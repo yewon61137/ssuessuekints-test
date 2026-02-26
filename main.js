@@ -148,8 +148,9 @@ function handlePointerMove(e) {
     const offsetX = - (MAGNIFIER_SIZE / 2);
     const offsetY = isTouch ? - MAGNIFIER_SIZE - 40 : - (MAGNIFIER_SIZE / 2);
     
-    magnifierCanvas.style.left = `${cssX + offsetX}px`;
-    magnifierCanvas.style.top = `${cssY + offsetY}px`;
+    // 부모 요소(wrapper) 내에서의 캔버스 위치(offsetLeft/Top)를 더해줘야 정확한 위치에 돋보기가 뜹니다.
+    magnifierCanvas.style.left = `${cssX + previewCanvas.offsetLeft + offsetX}px`;
+    magnifierCanvas.style.top = `${cssY + previewCanvas.offsetTop + offsetY}px`;
 
     magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     magnifierCtx.save();
@@ -414,8 +415,15 @@ downloadPdfBtn.addEventListener('click', () => {
         pdf.text("Knitting Pattern", margin, margin + 5);
         
         pdf.setFontSize(10);
-        const infoText = patternInfo.textContent;
-        pdf.text(infoText, margin, margin + 12);
+        // patternInfo.textContent에서 숫자만 추출하여 영문으로 변환 (한글 깨짐 방지)
+        const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
+        let englishInfo = "";
+        if (numbers && numbers.length >= 4) {
+            englishInfo = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
+        } else {
+            englishInfo = "Knitting Pattern Details";
+        }
+        pdf.text(englishInfo, margin, margin + 12);
         
         pdf.addImage(imgData, 'JPEG', margin, margin + 18, finalW, finalH);
         pdf.addPage();
