@@ -248,10 +248,12 @@ function drawGridWithLabels(cols, rows, cellSize) {
     
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; 
     ctx.lineWidth = 2;
-    for (let x = 0; x <= cols; x += 10) {
+    // 오른쪽부터 10단위 굵은 선 (코수)
+    for (let x = cols; x >= 0; x -= 10) {
         ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
     }
-    for (let y = 0; y <= rows; y += 10) {
+    // 아래쪽부터 10단위 굵은 선 (단수)
+    for (let y = rows; y >= 0; y -= 10) {
         ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
     }
     ctx.strokeRect(0, 0, cols * cellSize, rows * cellSize);
@@ -259,17 +261,19 @@ function drawGridWithLabels(cols, rows, cellSize) {
     ctx.fillStyle = '#334155';
     ctx.font = '12px Pretendard, sans-serif';
     
-    // Y축 (단수) - 오른쪽
+    // Y축 (단수) - 오른쪽. 아래쪽(rows)이 0(또는 1단 시작), 위로 갈수록 증가
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    for (let y = 0; y <= rows; y += 10) {
+    for (let y = rows; y >= 0; y -= 10) {
+        // 실제 뜨개질에서 첫 단을 1단으로 부르므로 (rows - y)가 0일 때 1로 표시하거나 그대로 0부터 표시
+        // 0부터 10, 20 단위로 표시하도록 rows - y 사용
         ctx.fillText(rows - y, cols * cellSize + 8, y * cellSize);
     }
     
-    // X축 (코수) - 아래쪽
+    // X축 (코수) - 아래쪽. 오른쪽(cols)이 0, 왼쪽으로 갈수록 증가
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    for (let x = 0; x <= cols; x += 10) {
+    for (let x = cols; x >= 0; x -= 10) {
         ctx.fillText(cols - x, x * cellSize, rows * cellSize + 8);
     }
 }
@@ -361,7 +365,7 @@ function restoreFromHistory(item) {
 downloadPdfBtn.addEventListener('click', () => {
     try {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();

@@ -136,6 +136,7 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
 
     // A(채도) + C(중앙) 가중치가 적용된 초기 중심점 추출 (+Seed Colors 지원)
     const centers = initKMeansPlusPlus(samplePixels, k, width, height, seedColors);
+    const numSeeds = Math.min(seedColors.length, k);
     
     if (centers.length === 0) return { palette: [[0,0,0]], assignments: new Array(pixels.length).fill(0) };
 
@@ -177,7 +178,12 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
         }
         
         for (let c = 0; c < centers.length; c++) {
-            if (sums[c][3] > 0) {
+            if (c < numSeeds) {
+                // 사용자가 지정한 Seed Color는 절대 변하지 않도록 강제 고정 (Lock)
+                centers[c][0] = seedColors[c][0];
+                centers[c][1] = seedColors[c][1];
+                centers[c][2] = seedColors[c][2];
+            } else if (sums[c][3] > 0) {
                 centers[c][0] = Math.round(sums[c][0] / sums[c][3]);
                 centers[c][1] = Math.round(sums[c][1] / sums[c][3]);
                 centers[c][2] = Math.round(sums[c][2] / sums[c][3]);
