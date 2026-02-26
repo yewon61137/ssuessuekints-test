@@ -128,6 +128,17 @@ small {
   font-weight: normal;
 }
 
+.generator-hint {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+}
+
 button {
   padding: 0.75rem 1rem;
   border: none;
@@ -188,6 +199,46 @@ button:disabled {
   min-height: 600px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* 기록 패널 */
+.history-panel {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.history-panel h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.history-thumbnails {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.history-item {
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  object-fit: cover;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: border-color 0.2s, transform 0.2s;
+  image-rendering: pixelated;
+}
+
+.history-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-hover);
+}
+
+.history-item.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
 }
 
 .canvas-wrapper {

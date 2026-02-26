@@ -4,6 +4,7 @@ import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
 
 // --- 상태 관리 ---
 let originalImage = null;
+let patternHistory = []; // { dataURL, legendHTML, infoText, id }
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -19,6 +20,8 @@ const patternInfo = document.getElementById('patternInfo');
 const canvas = document.getElementById('patternCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const colorLegend = document.getElementById('colorLegend');
+const historyPanel = document.getElementById('historyPanel');
+const historyThumbnails = document.getElementById('historyThumbnails');
 
 // --- 게이지 데이터 (10x10cm 기준 평균 코/단 수) ---
 const gaugeData = {
@@ -75,20 +78,23 @@ imageUpload.addEventListener('change', (e) => {
             colorLegend.innerHTML = '<li class="empty-msg">도안을 생성하면 색상표가 표시됩니다.</li>';
             patternInfo.textContent = '';
             downloadPdfBtn.disabled = true;
+            
+            // 새 이미지가 업로드되면 기록 초기화
+            patternHistory = [];
+            renderHistory();
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// --- 2. 도안 생성 로직 (픽셀화 핵심) ---
+// --- 2. 도안 생성 로직 ---
 generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
 
     generateBtn.disabled = true;
-    showStatus('도안 생성 중... K-means++ 알고리즘 적용 중...', false);
+    showStatus('도안 생성 중... 알고리즘이 뚜렷한 색상을 찾고 있습니다...', false);
 
-    // 1) 입력값 가져오기
     const widthCm = parseFloat(targetWidthInput.value);
     const yarnType = yarnWeightSelect.value;
     const colorCount = parseInt(colorCountInput.value, 10);
@@ -101,51 +107,40 @@ generateBtn.addEventListener('click', async () => {
         return;
     }
 
-    // 2) 실 굵기에 따른 가로 코수 계산
     const gauge = gaugeData[yarnType];
-    // 총 가로 코수 = (가로cm / 10) * 10cm당 가로 코수
     const targetStitches = Math.round((widthCm / 10) * gauge.sts);
-
-    // 3) 원본 이미지 비율과 기법(코 비율)에 맞춰 세로 단수 계산
     const imgRatio = originalImage.height / originalImage.width;
     const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
 
-    // 4) 이미지를 코수/단수 크기로 리사이징
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
     tempCanvas.width = targetStitches;
     tempCanvas.height = targetRows;
     tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
 
-    // 5) 픽셀 데이터 추출 및 색상 양자화 (비동기 흉내)
     setTimeout(() => {
         try {
             const imageData = tempCtx.getImageData(0, 0, targetStitches, targetRows);
-            const pixels = getPixelArray(imageData);
+            // X, Y 좌표 정보를 함께 추출
+            const pixels = getPixelArray(imageData, targetStitches, targetRows);
             
-            // K-means++ 클러스터링으로 색상 단순화
-            const { palette, assignments } = kMeans(pixels, colorCount, 15);
+            // 채도 및 중앙 가중치가 적용된 K-means++
+            const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15);
             
-            // 6) 메인 캔버스에 직접 블록(사각형) 단위로 그리기
             const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
             
-            // 좌표(숫자)를 표시하기 위한 여백 추가
             const paddingLeft = showGrid ? 30 : 0;
             const paddingTop = showGrid ? 30 : 0;
             
             canvas.width = renderWidth + paddingLeft;
             canvas.height = renderHeight + paddingTop;
             
-            // 배경 초기화
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 도안 그리기 영역으로 좌표 이동
             ctx.translate(paddingLeft, paddingTop);
 
-            // 각 픽셀(코)을 순회하며 메인 캔버스에 사각형으로 그림
             for (let y = 0; y < targetRows; y++) {
                 for (let x = 0; x < targetStitches; x++) {
                     const idx = y * targetStitches + x;
@@ -157,21 +152,21 @@ generateBtn.addEventListener('click', async () => {
                 }
             }
 
-            // 7) 그리드 및 축 좌표(숫자) 그리기
             if (showGrid) {
                 drawGridWithLabels(targetStitches, targetRows, pixelSize);
             }
 
-            // 원상 복구 (PDF 생성 등을 위해)
             ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-            // 8) 정보 및 색상표 업데이트
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
             patternInfo.textContent = `도안 크기: 가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
             updateLegend(palette);
             
-            showStatus('도안 생성이 완료되었습니다!', false);
+            showStatus('도안 생성이 완료되었습니다! (마음에 들지 않으면 다시 생성해보세요)', false);
             downloadPdfBtn.disabled = false;
+            
+            // --- 생성된 도안을 기록(History)에 저장 ---
+            saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
             
         } catch (error) {
             console.error(error);
@@ -186,7 +181,6 @@ generateBtn.addEventListener('click', async () => {
 function drawGridWithLabels(cols, rows, cellSize) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; 
     ctx.lineWidth = 1;
-    // 1코(칸) 단위 얇은 선
     for (let x = 0; x <= cols; x++) {
         ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
     }
@@ -196,29 +190,23 @@ function drawGridWithLabels(cols, rows, cellSize) {
     
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; 
     ctx.lineWidth = 2;
-    // 10코/10단 단위 굵은 선
     for (let x = 0; x <= cols; x += 10) {
         ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
     }
     for (let y = 0; y <= rows; y += 10) {
         ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
     }
-    // 외곽선
     ctx.strokeRect(0, 0, cols * cellSize, rows * cellSize);
 
-    // --- 좌표(숫자) 그리기 ---
     ctx.fillStyle = '#334155';
     ctx.font = '12px Pretendard, sans-serif';
     
-    // Y축 (단수) - 왼쪽
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     for (let y = 0; y <= rows; y += 10) {
-        // 단수는 아래에서 위로 읽기도 하지만, 이미지 렌더링 방향에 맞춰 위에서 아래로 표시
         ctx.fillText(y, -5, y * cellSize);
     }
     
-    // X축 (코수) - 위쪽
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     for (let x = 0; x <= cols; x += 10) {
@@ -248,7 +236,68 @@ function updateLegend(palette) {
     });
 }
 
-// --- 5. PDF 다운로드 ---
+// --- 5. 히스토리 (기록) 관리 기능 ---
+function saveToHistory(dataURL, legendHTML, infoText) {
+    const id = Date.now();
+    patternHistory.push({ id, dataURL, legendHTML, infoText });
+    
+    // 최대 5개까지만 유지
+    if (patternHistory.length > 5) {
+        patternHistory.shift();
+    }
+    renderHistory();
+}
+
+function renderHistory() {
+    // 기록이 1개 이하일 때는 굳이 패널을 보여주지 않음 (최소 2개부터 비교 의미가 있음)
+    if (patternHistory.length <= 1) {
+        historyPanel.style.display = 'none';
+        return;
+    }
+    
+    historyPanel.style.display = 'block';
+    historyThumbnails.innerHTML = '';
+    
+    patternHistory.forEach((item, index) => {
+        const img = document.createElement('img');
+        img.src = item.dataURL;
+        img.className = 'history-item';
+        img.title = `도안 ${index + 1}`;
+        
+        // 현재 보여지고 있는 최신 도안 강조
+        if (index === patternHistory.length - 1) {
+             img.classList.add('active');
+        }
+        
+        img.addEventListener('click', () => {
+            restoreFromHistory(item);
+            
+            // 모든 썸네일에서 active 제거 후 클릭된 것에만 추가
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            img.classList.add('active');
+        });
+        
+        historyThumbnails.appendChild(img);
+    });
+}
+
+function restoreFromHistory(item) {
+    const img = new Image();
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+    };
+    img.src = item.dataURL;
+    
+    colorLegend.innerHTML = item.legendHTML;
+    patternInfo.textContent = item.infoText;
+    downloadPdfBtn.disabled = false;
+    showStatus('이전 도안을 불러왔습니다.', false);
+}
+
+// --- 6. PDF 다운로드 ---
 downloadPdfBtn.addEventListener('click', () => {
     try {
         const { jsPDF } = window.jspdf;
@@ -269,7 +318,6 @@ downloadPdfBtn.addEventListener('click', () => {
             finalWidth = (canvas.width / canvas.height) * finalHeight;
         }
 
-        // 한국어 폰트 깨짐 방지를 위해 영어 제목 사용
         pdf.setFontSize(12);
         const titleText = "Knitting Pattern";
         const infoMatch = patternInfo.textContent.match(/(\d+)코 × 세로 (\d+)단/);

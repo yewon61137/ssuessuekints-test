@@ -60,7 +60,7 @@
           <input type="number" id="colorCount" value="15" min="2" max="40">
           <span class="hint">색</span>
         </div>
-        <small>색상을 단순화합니다. (가장 눈에 띄는 색상 우선 보존)</small>
+        <small>가장 눈에 띄는(채도가 높고 중앙에 있는) 색상 우선 보존.</small>
       </div>
 
       <div class="control-group checkbox-group">
@@ -68,6 +68,9 @@
         <label for="showGrid">10단위 그리드 및 좌표 표시</label>
       </div>
 
+      <div class="generator-hint">
+        💡 <strong>Tip:</strong> 버튼을 다시 누르면 추출되는 색상 조합이 미세하게 달라집니다. 마음에 드는 도안이 나올 때까지 여러 번 생성해 보세요!
+      </div>
       <button id="generateBtn" class="primary-btn">도안 생성하기</button>
       <button id="downloadPdfBtn" class="secondary-btn" disabled>PDF 다운로드</button>
       
@@ -76,6 +79,12 @@
 
     <!-- 우측: 결과 화면 (도안 + 색상표) -->
     <section class="result-panel">
+      <!-- 생성 기록 (최근 5개) -->
+      <div class="history-panel" id="historyPanel" style="display: none;">
+        <h3>최근 생성 기록 <small>(클릭하여 복구, 최대 5개)</small></h3>
+        <div class="history-thumbnails" id="historyThumbnails"></div>
+      </div>
+
       <div class="canvas-wrapper">
         <canvas id="patternCanvas"></canvas>
       </div>
