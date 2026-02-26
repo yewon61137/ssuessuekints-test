@@ -198,16 +198,20 @@ function renderSeedColors() {
     }
     
     clearSeedsBtn.style.display = 'block';
-    seedColors.forEach((color) => {
+    seedColors.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
         li.className = 'seed-color-item';
-        li.style.padding = '0.2rem';
         
         const box = document.createElement('div');
-        box.className = 'color-box';
+        box.className = 'color-box removable-box';
         box.style.backgroundColor = hex;
-        box.title = hex;
+        box.title = "클릭하여 삭제";
+        
+        box.addEventListener('click', () => {
+            seedColors.splice(index, 1);
+            renderSeedColors();
+        });
         
         li.appendChild(box);
         seedColorList.appendChild(li);
