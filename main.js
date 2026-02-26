@@ -10,6 +10,10 @@ let seedColors = [];
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
+const previewArea = document.getElementById('previewArea');
+const previewCanvas = document.getElementById('previewCanvas');
+const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
+const settingsArea = document.getElementById('settingsArea');
 const techniqueRatioSelect = document.getElementById('techniqueRatio');
 const yarnWeightSelect = document.getElementById('yarnWeight');
 const targetWidthInput = document.getElementById('targetWidth');
@@ -20,6 +24,7 @@ const showGridCheckbox = document.getElementById('showGrid');
 const generateBtn = document.getElementById('generateBtn');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 const statusMessage = document.getElementById('statusMessage');
+const resultPanel = document.getElementById('resultPanel');
 const patternInfo = document.getElementById('patternInfo');
 const canvas = document.getElementById('patternCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -55,8 +60,6 @@ imageUpload.addEventListener('change', (e) => {
 
     if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
         showStatus('JPG 또는 PNG 파일만 업로드 가능합니다.', true);
-        originalImage = null;
-        generateBtn.disabled = true;
         return;
     }
 
@@ -65,11 +68,15 @@ imageUpload.addEventListener('change', (e) => {
         const img = new Image();
         img.onload = () => {
             originalImage = img;
-            showStatus('이미지 로드 완료! 도안을 생성해주세요.', false);
+            
+            // UI 표시 전환
+            previewArea.style.display = 'block';
+            settingsArea.style.display = 'block';
+            resultPanel.style.display = 'none';
             generateBtn.disabled = false;
             
-            // 프리뷰
-            const maxPreviewWidth = 600;
+            // 프리뷰 캔버스에 그리기 (최대 폭 제한)
+            const maxPreviewWidth = 800;
             let drawWidth = img.width;
             let drawHeight = img.height;
             if (drawWidth > maxPreviewWidth) {
@@ -77,33 +84,27 @@ imageUpload.addEventListener('change', (e) => {
                 drawWidth = maxPreviewWidth;
                 drawHeight = img.height * ratio;
             }
-            canvas.width = drawWidth;
-            canvas.height = drawHeight;
-            ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
+            previewCanvas.width = drawWidth;
+            previewCanvas.height = drawHeight;
+            previewCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
             
-            colorLegend.innerHTML = '<li class="empty-msg">도안을 생성하면 색상표가 표시됩니다.</li>';
-            patternInfo.textContent = '';
-            downloadPdfBtn.disabled = true;
-            
-            // 새 이미지가 업로드되면 기록 초기화
+            // 상태 및 기록 초기화
             patternHistory = [];
             renderHistory();
-            
-            // Seed Colors 초기화
             isPreviewMode = true;
             seedColors = [];
             renderSeedColors();
+            showStatus('이미지가 로드되었습니다. 설정을 확인하고 도안을 생성하세요.', false);
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 (마우스/터치 호환) ---
-const MAGNIFIER_SIZE = 100; // 돋보기 캔버스 크기 (가로/세로 px)
-const MAGNIFIER_ZOOM = 5; // 확대 배율
+// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 ---
+const MAGNIFIER_SIZE = 120;
+const MAGNIFIER_ZOOM = 6;
 
-// 돋보기 캔버스 초기 설정
 magnifierCanvas.width = MAGNIFIER_SIZE;
 magnifierCanvas.height = MAGNIFIER_SIZE;
 
@@ -113,41 +114,34 @@ function handlePointerMove(e) {
         return;
     }
 
-    // 터치 이벤트인지 마우스 이벤트인지 구분
     let clientX, clientY;
     if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
-        // 터치 시 스크롤 방지 (선택적: 캔버스 위에서만 스크롤 막기)
         if (e.cancelable) e.preventDefault(); 
     } else {
         clientX = e.clientX;
         clientY = e.clientY;
     }
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const rect = previewCanvas.getBoundingClientRect();
+    const scaleX = previewCanvas.width / rect.width;
+    const scaleY = previewCanvas.height / rect.height;
     
-    // 마우스/터치의 실제 캔버스 내부 좌표
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
-
-    // 화면(CSS) 상의 마우스 위치
     const cssX = clientX - rect.left;
     const cssY = clientY - rect.top;
 
     magnifierCanvas.style.display = 'block';
     
-    // 모바일(터치)일 때는 손가락에 가려지지 않게 돋보기를 터치 위치보다 약간 위로 올림
     const isTouch = e.type.includes('touch');
     const offsetX = isTouch ? - (MAGNIFIER_SIZE / 2) : 15;
-    const offsetY = isTouch ? - MAGNIFIER_SIZE - 20 : 15;
+    const offsetY = isTouch ? - MAGNIFIER_SIZE - 30 : 15;
     
     magnifierCanvas.style.left = `${cssX + offsetX}px`;
     magnifierCanvas.style.top = `${cssY + offsetY}px`;
 
-    // 돋보기 캔버스 클리어 및 원형 마스크 설정
     magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     magnifierCtx.save();
     magnifierCtx.beginPath();
@@ -160,22 +154,16 @@ function handlePointerMove(e) {
     const sy = y - (sHeight / 2);
 
     magnifierCtx.imageSmoothingEnabled = false;
-    magnifierCtx.drawImage(
-        canvas, 
-        sx, sy, sWidth, sHeight, 
-        0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE
-    );
+    magnifierCtx.drawImage(previewCanvas, sx, sy, sWidth, sHeight, 0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
 
-    // 십자선
-    magnifierCtx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-    magnifierCtx.lineWidth = 1;
+    magnifierCtx.strokeStyle = 'red';
+    magnifierCtx.lineWidth = 2;
     magnifierCtx.beginPath();
-    magnifierCtx.moveTo(MAGNIFIER_SIZE/2 - 5, MAGNIFIER_SIZE/2);
-    magnifierCtx.lineTo(MAGNIFIER_SIZE/2 + 5, MAGNIFIER_SIZE/2);
-    magnifierCtx.moveTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 - 5);
-    magnifierCtx.lineTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 + 5);
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2 - 8, MAGNIFIER_SIZE/2);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2 + 8, MAGNIFIER_SIZE/2);
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 - 8);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 + 8);
     magnifierCtx.stroke();
-
     magnifierCtx.restore();
 }
 
@@ -185,69 +173,55 @@ function handlePointerEnd(e) {
 
     let clientX, clientY;
     if (e.type === 'touchend') {
-        // touchend는 touches 배열이 비어있으므로 changedTouches 사용
         if (e.changedTouches && e.changedTouches.length > 0) {
             clientX = e.changedTouches[0].clientX;
             clientY = e.changedTouches[0].clientY;
-        } else {
-            return;
-        }
+        } else return;
     } else {
         clientX = e.clientX;
         clientY = e.clientY;
     }
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const rect = previewCanvas.getBoundingClientRect();
+    const x = (clientX - rect.left) * (previewCanvas.width / rect.width);
+    const y = (clientY - rect.top) * (previewCanvas.height / rect.height);
     
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
-    
-    // 캔버스 범위를 벗어나서 손을 떼면 색상 추가 안 함
-    if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return;
+    if (x < 0 || y < 0 || x > previewCanvas.width || y > previewCanvas.height) return;
 
-    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    const pixel = previewCtx.getImageData(x, y, 1, 1).data;
     if (pixel[3] > 0) { 
         seedColors.push([pixel[0], pixel[1], pixel[2]]);
         renderSeedColors();
     }
 }
 
-// 이벤트 리스너 등록 (마우스)
-canvas.addEventListener('mousemove', handlePointerMove);
-canvas.addEventListener('mouseleave', () => magnifierCanvas.style.display = 'none');
-canvas.addEventListener('click', handlePointerEnd);
-
-// 이벤트 리스너 등록 (터치)
-canvas.addEventListener('touchstart', handlePointerMove, { passive: false });
-canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-canvas.addEventListener('touchend', handlePointerEnd);
+previewCanvas.addEventListener('mousemove', handlePointerMove);
+previewCanvas.addEventListener('mouseleave', () => magnifierCanvas.style.display = 'none');
+previewCanvas.addEventListener('click', handlePointerEnd);
+previewCanvas.addEventListener('touchstart', handlePointerMove, { passive: false });
+previewCanvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+previewCanvas.addEventListener('touchend', handlePointerEnd);
 
 function renderSeedColors() {
     seedColorList.innerHTML = '';
     if (seedColors.length === 0) {
-        seedColorList.innerHTML = '<li class="empty-msg">이미지를 클릭하여 색상을 추가하세요.</li>';
+        seedColorList.innerHTML = '<li class="empty-msg">사진을 클릭해 필수 색상을 추가하세요.</li>';
         clearSeedsBtn.style.display = 'none';
         return;
     }
     
-    clearSeedsBtn.style.display = 'block';
+    clearSeedsBtn.style.display = 'inline-block';
     seedColors.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
         li.className = 'seed-color-item';
-        
         const box = document.createElement('div');
         box.className = 'color-box removable-box';
         box.style.backgroundColor = hex;
-        box.title = "클릭하여 삭제";
-        
         box.addEventListener('click', () => {
             seedColors.splice(index, 1);
             renderSeedColors();
         });
-        
         li.appendChild(box);
         seedColorList.appendChild(li);
     });
@@ -263,8 +237,7 @@ generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
 
     generateBtn.disabled = true;
-    isPreviewMode = false;
-    showStatus('도안 생성 중... 알고리즘이 뚜렷한 색상을 찾고 있습니다...', false);
+    showStatus('도안 생성 중... 잠시만 기다려주세요.', false);
 
     const widthCm = parseFloat(targetWidthInput.value);
     const yarnType = yarnWeightSelect.value;
@@ -273,7 +246,7 @@ generateBtn.addEventListener('click', async () => {
     const techniqueRatio = parseFloat(techniqueRatioSelect.value);
 
     if (isNaN(widthCm) || widthCm < 10) {
-        showStatus('올바른 크기(cm)를 입력하세요 (최소 10cm).', true);
+        showStatus('올바른 가로 크기를 입력하세요.', true);
         generateBtn.disabled = false;
         return;
     }
@@ -292,32 +265,24 @@ generateBtn.addEventListener('click', async () => {
     setTimeout(() => {
         try {
             const imageData = tempCtx.getImageData(0, 0, targetStitches, targetRows);
-            // X, Y 좌표 정보를 함께 추출
             const pixels = getPixelArray(imageData, targetStitches, targetRows);
-            
-            // 채도 및 중앙 가중치가 적용된 K-means++ (+ Seed Colors)
             const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15, seedColors);
             
             const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
+            const padding = showGrid ? 40 : 0;
             
-            const paddingRight = showGrid ? 35 : 0;
-            const paddingBottom = showGrid ? 35 : 0;
-            
-            canvas.width = renderWidth + paddingRight;
-            canvas.height = renderHeight + paddingBottom;
-            
+            canvas.width = renderWidth + padding;
+            canvas.height = renderHeight + padding;
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // ctx.translate(paddingLeft, paddingTop); // Removed translation as padding is now bottom/right
 
             for (let y = 0; y < targetRows; y++) {
                 for (let x = 0; x < targetStitches; x++) {
                     const idx = y * targetStitches + x;
                     const colorIdx = assignments[idx];
                     const color = palette[colorIdx];
-                    
                     ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
                     ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                 }
@@ -327,200 +292,120 @@ generateBtn.addEventListener('click', async () => {
                 drawGridWithLabels(targetStitches, targetRows, pixelSize);
             }
 
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-
+            resultPanel.style.display = 'block';
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
-            patternInfo.textContent = `도안 크기: 가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
+            patternInfo.textContent = `가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
             updateLegend(palette);
             
-            showStatus('도안 생성이 완료되었습니다! (마음에 들지 않으면 다시 생성해보세요)', false);
+            showStatus('도안 생성 완료!', false);
             downloadPdfBtn.disabled = false;
-            
-            // --- 생성된 도안을 기록(History)에 저장 ---
             saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
+            
+            // 결과창으로 스크롤 이동
+            resultPanel.scrollIntoView({ behavior: 'smooth' });
             
         } catch (error) {
             console.error(error);
-            showStatus('도안 생성 중 오류가 발생했습니다.', true);
+            showStatus('생성 중 오류 발생', true);
         } finally {
             generateBtn.disabled = false;
         }
     }, 50);
 });
 
-// --- 3. 그리드 및 좌표 라벨 그리기 ---
 function drawGridWithLabels(cols, rows, cellSize) {
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; 
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'; 
     ctx.lineWidth = 1;
-    for (let x = 0; x <= cols; x++) {
-        ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
-    }
-    for (let y = 0; y <= rows; y++) {
-        ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
-    }
+    for (let x = 0; x <= cols; x++) { ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke(); }
+    for (let y = 0; y <= rows; y++) { ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke(); }
     
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; 
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; 
     ctx.lineWidth = 2;
-    // 오른쪽부터 10단위 굵은 선 (코수)
-    for (let x = cols; x >= 0; x -= 10) {
-        ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
-    }
-    // 아래쪽부터 10단위 굵은 선 (단수)
-    for (let y = rows; y >= 0; y -= 10) {
-        ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
-    }
-    ctx.strokeRect(0, 0, cols * cellSize, rows * cellSize);
-
-    ctx.fillStyle = '#334155';
-    ctx.font = '12px Pretendard, sans-serif';
+    for (let x = cols; x >= 0; x -= 10) { ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke(); }
+    for (let y = rows; y >= 0; y -= 10) { ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke(); }
     
-    // Y축 (단수) - 오른쪽. 아래쪽(rows)이 0(또는 1단 시작), 위로 갈수록 증가
+    ctx.strokeRect(0, 0, cols * cellSize, rows * cellSize);
+    ctx.fillStyle = '#334155';
+    ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    for (let y = rows; y >= 0; y -= 10) {
-        // 실제 뜨개질에서 첫 단을 1단으로 부르므로 (rows - y)가 0일 때 1로 표시하거나 그대로 0부터 표시
-        // 0부터 10, 20 단위로 표시하도록 rows - y 사용
-        ctx.fillText(rows - y, cols * cellSize + 8, y * cellSize);
-    }
-    
-    // X축 (코수) - 아래쪽. 오른쪽(cols)이 0, 왼쪽으로 갈수록 증가
+    for (let y = rows; y >= 0; y -= 10) { ctx.fillText(rows - y, cols * cellSize + 8, y * cellSize); }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    for (let x = cols; x >= 0; x -= 10) {
-        ctx.fillText(cols - x, x * cellSize, rows * cellSize + 8);
-    }
+    for (let x = cols; x >= 0; x -= 10) { ctx.fillText(cols - x, x * cellSize, rows * cellSize + 8); }
 }
 
-// --- 4. 색상표(Legend) UI 업데이트 ---
 function updateLegend(palette) {
     colorLegend.innerHTML = '';
-    
     palette.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
         li.className = 'color-item';
-        
         const box = document.createElement('div');
         box.className = 'color-box';
         box.style.backgroundColor = hex;
-        
         const text = document.createElement('span');
         text.textContent = `No.${index + 1} (${hex})`;
-        
         li.appendChild(box);
         li.appendChild(text);
         colorLegend.appendChild(li);
     });
 }
 
-// --- 5. 히스토리 (기록) 관리 기능 ---
 function saveToHistory(dataURL, legendHTML, infoText) {
     const id = Date.now();
     patternHistory.push({ id, dataURL, legendHTML, infoText });
-    
-    // 최대 5개까지만 유지
-    if (patternHistory.length > 5) {
-        patternHistory.shift();
-    }
+    if (patternHistory.length > 5) patternHistory.shift();
     renderHistory();
 }
 
 function renderHistory() {
-    // 기록이 1개 이하일 때는 굳이 패널을 보여주지 않음 (최소 2개부터 비교 의미가 있음)
-    if (patternHistory.length <= 1) {
-        historyPanel.style.display = 'none';
-        return;
-    }
-    
+    if (patternHistory.length <= 1) { historyPanel.style.display = 'none'; return; }
     historyPanel.style.display = 'block';
     historyThumbnails.innerHTML = '';
-    
     patternHistory.forEach((item, index) => {
         const img = document.createElement('img');
         img.src = item.dataURL;
-        img.className = 'history-item';
-        img.title = `도안 ${index + 1}`;
-        
-        // 현재 보여지고 있는 최신 도안 강조
-        if (index === patternHistory.length - 1) {
-             img.classList.add('active');
-        }
-        
+        img.className = 'history-item' + (index === patternHistory.length - 1 ? ' active' : '');
         img.addEventListener('click', () => {
-            restoreFromHistory(item);
-            
-            // 모든 썸네일에서 active 제거 후 클릭된 것에만 추가
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                ctx.drawImage(tempImg, 0, 0);
+            };
+            tempImg.src = item.dataURL;
+            colorLegend.innerHTML = item.legendHTML;
+            patternInfo.textContent = item.infoText;
             document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
             img.classList.add('active');
         });
-        
         historyThumbnails.appendChild(img);
     });
 }
 
-function restoreFromHistory(item) {
-    const img = new Image();
-    img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-    };
-    img.src = item.dataURL;
-    
-    colorLegend.innerHTML = item.legendHTML;
-    patternInfo.textContent = item.infoText;
-    downloadPdfBtn.disabled = false;
-    showStatus('이전 도안을 불러왔습니다.', false);
-}
-
-// --- 6. PDF 다운로드 ---
 downloadPdfBtn.addEventListener('click', () => {
     try {
         const { jsPDF } = window.jspdf;
-        // If jsPDF is still not found, try to access it globally as it might be attached to window directly depending on the CDN build
         const PDFDocument = jsPDF || window.jsPDF; 
-        
-        if (!PDFDocument) {
-             throw new Error("jsPDF library is not loaded properly.");
-        }
-
         const pdf = new PDFDocument({ orientation: 'p', unit: 'mm', format: 'a4' });
-
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 10;
-        const maxContentWidth = pdfWidth - (margin * 2);
-        const maxContentHeight = pdfHeight - (margin * 2) - 40;
-
-        let finalWidth = maxContentWidth;
-        let finalHeight = (canvas.height / canvas.width) * finalWidth;
-        
-        if (finalHeight > maxContentHeight) {
-            finalHeight = maxContentHeight;
-            finalWidth = (canvas.width / canvas.height) * finalHeight;
-        }
-
+        const maxW = pdfWidth - (margin * 2);
+        const maxH = pdfHeight - (margin * 2) - 40;
+        let finalW = maxW;
+        let finalH = (canvas.height / canvas.width) * finalW;
+        if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         pdf.setFontSize(12);
-        const titleText = "Knitting Pattern";
-        const infoMatch = patternInfo.textContent.match(/(\d+)코 × 세로 (\d+)단/);
-        let subText = "";
-        if (infoMatch) {
-            subText = ` - ${infoMatch[1]} Stitches x ${infoMatch[2]} Rows`;
-        }
-        
-        pdf.text(titleText + subText, margin, margin + 5);
-        pdf.addImage(imgData, 'JPEG', margin, margin + 10, finalWidth, finalHeight);
-
+        pdf.text("Knitting Pattern", margin, margin + 5);
+        pdf.addImage(imgData, 'JPEG', margin, margin + 10, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
-        
-        const colorItems = document.querySelectorAll('.color-item');
         let currentY = margin + 15;
         let currentX = margin;
-        
-        colorItems.forEach((item) => {
+        document.querySelectorAll('.color-item').forEach((item) => {
             const rgbMatch = item.querySelector('.color-box').style.backgroundColor.match(/\d+/g);
             if(rgbMatch) {
                  pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
@@ -529,18 +414,12 @@ downloadPdfBtn.addEventListener('click', () => {
                  pdf.rect(currentX, currentY, 10, 10, 'S');
                  pdf.setFontSize(10);
                  pdf.text(item.querySelector('span').textContent, currentX + 15, currentY + 7);
-                 
                  currentY += 15;
-                 if (currentY > pdfHeight - margin) {
-                     currentY = margin + 15;
-                     currentX += 60;
-                 }
+                 if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 60; }
             }
         });
-
         pdf.save('knitting_pattern.pdf');
     } catch (e) {
-        console.error("PDF 생성 에러:", e);
-        showStatus('PDF 생성에 실패했습니다.', true);
+        showStatus('PDF 생성 실패', true);
     }
 });
