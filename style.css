@@ -10,7 +10,7 @@
 }
 
 body {
-  font-family: 'GmarketSansMedium', sans-serif;
+  font-family: 'GmarketSans', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   margin: 0;
@@ -21,141 +21,73 @@ body {
 
 header {
   text-align: center;
-  padding: 4rem 1rem 3rem;
+  padding: 5rem 1rem 4rem;
   background: white;
-  border-bottom: 2px solid var(--border-color);
   position: relative;
 }
 
-.lang-selector {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  display: flex;
-  gap: 0.75rem;
-}
-
-@media (max-width: 800px) {
-  header {
-    padding: 5rem 1rem 3rem; /* Increased top padding for mobile to give space for lang selector */
-  }
-  .lang-selector {
-    top: 1rem;
-    right: 50%;
-    transform: translateX(50%); /* Center lang selector on top in mobile */
-  }
-}
-
-.lang-btn {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  border: 2px solid #000;
-  background: #fff;
-  cursor: pointer;
-  width: auto;
-}
-
-.lang-btn.active {
-  background: #000;
-  color: #fff;
-}
-
 .brand {
-  font-family: "Helvetica Neue", Helvetica, "Arial Black", sans-serif;
-  font-size: 3rem;
-  font-weight: 900;
+  font-family: "Helvetica Neue", Helvetica, "Arial", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 950; /* Maximum thickness */
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1;
-  margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  margin-bottom: 0.5rem;
 }
 
 .brand-kr {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #888;
-  margin-bottom: 1rem;
-}
-
-.tagline {
-  font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-  font-size: 0.9rem;
+  font-family: 'GmarketSans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #000;
-  margin: 0;
+  margin-bottom: 1.5rem;
 }
 
 .container {
-  max-width: 1000px;
-  width: 90%;
-  margin: 0 auto;
+  max-width: 1100px;
+  width: 95%;
+  margin: 0 auto 5rem;
   display: flex;
   flex-direction: column;
+  gap: 2.5rem;
 }
 
-/* Sections */
+/* Unified Card Style */
 .step-section {
-  padding: 4rem 0;
-  border-bottom: 2px solid #eee;
-}
-
-.step-section:last-child {
-  border-bottom: none;
+  background: #ffffff;
+  border: 2px solid #000000;
+  padding: 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section-title {
   margin-bottom: 2.5rem;
   text-align: left;
+  border-bottom: 2px solid #000;
+  padding-bottom: 1rem;
 }
 
 .section-title h2 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 800;
   text-transform: uppercase;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
 }
 
-.instruction {
-  font-size: 1rem;
-  color: var(--secondary-color);
-}
-
-/* Upload Area */
-.upload-section {
-  text-align: center;
-}
-
-.main-label {
-  display: block;
-  font-weight: 800;
-  font-size: 1.4rem;
-  text-transform: uppercase;
-  margin-bottom: 1.5rem;
-}
-
-input[type="file"] {
-  border: 2px solid #000;
-  padding: 3rem;
-  width: 100%;
-  border-radius: 0; /* Sharp corners for hip look */
-  box-sizing: border-box;
-  cursor: pointer;
-  background: #fff;
-  font-family: inherit;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-
-input[type="file"]:hover {
-  background: #f0f0f0;
-}
-
-/* Settings Grid */
+/* Settings Grid - Explicit 3 Columns */
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
   margin-bottom: 3rem;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .unit-toggle {
@@ -392,17 +324,20 @@ canvas {
 .history-item {
   width: 100px;
   height: 100px;
-  border: 2px solid #000;
+  border: 2px solid #eee;
   cursor: pointer;
   object-fit: cover;
   image-rendering: pixelated;
-  filter: grayscale(1);
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
-.history-item:hover, .history-item.active {
-  filter: grayscale(0);
-  border: 2px solid #000;
+.history-item:hover {
+  border-color: #888;
+}
+
+.history-item.active {
+  border: 4px solid #000;
+  transform: scale(1.05);
 }
 
 .status-msg {
