@@ -17,7 +17,11 @@ const previewCanvas = document.getElementById('previewCanvas');
 const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
 const settingsArea = document.getElementById('settingsArea');
 const techniqueRatioSelect = document.getElementById('techniqueRatio');
+const yarnUnitRadios = document.getElementsByName('yarnUnit');
+const yarnNameGroup = document.getElementById('yarnNameGroup');
+const yarnMmGroup = document.getElementById('yarnMmGroup');
 const yarnWeightSelect = document.getElementById('yarnWeight');
+const yarnMmInput = document.getElementById('yarnMm');
 const targetWidthInput = document.getElementById('targetWidth');
 const colorCountInput = document.getElementById('colorCount');
 const seedColorList = document.getElementById('seedColorList');
@@ -35,6 +39,149 @@ const magnifierCtx = magnifierCanvas.getContext('2d');
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
+const langBtns = document.querySelectorAll('.lang-btn');
+
+// --- 번역 데이터 (i18n) ---
+const translations = {
+    ko: {
+        tagline: "당신의 픽셀을 뜨개 도안으로 만듭니다.",
+        upload_label: "1. 도안으로 만들 이미지를 업로드하세요",
+        preview_title: "2. 원본 이미지 확인 및 필수 색상 선택",
+        preview_desc: "사진에서 살리고 싶은 중요한 색상(예: 눈동자, 옷 등)을 클릭(모바일은 꾹 누르기)하여 선택하세요.",
+        upload_placeholder: "이미지를 업로드해주세요.",
+        selected_colors: "선택된 필수 색상",
+        no_colors_selected: "아직 선택된 색상이 없습니다.",
+        clear_selection: "선택 초기화",
+        settings_title: "3. 도안 세부 설정",
+        label_technique: "뜨개 기법 (코:단 비율)",
+        opt_ratio_1: "코바늘 / 십자수 (1:1)",
+        opt_ratio_2: "대바늘 인물 사진 (5:7)",
+        opt_ratio_3: "대바늘 풍경 사진 (7:5)",
+        label_yarn_unit: "실 굵기 입력 방식",
+        unit_standard: "표준 규격",
+        unit_mm: "직경 (mm)",
+        label_yarn_name: "실 굵기 (표준)",
+        label_yarn_mm: "실 굵기 (mm)",
+        label_width: "원하는 편물의 가로 크기",
+        label_max_colors: "최대 색상 수",
+        unit_colors: "색",
+        label_grid: "10단위 그리드 및 좌표 표시",
+        regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
+        btn_generate: "도안 생성하기",
+        btn_download: "PDF 다운로드",
+        result_title: "4. 생성된 도안",
+        result_placeholder: "도안을 생성하면 여기에 표시됩니다.",
+        history_title: "최근 생성 기록 (클릭하여 비교)",
+        legend_title: "사용된 색상표 (실 번호)",
+        status_loaded: "이미지가 로드되었습니다. 설정을 확인하고 도안을 생성하세요.",
+        status_generating: "도안 생성 중... 잠시만 기다려주세요.",
+        status_done: "도안 생성 완료!",
+        status_error: "생성 중 오류 발생",
+        status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다."
+    },
+    en: {
+        tagline: "Crafting your pixels into knit patterns.",
+        upload_label: "1. Upload an image to create a pattern",
+        preview_title: "2. Original Image & Seed Color Selection",
+        preview_desc: "Click (or long-press on mobile) on the image to select essential colors you want to preserve.",
+        upload_placeholder: "Please upload an image.",
+        selected_colors: "Selected Essential Colors",
+        no_colors_selected: "No colors selected yet.",
+        clear_selection: "Clear Selection",
+        settings_title: "3. Pattern Settings",
+        label_technique: "Stitch Technique (Ratio)",
+        opt_ratio_1: "Crochet / Cross Stitch (1:1)",
+        opt_ratio_2: "Knit Portrait (5:7)",
+        opt_ratio_3: "Knit Landscape (7:5)",
+        label_yarn_unit: "Yarn Weight Input Mode",
+        unit_standard: "Standard",
+        unit_mm: "Diameter (mm)",
+        label_yarn_name: "Yarn Weight (Standard)",
+        label_yarn_mm: "Yarn Weight (mm)",
+        label_width: "Desired Finished Width",
+        label_max_colors: "Max Color Count",
+        unit_colors: "colors",
+        label_grid: "Show 10-unit Grid & Coordinates",
+        regen_hint: "💡 Re-generate to get slightly different color combinations.",
+        btn_generate: "Generate Pattern",
+        btn_download: "Download PDF",
+        result_title: "4. Generated Pattern",
+        result_placeholder: "Pattern will appear here after generation.",
+        history_title: "Recent History (Click to compare)",
+        legend_title: "Color Legend (Thread No.)",
+        status_loaded: "Image loaded. Adjust settings and generate.",
+        status_generating: "Generating pattern... please wait.",
+        status_done: "Pattern generation complete!",
+        status_error: "Error during generation",
+        status_format_err: "Only JPG or PNG files are supported."
+    },
+    ja: {
+        tagline: "あなたのピクセルを編み図に変えます。",
+        upload_label: "1. 編み図にする画像をアップロードしてください",
+        preview_title: "2. オリジナル画像と必須色の選択",
+        preview_desc: "画像をクリック（モバイルは長押し）して、残したい重要な色を選択してください。",
+        upload_placeholder: "画像をアップロードしてください。",
+        selected_colors: "選択された必須色",
+        no_colors_selected: "まだ色が選択されていません。",
+        clear_selection: "選択を解除",
+        settings_title: "3. 編み図の詳細設定",
+        label_technique: "編み技法 (比率)",
+        opt_ratio_1: "かぎ針編み / クロ스ステッチ (1:1)",
+        opt_ratio_2: "棒針編み 人物 (5:7)",
+        opt_ratio_3: "棒針編み 風景 (7:5)",
+        label_yarn_unit: "糸の太さ 입력 방식",
+        unit_standard: "標準規格",
+        unit_mm: "直径 (mm)",
+        label_yarn_name: "糸の太さ (標準)",
+        label_yarn_mm: "糸の太さ (mm)",
+        label_width: "仕上がり幅",
+        label_max_colors: "最大色数",
+        unit_colors: "色",
+        label_grid: "10単位グリッドと座標を表示",
+        regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
+        btn_generate: "編み図を生成",
+        btn_download: "PDFをダウンロード",
+        result_title: "4. 生成された編み図",
+        result_placeholder: "生成された編み図がここに表示されます。",
+        history_title: "最近の履歴 (クリックで比較)",
+        legend_title: "カラーチャート (糸番号)",
+        status_loaded: "画像が読み込まれました。設定を確認して生成してください。",
+        status_generating: "編み図を生成中... 少々お待ちください。",
+        status_done: "編み図の生成が完了しました！",
+        status_error: "生成中にエラーが発生しました",
+        status_format_err: "JPGまたはPNGファイルのみアップロード可能です。"
+    }
+};
+
+let currentLang = 'ko';
+
+function changeLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+    
+    // Update active button state
+    langBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+}
+
+langBtns.forEach(btn => {
+    btn.addEventListener('click', () => changeLanguage(btn.getAttribute('data-lang')));
+});
+
+// --- 실 굵기 입력 방식 전환 ---
+yarnUnitRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const isMm = e.target.value === 'mm';
+        yarnNameGroup.style.display = isMm ? 'none' : 'flex';
+        yarnMmGroup.style.display = isMm ? 'flex' : 'none';
+    });
+});
 
 // --- 게이지 데이터 (10x10cm 기준 평균 코/단 수) ---
 const gaugeData = {
@@ -46,8 +193,16 @@ const gaugeData = {
     super_bulky: { sts: 10, rows: 14 }
 };
 
+// mm 두께를 대략적인 게이지로 변환하는 함수
+function getGaugeFromMm(mm) {
+    const sts = Math.round(80 / (parseFloat(mm) + 0.5));
+    const rows = Math.round(sts * 1.25); 
+    return { sts, rows };
+}
+
 // 상태 메시지 표시 유틸리티
-function showStatus(msg, isError = false) {
+function showStatus(msgKey, isError = false) {
+    const msg = translations[currentLang][msgKey] || msgKey;
     statusMessage.textContent = msg;
     statusMessage.style.color = isError ? '#ff0000' : '#000000';
 }
@@ -61,7 +216,7 @@ imageUpload.addEventListener('change', (e) => {
     if (!file) return;
 
     if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-        showStatus('JPG 또는 PNG 파일만 업로드 가능합니다.', true);
+        showStatus('status_format_err', true);
         return;
     }
 
@@ -76,7 +231,7 @@ imageUpload.addEventListener('change', (e) => {
             previewCanvas.style.display = 'block';
             generateBtn.disabled = false;
             
-            // 프리뷰 캔버스에 그리기 (최대 폭 제한)
+            // 프리뷰 캔버스에 그리기
             const maxPreviewWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 60;
             let drawWidth = img.width;
             let drawHeight = img.height;
@@ -102,14 +257,14 @@ imageUpload.addEventListener('change', (e) => {
             isPreviewMode = true;
             seedColors = [];
             renderSeedColors();
-            showStatus('이미지가 로드되었습니다. 설정을 확인하고 도안을 생성하세요.', false);
+            showStatus('status_loaded', false);
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 ---
+// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 (마우스/터치 호환) ---
 const MAGNIFIER_SIZE = 120;
 const MAGNIFIER_ZOOM = 6;
 
@@ -144,17 +299,14 @@ function handlePointerMove(e) {
     magnifierCanvas.style.display = 'block';
     
     const isTouch = e.type.includes('touch');
-    // 마우스일 때는 커서 정중앙에, 터치일 때는 손가락 위 40px 지점에 배치
     const offsetX = - (MAGNIFIER_SIZE / 2);
     const offsetY = isTouch ? - MAGNIFIER_SIZE - 40 : - (MAGNIFIER_SIZE / 2);
     
-    // 부모 요소(wrapper) 내에서의 캔버스 위치(offsetLeft/Top)를 더해줘야 정확한 위치에 돋보기가 뜹니다.
     magnifierCanvas.style.left = `${cssX + previewCanvas.offsetLeft + offsetX}px`;
     magnifierCanvas.style.top = `${cssY + previewCanvas.offsetTop + offsetY}px`;
 
     magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     magnifierCtx.save();
-    // Circular clipping removed for square hip look
     
     const sWidth = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
     const sHeight = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
@@ -213,7 +365,8 @@ previewCanvas.addEventListener('touchend', handlePointerEnd);
 function renderSeedColors() {
     seedColorList.innerHTML = '';
     if (seedColors.length === 0) {
-        seedColorList.innerHTML = '<li class="empty-msg">사진을 클릭해 필수 색상을 추가하세요.</li>';
+        const msg = translations[currentLang].no_colors_selected;
+        seedColorList.innerHTML = `<li class="empty-msg">${msg}</li>`;
         clearSeedsBtn.style.display = 'none';
         return;
     }
@@ -245,21 +398,25 @@ generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
 
     generateBtn.disabled = true;
-    showStatus('도안 생성 중... 잠시만 기다려주세요.', false);
+    showStatus('status_generating', false);
 
     const widthCm = parseFloat(targetWidthInput.value);
+    const isMmMode = document.querySelector('input[name="yarnUnit"]:checked').value === 'mm';
     const yarnType = yarnWeightSelect.value;
+    const yarnMm = yarnMmInput.value;
+    
     const colorCount = parseInt(colorCountInput.value, 10);
     const showGrid = showGridCheckbox.checked;
     const techniqueRatio = parseFloat(techniqueRatioSelect.value);
 
     if (isNaN(widthCm) || widthCm < 10) {
-        showStatus('올바른 가로 크기를 입력하세요.', true);
+        showStatus('status_error', true);
         generateBtn.disabled = false;
         return;
     }
 
-    const gauge = gaugeData[yarnType];
+    const gauge = isMmMode ? getGaugeFromMm(yarnMm) : gaugeData[yarnType];
+    
     const targetStitches = Math.round((widthCm / 10) * gauge.sts);
     const imgRatio = originalImage.height / originalImage.width;
     const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
@@ -303,20 +460,20 @@ generateBtn.addEventListener('click', async () => {
             resultPanel.style.display = 'block';
             resultPlaceholder.style.display = 'none';
             canvas.style.display = 'block';
+            
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
-            patternInfo.textContent = `가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
+            patternInfo.textContent = `${targetStitches} Stitches x ${targetRows} Rows (approx. ${widthCm}cm x ${calcHeightCm}cm)`;
             updateLegend(palette);
             
-            showStatus('도안 생성 완료!', false);
+            showStatus('status_done', false);
             downloadPdfBtn.disabled = false;
             saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
             
-            // 결과창으로 스크롤 이동
             resultPanel.scrollIntoView({ behavior: 'smooth' });
             
         } catch (error) {
             console.error(error);
-            showStatus('생성 중 오류 발생', true);
+            showStatus('status_error', true);
         } finally {
             generateBtn.disabled = false;
         }
@@ -413,15 +570,8 @@ downloadPdfBtn.addEventListener('click', () => {
         pdf.text("Knitting Pattern", margin, margin + 5);
         
         pdf.setFontSize(10);
-        // patternInfo.textContent에서 숫자만 추출하여 영문으로 변환 (한글 깨짐 방지)
-        const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
-        let englishInfo = "";
-        if (numbers && numbers.length >= 4) {
-            englishInfo = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
-        } else {
-            englishInfo = "Knitting Pattern Details";
-        }
-        pdf.text(englishInfo, margin, margin + 12);
+        const infoText = patternInfo.textContent;
+        pdf.text(infoText, margin, margin + 12);
         
         pdf.addImage(imgData, 'JPEG', margin, margin + 18, finalW, finalH);
         pdf.addPage();
@@ -443,6 +593,6 @@ downloadPdfBtn.addEventListener('click', () => {
         });
         pdf.save('knitting_pattern.pdf');
     } catch (e) {
-        showStatus('PDF 생성 실패', true);
+        showStatus('status_error', true);
     }
 });

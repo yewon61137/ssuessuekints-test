@@ -9,9 +9,14 @@
 </head>
 <body>
   <header>
+    <div class="lang-selector">
+      <button class="lang-btn active" data-lang="ko">KO</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="ja">JP</button>
+    </div>
     <div class="brand">SSUESSUE KNITS</div>
     <div class="brand-kr">쓔쓔닛츠</div>
-    <p class="tagline">Crafting your pixels into knit patterns.</p>
+    <p class="tagline" data-i18n="tagline">Crafting your pixels into knit patterns.</p>
   </header>
 
   <main class="container">
@@ -19,7 +24,7 @@
     <!-- 1단계: 이미지 업로드 -->
     <section class="step-section upload-section">
       <div class="control-group">
-        <label for="imageUpload" class="main-label">1. 도안으로 만들 이미지를 업로드하세요</label>
+        <label for="imageUpload" class="main-label" data-i18n="upload_label">1. 도안으로 만들 이미지를 업로드하세요</label>
         <input type="file" id="imageUpload" accept="image/jpeg, image/png">
       </div>
     </section>
@@ -27,81 +32,97 @@
     <!-- 2단계: 원본 이미지 미리보기 및 필수 색상 선택 -->
     <section id="previewArea" class="step-section preview-section">
       <div class="section-title">
-        <h2>2. 원본 이미지 확인 및 필수 색상 선택</h2>
-        <p class="instruction">이미지를 업로드하면 여기에 나타납니다. 사진에서 <b>살리고 싶은 중요한 색상</b>을 선택하세요.</p>
+        <h2 data-i18n="preview_title">2. 원본 이미지 확인 및 필수 색상 선택</h2>
+        <p class="instruction" data-i18n="preview_desc">이미지를 업로드하면 여기에 나타납니다. 사진에서 <b>살리고 싶은 중요한 색상</b>을 선택하세요.</p>
       </div>
       
       <div class="canvas-wrapper original-wrapper">
-        <div id="uploadPlaceholder" class="placeholder-msg">이미지를 업로드해주세요.</div>
+        <div id="uploadPlaceholder" class="placeholder-msg" data-i18n="upload_placeholder">이미지를 업로드해주세요.</div>
         <canvas id="previewCanvas" style="display: none;"></canvas>
         <canvas id="magnifierCanvas" class="magnifier-canvas"></canvas>
       </div>
 
       <div class="seed-colors-area">
-        <h3>선택된 필수 색상</h3>
+        <h3 data-i18n="selected_colors">선택된 필수 색상</h3>
         <ul id="seedColorList" class="color-list">
-          <li class="empty-msg">아직 선택된 색상이 없습니다.</li>
+          <li class="empty-msg" data-i18n="no_colors_selected">아직 선택된 색상이 없습니다.</li>
         </ul>
-        <button id="clearSeedsBtn" class="secondary-btn small-btn" style="display: none;">선택 초기화</button>
+        <button id="clearSeedsBtn" class="secondary-btn small-btn" style="display: none;" data-i18n="clear_selection">선택 초기화</button>
       </div>
     </section>
 
     <!-- 3단계: 세부 설정 -->
     <section id="settingsArea" class="step-section settings-section">
       <div class="section-title">
-        <h2>3. 도안 세부 설정</h2>
+        <h2 data-i18n="settings_title">3. 도안 세부 설정</h2>
       </div>
       
       <div class="settings-grid">
         <div class="control-group">
-          <label for="techniqueRatio">뜨개 기법 (코:단 비율)</label>
+          <label for="techniqueRatio" data-i18n="label_technique">뜨개 기법 (코:단 비율)</label>
           <select id="techniqueRatio">
-            <option value="1">코바늘 / 십자수 (1:1)</option>
-            <option value="1.4">대바늘 인물 사진 - Knit Portrait (5:7)</option>
-            <option value="0.714">대바늘 풍경 사진 - Knit Landscape (7:5)</option>
+            <option value="1" data-i18n="opt_ratio_1">코바늘 / 십자수 (1:1)</option>
+            <option value="1.4" data-i18n="opt_ratio_2">대바늘 인물 사진 - Knit Portrait (5:7)</option>
+            <option value="0.714" data-i18n="opt_ratio_3">대바늘 풍경 사진 - Knit Landscape (7:5)</option>
           </select>
         </div>
 
         <div class="control-group">
-          <label for="yarnWeight">실 굵기 (Yarn Weight)</label>
+          <label data-i18n="label_yarn_unit">실 굵기 입력 방식</label>
+          <div class="unit-toggle">
+            <label><input type="radio" name="yarnUnit" value="name" checked> <span data-i18n="unit_standard">표준 규격</span></label>
+            <label><input type="radio" name="yarnUnit" value="mm"> <span data-i18n="unit_mm">직경 (mm)</span></label>
+          </div>
+        </div>
+
+        <div class="control-group" id="yarnNameGroup">
+          <label for="yarnWeight" data-i18n="label_yarn_name">실 굵기 (Yarn Weight)</label>
           <select id="yarnWeight">
-            <option value="lace">Lace (약 32코 40단)</option>
-            <option value="fingering">Fingering / 4-ply (약 28코 36단)</option>
-            <option value="dk" selected>DK / 8-ply (약 22코 28단)</option>
-            <option value="aran">Aran / Worsted / 10-ply (약 18코 24단)</option>
-            <option value="chunky">Chunky / Bulky (약 14코 20단)</option>
-            <option value="super_bulky">Super Bulky (약 10코 14단)</option>
+            <option value="lace">Lace (approx. 32sts)</option>
+            <option value="fingering">Fingering (approx. 28sts)</option>
+            <option value="dk" selected>DK / 8-ply (approx. 22sts)</option>
+            <option value="aran">Aran / Worsted (approx. 18sts)</option>
+            <option value="chunky">Chunky (approx. 14sts)</option>
+            <option value="super_bulky">Super Bulky (approx. 10sts)</option>
           </select>
         </div>
 
-        <div class="control-group">
-          <label>원하는 편물의 가로 크기</label>
+        <div class="control-group" id="yarnMmGroup" style="display: none;">
+          <label for="yarnMm" data-i18n="label_yarn_mm">실 굵기 (mm)</label>
           <div class="input-with-hint">
-              <input type="number" id="targetWidth" value="50" min="10" max="300">
-              <span class="hint">가로(cm)</span>
+            <input type="number" id="yarnMm" value="4.0" step="0.5" min="0.5" max="20">
+            <span class="hint">mm</span>
           </div>
         </div>
 
         <div class="control-group">
-          <label for="colorCount">최대 색상 수</label>
+          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
+          <div class="input-with-hint">
+              <input type="number" id="targetWidth" value="50" min="10" max="300">
+              <span class="hint">cm</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
           <div class="input-with-hint">
             <input type="number" id="colorCount" value="15" min="2" max="40">
-            <span class="hint">색</span>
+            <span class="hint" data-i18n="unit_colors">색</span>
           </div>
         </div>
 
         <div class="control-group checkbox-group">
           <input type="checkbox" id="showGrid" checked>
-          <label for="showGrid">10단위 그리드 및 좌표 표시</label>
+          <label for="showGrid" data-i18n="label_grid">10단위 그리드 및 좌표 표시</label>
         </div>
       </div>
 
       <div class="action-buttons">
-        <div class="generator-hint">
+        <div class="generator-hint" data-i18n="regen_hint">
           💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.
         </div>
-        <button id="generateBtn" class="primary-btn" disabled>도안 생성하기</button>
-        <button id="downloadPdfBtn" class="secondary-btn" disabled>PDF 다운로드</button>
+        <button id="generateBtn" class="primary-btn" disabled data-i18n="btn_generate">도안 생성하기</button>
+        <button id="downloadPdfBtn" class="secondary-btn" disabled data-i18n="btn_download">PDF 다운로드</button>
         <div id="statusMessage" class="status-msg"></div>
       </div>
     </section>
@@ -109,22 +130,22 @@
     <!-- 4단계: 결과 도안 -->
     <section id="resultPanel" class="step-section result-panel">
       <div class="section-title">
-        <h2>4. 생성된 도안</h2>
+        <h2 data-i18n="result_title">4. 생성된 도안</h2>
       </div>
 
       <!-- 생성 기록 (최근 5개) -->
       <div class="history-panel" id="historyPanel" style="display: none;">
-        <h3>최근 생성 기록 <small>(클릭하여 비교)</small></h3>
+        <h3 data-i18n="history_title">최근 생성 기록 <small>(클릭하여 비교)</small></h3>
         <div class="history-thumbnails" id="historyThumbnails"></div>
       </div>
 
       <div class="canvas-wrapper pattern-wrapper">
-        <div id="resultPlaceholder" class="placeholder-msg">도안을 생성하면 여기에 표시됩니다.</div>
+        <div id="resultPlaceholder" class="placeholder-msg" data-i18n="result_placeholder">도안을 생성하면 여기에 표시됩니다.</div>
         <canvas id="patternCanvas" style="display: none;"></canvas>
       </div>
       
       <div class="legend-panel">
-        <h3>사용된 색상표 (실 번호)</h3>
+        <h3 data-i18n="legend_title">사용된 색상표 (실 번호)</h3>
         <p id="patternInfo" class="pattern-info-text"></p>
         <ul id="colorLegend" class="color-list">
         </ul>
