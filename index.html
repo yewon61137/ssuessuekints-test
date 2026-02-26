@@ -24,7 +24,17 @@
       </div>
 
       <div class="control-group">
-        <label for="yarnWeight">2. 실 굵기 (Yarn Weight)</label>
+        <label for="techniqueRatio">2. 뜨개 기법 (코:단 비율)</label>
+        <select id="techniqueRatio">
+          <option value="1">코바늘 / 십자수 (1:1)</option>
+          <option value="1.4">대바늘 인물 사진 - Knit Portrait (5:7)</option>
+          <option value="0.714">대바늘 풍경 사진 - Knit Landscape (7:5)</option>
+        </select>
+        <small>대바늘은 코가 납작하여 비율 보정이 필요합니다.</small>
+      </div>
+
+      <div class="control-group">
+        <label for="yarnWeight">3. 실 굵기 (Yarn Weight)</label>
         <select id="yarnWeight">
           <option value="lace">Lace (약 32코 40단)</option>
           <option value="fingering">Fingering / 4-ply (약 28코 36단)</option>
@@ -33,30 +43,29 @@
           <option value="chunky">Chunky / Bulky (약 14코 20단)</option>
           <option value="super_bulky">Super Bulky (약 10코 14단)</option>
         </select>
-        <small>※ 10x10cm 기준 평균 게이지입니다.</small>
       </div>
 
       <div class="control-group">
-        <label>3. 원하는 편물의 가로 크기</label>
+        <label>4. 원하는 편물의 가로 크기</label>
         <div class="input-with-hint">
             <input type="number" id="targetWidth" value="50" min="10" max="300">
             <span class="hint">가로(cm)</span>
         </div>
-        <small>세로 크기(단 수)는 원본 이미지 비율에 맞춰 자동 계산됩니다.</small>
+        <small>세로 단 수는 선택한 비율과 이미지에 맞춰 자동 계산됩니다.</small>
       </div>
 
       <div class="control-group">
-        <label for="colorCount">4. 최대 색상 수</label>
+        <label for="colorCount">5. 최대 색상 수</label>
         <div class="input-with-hint">
           <input type="number" id="colorCount" value="15" min="2" max="40">
           <span class="hint">색</span>
         </div>
-        <small>색상을 단순화합니다. (뚜렷한 색상 보존)</small>
+        <small>색상을 단순화합니다. (가장 눈에 띄는 색상 우선 보존)</small>
       </div>
 
       <div class="control-group checkbox-group">
         <input type="checkbox" id="showGrid" checked>
-        <label for="showGrid">10x10 그리드(선) 표시</label>
+        <label for="showGrid">10단위 그리드 및 좌표 표시</label>
       </div>
 
       <button id="generateBtn" class="primary-btn">도안 생성하기</button>

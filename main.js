@@ -7,6 +7,7 @@ let originalImage = null;
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
+const techniqueRatioSelect = document.getElementById('techniqueRatio');
 const yarnWeightSelect = document.getElementById('yarnWeight');
 const targetWidthInput = document.getElementById('targetWidth');
 const colorCountInput = document.getElementById('colorCount');
@@ -92,6 +93,7 @@ generateBtn.addEventListener('click', async () => {
     const yarnType = yarnWeightSelect.value;
     const colorCount = parseInt(colorCountInput.value, 10);
     const showGrid = showGridCheckbox.checked;
+    const techniqueRatio = parseFloat(techniqueRatioSelect.value);
 
     if (isNaN(widthCm) || widthCm < 10) {
         showStatus('올바른 크기(cm)를 입력하세요 (최소 10cm).', true);
@@ -104,12 +106,11 @@ generateBtn.addEventListener('click', async () => {
     // 총 가로 코수 = (가로cm / 10) * 10cm당 가로 코수
     const targetStitches = Math.round((widthCm / 10) * gauge.sts);
 
-    // 3) 원본 이미지 비율에 맞춰 세로 단수 계산 (배경 채우기 폐기, 원본 비율 완벽 유지)
+    // 3) 원본 이미지 비율과 기법(코 비율)에 맞춰 세로 단수 계산
     const imgRatio = originalImage.height / originalImage.width;
-    const targetRows = Math.round(targetStitches * imgRatio);
+    const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
 
-    // 4) 이미지를 코수/단수 크기(아주 작은 픽셀 이미지)로 리사이징
-    // 이 단계에서 원본 이미지가 픽셀화(Mosaic) 됩니다.
+    // 4) 이미지를 코수/단수 크기로 리사이징
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
     tempCanvas.width = targetStitches;
@@ -126,18 +127,23 @@ generateBtn.addEventListener('click', async () => {
             const { palette, assignments } = kMeans(pixels, colorCount, 15);
             
             // 6) 메인 캔버스에 직접 블록(사각형) 단위로 그리기
-            // 픽셀이 흐려지지 않게 각 코를 하나의 완벽한 단색 사각형으로 그립니다.
-            // 1코를 몇 픽셀로 그릴지 결정 (화면 크기에 맞게)
-            const pixelSize = Math.max(5, Math.min(20, Math.floor(800 / targetStitches))); 
+            const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
             
-            canvas.width = renderWidth;
-            canvas.height = renderHeight;
+            // 좌표(숫자)를 표시하기 위한 여백 추가
+            const paddingLeft = showGrid ? 30 : 0;
+            const paddingTop = showGrid ? 30 : 0;
+            
+            canvas.width = renderWidth + paddingLeft;
+            canvas.height = renderHeight + paddingTop;
             
             // 배경 초기화
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, renderWidth, renderHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 도안 그리기 영역으로 좌표 이동
+            ctx.translate(paddingLeft, paddingTop);
 
             // 각 픽셀(코)을 순회하며 메인 캔버스에 사각형으로 그림
             for (let y = 0; y < targetRows; y++) {
@@ -146,20 +152,22 @@ generateBtn.addEventListener('click', async () => {
                     const colorIdx = assignments[idx];
                     const color = palette[colorIdx];
                     
-                    // 해당 코의 색상을 채움
                     ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
                     ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                 }
             }
 
-            // 7) 그리드 그리기 (픽셀 위에 정확히 겹치게)
+            // 7) 그리드 및 축 좌표(숫자) 그리기
             if (showGrid) {
-                drawGrid(targetStitches, targetRows, pixelSize);
+                drawGridWithLabels(targetStitches, targetRows, pixelSize);
             }
+
+            // 원상 복구 (PDF 생성 등을 위해)
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
 
             // 8) 정보 및 색상표 업데이트
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
-            patternInfo.textContent = `도안 크기: 가로 ${targetStitches}코 × 세로 ${targetRows}단 (가로 ${widthCm}cm x 세로 약 ${calcHeightCm}cm)`;
+            patternInfo.textContent = `도안 크기: 가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
             updateLegend(palette);
             
             showStatus('도안 생성이 완료되었습니다!', false);
@@ -174,8 +182,8 @@ generateBtn.addEventListener('click', async () => {
     }, 50);
 });
 
-// --- 3. 그리드 그리기 ---
-function drawGrid(cols, rows, cellSize) {
+// --- 3. 그리드 및 좌표 라벨 그리기 ---
+function drawGridWithLabels(cols, rows, cellSize) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; 
     ctx.lineWidth = 1;
     // 1코(칸) 단위 얇은 선
@@ -197,6 +205,25 @@ function drawGrid(cols, rows, cellSize) {
     }
     // 외곽선
     ctx.strokeRect(0, 0, cols * cellSize, rows * cellSize);
+
+    // --- 좌표(숫자) 그리기 ---
+    ctx.fillStyle = '#334155';
+    ctx.font = '12px Pretendard, sans-serif';
+    
+    // Y축 (단수) - 왼쪽
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let y = 0; y <= rows; y += 10) {
+        // 단수는 아래에서 위로 읽기도 하지만, 이미지 렌더링 방향에 맞춰 위에서 아래로 표시
+        ctx.fillText(y, -5, y * cellSize);
+    }
+    
+    // X축 (코수) - 위쪽
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    for (let x = 0; x <= cols; x += 10) {
+        ctx.fillText(x, x * cellSize, -5);
+    }
 }
 
 // --- 4. 색상표(Legend) UI 업데이트 ---
@@ -245,7 +272,6 @@ downloadPdfBtn.addEventListener('click', () => {
         // 한국어 폰트 깨짐 방지를 위해 영어 제목 사용
         pdf.setFontSize(12);
         const titleText = "Knitting Pattern";
-        // patternInfo 텍스트에서 한글 제거하고 코/단 수만 추출 (영어만 사용)
         const infoMatch = patternInfo.textContent.match(/(\d+)코 × 세로 (\d+)단/);
         let subText = "";
         if (infoMatch) {
@@ -270,7 +296,6 @@ downloadPdfBtn.addEventListener('click', () => {
                  pdf.setDrawColor(0);
                  pdf.rect(currentX, currentY, 10, 10, 'S');
                  pdf.setFontSize(10);
-                 // 텍스트도 영문으로 (No.X #HEX)
                  pdf.text(item.querySelector('span').textContent, currentX + 15, currentY + 7);
                  
                  currentY += 15;
