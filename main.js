@@ -436,12 +436,22 @@ generateBtn.addEventListener('click', async () => {
             const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
-            const padding = showGrid ? 40 : 0;
             
-            canvas.width = renderWidth + padding;
-            canvas.height = renderHeight + padding;
+            // 좌표 라벨이 잘리지 않도록 여백 설정
+            const paddingTop = showGrid ? 25 : 0; // 상단 숫자 잘림 방지
+            const paddingRight = showGrid ? 50 : 0; // 우측 숫자 공간
+            const paddingBottom = showGrid ? 50 : 0; // 하단 숫자 공간
+            const paddingLeft = 0;
+            
+            canvas.width = renderWidth + paddingLeft + paddingRight;
+            canvas.height = renderHeight + paddingTop + paddingBottom;
+            
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 패턴 그리기 시작점으로 이동
+            ctx.save();
+            ctx.translate(paddingLeft, paddingTop);
 
             for (let y = 0; y < targetRows; y++) {
                 for (let x = 0; x < targetStitches; x++) {
@@ -456,6 +466,8 @@ generateBtn.addEventListener('click', async () => {
             if (showGrid) {
                 drawGridWithLabels(targetStitches, targetRows, pixelSize);
             }
+            
+            ctx.restore();
 
             resultPanel.style.display = 'block';
             resultPlaceholder.style.display = 'none';
