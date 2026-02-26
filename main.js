@@ -49,7 +49,7 @@ const gaugeData = {
 // 상태 메시지 표시 유틸리티
 function showStatus(msg, isError = false) {
     statusMessage.textContent = msg;
-    statusMessage.style.color = isError ? '#dc2626' : '#16a34a';
+    statusMessage.style.color = isError ? '#ff0000' : '#000000';
 }
 
 // 초기화
@@ -154,10 +154,8 @@ function handlePointerMove(e) {
 
     magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     magnifierCtx.save();
-    magnifierCtx.beginPath();
-    magnifierCtx.arc(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, 0, Math.PI * 2);
-    magnifierCtx.clip();
-
+    // Circular clipping removed for square hip look
+    
     const sWidth = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
     const sHeight = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
     const sx = x - (sWidth / 2);
