@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SSUESSUE KNITS | 쓔쓔닛츠</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff">
   <link href='/style.css' rel='stylesheet'>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -58,6 +59,7 @@
       </div>
       
       <div class="settings-grid">
+        <!-- Row 1 -->
         <div class="control-group">
           <label for="techniqueRatio" data-i18n="label_technique">뜨개 기법 (코:단 비율)</label>
           <select id="techniqueRatio">
@@ -75,6 +77,15 @@
           </div>
         </div>
 
+        <div class="control-group">
+          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
+          <div class="input-with-hint">
+              <input type="number" id="targetWidth" value="50" min="10" max="300">
+              <span class="hint">cm</span>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
         <div class="control-group">
           <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
           <div class="input-with-hint">
@@ -108,14 +119,6 @@
         <div class="control-group checkbox-group">
           <input type="checkbox" id="showGrid" checked>
           <label for="showGrid" data-i18n="label_grid">10단위 그리드 및 좌표 표시</label>
-        </div>
-
-        <div class="control-group">
-          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
-          <div class="input-with-hint">
-              <input type="number" id="targetWidth" value="50" min="10" max="300">
-              <span class="hint">cm</span>
-          </div>
         </div>
       </div>
 

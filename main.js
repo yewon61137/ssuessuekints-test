@@ -570,10 +570,18 @@ downloadPdfBtn.addEventListener('click', () => {
         pdf.text("Knitting Pattern", margin, margin + 5);
         
         pdf.setFontSize(10);
-        const infoText = patternInfo.textContent;
-        pdf.text(infoText, margin, margin + 12);
+        const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
+        let englishInfo = "";
+        if (numbers && numbers.length >= 4) {
+            englishInfo = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
+        } else {
+            englishInfo = "Knitting Pattern Details";
+        }
+        // y 좌표를 margin + 15 정도로 내려서 잘림 방지
+        pdf.text(englishInfo, margin, margin + 15);
         
-        pdf.addImage(imgData, 'JPEG', margin, margin + 18, finalW, finalH);
+        // 이미지 시작 위치를 더 내려서 텍스트와 겹치지 않게 함
+        pdf.addImage(imgData, 'JPEG', margin, margin + 25, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
         let currentY = margin + 15;
