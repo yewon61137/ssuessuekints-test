@@ -23,6 +23,8 @@ const statusMessage = document.getElementById('statusMessage');
 const patternInfo = document.getElementById('patternInfo');
 const canvas = document.getElementById('patternCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const magnifierCanvas = document.getElementById('magnifierCanvas');
+const magnifierCtx = magnifierCanvas.getContext('2d');
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
@@ -97,7 +99,79 @@ imageUpload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-// --- Seed Colors (필수 색상) 선택 로직 ---
+// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 ---
+const MAGNIFIER_SIZE = 100; // 돋보기 캔버스 크기 (가로/세로 px)
+const MAGNIFIER_ZOOM = 5; // 확대 배율
+
+// 돋보기 캔버스 초기 설정
+magnifierCanvas.width = MAGNIFIER_SIZE;
+magnifierCanvas.height = MAGNIFIER_SIZE;
+
+canvas.addEventListener('mousemove', (e) => {
+    // 미리보기 모드일 때만 돋보기 활성화
+    if (!isPreviewMode || !originalImage) {
+        magnifierCanvas.style.display = 'none';
+        return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // 마우스의 실제 캔버스 내부 좌표
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    // 화면(CSS) 상의 마우스 위치
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+
+    magnifierCanvas.style.display = 'block';
+    
+    // 돋보기가 마우스를 따라다니도록 위치 설정 (마우스 커서 우측 하단에 배치)
+    magnifierCanvas.style.left = `${cssX + 15}px`;
+    magnifierCanvas.style.top = `${cssY + 15}px`;
+
+    // 돋보기 캔버스 클리어 및 원형 마스크 설정
+    magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
+    magnifierCtx.save();
+    magnifierCtx.beginPath();
+    magnifierCtx.arc(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, 0, Math.PI * 2);
+    magnifierCtx.clip();
+
+    // 원본 캔버스의 특정 영역을 확대해서 돋보기 캔버스에 그리기
+    // 가져올 원본 영역의 크기
+    const sWidth = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
+    const sHeight = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
+    
+    // 가져올 원본 영역의 시작점 (마우스 포인터가 중심이 되도록)
+    const sx = x - (sWidth / 2);
+    const sy = y - (sHeight / 2);
+
+    magnifierCtx.imageSmoothingEnabled = false; // 픽셀 깨짐 유지 (정확한 색상 확인용)
+    magnifierCtx.drawImage(
+        canvas, 
+        sx, sy, sWidth, sHeight, 
+        0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE
+    );
+
+    // 정중앙에 십자선(Crosshair) 그리기
+    magnifierCtx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+    magnifierCtx.lineWidth = 1;
+    magnifierCtx.beginPath();
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2 - 5, MAGNIFIER_SIZE/2);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2 + 5, MAGNIFIER_SIZE/2);
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 - 5);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 + 5);
+    magnifierCtx.stroke();
+
+    magnifierCtx.restore();
+});
+
+canvas.addEventListener('mouseleave', () => {
+    magnifierCanvas.style.display = 'none';
+});
+
 canvas.addEventListener('click', (e) => {
     if (!isPreviewMode || !originalImage) return;
 
