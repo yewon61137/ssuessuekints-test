@@ -4,7 +4,6 @@ import { getPixelArray, kMeans, rgbToHex } from './colorUtils.js';
 
 // --- 상태 관리 ---
 let originalImage = null; // 업로드된 원본 이미지 객체 보관
-let generatedPatternData = null; // 생성된 도안 데이터 (PDF 출력용)
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -100,8 +99,7 @@ generateBtn.addEventListener('click', async () => {
     tempCanvas.height = targetHeight;
     tempCtx.drawImage(originalImage, 0, 0, targetWidth, targetHeight);
 
-    // 4) 픽셀 데이터 추출 및 색상 양자화 (Web Worker를 쓰면 좋지만 우선 동기식으로 구현)
-    // 비동기 처리 흉내내어 UI 멈춤 현상 완화
+    // 4) 픽셀 데이터 추출 및 색상 양자화 (비동기 흉내내어 UI 멈춤 방지)
     setTimeout(() => {
         try {
             const imageData = tempCtx.getImageData(0, 0, targetWidth, targetHeight);
@@ -123,8 +121,8 @@ generateBtn.addEventListener('click', async () => {
             tempCtx.putImageData(newImageData, 0, 0);
 
             // 6) 메인 캔버스에 확대해서 그리기 (선명도 유지)
-            // 화면에 표시할 때는 각 픽셀(코)을 일정 크기의 정사각형으로 그립니다.
-            const pixelSize = 10; // 1코당 10x10 픽셀로 확대 렌더링
+            // 1코를 몇 픽셀로 그릴지 결정 (최소 10픽셀, 도안이 너무 크면 조절)
+            const pixelSize = Math.max(5, Math.min(20, Math.floor(800 / targetWidth))); 
             const renderWidth = targetWidth * pixelSize;
             const renderHeight = targetHeight * pixelSize;
             
@@ -135,7 +133,7 @@ generateBtn.addEventListener('click', async () => {
             ctx.imageSmoothingEnabled = false;
             ctx.drawImage(tempCanvas, 0, 0, targetWidth, targetHeight, 0, 0, renderWidth, renderHeight);
 
-            // 7) 그리드 (10x10 단/코 마다 굵은 선 표시) 그리기
+            // 7) 그리드 그리기 (10단위 굵은 선, 1단위 얇은 선)
             if (showGrid) {
                 drawGrid(targetWidth, targetHeight, pixelSize);
             }
@@ -143,7 +141,6 @@ generateBtn.addEventListener('click', async () => {
             // 8) 색상표(Legend) 업데이트
             updateLegend(palette);
             
-            // 성공 상태 업데이트
             showStatus('도안 생성이 완료되었습니다!', false);
             downloadPdfBtn.disabled = false;
             
@@ -153,39 +150,29 @@ generateBtn.addEventListener('click', async () => {
         } finally {
             generateBtn.disabled = false;
         }
-    }, 50); // 짧은 지연시간을 주어 UI가 '생성중...' 텍스트를 그릴 여유를 줌
+    }, 50);
 });
 
 // --- 3. 그리드 그리기 ---
 function drawGrid(cols, rows, cellSize) {
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // 얇은 기본 선
+    // 1칸 단위 얇은 선
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; 
     ctx.lineWidth = 1;
-
-    // 1코(칸)마다 얇은 선 그리기 (선택사항, 너무 복잡하면 제거 가능)
-    // for (let x = 0; x <= cols; x++) {
-    //    ctx.beginPath();
-    //    ctx.moveTo(x * cellSize, 0);
-    //    ctx.lineTo(x * cellSize, rows * cellSize);
-    //    ctx.stroke();
-    // }
-    
-    // 10코/10단마다 굵은 선 그리기 (가독성 향상)
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; // 진한 선
-    ctx.lineWidth = 2;
-
-    // 세로 선 (10코 단위)
-    for (let x = 0; x <= cols; x += 10) {
-        ctx.beginPath();
-        ctx.moveTo(x * cellSize, 0);
-        ctx.lineTo(x * cellSize, rows * cellSize);
-        ctx.stroke();
+    for (let x = 0; x <= cols; x++) {
+        ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
     }
-    // 가로 선 (10단 단위)
+    for (let y = 0; y <= rows; y++) {
+        ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
+    }
+    
+    // 10단/코 단위 굵은 선
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; 
+    ctx.lineWidth = 2;
+    for (let x = 0; x <= cols; x += 10) {
+        ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, rows * cellSize); ctx.stroke();
+    }
     for (let y = 0; y <= rows; y += 10) {
-        ctx.beginPath();
-        ctx.moveTo(0, y * cellSize);
-        ctx.lineTo(cols * cellSize, y * cellSize);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(cols * cellSize, y * cellSize); ctx.stroke();
     }
     
     // 외곽선 굵게
@@ -196,7 +183,6 @@ function drawGrid(cols, rows, cellSize) {
 function updateLegend(palette) {
     colorLegend.innerHTML = '';
     
-    // 각 색상마다 리스트 아이템 생성
     palette.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
@@ -207,7 +193,6 @@ function updateLegend(palette) {
         box.style.backgroundColor = hex;
         
         const text = document.createElement('span');
-        // 번호는 1번부터 시작, 그리고 해당 색상의 Hex 코드 표시
         text.textContent = `No.${index + 1} (${hex})`;
         
         li.appendChild(box);
@@ -215,3 +200,76 @@ function updateLegend(palette) {
         colorLegend.appendChild(li);
     });
 }
+
+// --- 5. PDF 다운로드 (jsPDF 활용) ---
+downloadPdfBtn.addEventListener('click', () => {
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // 1. 도안 이미지 캡처
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+        // PDF 가로 크기 (297mm)에 맞게 도안 리사이징
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        // 여백 10mm
+        const margin = 10;
+        const maxContentWidth = pdfWidth - (margin * 2);
+        const maxContentHeight = pdfHeight - (margin * 2) - 40; // 하단 색상표 공간 확보
+
+        // 캔버스 비율에 맞춰 PDF 내 이미지 크기 계산
+        let finalWidth = maxContentWidth;
+        let finalHeight = (canvas.height / canvas.width) * finalWidth;
+        
+        if (finalHeight > maxContentHeight) {
+            finalHeight = maxContentHeight;
+            finalWidth = (canvas.width / canvas.height) * finalHeight;
+        }
+
+        // 이미지 그리기
+        pdf.text("My Knitting Pattern", margin, margin + 5);
+        pdf.addImage(imgData, 'JPEG', margin, margin + 10, finalWidth, finalHeight);
+
+        // 2. 새로운 페이지에 색상표 그리기
+        pdf.addPage();
+        pdf.text("Color Legend", margin, margin + 5);
+        
+        const colorItems = document.querySelectorAll('.color-item');
+        let currentY = margin + 15;
+        let currentX = margin;
+        
+        colorItems.forEach((item, index) => {
+            const rgbMatch = item.querySelector('.color-box').style.backgroundColor.match(/\d+/g);
+            if(rgbMatch) {
+                 // 색상 박스 채우기
+                 pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                 pdf.rect(currentX, currentY, 10, 10, 'F');
+                 // 테두리
+                 pdf.setDrawColor(0);
+                 pdf.rect(currentX, currentY, 10, 10, 'S');
+                 // 텍스트
+                 pdf.setFontSize(10);
+                 pdf.text(item.querySelector('span').textContent, currentX + 15, currentY + 7);
+                 
+                 currentY += 15;
+                 
+                 // 한 줄이 꽉 차면 옆 열로 이동
+                 if (currentY > pdfHeight - margin) {
+                     currentY = margin + 15;
+                     currentX += 60;
+                 }
+            }
+        });
+
+        pdf.save('knitting_pattern.pdf');
+    } catch (e) {
+        console.error("PDF 생성 에러:", e);
+        showStatus('PDF 생성에 실패했습니다.', true);
+    }
+});
