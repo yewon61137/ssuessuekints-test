@@ -141,6 +141,11 @@ select, input[type="number"] {
   box-sizing: border-box;
   background: transparent;
   appearance: none;
+  color: #000000; /* Force black text color */
+}
+
+option {
+  color: #000000; /* Ensure options are also black */
 }
 
 select {
