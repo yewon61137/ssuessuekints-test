@@ -127,7 +127,7 @@ function renderSeedColors() {
     seedColors.forEach((color) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
-        li.className = 'color-item';
+        li.className = 'seed-color-item';
         li.style.padding = '0.2rem';
         
         const box = document.createElement('div');
