@@ -464,11 +464,11 @@ generateBtn.addEventListener('click', async () => {
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
             
-            // 좌표 라벨이 잘리지 않도록 여백 설정
-            const paddingTop = showGrid ? 25 : 0; // 상단 숫자 잘림 방지
-            const paddingRight = showGrid ? 50 : 0; // 우측 숫자 공간
-            const paddingBottom = showGrid ? 50 : 0; // 하단 숫자 공간
-            const paddingLeft = 0;
+            // 좌표 라벨과 테두리가 잘리지 않도록 여백 설정 (사방 여백 부여)
+            const paddingTop = showGrid ? 40 : 10; 
+            const paddingRight = showGrid ? 60 : 10; 
+            const paddingBottom = showGrid ? 60 : 10; 
+            const paddingLeft = showGrid ? 40 : 10; // 왼쪽 여백 추가 및 개선
             
             canvas.width = renderWidth + paddingLeft + paddingRight;
             canvas.height = renderHeight + paddingTop + paddingBottom;
