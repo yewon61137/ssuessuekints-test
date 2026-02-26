@@ -21,7 +21,7 @@ body {
 
 header {
   text-align: center;
-  padding: 5rem 1rem 4rem;
+  padding: 4rem 1rem 3rem;
   background: white;
   position: relative;
 }
@@ -29,19 +29,20 @@ header {
 .brand {
   font-family: "Helvetica Neue", Helvetica, "Arial", sans-serif;
   font-size: 3.5rem;
-  font-weight: 950; /* Maximum thickness */
+  font-weight: 950;
   text-transform: uppercase;
-  letter-spacing: -0.02em;
-  line-height: 0.9;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
   margin-bottom: 0.5rem;
+  -webkit-text-stroke: 1.5px #000;
 }
 
 .brand-kr {
   font-family: 'GmarketSans', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #000;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .container {
@@ -50,7 +51,7 @@ header {
   margin: 0 auto 5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 /* Unified Card Style */
@@ -63,17 +64,26 @@ header {
 }
 
 .section-title {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   text-align: left;
   border-bottom: 2px solid #000;
-  padding-bottom: 1rem;
+  padding-bottom: 0.75rem;
 }
 
-.section-title h2 {
-  font-size: 1.6rem;
+.section-title h2, .main-label {
+  font-size: 1.5rem;
   font-weight: 800;
   text-transform: uppercase;
   margin: 0;
+}
+
+/* Step 1 label specific */
+.main-label {
+  display: block;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #000;
+  padding-bottom: 0.75rem;
 }
 
 /* Settings Grid - Explicit 3 Columns */
@@ -354,17 +364,38 @@ canvas {
   white-space: nowrap;
 }
 
+.lang-selector {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.lang-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border: 1.5px solid #000;
+  background: #fff;
+  cursor: pointer;
+  width: auto;
+}
+
+.lang-btn.active {
+  background: #000;
+  color: #fff;
+}
+
 @media (max-width: 800px) {
   header {
-    padding: 3rem 1rem 2rem;
+    padding: 4rem 1rem 2.5rem;
   }
-  .brand {
-    font-size: 2rem;
-  }
-  .step-section {
-    padding: 3rem 0;
-  }
-  button {
-    max-width: 100%;
+  .lang-selector {
+    top: 0.75rem;
+    right: 50%;
+    transform: translateX(50%);
   }
 }
+
+.brand {
