@@ -37,6 +37,64 @@ header {
   -webkit-text-stroke: 1.5px #000;
 }
 
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --primary-color: #ffffff;
+    --primary-hover: #cccccc;
+    --secondary-color: #aaaaaa;
+    --border-color: #ffffff;
+    --panel-bg: #1e1e1e;
+    --accent-color: #2a2a2a;
+  }
+  header, .step-section, .canvas-wrapper, .magnifier-canvas {
+    background: #121212;
+    border-color: #ffffff;
+  }
+  .brand {
+    -webkit-text-stroke: 1.5px #fff;
+  }
+  .brand-kr, label, .hint, .input-desc, select, input[type="number"], .status-msg, .empty-msg {
+    color: #ffffff;
+  }
+  select, input[type="number"], .color-item, .seed-color-item, .history-item.active {
+    border-color: #ffffff;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  }
+  .primary-btn {
+    background-color: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+  .primary-btn:hover:not(:disabled) {
+    background-color: #000;
+    color: #fff;
+  }
+  .secondary-btn {
+    background-color: #121212;
+    color: #fff;
+    border-color: #fff;
+  }
+  .secondary-btn:hover:not(:disabled) {
+    background-color: #fff;
+    color: #000;
+  }
+  .generator-hint {
+    background-color: #fff;
+    color: #000;
+  }
+  .section-title {
+    border-bottom-color: #fff;
+  }
+  .seed-colors-area h3, .legend-panel h3 {
+    border-left-color: #fff;
+  }
+}
+
 .brand-kr {
   font-family: 'GmarketSans', sans-serif;
   font-size: 1.2rem;
@@ -81,9 +139,17 @@ header {
 .main-label {
   display: block;
   text-align: left;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   border-bottom: 2px solid #000;
   padding-bottom: 0.75rem;
+}
+
+.input-desc {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
 }
 
 /* Settings Grid - Explicit 3 Columns */

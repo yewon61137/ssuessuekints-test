@@ -77,7 +77,9 @@ const translations = {
         status_generating: "도안 생성 중... 잠시만 기다려주세요.",
         status_done: "도안 생성 완료!",
         status_error: "생성 중 오류 발생",
-        status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다."
+        status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다.",
+        status_size_err: "파일 크기가 너무 큽니다 (최대 10MB).",
+        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -113,22 +115,24 @@ const translations = {
         status_generating: "Generating pattern... please wait.",
         status_done: "Pattern generation complete!",
         status_error: "Error during generation",
-        status_format_err: "Only JPG or PNG files are supported."
+        status_format_err: "Only JPG or PNG files are supported.",
+        status_size_err: "File is too large (Max 10MB).",
+        status_pdf_err: "Failed to load PDF library. Please try again later."
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
         upload_label: "1. 編み図にする画像をアップロードしてください",
         preview_title: "2. オリジナル画像と必須色の選択",
         preview_desc: "画像をクリック（モバイルは長押し）して、残したい重要な色を選択してください。",
-        upload_placeholder: "画像をアップロードしてください。",
+        upload_placeholder: "画像をアップ로드してください。",
         selected_colors: "選択された必須色",
         no_colors_selected: "まだ色が選択されていません。",
         clear_selection: "選択を解除",
         settings_title: "3. 編み図の詳細設定",
         label_technique: "編み技法 (比率)",
-        opt_ratio_1: "かぎ針編み / クロ스ステッチ (1:1)",
+        opt_ratio_1: "かぎ針編み / クロスステッチ (1:1)",
         opt_ratio_2: "棒針編み 人物 (5:7)",
-        opt_ratio_3: "棒針編み 風景 (7:5)",
+        opt_ratio_3: "棒針編み 풍경 (7:5)",
         label_yarn_unit: "糸の太さ 입력 방식",
         unit_standard: "標準規格",
         unit_mm: "直径 (mm)",
@@ -145,15 +149,19 @@ const translations = {
         result_placeholder: "生成された編み図がここに表示されます。",
         history_title: "最近の履歴 (クリックで比較)",
         legend_title: "カラーチャート (糸番号)",
-        status_loaded: "画像が読み込まれました。設定を確認して生成してください。",
+        status_loaded: "画像が読み込まれました. 設定を確認して生成してください。",
         status_generating: "編み図を生成中... 少々お待ちください。",
         status_done: "編み図の生成が完了しました！",
         status_error: "生成中にエラーが発生しました",
-        status_format_err: "JPGまたはPNGファイルのみアップロード可能です。"
+        status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다.",
+        status_size_err: "파일 사이즈가 너무 큽니다 (최대 10MB).",
+        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
     }
 };
 
 let currentLang = 'ko';
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_CANVAS_DIMENSION = 8000; // Browser safety limit
 
 function changeLanguage(lang) {
     currentLang = lang;
@@ -220,6 +228,12 @@ imageUpload.addEventListener('change', (e) => {
         return;
     }
 
+    if (file.size > MAX_FILE_SIZE) {
+        showStatus('status_size_err', true);
+        e.target.value = ''; // Reset input
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
         const img = new Image();
@@ -265,8 +279,8 @@ imageUpload.addEventListener('change', (e) => {
 });
 
 // --- Seed Colors (필수 색상) 선택 및 돋보기 로직 (마우스/터치 호환) ---
-const MAGNIFIER_SIZE = 120;
-const MAGNIFIER_ZOOM = 6;
+const MAGNIFIER_SIZE = 140; 
+const MAGNIFIER_ZOOM = 8;
 
 magnifierCanvas.width = MAGNIFIER_SIZE;
 magnifierCanvas.height = MAGNIFIER_SIZE;
@@ -278,7 +292,8 @@ function handlePointerMove(e) {
     }
 
     let clientX, clientY;
-    if (e.touches && e.touches.length > 0) {
+    const isTouch = e.type.includes('touch');
+    if (isTouch && e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
         if (e.cancelable) e.preventDefault(); 
@@ -298,9 +313,8 @@ function handlePointerMove(e) {
 
     magnifierCanvas.style.display = 'block';
     
-    const isTouch = e.type.includes('touch');
     const offsetX = - (MAGNIFIER_SIZE / 2);
-    const offsetY = isTouch ? - MAGNIFIER_SIZE - 40 : - (MAGNIFIER_SIZE / 2);
+    const offsetY = isTouch ? - MAGNIFIER_SIZE - 60 : - (MAGNIFIER_SIZE / 2);
     
     magnifierCanvas.style.left = `${cssX + previewCanvas.offsetLeft + offsetX}px`;
     magnifierCanvas.style.top = `${cssY + previewCanvas.offsetTop + offsetY}px`;
@@ -316,13 +330,13 @@ function handlePointerMove(e) {
     magnifierCtx.imageSmoothingEnabled = false;
     magnifierCtx.drawImage(previewCanvas, sx, sy, sWidth, sHeight, 0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
 
-    magnifierCtx.strokeStyle = 'red';
+    magnifierCtx.strokeStyle = '#FF3B30';
     magnifierCtx.lineWidth = 2;
     magnifierCtx.beginPath();
-    magnifierCtx.moveTo(MAGNIFIER_SIZE/2 - 8, MAGNIFIER_SIZE/2);
-    magnifierCtx.lineTo(MAGNIFIER_SIZE/2 + 8, MAGNIFIER_SIZE/2);
-    magnifierCtx.moveTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 - 8);
-    magnifierCtx.lineTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 + 8);
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2 - 10, MAGNIFIER_SIZE/2);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2 + 10, MAGNIFIER_SIZE/2);
+    magnifierCtx.moveTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 - 10);
+    magnifierCtx.lineTo(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2 + 10);
     magnifierCtx.stroke();
     magnifierCtx.restore();
 }
@@ -349,7 +363,7 @@ function handlePointerEnd(e) {
     if (x < 0 || y < 0 || x > previewCanvas.width || y > previewCanvas.height) return;
 
     const pixel = previewCtx.getImageData(x, y, 1, 1).data;
-    if (pixel[3] > 0) { 
+    if (pixel[3] > 128) { 
         seedColors.push([pixel[0], pixel[1], pixel[2]]);
         renderSeedColors();
     }
@@ -421,6 +435,13 @@ generateBtn.addEventListener('click', async () => {
     const imgRatio = originalImage.height / originalImage.width;
     const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
 
+    // Limit stitches/rows for browser canvas safety
+    if (targetStitches > 2000 || targetRows > 2000) {
+        showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
+        generateBtn.disabled = false;
+        return;
+    }
+
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
     tempCanvas.width = targetStitches;
@@ -433,7 +454,13 @@ generateBtn.addEventListener('click', async () => {
             const pixels = getPixelArray(imageData, targetStitches, targetRows);
             const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15, seedColors);
             
-            const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
+            let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
+            
+            // Safety Check: Total dimension should not exceed MAX_CANVAS_DIMENSION
+            if (targetStitches * pixelSize > MAX_CANVAS_DIMENSION || targetRows * pixelSize > MAX_CANVAS_DIMENSION) {
+                pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(targetStitches, targetRows));
+            }
+
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
             
@@ -565,10 +592,14 @@ function renderHistory() {
 
 downloadPdfBtn.addEventListener('click', () => {
     try {
+        if (typeof window.jspdf === 'undefined') {
+            showStatus('status_pdf_err', true);
+            return;
+        }
         const { jsPDF } = window.jspdf;
         const PDFDocument = jsPDF || window.jsPDF; 
         const pdf = new PDFDocument({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
@@ -589,10 +620,8 @@ downloadPdfBtn.addEventListener('click', () => {
         } else {
             englishInfo = "Knitting Pattern Details";
         }
-        // y 좌표를 margin + 15 정도로 내려서 잘림 방지
         pdf.text(englishInfo, margin, margin + 15);
         
-        // 이미지 시작 위치를 더 내려서 텍스트와 겹치지 않게 함
         pdf.addImage(imgData, 'JPEG', margin, margin + 25, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);

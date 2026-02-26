@@ -123,6 +123,19 @@ function initKMeansPlusPlus(pixels, k, width, height, seedColors = []) {
 }
 
 export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) {
+    if (pixels.length === 0) return { palette: [[0,0,0]], assignments: [] };
+
+    // Unique pixels check for small images or limited colors
+    const uniquePixelsMap = new Map();
+    for(const p of pixels) {
+        const key = `${p[0]},${p[1]},${p[2]}`;
+        if(!uniquePixelsMap.has(key)) uniquePixelsMap.set(key, p);
+    }
+    const uniquePixels = Array.from(uniquePixelsMap.values());
+    
+    // If k is greater than number of unique pixels, adjust k
+    const finalK = Math.min(k, uniquePixels.length);
+
     // 서브샘플링으로 속도 향상
     const maxPixels = 10000; 
     let samplePixels = pixels;
@@ -135,8 +148,8 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
     }
 
     // A(채도) + C(중앙) 가중치가 적용된 초기 중심점 추출 (+Seed Colors 지원)
-    const centers = initKMeansPlusPlus(samplePixels, k, width, height, seedColors);
-    const numSeeds = Math.min(seedColors.length, k);
+    const centers = initKMeansPlusPlus(samplePixels, finalK, width, height, seedColors);
+    const numSeeds = Math.min(seedColors.length, finalK);
     
     if (centers.length === 0) return { palette: [[0,0,0]], assignments: new Array(pixels.length).fill(0) };
 
