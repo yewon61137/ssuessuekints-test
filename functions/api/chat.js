@@ -13,8 +13,8 @@ export async function onRequestPost(context) {
        return new Response(JSON.stringify({ error: "Cloudflare 환경변수에 API 키가 설정되지 않았습니다." }), { status: 500 });
     }
 
-    // Google Gemini API 호출 (최신 1.5-flash 모델 사용)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Google Gemini API 호출 (최신 2.5-flash 모델 사용)
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
     const response = await fetch(geminiUrl, {
       method: "POST",
