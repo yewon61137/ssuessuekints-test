@@ -364,7 +364,7 @@ function restoreFromHistory(item) {
 // --- 6. PDF 다운로드 ---
 downloadPdfBtn.addEventListener('click', () => {
     try {
-        const { jsPDF } = window.jspdf;
+        const jsPDF = window.jspdf.jsPDF;
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
