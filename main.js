@@ -99,7 +99,7 @@ imageUpload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 ---
+// --- Seed Colors (필수 색상) 선택 및 돋보기 로직 (마우스/터치 호환) ---
 const MAGNIFIER_SIZE = 100; // 돋보기 캔버스 크기 (가로/세로 px)
 const MAGNIFIER_ZOOM = 5; // 확대 배율
 
@@ -107,30 +107,45 @@ const MAGNIFIER_ZOOM = 5; // 확대 배율
 magnifierCanvas.width = MAGNIFIER_SIZE;
 magnifierCanvas.height = MAGNIFIER_SIZE;
 
-canvas.addEventListener('mousemove', (e) => {
-    // 미리보기 모드일 때만 돋보기 활성화
+function handlePointerMove(e) {
     if (!isPreviewMode || !originalImage) {
         magnifierCanvas.style.display = 'none';
         return;
+    }
+
+    // 터치 이벤트인지 마우스 이벤트인지 구분
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+        // 터치 시 스크롤 방지 (선택적: 캔버스 위에서만 스크롤 막기)
+        if (e.cancelable) e.preventDefault(); 
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
     }
 
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
-    // 마우스의 실제 캔버스 내부 좌표
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    // 마우스/터치의 실제 캔버스 내부 좌표
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
 
     // 화면(CSS) 상의 마우스 위치
-    const cssX = e.clientX - rect.left;
-    const cssY = e.clientY - rect.top;
+    const cssX = clientX - rect.left;
+    const cssY = clientY - rect.top;
 
     magnifierCanvas.style.display = 'block';
     
-    // 돋보기가 마우스를 따라다니도록 위치 설정 (마우스 커서 우측 하단에 배치)
-    magnifierCanvas.style.left = `${cssX + 15}px`;
-    magnifierCanvas.style.top = `${cssY + 15}px`;
+    // 모바일(터치)일 때는 손가락에 가려지지 않게 돋보기를 터치 위치보다 약간 위로 올림
+    const isTouch = e.type.includes('touch');
+    const offsetX = isTouch ? - (MAGNIFIER_SIZE / 2) : 15;
+    const offsetY = isTouch ? - MAGNIFIER_SIZE - 20 : 15;
+    
+    magnifierCanvas.style.left = `${cssX + offsetX}px`;
+    magnifierCanvas.style.top = `${cssY + offsetY}px`;
 
     // 돋보기 캔버스 클리어 및 원형 마스크 설정
     magnifierCtx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
@@ -139,23 +154,19 @@ canvas.addEventListener('mousemove', (e) => {
     magnifierCtx.arc(MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, MAGNIFIER_SIZE/2, 0, Math.PI * 2);
     magnifierCtx.clip();
 
-    // 원본 캔버스의 특정 영역을 확대해서 돋보기 캔버스에 그리기
-    // 가져올 원본 영역의 크기
     const sWidth = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
     const sHeight = MAGNIFIER_SIZE / MAGNIFIER_ZOOM;
-    
-    // 가져올 원본 영역의 시작점 (마우스 포인터가 중심이 되도록)
     const sx = x - (sWidth / 2);
     const sy = y - (sHeight / 2);
 
-    magnifierCtx.imageSmoothingEnabled = false; // 픽셀 깨짐 유지 (정확한 색상 확인용)
+    magnifierCtx.imageSmoothingEnabled = false;
     magnifierCtx.drawImage(
         canvas, 
         sx, sy, sWidth, sHeight, 
         0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE
     );
 
-    // 정중앙에 십자선(Crosshair) 그리기
+    // 십자선
     magnifierCtx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
     magnifierCtx.lineWidth = 1;
     magnifierCtx.beginPath();
@@ -166,28 +177,52 @@ canvas.addEventListener('mousemove', (e) => {
     magnifierCtx.stroke();
 
     magnifierCtx.restore();
-});
+}
 
-canvas.addEventListener('mouseleave', () => {
-    magnifierCanvas.style.display = 'none';
-});
-
-canvas.addEventListener('click', (e) => {
+function handlePointerEnd(e) {
     if (!isPreviewMode || !originalImage) return;
+    magnifierCanvas.style.display = 'none';
+
+    let clientX, clientY;
+    if (e.type === 'touchend') {
+        // touchend는 touches 배열이 비어있으므로 changedTouches 사용
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            return;
+        }
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
 
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
     
+    // 캔버스 범위를 벗어나서 손을 떼면 색상 추가 안 함
+    if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return;
+
     const pixel = ctx.getImageData(x, y, 1, 1).data;
-    if (pixel[3] > 0) { // 투명하지 않은 픽셀만
+    if (pixel[3] > 0) { 
         seedColors.push([pixel[0], pixel[1], pixel[2]]);
         renderSeedColors();
     }
-});
+}
+
+// 이벤트 리스너 등록 (마우스)
+canvas.addEventListener('mousemove', handlePointerMove);
+canvas.addEventListener('mouseleave', () => magnifierCanvas.style.display = 'none');
+canvas.addEventListener('click', handlePointerEnd);
+
+// 이벤트 리스너 등록 (터치)
+canvas.addEventListener('touchstart', handlePointerMove, { passive: false });
+canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+canvas.addEventListener('touchend', handlePointerEnd);
 
 function renderSeedColors() {
     seedColorList.innerHTML = '';
