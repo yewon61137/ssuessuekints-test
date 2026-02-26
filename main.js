@@ -10,6 +10,8 @@ let seedColors = [];
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
+const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+const resultPlaceholder = document.getElementById('resultPlaceholder');
 const previewArea = document.getElementById('previewArea');
 const previewCanvas = document.getElementById('previewCanvas');
 const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
@@ -69,13 +71,12 @@ imageUpload.addEventListener('change', (e) => {
         img.onload = () => {
             originalImage = img;
             
-            // UI 표시 전환
-            previewArea.style.display = 'block';
-            settingsArea.style.display = 'block';
-            resultPanel.style.display = 'none';
+            // UI 상태 전환
+            uploadPlaceholder.style.display = 'none';
+            previewCanvas.style.display = 'block';
             generateBtn.disabled = false;
             
-            // 프리뷰 캔버스에 그리기 (최대 폭 제한)
+            // 프리뷰 캔버스에 그리기
             const maxPreviewWidth = 800;
             let drawWidth = img.width;
             let drawHeight = img.height;
@@ -87,6 +88,13 @@ imageUpload.addEventListener('change', (e) => {
             previewCanvas.width = drawWidth;
             previewCanvas.height = drawHeight;
             previewCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
+            
+            // 결과 영역 초기화
+            resultPlaceholder.style.display = 'block';
+            canvas.style.display = 'none';
+            colorLegend.innerHTML = '';
+            patternInfo.textContent = '';
+            downloadPdfBtn.disabled = true;
             
             // 상태 및 기록 초기화
             patternHistory = [];
@@ -136,8 +144,9 @@ function handlePointerMove(e) {
     magnifierCanvas.style.display = 'block';
     
     const isTouch = e.type.includes('touch');
-    const offsetX = isTouch ? - (MAGNIFIER_SIZE / 2) : 15;
-    const offsetY = isTouch ? - MAGNIFIER_SIZE - 30 : 15;
+    // 마우스일 때는 커서 정중앙에, 터치일 때는 손가락 위 40px 지점에 배치
+    const offsetX = - (MAGNIFIER_SIZE / 2);
+    const offsetY = isTouch ? - MAGNIFIER_SIZE - 40 : - (MAGNIFIER_SIZE / 2);
     
     magnifierCanvas.style.left = `${cssX + offsetX}px`;
     magnifierCanvas.style.top = `${cssY + offsetY}px`;
@@ -293,6 +302,8 @@ generateBtn.addEventListener('click', async () => {
             }
 
             resultPanel.style.display = 'block';
+            resultPlaceholder.style.display = 'none';
+            canvas.style.display = 'block';
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
             patternInfo.textContent = `가로 ${targetStitches}코 × 세로 ${targetRows}단 (약 ${widthCm}cm x ${calcHeightCm}cm)`;
             updateLegend(palette);
@@ -398,9 +409,15 @@ downloadPdfBtn.addEventListener('click', () => {
         let finalW = maxW;
         let finalH = (canvas.height / canvas.width) * finalW;
         if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
-        pdf.setFontSize(12);
+        
+        pdf.setFontSize(14);
         pdf.text("Knitting Pattern", margin, margin + 5);
-        pdf.addImage(imgData, 'JPEG', margin, margin + 10, finalW, finalH);
+        
+        pdf.setFontSize(10);
+        const infoText = patternInfo.textContent;
+        pdf.text(infoText, margin, margin + 12);
+        
+        pdf.addImage(imgData, 'JPEG', margin, margin + 18, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
         let currentY = margin + 15;
