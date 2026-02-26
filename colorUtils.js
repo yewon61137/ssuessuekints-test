@@ -26,40 +26,50 @@ function colorDistanceSq(c1, c2) {
     return (rDiff * rDiff * 0.3) + (gDiff * gDiff * 0.59) + (bDiff * bDiff * 0.11);
 }
 
-// K-means++ 초기화 (방법 A+C 적용)
-function initKMeansPlusPlus(pixels, k, width, height) {
+// K-means++ 초기화 (방법 A+C 적용, Seed Colors 지원)
+function initKMeansPlusPlus(pixels, k, width, height, seedColors = []) {
     const centers = [];
-    if (pixels.length === 0) return centers;
+    
+    // 사용자가 지정한 필수 보존 색상을 최우선으로 추가
+    for (const color of seedColors) {
+        if (centers.length < k) {
+            centers.push([...color]);
+        }
+    }
+    
+    if (pixels.length === 0 || centers.length >= k) return centers;
     
     // 중앙점 계산
     const centerX = width / 2;
     const centerY = height / 2;
     const maxDistToCenter = Math.sqrt(centerX * centerX + centerY * centerY);
 
-    // 1. 첫 번째 중심점은 가장 채도가 높고 중앙에 가까운 픽셀 근처에서 선택
-    let bestFirstIdx = 0;
-    let maxFirstScore = -1;
-    for (let j = 0; j < pixels.length; j += Math.max(1, Math.floor(pixels.length/1000))) { // 일부 샘플링
-        const p = pixels[j];
-        const maxRGB = Math.max(p[0], p[1], p[2]);
-        const minRGB = Math.min(p[0], p[1], p[2]);
-        const sat = (maxRGB - minRGB) / 255;
-        
-        const dx = p[3] - centerX;
-        const dy = p[4] - centerY;
-        const distFromCenter = Math.sqrt(dx*dx + dy*dy);
-        const centerBias = 1.0 - (distFromCenter / maxDistToCenter);
-        
-        const score = sat * centerBias;
-        if (score > maxFirstScore) {
-            maxFirstScore = score;
-            bestFirstIdx = j;
+    // Seed Color가 하나도 없을 경우에만 첫 번째 중심점을 A+C 가중치로 찾음
+    if (centers.length === 0) {
+        let bestFirstIdx = 0;
+        let maxFirstScore = -1;
+        for (let j = 0; j < pixels.length; j += Math.max(1, Math.floor(pixels.length/1000))) {
+            const p = pixels[j];
+            const maxRGB = Math.max(p[0], p[1], p[2]);
+            const minRGB = Math.min(p[0], p[1], p[2]);
+            const sat = (maxRGB - minRGB) / 255;
+            
+            const dx = p[3] - centerX;
+            const dy = p[4] - centerY;
+            const distFromCenter = Math.sqrt(dx*dx + dy*dy);
+            const centerBias = 1.0 - (distFromCenter / maxDistToCenter);
+            
+            const score = sat * centerBias;
+            if (score > maxFirstScore) {
+                maxFirstScore = score;
+                bestFirstIdx = j;
+            }
         }
+        centers.push([...pixels[bestFirstIdx]]);
     }
-    centers.push([...pixels[bestFirstIdx]]);
     
     // 2. 나머지 중심점들은 거리에 비례한 확률로 선택 (채도와 위치 가중치 적용)
-    for (let i = 1; i < k; i++) {
+    for (let i = centers.length; i < k; i++) {
         let distances = new Float64Array(pixels.length);
         let sumDistances = 0;
         
@@ -94,7 +104,7 @@ function initKMeansPlusPlus(pixels, k, width, height) {
         
         if (sumDistances === 0) break;
         
-        // 룰렛 휠 선택 (가중치가 적용된 거리가 멀수록 뽑힐 확률이 높음)
+        // 룰렛 휠 선택
         let target = Math.random() * sumDistances;
         for (let j = 0; j < pixels.length; j++) {
             target -= distances[j];
@@ -112,7 +122,7 @@ function initKMeansPlusPlus(pixels, k, width, height) {
     return centers;
 }
 
-export function kMeans(pixels, k, width, height, maxIter = 15) {
+export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) {
     // 서브샘플링으로 속도 향상
     const maxPixels = 10000; 
     let samplePixels = pixels;
@@ -124,8 +134,8 @@ export function kMeans(pixels, k, width, height, maxIter = 15) {
         }
     }
 
-    // A(채도) + C(중앙) 가중치가 적용된 초기 중심점 추출!
-    const centers = initKMeansPlusPlus(samplePixels, k, width, height);
+    // A(채도) + C(중앙) 가중치가 적용된 초기 중심점 추출 (+Seed Colors 지원)
+    const centers = initKMeansPlusPlus(samplePixels, k, width, height, seedColors);
     
     if (centers.length === 0) return { palette: [[0,0,0]], assignments: new Array(pixels.length).fill(0) };
 

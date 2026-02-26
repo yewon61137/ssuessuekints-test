@@ -5,6 +5,8 @@ import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
 // --- 상태 관리 ---
 let originalImage = null;
 let patternHistory = []; // { dataURL, legendHTML, infoText, id }
+let isPreviewMode = false;
+let seedColors = [];
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -12,6 +14,8 @@ const techniqueRatioSelect = document.getElementById('techniqueRatio');
 const yarnWeightSelect = document.getElementById('yarnWeight');
 const targetWidthInput = document.getElementById('targetWidth');
 const colorCountInput = document.getElementById('colorCount');
+const seedColorList = document.getElementById('seedColorList');
+const clearSeedsBtn = document.getElementById('clearSeedsBtn');
 const showGridCheckbox = document.getElementById('showGrid');
 const generateBtn = document.getElementById('generateBtn');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
@@ -82,10 +86,63 @@ imageUpload.addEventListener('change', (e) => {
             // 새 이미지가 업로드되면 기록 초기화
             patternHistory = [];
             renderHistory();
+            
+            // Seed Colors 초기화
+            isPreviewMode = true;
+            seedColors = [];
+            renderSeedColors();
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
+});
+
+// --- Seed Colors (필수 색상) 선택 로직 ---
+canvas.addEventListener('click', (e) => {
+    if (!isPreviewMode || !originalImage) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    if (pixel[3] > 0) { // 투명하지 않은 픽셀만
+        seedColors.push([pixel[0], pixel[1], pixel[2]]);
+        renderSeedColors();
+    }
+});
+
+function renderSeedColors() {
+    seedColorList.innerHTML = '';
+    if (seedColors.length === 0) {
+        seedColorList.innerHTML = '<li class="empty-msg">이미지를 클릭하여 색상을 추가하세요.</li>';
+        clearSeedsBtn.style.display = 'none';
+        return;
+    }
+    
+    clearSeedsBtn.style.display = 'block';
+    seedColors.forEach((color) => {
+        const hex = rgbToHex(color);
+        const li = document.createElement('li');
+        li.className = 'color-item';
+        li.style.padding = '0.2rem';
+        
+        const box = document.createElement('div');
+        box.className = 'color-box';
+        box.style.backgroundColor = hex;
+        box.title = hex;
+        
+        li.appendChild(box);
+        seedColorList.appendChild(li);
+    });
+}
+
+clearSeedsBtn.addEventListener('click', () => {
+    seedColors = [];
+    renderSeedColors();
 });
 
 // --- 2. 도안 생성 로직 ---
@@ -93,6 +150,7 @@ generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
 
     generateBtn.disabled = true;
+    isPreviewMode = false;
     showStatus('도안 생성 중... 알고리즘이 뚜렷한 색상을 찾고 있습니다...', false);
 
     const widthCm = parseFloat(targetWidthInput.value);
@@ -124,22 +182,22 @@ generateBtn.addEventListener('click', async () => {
             // X, Y 좌표 정보를 함께 추출
             const pixels = getPixelArray(imageData, targetStitches, targetRows);
             
-            // 채도 및 중앙 가중치가 적용된 K-means++
-            const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15);
+            // 채도 및 중앙 가중치가 적용된 K-means++ (+ Seed Colors)
+            const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15, seedColors);
             
             const pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
             
-            const paddingLeft = showGrid ? 30 : 0;
-            const paddingTop = showGrid ? 30 : 0;
+            const paddingRight = showGrid ? 35 : 0;
+            const paddingBottom = showGrid ? 35 : 0;
             
-            canvas.width = renderWidth + paddingLeft;
-            canvas.height = renderHeight + paddingTop;
+            canvas.width = renderWidth + paddingRight;
+            canvas.height = renderHeight + paddingBottom;
             
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.translate(paddingLeft, paddingTop);
+            // ctx.translate(paddingLeft, paddingTop); // Removed translation as padding is now bottom/right
 
             for (let y = 0; y < targetRows; y++) {
                 for (let x = 0; x < targetStitches; x++) {
@@ -201,16 +259,18 @@ function drawGridWithLabels(cols, rows, cellSize) {
     ctx.fillStyle = '#334155';
     ctx.font = '12px Pretendard, sans-serif';
     
-    ctx.textAlign = 'right';
+    // Y축 (단수) - 오른쪽
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     for (let y = 0; y <= rows; y += 10) {
-        ctx.fillText(y, -5, y * cellSize);
+        ctx.fillText(rows - y, cols * cellSize + 8, y * cellSize);
     }
     
+    // X축 (코수) - 아래쪽
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
+    ctx.textBaseline = 'top';
     for (let x = 0; x <= cols; x += 10) {
-        ctx.fillText(x, x * cellSize, -5);
+        ctx.fillText(cols - x, x * cellSize, rows * cellSize + 8);
     }
 }
 
@@ -301,7 +361,7 @@ function restoreFromHistory(item) {
 downloadPdfBtn.addEventListener('click', () => {
     try {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
