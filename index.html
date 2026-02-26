@@ -62,8 +62,8 @@
           <label for="techniqueRatio" data-i18n="label_technique">뜨개 기법 (코:단 비율)</label>
           <select id="techniqueRatio">
             <option value="1" data-i18n="opt_ratio_1">코바늘 / 십자수 (1:1)</option>
-            <option value="1.4" data-i18n="opt_ratio_2">대바늘 인물 사진 - Knit Portrait (5:7)</option>
-            <option value="0.714" data-i18n="opt_ratio_3">대바늘 풍경 사진 - Knit Landscape (7:5)</option>
+            <option value="1.4" data-i18n="opt_ratio_2">대바늘 인물 사진 (5:7)</option>
+            <option value="0.714" data-i18n="opt_ratio_3">대바늘 풍경 사진 (7:5)</option>
           </select>
         </div>
 
@@ -75,34 +75,6 @@
           </div>
         </div>
 
-        <div class="control-group" id="yarnNameGroup">
-          <label for="yarnWeight" data-i18n="label_yarn_name">실 굵기 (Yarn Weight)</label>
-          <select id="yarnWeight">
-            <option value="lace">Lace (approx. 32sts)</option>
-            <option value="fingering">Fingering (approx. 28sts)</option>
-            <option value="dk" selected>DK / 8-ply (approx. 22sts)</option>
-            <option value="aran">Aran / Worsted (approx. 18sts)</option>
-            <option value="chunky">Chunky (approx. 14sts)</option>
-            <option value="super_bulky">Super Bulky (approx. 10sts)</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="yarnMmGroup" style="display: none;">
-          <label for="yarnMm" data-i18n="label_yarn_mm">실 굵기 (mm)</label>
-          <div class="input-with-hint">
-            <input type="number" id="yarnMm" value="4.0" step="0.5" min="0.5" max="20">
-            <span class="hint">mm</span>
-          </div>
-        </div>
-
-        <div class="control-group">
-          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
-          <div class="input-with-hint">
-              <input type="number" id="targetWidth" value="50" min="10" max="300">
-              <span class="hint">cm</span>
-          </div>
-        </div>
-
         <div class="control-group">
           <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
           <div class="input-with-hint">
@@ -111,9 +83,39 @@
           </div>
         </div>
 
+        <div id="yarnInputArea">
+          <div class="control-group" id="yarnNameGroup">
+            <label for="yarnWeight" data-i18n="label_yarn_name">실 굵기 (표준)</label>
+            <select id="yarnWeight">
+              <option value="lace">Lace (approx. 32sts)</option>
+              <option value="fingering">Fingering (approx. 28sts)</option>
+              <option value="dk" selected>DK / 8-ply (approx. 22sts)</option>
+              <option value="aran">Aran / Worsted (approx. 18sts)</option>
+              <option value="chunky">Chunky (approx. 14sts)</option>
+              <option value="super_bulky">Super Bulky (approx. 10sts)</option>
+            </select>
+          </div>
+
+          <div class="control-group" id="yarnMmGroup" style="display: none;">
+            <label for="yarnMm" data-i18n="label_yarn_mm">실 굵기 (mm)</label>
+            <div class="input-with-hint">
+              <input type="number" id="yarnMm" value="4.0" step="0.5" min="0.5" max="20">
+              <span class="hint">mm</span>
+            </div>
+          </div>
+        </div>
+
         <div class="control-group checkbox-group">
           <input type="checkbox" id="showGrid" checked>
           <label for="showGrid" data-i18n="label_grid">10단위 그리드 및 좌표 표시</label>
+        </div>
+
+        <div class="control-group">
+          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
+          <div class="input-with-hint">
+              <input type="number" id="targetWidth" value="50" min="10" max="300">
+              <span class="hint">cm</span>
+          </div>
         </div>
       </div>
 
