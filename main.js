@@ -364,8 +364,15 @@ function restoreFromHistory(item) {
 // --- 6. PDF 다운로드 ---
 downloadPdfBtn.addEventListener('click', () => {
     try {
-        const jsPDF = window.jspdf.jsPDF;
-        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const { jsPDF } = window.jspdf;
+        // If jsPDF is still not found, try to access it globally as it might be attached to window directly depending on the CDN build
+        const PDFDocument = jsPDF || window.jsPDF; 
+        
+        if (!PDFDocument) {
+             throw new Error("jsPDF library is not loaded properly.");
+        }
+
+        const pdf = new PDFDocument({ orientation: 'p', unit: 'mm', format: 'a4' });
 
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
