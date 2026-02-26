@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>뜨개질 도안 생성기 (Knit Pattern Generator)</title>
   <link href='/style.css' rel='stylesheet'>
-  <!-- PDF 생성을 위한 jsPDF 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>🧶 뜨개질 도안 생성기</h1>
-    <p>이미지를 업로드하고 원하는 크기(코 수)와 색상 수를 입력하면, 나만의 뜨개질 도안을 만들어 줍니다!</p>
+    <h1>🧶 맞춤형 뜨개질 도안 생성기</h1>
+    <p>원하는 실 굵기와 완성품 크기(cm)를 입력하면, 비율에 맞게 사진을 배치하여 도안을 만들어줍니다!</p>
   </header>
 
   <main class="container">
@@ -20,26 +19,51 @@
       <h2>설정</h2>
       
       <div class="control-group">
-        <label for="imageUpload">1. 이미지 업로드 (JPG, PNG)</label>
+        <label for="imageUpload">1. 이미지 업로드</label>
         <input type="file" id="imageUpload" accept="image/jpeg, image/png">
       </div>
 
       <div class="control-group">
-        <label for="widthStitches">2. 가로 코 수 (크기)</label>
-        <div class="input-with-hint">
-          <input type="number" id="widthStitches" value="50" min="10" max="200">
-          <span class="hint">코 (가로 픽셀 수)</span>
-        </div>
-        <small>세로 단 수는 원본 이미지 비율에 맞춰 자동 계산됩니다.</small>
+        <label for="yarnWeight">2. 실 굵기 (Yarn Weight)</label>
+        <select id="yarnWeight">
+          <option value="lace">Lace (약 32코 40단)</option>
+          <option value="fingering">Fingering / 4-ply (약 28코 36단)</option>
+          <option value="dk" selected>DK / 8-ply (약 22코 28단)</option>
+          <option value="aran">Aran / Worsted / 10-ply (약 18코 24단)</option>
+          <option value="chunky">Chunky / Bulky (약 14코 20단)</option>
+          <option value="super_bulky">Super Bulky (약 10코 14단)</option>
+        </select>
+        <small>※ 10x10cm 기준 평균 게이지로 자동 계산됩니다.</small>
       </div>
 
       <div class="control-group">
-        <label for="colorCount">3. 최대 색상 수</label>
+        <label>3. 원하는 완성품 크기</label>
+        <div class="size-inputs">
+          <div class="input-with-hint">
+            <input type="number" id="targetWidth" value="50" min="10" max="300">
+            <span class="hint">가로(cm)</span>
+          </div>
+          <span>x</span>
+          <div class="input-with-hint">
+            <input type="number" id="targetHeight" value="50" min="10" max="300">
+            <span class="hint">세로(cm)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="bgColor">4. 여백 채우기 색상</label>
+        <input type="color" id="bgColor" value="#ffffff">
+        <small>사진 비율이 편물과 다를 때 빈 공간을 채울 색상입니다.</small>
+      </div>
+
+      <div class="control-group">
+        <label for="colorCount">5. 최대 색상 수</label>
         <div class="input-with-hint">
-          <input type="number" id="colorCount" value="10" min="2" max="30">
+          <input type="number" id="colorCount" value="15" min="2" max="40">
           <span class="hint">색</span>
         </div>
-        <small>비슷한 색상을 묶어 도안을 단순화합니다.</small>
+        <small>색상을 단순화합니다. (뚜렷한 색상 보존)</small>
       </div>
 
       <div class="control-group checkbox-group">
@@ -56,21 +80,19 @@
     <!-- 우측: 결과 화면 (도안 + 색상표) -->
     <section class="result-panel">
       <div class="canvas-wrapper">
-        <!-- 원본 비율을 유지하며 캔버스를 감싸는 영역 -->
         <canvas id="patternCanvas"></canvas>
       </div>
       
       <div class="legend-panel">
         <h3>사용된 색상표 (실 번호)</h3>
+        <p id="patternInfo" style="font-size: 0.9rem; color: #64748b; margin-top: 0;"></p>
         <ul id="colorLegend" class="color-list">
-          <!-- 색상 목록이 동적으로 여기에 추가됩니다 -->
           <li class="empty-msg">이미지를 업로드하고 도안을 생성해주세요.</li>
         </ul>
       </div>
     </section>
   </main>
   
-  <!-- 도안 생성 로직 (분리 예정) -->
   <script type="module" src="/main.js"></script>
 </body>
 </html>
