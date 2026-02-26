@@ -225,6 +225,8 @@ button {
 }
 
 canvas {
+  max-width: 100%;
+  height: auto;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   image-rendering: pixelated;
   cursor: crosshair;

@@ -76,8 +76,8 @@ imageUpload.addEventListener('change', (e) => {
             previewCanvas.style.display = 'block';
             generateBtn.disabled = false;
             
-            // 프리뷰 캔버스에 그리기
-            const maxPreviewWidth = 800;
+            // 프리뷰 캔버스에 그리기 (최대 폭 제한)
+            const maxPreviewWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 60;
             let drawWidth = img.width;
             let drawHeight = img.height;
             if (drawWidth > maxPreviewWidth) {
@@ -404,7 +404,7 @@ downloadPdfBtn.addEventListener('click', () => {
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const margin = 10;
+        const margin = 15;
         const maxW = pdfWidth - (margin * 2);
         const maxH = pdfHeight - (margin * 2) - 40;
         let finalW = maxW;
