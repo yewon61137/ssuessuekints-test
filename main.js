@@ -1,6 +1,7 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
 import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
+import { initAuth, getCurrentUser, savePatternToCloud } from './auth.js';
 
 // --- 상태 관리 ---
 let originalImage = null;
@@ -79,7 +80,16 @@ const translations = {
         status_error: "생성 중 오류 발생",
         status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다.",
         status_size_err: "파일 크기가 너무 큽니다 (최대 10MB).",
-        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        status_saved: "도안이 저장되었습니다.",
+        btn_signin: "로그인",
+        btn_signout: "로그아웃",
+        btn_mypage: "내 도안",
+        tab_signin: "로그인",
+        tab_signup: "회원가입",
+        btn_google: "Google로 계속하기",
+        btn_signup: "회원가입",
+        or_divider: "또는"
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -117,7 +127,16 @@ const translations = {
         status_error: "Error during generation",
         status_format_err: "Only JPG or PNG files are supported.",
         status_size_err: "File is too large (Max 10MB).",
-        status_pdf_err: "Failed to load PDF library. Please try again later."
+        status_pdf_err: "Failed to load PDF library. Please try again later.",
+        status_saved: "Pattern saved to your account.",
+        btn_signin: "Sign In",
+        btn_signout: "Sign Out",
+        btn_mypage: "My Patterns",
+        tab_signin: "Sign In",
+        tab_signup: "Sign Up",
+        btn_google: "Continue with Google",
+        btn_signup: "Sign Up",
+        or_divider: "or"
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -155,7 +174,16 @@ const translations = {
         status_error: "生成中にエラーが発生しました",
         status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다.",
         status_size_err: "파일 사이즈가 너무 큽니다 (최대 10MB).",
-        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        status_saved: "編み図が保存されました。",
+        btn_signin: "ログイン",
+        btn_signout: "ログアウト",
+        btn_mypage: "マイ編み図",
+        tab_signin: "ログイン",
+        tab_signup: "新規登録",
+        btn_google: "Googleで続ける",
+        btn_signup: "新規登録",
+        or_divider: "または"
     }
 };
 
@@ -217,6 +245,7 @@ function showStatus(msgKey, isError = false) {
 
 // 초기화
 generateBtn.disabled = true;
+initAuth();
 
 // --- 1. 이미지 업로드 처리 ---
 imageUpload.addEventListener('change', (e) => {
@@ -507,7 +536,24 @@ generateBtn.addEventListener('click', async () => {
             showStatus('status_done', false);
             downloadPdfBtn.disabled = false;
             saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
-            
+
+            // 로그인한 경우 클라우드에 저장 (non-blocking)
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                const settings = {
+                    widthCm,
+                    yarnType: isMmMode ? null : yarnType,
+                    yarnMm: isMmMode ? yarnMm : null,
+                    colorCount,
+                    showGrid,
+                    techniqueRatio
+                };
+                savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML,
+                    patternInfo.textContent, settings)
+                    .then(() => showStatus('status_saved', false))
+                    .catch(e => console.error('Cloud save failed:', e));
+            }
+
             resultPanel.scrollIntoView({ behavior: 'smooth' });
             
         } catch (error) {
