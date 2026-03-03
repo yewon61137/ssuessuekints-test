@@ -97,17 +97,33 @@
           data-ja="バグ報告、機能提案、プライバシー関連のお問い合わせなど、何でもお気軽にどうぞ。">
           버그 신고, 기능 제안, 개인정보 관련 문의 등 어떤 내용이든 환영합니다.
         </p>
-        <p class="contact-email">
-          <strong>Email:</strong>
-          <a href="mailto:contact@ssuessue-knits.com">contact@ssuessue-knits.com</a>
-        </p>
-        <p class="i18n contact-note"
-          data-ko="※ 실제 운영 이메일로 교체 필요"
-          data-en="※ Replace with your actual email"
-          data-ja="※ 実際のメールアドレスに変更してください"
-          style="color:#888;font-size:0.75rem;">
-          ※ 실제 운영 이메일로 교체 필요
-        </p>
+
+        <form id="contactForm" action="https://formspree.io/f/xpqjvzpk" method="POST" class="contact-form">
+          <div class="contact-form-row">
+            <label for="contactEmail" class="i18n" data-ko="이메일" data-en="Email" data-ja="メールアドレス">이메일</label>
+            <input type="email" id="contactEmail" name="email" required
+              placeholder="your@email.com" autocomplete="email">
+          </div>
+          <div class="contact-form-row">
+            <label for="contactMsg" class="i18n" data-ko="내용" data-en="Message" data-ja="内容">내용</label>
+            <textarea id="contactMsg" name="message" rows="5" required
+              class="i18n-placeholder"
+              data-placeholder-ko="문의 내용을 입력해주세요."
+              data-placeholder-en="Enter your message."
+              data-placeholder-ja="お問い合わせ内容をご入力ください。"
+              placeholder="문의 내용을 입력해주세요."></textarea>
+          </div>
+          <button type="submit" class="primary-btn contact-submit-btn">
+            <span class="i18n" data-ko="보내기" data-en="Send" data-ja="送信">보내기</span>
+          </button>
+        </form>
+
+        <!-- 전송 완료 메시지 -->
+        <div id="contactSuccess" class="contact-success" style="display:none;">
+          <span class="i18n" data-ko="✓ 메시지가 전송되었습니다. 감사합니다!" data-en="✓ Message sent. Thank you!" data-ja="✓ 送信完了しました。ありがとうございます！">
+            ✓ 메시지가 전송되었습니다. 감사합니다!
+          </span>
+        </div>
       </div>
     </section>
 
@@ -133,8 +149,37 @@
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;
       });
+      // placeholder i18n
+      document.querySelectorAll('.i18n-placeholder').forEach(el => {
+        const val = el.getAttribute('data-placeholder-' + lang);
+        if (val) el.placeholder = val;
+      });
     }
     langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
+
+    // Formspree AJAX 제출 (페이지 리다이렉트 방지)
+    const form = document.getElementById('contactForm');
+    const successMsg = document.getElementById('contactSuccess');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          form.style.display = 'none';
+          successMsg.style.display = 'block';
+        } else {
+          btn.disabled = false;
+        }
+      } catch {
+        btn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
