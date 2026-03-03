@@ -35,6 +35,7 @@ const t = {
         stitches: '코', rows: '단', btn_signin: '로그인', btn_signout: '로그아웃', btn_mypage: '내 도안',
         tab_signin: '로그인', tab_signup: '회원가입', btn_google: 'Google로 계속하기',
         btn_signup: '회원가입', or_divider: '또는', go_generate: '← 도안 만들기',
+        footer_generate: '도안 만들기', footer_mypage: '내 도안', footer_about: '소개', footer_privacy: '개인정보처리방침',
     },
     en: {
         mypatterns: 'My Patterns', not_logged_in: 'Sign in to view your saved patterns.',
@@ -44,6 +45,7 @@ const t = {
         stitches: 'sts', rows: 'rows', btn_signin: 'Sign In', btn_signout: 'Sign Out', btn_mypage: 'My Patterns',
         tab_signin: 'Sign In', tab_signup: 'Sign Up', btn_google: 'Continue with Google',
         btn_signup: 'Sign Up', or_divider: 'or', go_generate: '← Create Pattern',
+        footer_generate: 'Create Pattern', footer_mypage: 'My Patterns', footer_about: 'About', footer_privacy: 'Privacy Policy',
     },
     ja: {
         mypatterns: 'マイ編み図', not_logged_in: 'ログインして保存した編み図を確認しましょう。',
@@ -53,6 +55,7 @@ const t = {
         stitches: '目', rows: '段', btn_signin: 'ログイン', btn_signout: 'ログアウト', btn_mypage: 'マイ編み図',
         tab_signin: 'ログイン', tab_signup: '新規登録', btn_google: 'Googleで続ける',
         btn_signup: '新規登録', or_divider: 'または', go_generate: '← 編み図を作る',
+        footer_generate: '編み図を作る', footer_mypage: 'マイ編み図', footer_about: '紹介', footer_privacy: 'プライバシーポリシー',
     }
 };
 
