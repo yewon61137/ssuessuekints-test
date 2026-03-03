@@ -74,6 +74,7 @@ const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
 // --- Language ---
 function applyLang(lang) {
     currentLang = lang;
+    localStorage.setItem('lang', lang);
     langBtns.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === lang));
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -91,6 +92,9 @@ function applyLang(lang) {
 langBtns.forEach(btn => {
     btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
 });
+
+const savedLang = localStorage.getItem('lang');
+if (savedLang && savedLang !== 'ko') applyLang(savedLang);
 
 // --- Auth Modal ---
 function initAuthModal() {

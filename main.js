@@ -208,14 +208,13 @@ const MAX_CANVAS_DIMENSION = 8000; // Browser safety limit
 
 function changeLanguage(lang) {
     currentLang = lang;
+    localStorage.setItem('lang', lang);
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (translations[lang][key]) {
             el.innerHTML = translations[lang][key];
         }
     });
-    
-    // Update active button state
     langBtns.forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
@@ -224,6 +223,10 @@ function changeLanguage(lang) {
 langBtns.forEach(btn => {
     btn.addEventListener('click', () => changeLanguage(btn.getAttribute('data-lang')));
 });
+
+// 저장된 언어로 초기화
+const savedLang = localStorage.getItem('lang');
+if (savedLang && savedLang !== 'ko') changeLanguage(savedLang);
 
 // --- 실 굵기 입력 방식 전환 ---
 yarnUnitRadios.forEach(radio => {

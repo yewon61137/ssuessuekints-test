@@ -144,18 +144,20 @@
   <script>
     const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
     function applyLang(lang) {
+      localStorage.setItem('lang', lang);
       langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
       document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;
       });
-      // placeholder i18n
       document.querySelectorAll('.i18n-placeholder').forEach(el => {
         const val = el.getAttribute('data-placeholder-' + lang);
         if (val) el.placeholder = val;
       });
     }
     langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang && savedLang !== 'ko') applyLang(savedLang);
 
     // Formspree AJAX 제출 (페이지 리다이렉트 방지)
     const form = document.getElementById('contactForm');
