@@ -222,12 +222,15 @@ function changeLanguage(lang) {
 }
 
 langBtns.forEach(btn => {
-    btn.addEventListener('click', () => changeLanguage(btn.getAttribute('data-lang')));
+    btn.addEventListener('click', () => {
+        const lang = btn.getAttribute('data-lang');
+        if (lang) changeLanguage(lang);
+    });
 });
 
 // 저장된 언어로 초기화
 const savedLang = localStorage.getItem('lang');
-if (savedLang && savedLang !== 'ko') changeLanguage(savedLang);
+if (savedLang && translations[savedLang] && savedLang !== 'ko') changeLanguage(savedLang);
 
 // --- 실 굵기 입력 방식 전환 ---
 yarnUnitRadios.forEach(radio => {
