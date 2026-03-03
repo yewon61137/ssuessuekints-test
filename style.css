@@ -1163,3 +1163,33 @@ canvas {
     color: #e0e0e0;
   }
 }
+
+/* Copyright Notice (upload section) */
+.copyright-notice {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: #fffbe6;
+  border: 1.5px solid #e6c700;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #5a4a00;
+}
+
+.copyright-notice a {
+  color: #5a4a00;
+  font-weight: 800;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .copyright-notice {
+    background: #2a2400;
+    border-color: #c8a800;
+    color: #f0d060;
+  }
+  .copyright-notice a {
+    color: #f0d060;
+  }
+}
