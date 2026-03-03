@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSUESSUE KNITS | 쓔쓔닛츠</title>
+  <title>SSUESSUE KNITS | 사진을 뜨개 도안으로 변환</title>
+  <meta name="description" content="사진을 뜨개 도안으로 바꿔주는 무료 온라인 도구. 이미지를 업로드하면 코바늘·대바늘용 픽셀 도안을 자동 생성합니다. Convert photos into knitting patterns instantly.">
   <link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css">
   <link href='/style.css' rel='stylesheet'>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -19,11 +20,15 @@
         <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
       </div>
     </div>
-    <!-- 오른쪽 상단: 언어 선택 -->
-    <div class="lang-selector">
+    <!-- 오른쪽 상단: About 링크 + 언어 선택 -->
+    <div class="header-right">
+      <a href="/about.html" class="lang-btn" data-i18n="footer_about">소개</a>
+      <div class="lang-selector" style="position:static;transform:none;">
+
       <button class="lang-btn active" data-lang="ko">KO</button>
       <button class="lang-btn" data-lang="en">EN</button>
       <button class="lang-btn" data-lang="ja">JP</button>
+      </div>
     </div>
     <div class="brand">SSUESSUE KNITS</div>
     <div class="brand-kr">쓔쓔닛츠</div>
@@ -225,5 +230,6 @@
   </div>
 
   <script type="module" src="/main.js"></script>
+  <script src="/cookie-consent.js"></script>
 </body>
 </html>

@@ -75,6 +75,7 @@ const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
 function applyLang(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
+    document.documentElement.lang = lang;
     langBtns.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === lang));
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');

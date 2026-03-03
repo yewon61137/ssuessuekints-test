@@ -118,6 +118,14 @@
           </button>
         </form>
 
+        <p class="contact-email-direct i18n"
+          data-ko="또는 직접 이메일로 연락하세요:"
+          data-en="Or contact us directly by email:"
+          data-ja="またはメールで直接お問い合わせください:">
+          또는 직접 이메일로 연락하세요:
+        </p>
+        <p class="contact-email"><a href="mailto:yewon61137@gmail.com">yewon61137@gmail.com</a></p>
+
         <!-- 전송 완료 메시지 -->
         <div id="contactSuccess" class="contact-success" style="display:none;">
           <span class="i18n" data-ko="✓ 메시지가 전송되었습니다. 감사합니다!" data-en="✓ Message sent. Thank you!" data-ja="✓ 送信完了しました。ありがとうございます！">
@@ -145,6 +153,7 @@
     const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
     function applyLang(lang) {
       localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang;
       langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
       document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
@@ -183,5 +192,6 @@
       }
     });
   </script>
+  <script src="/cookie-consent.js"></script>
 </body>
 </html>

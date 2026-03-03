@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>개인정보처리방침 | SSUESSUE KNITS</title>
+  <meta name="description" content="SSUESSUE KNITS 개인정보처리방침. Privacy Policy for SSUESSUE KNITS.">
   <link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css">
   <link href='/style.css' rel='stylesheet'>
 </head>
@@ -62,7 +63,7 @@
           <p>본 서비스는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
 
           <h3>7. 문의</h3>
-          <p>개인정보 관련 문의는 <a href="/about.html">소개 페이지</a>의 연락처를 통해 주세요.</p>
+          <p>개인정보 관련 문의: <a href="mailto:yewon61137@gmail.com">yewon61137@gmail.com</a> 또는 <a href="/about.html">소개 페이지</a></p>
 
           <h3 id="disclaimer">8. 저작권 및 면책 고지</h3>
           <p>본 서비스는 사용자가 업로드한 이미지를 뜨개 도안으로 변환하는 도구를 제공합니다. 이와 관련하여 다음 사항을 명확히 고지합니다.</p>
@@ -192,6 +193,7 @@
     const blocks = document.querySelectorAll('.policy-block');
     function applyLang(lang) {
       localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang;
       langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
       blocks.forEach(b => b.style.display = b.getAttribute('data-lang') === lang ? 'block' : 'none');
       document.querySelectorAll('.i18n').forEach(el => {
@@ -203,5 +205,6 @@
     const savedLang = localStorage.getItem('lang');
     if (savedLang) applyLang(savedLang);
   </script>
+  <script src="/cookie-consent.js"></script>
 </body>
 </html>
