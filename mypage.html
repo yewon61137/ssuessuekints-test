@@ -121,6 +121,17 @@
         </form>
       </div>
 
+      <!-- 이메일 인증 안내 패널 -->
+      <div id="verificationSentPanel" style="display:none; text-align:center; padding: 1rem 0;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✉️</div>
+        <h3 style="margin-bottom: 1rem; font-weight:800;">이메일 인증이 필요합니다</h3>
+        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--secondary-color); margin-bottom: 1.5rem;">
+          <span id="sentEmailAddress" style="font-weight:700; color:var(--primary-color);"></span>(으)로 인증 메일을 보냈습니다.<br>
+          메일함의 링크를 클릭하여 인증을 완료한 후 다시 로그인해 주세요.
+        </p>
+        <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">확인</button>
+      </div>
+
       <div id="authModalError" class="auth-error" style="display:none;"></div>
     </div>
   </div>

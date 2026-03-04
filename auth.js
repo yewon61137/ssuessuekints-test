@@ -10,7 +10,9 @@ import {
     signInWithPopup,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    updateProfile
+    updateProfile,
+    sendEmailVerification,
+    applyActionCode
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     getFirestore,
@@ -101,6 +103,7 @@ function showProfileSetup(user) {
     modal.querySelector('.modal-divider').style.display = 'none';
     document.getElementById('signinPanel').style.display = 'none';
     document.getElementById('signupPanel').style.display = 'none';
+    document.getElementById('verificationSentPanel').style.display = 'none';
 
     const panel = document.getElementById('profileSetupPanel');
     panel.style.display = 'block';
@@ -140,13 +143,30 @@ function showProfileSetup(user) {
     modal.style.display = 'flex';
 }
 
+function showVerificationSentUI(email) {
+    const modal = document.getElementById('authModal');
+    modal.querySelector('.modal-tabs').style.display = 'none';
+    modal.querySelector('.google-btn').style.display = 'none';
+    modal.querySelector('.modal-divider').style.display = 'none';
+    document.getElementById('signinPanel').style.display = 'none';
+    document.getElementById('signupPanel').style.display = 'none';
+    document.getElementById('profileSetupPanel').style.display = 'none';
+
+    const panel = document.getElementById('verificationSentPanel');
+    panel.style.display = 'block';
+    document.getElementById('sentEmailAddress').textContent = email;
+    modal.style.display = 'flex';
+}
+
 function hideProfileSetupUI() {
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = '';
     modal.querySelector('.google-btn').style.display = '';
     modal.querySelector('.modal-divider').style.display = '';
-    const panel = document.getElementById('profileSetupPanel');
-    if (panel) panel.style.display = 'none';
+    const setupPanel = document.getElementById('profileSetupPanel');
+    if (setupPanel) setupPanel.style.display = 'none';
+    const sentPanel = document.getElementById('verificationSentPanel');
+    if (sentPanel) sentPanel.style.display = 'none';
     // 닉네임 체크 상태 리셋
     nicknameChecked = false;
     nicknameAvailable = false;
@@ -264,8 +284,17 @@ export function initAuth() {
     if (!signInBtn) return; // auth-area가 없는 페이지에서는 중단
 
     // 로그인 상태 변경 감지
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
+            // 이메일 기반 가입 사용자인 경우 인증 여부 확인 (구글은 자동 인증됨)
+            if (user.providerData.some(p => p.providerId === 'password') && !user.emailVerified) {
+                // 인증되지 않은 이메일 사용자는 로그아웃 처리 또는 제한
+                // 여기서는 UI만 로그아웃 상태로 유지하고 안내 메시지 표시 가능
+                signInBtn.style.display = 'inline-block';
+                userArea.style.display = 'none';
+                return;
+            }
+
             signInBtn.style.display = 'none';
             userArea.style.display = 'flex';
             userEmail.textContent = user.displayName || user.email || '';
@@ -327,10 +356,19 @@ export function initAuth() {
         const password = document.getElementById('signinPassword').value;
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
+            const user = result.user;
+
+            if (!user.emailVerified) {
+                await sendEmailVerification(user);
+                showVerificationSentUI(user.email);
+                await signOut(auth); // 인증 전까지는 로그인 세션 유지 안함
+                return;
+            }
+
             // 프로필 미완성 사용자는 설정 패널로
-            const complete = await isProfileComplete(result.user.uid);
+            const complete = await isProfileComplete(user.uid);
             if (!complete) {
-                showProfileSetup(result.user);
+                showProfileSetup(user);
             } else {
                 modal.style.display = 'none';
             }
@@ -352,8 +390,13 @@ export function initAuth() {
         }
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
-            // 계정 생성 후 프로필 설정 패널으로 전환
-            showProfileSetup(result.user);
+            const user = result.user;
+            
+            // 이메일 인증 메일 발송
+            await sendEmailVerification(user);
+            showVerificationSentUI(user.email);
+            await signOut(auth); // 인증 전까지는 로그인 세션 유지 안함
+            
         } catch (err) {
             showModalError(getAuthErrorMessage(err.code));
         }
@@ -361,14 +404,40 @@ export function initAuth() {
 
     // 프로필 설정 패널 초기화
     initProfileSetupPanel();
+    
+    // 이메일 인증 확인 패널의 버튼
+    const verifyDoneBtn = document.getElementById('verifyDoneBtn');
+    if (verifyDoneBtn) {
+        verifyDoneBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            hideProfileSetupUI();
+            switchTab('signin');
+        });
+    }
 }
 
 function switchTab(tab) {
     const isSignIn = tab === 'signin';
-    document.getElementById('tabSignIn').classList.toggle('active', isSignIn);
-    document.getElementById('tabSignUp').classList.toggle('active', !isSignIn);
-    document.getElementById('signinPanel').style.display = isSignIn ? 'block' : 'none';
-    document.getElementById('signupPanel').style.display = isSignIn ? 'none' : 'block';
+    const signInTab = document.getElementById('tabSignIn');
+    const signUpTab = document.getElementById('tabSignUp');
+    const signInPanel = document.getElementById('signinPanel');
+    const signUpPanel = document.getElementById('signupPanel');
+    const setupPanel = document.getElementById('profileSetupPanel');
+    const sentPanel = document.getElementById('verificationSentPanel');
+
+    if (signInTab) signInTab.classList.toggle('active', isSignIn);
+    if (signUpTab) signUpTab.classList.toggle('active', !isSignIn);
+    if (signInPanel) signInPanel.style.display = isSignIn ? 'block' : 'none';
+    if (signUpPanel) signUpPanel.style.display = isSignIn ? 'none' : 'block';
+    if (setupPanel) setupPanel.style.display = 'none';
+    if (sentPanel) sentPanel.style.display = 'none';
+    
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.querySelector('.modal-tabs').style.display = '';
+        modal.querySelector('.google-btn').style.display = '';
+        modal.querySelector('.modal-divider').style.display = '';
+    }
     clearModalError();
 }
 
@@ -404,6 +473,9 @@ function canvasToBlob(canvas, type, quality) {
 export async function savePatternToCloud(patternCanvas, originalCanvas, legendHTML, infoText, settings) {
     const user = auth.currentUser;
     if (!user) throw new Error('Not authenticated');
+    if (!user.emailVerified && !user.providerData.some(p => p.providerId === 'google.com')) {
+        throw new Error('Email not verified');
+    }
 
     const patternId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const basePath = `users/${user.uid}/patterns/${patternId}`;
