@@ -1192,6 +1192,17 @@ canvas {
   color: #fff;
 }
 
+.pattern-visibility-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.2rem 0.45rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+
 /* Dark mode - mypage */
 @media (prefers-color-scheme: dark) {
   .pattern-card {

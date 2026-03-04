@@ -738,42 +738,70 @@ downloadPdfBtn.addEventListener('click', () => {
     }
 });
 
-saveToCloudBtn.addEventListener('click', async () => {
+// 저장 버튼 → 모달 오픈
+saveToCloudBtn.addEventListener('click', () => {
     const user = getCurrentUser();
     if (!user) {
         showStatus('save_login_required', true);
         return;
     }
-    const tr = translations[currentLang];
-    saveToCloudBtn.disabled = true;
-    saveToCloudBtn.textContent = tr.btn_save_cloud_saving;
+    document.getElementById('patternSaveModal').style.display = 'flex';
+    document.getElementById('patternTitleInput').value = '';
+    document.querySelectorAll('input[name="patternTag"]').forEach(cb => cb.checked = false);
+    document.getElementById('patternIsPublic').checked = true;
+    document.getElementById('patternSaveError').style.display = 'none';
+    document.getElementById('patternSaveModalSubmit').disabled = false;
+    document.getElementById('patternSaveModalSubmit').textContent = '저장';
+});
 
-    // 저장 시 필요한 설정값 수집
+document.getElementById('patternSaveModalClose').addEventListener('click', () => {
+    document.getElementById('patternSaveModal').style.display = 'none';
+});
+
+document.getElementById('patternSaveModalCancel').addEventListener('click', () => {
+    document.getElementById('patternSaveModal').style.display = 'none';
+});
+
+document.getElementById('patternSaveForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = getCurrentUser();
+    if (!user) { showStatus('save_login_required', true); return; }
+
+    const title = document.getElementById('patternTitleInput').value.trim();
+    if (!title) return;
+    const tags = Array.from(document.querySelectorAll('input[name="patternTag"]:checked')).map(cb => cb.value);
+    const isPublic = document.getElementById('patternIsPublic').checked;
+
+    const submitBtn = document.getElementById('patternSaveModalSubmit');
+    const errorEl = document.getElementById('patternSaveError');
+    submitBtn.disabled = true;
+    submitBtn.textContent = translations[currentLang].btn_save_cloud_saving;
+    errorEl.style.display = 'none';
+
     const isMmMode = document.querySelector('input[name="yarnUnit"]:checked')?.value === 'mm';
-    const yarnType = yarnWeightSelect.value;
-    const yarnMm = parseFloat(yarnMmInput.value) || null;
-    const colorCount = parseInt(colorCountInput.value) || 15;
-    const showGrid = showGridCheckbox.checked;
-    const techniqueRatio = parseFloat(techniqueRatioSelect.value) || 1;
-    const widthCm = parseFloat(targetWidthInput.value) || 50;
-
     const settings = {
-        widthCm,
-        yarnType: isMmMode ? null : yarnType,
-        yarnMm: isMmMode ? yarnMm : null,
-        colorCount,
-        showGrid,
-        techniqueRatio
+        title,
+        tags,
+        isPublic,
+        widthCm: parseFloat(targetWidthInput.value) || 50,
+        yarnType: isMmMode ? null : yarnWeightSelect.value,
+        yarnMm: isMmMode ? (parseFloat(yarnMmInput.value) || null) : null,
+        colorCount: parseInt(colorCountInput.value) || 15,
+        showGrid: showGridCheckbox.checked,
+        techniqueRatio: parseFloat(techniqueRatioSelect.value) || 1
     };
 
     try {
         await savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML, patternInfo.textContent, settings);
-        saveToCloudBtn.textContent = tr.btn_save_cloud_done;
-        saveToCloudBtn.disabled = true; // 중복 저장 방지
-    } catch (e) {
-        console.error('Cloud save failed:', e);
-        saveToCloudBtn.disabled = false;
-        saveToCloudBtn.textContent = tr.btn_save_cloud;
-        showStatus('status_error', true);
+        document.getElementById('patternSaveModal').style.display = 'none';
+        saveToCloudBtn.textContent = translations[currentLang].btn_save_cloud_done;
+        saveToCloudBtn.disabled = true;
+        showStatus('status_saved', false);
+    } catch (err) {
+        console.error('Cloud save failed:', err);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '저장';
+        errorEl.textContent = '저장 중 오류가 발생했습니다.';
+        errorEl.style.display = 'block';
     }
 });

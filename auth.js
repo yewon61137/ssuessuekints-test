@@ -638,9 +638,13 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
     const widthCm = parseFloat(nums[2]) || 0;
 
     // 4. Firestore에 메타데이터 저장
+    const defaultTitle = `도안 ${new Date().toLocaleDateString('ko-KR')}`;
     const patternsRef = collection(db, `users/${user.uid}/patterns`);
     await addDoc(patternsRef, {
-        name: settings.name || `도안 ${new Date().toLocaleDateString('ko-KR')}`,
+        title: settings.title || defaultTitle,
+        name: settings.title || defaultTitle, // 하위 호환
+        tags: settings.tags || [],
+        isPublic: settings.isPublic ?? true,
         patternImageURL,
         originalImageURL,
         legendHTML,

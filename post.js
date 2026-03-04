@@ -4,7 +4,7 @@ import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './au
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     doc, getDoc, collection, query, orderBy, getDocs,
-    addDoc, deleteDoc, serverTimestamp, runTransaction, increment
+    addDoc, deleteDoc, updateDoc, serverTimestamp, runTransaction, increment
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, deleteObject, listAll } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
@@ -279,6 +279,62 @@ async function deletePost(pid, imageURLs) {
     }
 }
 
+// --- 게시글 수정 ---
+function openEditModal(data) {
+    document.getElementById('editPostTitle').value = data.title || '';
+    document.getElementById('editPostContent').value = data.content || '';
+    document.querySelectorAll('input[name="editTag"]').forEach(cb => {
+        cb.checked = (data.tags || []).includes(cb.value);
+    });
+    document.getElementById('editPostIsPublic').checked = data.isPublic !== false;
+    document.getElementById('editPostError').style.display = 'none';
+    document.getElementById('editPostSubmit').disabled = false;
+    document.getElementById('editPostSubmit').textContent = '저장';
+    document.getElementById('editPostModal').style.display = 'flex';
+}
+
+document.getElementById('editPostModalClose').addEventListener('click', () => {
+    document.getElementById('editPostModal').style.display = 'none';
+});
+document.getElementById('editPostCancel').addEventListener('click', () => {
+    document.getElementById('editPostModal').style.display = 'none';
+});
+document.getElementById('editPostModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('editPostModal')) {
+        document.getElementById('editPostModal').style.display = 'none';
+    }
+});
+
+document.getElementById('editPostForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('editPostSubmit');
+    const errorEl = document.getElementById('editPostError');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '저장 중...';
+    errorEl.style.display = 'none';
+    try {
+        const title = document.getElementById('editPostTitle').value.trim();
+        const content = document.getElementById('editPostContent').value.trim();
+        const tags = Array.from(document.querySelectorAll('input[name="editTag"]:checked')).map(cb => cb.value);
+        const isPublic = document.getElementById('editPostIsPublic').checked;
+        await updateDoc(doc(db, 'posts', postId), { title, content, tags, isPublic, updatedAt: serverTimestamp() });
+        // 로컬 상태 업데이트
+        postData = { ...postData, title, content, tags, isPublic };
+        // 화면 리렌더
+        document.getElementById('postTitle').textContent = title;
+        document.title = `${title} | SSUESSUE KNITS`;
+        document.getElementById('postBody').textContent = content;
+        document.getElementById('postTags').innerHTML = tags.map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
+        document.getElementById('editPostModal').style.display = 'none';
+    } catch (err) {
+        console.error('Post edit error:', err);
+        errorEl.textContent = '수정 중 오류가 발생했습니다.';
+        errorEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = '저장';
+    }
+});
+
 // --- 이벤트 바인딩 ---
 document.getElementById('likeBtn').addEventListener('click', () => {
     if (!currentUser) { openAuthModal(); return; }
@@ -304,6 +360,10 @@ document.getElementById('commentForm').addEventListener('submit', async e => {
 });
 
 document.getElementById('commentLoginBtn')?.addEventListener('click', openAuthModal);
+
+document.getElementById('postEditBtn').addEventListener('click', () => {
+    if (postData) openEditModal(postData);
+});
 
 document.getElementById('postDeleteBtn').addEventListener('click', () => {
     deletePost(postId, postData?.images || []);
@@ -331,8 +391,9 @@ onAuthStateChanged(auth, async user => {
         commentLoginMsg.style.display = 'block';
     }
 
-    // 삭제 버튼
+    // 수정/삭제 버튼 (본인 글)
     if (postData && currentUser && currentUser.uid === postData.uid) {
+        document.getElementById('postEditBtn').style.display = 'inline-block';
         document.getElementById('postDeleteBtn').style.display = 'inline-block';
     }
 

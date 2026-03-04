@@ -87,6 +87,9 @@ const t = {
 let currentLang = 'ko';
 function tr(key) { return (t[currentLang] && t[currentLang][key]) || key; }
 
+// --- URL 파라미터로 타인 프로필 여부 판단 ---
+const urlUid = new URLSearchParams(location.search).get('uid');
+
 // --- DOM refs ---
 const notLoggedInEl = document.getElementById('notLoggedIn');
 const loggedInEl = document.getElementById('loggedIn');
@@ -140,6 +143,7 @@ if (savedLang && savedLang !== 'ko') applyLang(savedLang);
 // --- Tab 컨트롤러 ---
 let currentTab = 'profile';
 let currentUid = null;
+let isMine = true; // 본인 프로필 여부
 const tabLoaded = { profile: false, mypatterns: false, myposts: false, scraps: false };
 
 function switchTab(tabName) {
@@ -324,8 +328,15 @@ async function loadPatterns(uid) {
         );
         const snap = await getDocs(q);
         loadingMsgEl.style.display = 'none';
-        if (snap.empty) { emptyMsgEl.style.display = 'block'; return; }
-        snap.forEach(docSnap => patternGridEl.appendChild(buildPatternCard(uid, docSnap.id, docSnap.data())));
+        let count = 0;
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            // 타인 프로필: 공개 도안만 표시
+            if (!isMine && data.isPublic !== true) return;
+            patternGridEl.appendChild(buildPatternCard(uid, docSnap.id, data));
+            count++;
+        });
+        if (count === 0) emptyMsgEl.style.display = 'block';
     } catch (e) {
         console.error('Failed to load patterns:', e);
         loadingMsgEl.textContent = '불러오기 실패. 다시 시도해주세요.';
@@ -336,48 +347,128 @@ function buildPatternCard(uid, patternId, data) {
     const card = document.createElement('div');
     card.className = 'pattern-card';
     const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
+    const displayName = escHtml(data.title || data.name || '');
 
-    card.innerHTML = `
-        <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${escHtml(data.name)}" loading="lazy"
-             onerror="this.style.background='#eee'">
-        <div class="pattern-card-body">
-          <p class="pattern-card-name" title="${escHtml(data.name)}">${escHtml(data.name)}</p>
-          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')} · ${date}</p>
+    // 세부 설정 텍스트
+    const yarnInfo = data.yarnType ? data.yarnType : (data.yarnMm ? `${data.yarnMm}mm` : '');
+    const widthInfo = data.widthCm ? `${data.widthCm}cm` : '';
+    const settingsParts = [yarnInfo, widthInfo].filter(Boolean);
+    const settingsText = settingsParts.length ? ` · ${settingsParts.join(' · ')}` : '';
+    const publicBadge = isMine ? `<span class="pattern-visibility-badge">${data.isPublic ? '공개' : '비공개'}</span>` : '';
+
+    const actionsHtml = isMine ? `
           <div class="pattern-card-actions">
             <button class="rename-btn">${tr('rename')}</button>
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
+            <button class="pdf-btn">PDF</button>
             <button class="delete-btn">${tr('delete')}</button>
+          </div>` : `
+          <div class="pattern-card-actions">
+            <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
+            <button class="pdf-btn">PDF</button>
+          </div>`;
+
+    card.innerHTML = `
+        <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${displayName}" loading="lazy"
+             onerror="this.style.background='#eee'">
+        <div class="pattern-card-body">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+            <p class="pattern-card-name" title="${displayName}" style="margin:0;flex:1;">${displayName}</p>
+            ${publicBadge}
           </div>
+          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText} · ${date}</p>
+          ${actionsHtml}
         </div>
     `;
 
     card.querySelector('.pattern-card-thumb').addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
 
-    card.querySelector('.rename-btn').addEventListener('click', async () => {
-        const newName = window.prompt(tr('rename_prompt'), data.name);
-        if (!newName || newName.trim() === data.name) return;
-        const trimmed = newName.trim();
-        try {
-            await updateDoc(doc(db, `users/${uid}/patterns/${patternId}`), { name: trimmed });
-            card.querySelector('.pattern-card-name').textContent = trimmed;
-            card.querySelector('.pattern-card-name').title = trimmed;
-            data.name = trimmed;
-        } catch (e) { console.error('Rename failed:', e); }
+    // PDF 다운로드 (본인/타인 모두)
+    card.querySelector('.pdf-btn').addEventListener('click', () => {
+        if (typeof window.jspdf === 'undefined') {
+            alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const pdfW = pdf.internal.pageSize.getWidth();
+            const pdfH = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+            const maxW = pdfW - margin * 2;
+            const maxH = pdfH - margin * 2 - 30;
+            let finalW = maxW;
+            let finalH = (img.height / img.width) * finalW;
+            if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
+            pdf.setFontSize(13);
+            pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
+            pdf.setFontSize(9);
+            const infoLine = `${data.stitches || 0} sts × ${data.rows || 0} rows${data.widthCm ? ` (${data.widthCm}cm)` : ''}`;
+            pdf.text(infoLine, margin, margin + 13);
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = img.width;
+            tmpCanvas.height = img.height;
+            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
+            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
+            pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
+            if (data.legendHTML) {
+                pdf.addPage();
+                pdf.setFontSize(12);
+                pdf.text('Color Legend', margin, margin + 5);
+                const tmpDiv = document.createElement('div');
+                tmpDiv.innerHTML = data.legendHTML;
+                let y = margin + 15;
+                tmpDiv.querySelectorAll('.color-item').forEach(item => {
+                    const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
+                    if (rgbMatch) {
+                        pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                        pdf.rect(margin, y, 8, 8, 'F');
+                        pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
+                        pdf.setFontSize(9);
+                        pdf.text(item.querySelector('span')?.textContent || '', margin + 12, y + 6);
+                        y += 12;
+                        if (y > pdfH - margin) y = margin;
+                    }
+                });
+            }
+            const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+            pdf.save(`${safeName}.pdf`);
+        };
+        img.onerror = () => alert('이미지를 불러오지 못했습니다.');
+        img.src = data.patternImageURL;
     });
 
-    card.querySelector('.delete-btn').addEventListener('click', async () => {
-        if (!window.confirm(tr('confirm_delete'))) return;
-        try {
-            const basePath = `users/${uid}/patterns/${patternId}`;
-            await Promise.allSettled([
-                deleteObject(ref(storage, `${basePath}/pattern.png`)),
-                deleteObject(ref(storage, `${basePath}/original.jpg`))
-            ]);
-            await deleteDoc(doc(db, `users/${uid}/patterns/${patternId}`));
-            card.remove();
-            if (patternGridEl.children.length === 0) emptyMsgEl.style.display = 'block';
-        } catch (e) { console.error('Delete failed:', e); }
-    });
+    if (isMine) {
+        card.querySelector('.rename-btn').addEventListener('click', async () => {
+            const currentName = data.title || data.name || '';
+            const newName = window.prompt(tr('rename_prompt'), currentName);
+            if (!newName || newName.trim() === currentName) return;
+            const trimmed = newName.trim();
+            try {
+                await updateDoc(doc(db, `users/${uid}/patterns/${patternId}`), { title: trimmed, name: trimmed });
+                card.querySelector('.pattern-card-name').textContent = trimmed;
+                card.querySelector('.pattern-card-name').title = trimmed;
+                data.title = trimmed;
+                data.name = trimmed;
+            } catch (e) { console.error('Rename failed:', e); }
+        });
+
+        card.querySelector('.delete-btn').addEventListener('click', async () => {
+            if (!window.confirm(tr('confirm_delete'))) return;
+            try {
+                const basePath = `users/${uid}/patterns/${patternId}`;
+                await Promise.allSettled([
+                    deleteObject(ref(storage, `${basePath}/pattern.png`)),
+                    deleteObject(ref(storage, `${basePath}/original.jpg`))
+                ]);
+                await deleteDoc(doc(db, `users/${uid}/patterns/${patternId}`));
+                card.remove();
+                if (patternGridEl.children.length === 0) emptyMsgEl.style.display = 'block';
+            } catch (e) { console.error('Delete failed:', e); }
+        });
+    }
 
     return card;
 }
@@ -405,7 +496,15 @@ async function loadMyPosts(uid) {
             const bt = b.data().createdAt?.seconds || 0;
             return bt - at;
         });
-        docs.forEach(docSnap => gridEl.appendChild(buildPostCard(docSnap.id, docSnap.data())));
+        let count = 0;
+        docs.forEach(docSnap => {
+            const data = docSnap.data();
+            // 타인 프로필: 공개 게시글만 표시
+            if (!isMine && data.isPublic === false) return;
+            gridEl.appendChild(buildPostCard(docSnap.id, data));
+            count++;
+        });
+        if (count === 0) emptyEl.style.display = 'block';
     } catch (e) {
         console.error('loadMyPosts error:', e);
         loadingEl.style.display = 'none';
@@ -477,6 +576,20 @@ function escHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// 타인 프로필 뷰: 탭을 도안/게시글만 보이도록 설정
+function setupOtherUserView(nickname) {
+    // 프로필수정/스크랩 탭 숨김
+    document.querySelectorAll('.mypage-tab').forEach(btn => {
+        const tab = btn.getAttribute('data-tab');
+        if (tab === 'profile' || tab === 'scraps') btn.style.display = 'none';
+    });
+    // 타이틀
+    const title = nickname ? `${nickname}님의 프로필` : '프로필';
+    document.getElementById('mypageTitle').textContent = title;
+    // 첫 탭을 내 도안으로
+    switchTab('mypatterns');
+}
+
 // --- Auth + 페이지 초기화 ---
 function initPageAuth() {
     initAuth();
@@ -484,11 +597,28 @@ function initPageAuth() {
 
     onAuthStateChanged(auth, async user => {
         const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'));
-        if (isVerified) {
+
+        if (urlUid) {
+            // 타인 프로필 모드: 로그인 여부 관계없이 표시
+            isMine = isVerified && user && user.uid === urlUid;
+            notLoggedInEl.style.display = 'none';
+            loggedInEl.style.display = 'block';
+            currentUid = urlUid;
+
+            if (!tabLoaded['_init']) {
+                tabLoaded['_init'] = true;
+                tabLoaded['mypatterns'] = true; // switchTab이 중복 로드 안 하도록 미리 설정
+                // 타인 프로필 정보 로드
+                const profile = await getUserProfile(urlUid);
+                setupOtherUserView(profile?.nickname || null);
+                loadPatterns(urlUid);
+            }
+        } else if (isVerified) {
+            // 본인 프로필 모드
+            isMine = true;
             notLoggedInEl.style.display = 'none';
             loggedInEl.style.display = 'block';
             currentUid = user.uid;
-            // 기본 탭(profile) 첫 로드
             if (!tabLoaded['profile']) {
                 tabLoaded['profile'] = true;
                 await loadProfilePanel(user.uid);

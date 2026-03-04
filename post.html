@@ -53,7 +53,8 @@
             <span class="post-author-name" id="postAuthorName"></span>
             <span class="post-date" id="postDate"></span>
           </div>
-          <button class="secondary-btn small-btn" id="postDeleteBtn" style="display:none;margin-left:auto;">삭제</button>
+          <button class="secondary-btn small-btn" id="postEditBtn" style="display:none;margin-left:auto;">수정</button>
+          <button class="secondary-btn small-btn" id="postDeleteBtn" style="display:none;margin-left:0.5rem;">삭제</button>
         </div>
       </div>
 
@@ -180,6 +181,38 @@
         </div>
       </div>
       <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- 게시글 수정 모달 -->
+  <div id="editPostModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box write-modal">
+      <button class="modal-close" id="editPostModalClose" aria-label="닫기">&#x2715;</button>
+      <p class="profile-setup-title" style="margin-bottom:1.25rem;">게시글 수정</p>
+      <form id="editPostForm" class="write-form">
+        <input type="text" id="editPostTitle" placeholder="제목 (필수, 최대 100자)" maxlength="100" required>
+        <textarea id="editPostContent" placeholder="내용 (최대 2000자)" maxlength="2000" rows="5" required></textarea>
+        <div>
+          <label class="write-label">태그 선택</label>
+          <div class="tag-checkbox-group">
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="코바늘"> 코바늘</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="대바늘"> 대바늘</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="완성작"> 완성작</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="도안공유"> 도안공유</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="진행중"> 진행중</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="editTag" value="질문"> 질문</label>
+          </div>
+        </div>
+        <label class="tag-checkbox-label" style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="editPostIsPublic" checked>
+          <span>공개 (커뮤니티 피드에 표시됩니다)</span>
+        </label>
+        <div id="editPostError" class="auth-error" style="display:none;margin-top:0.75rem;"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+          <button type="button" class="secondary-btn" id="editPostCancel" style="flex:1;">취소</button>
+          <button type="submit" class="primary-btn" id="editPostSubmit" style="flex:1;">저장</button>
+        </div>
+      </form>
     </div>
   </div>
 
