@@ -1,15 +1,9 @@
 // mypage.js — 내 도안 페이지 로직
 // Firebase 서비스는 auth.js에서 공유 (재초기화 방지)
 
-import { auth, db, storage } from './auth.js';
+import { auth, db, storage, initAuth, openAuthModal } from './auth.js';
 import {
-    onAuthStateChanged,
-    signOut,
-    GoogleAuthProvider,
-    signInWithPopup,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    sendEmailVerification
+    onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection,
@@ -98,107 +92,22 @@ langBtns.forEach(btn => {
 const savedLang = localStorage.getItem('lang');
 if (savedLang && savedLang !== 'ko') applyLang(savedLang);
 
-// --- Auth Modal ---
-function initAuthModal() {
-    const signInBtn = document.getElementById('authSignInBtn');
-    const userArea = document.getElementById('authUserArea');
-    const userEmail = document.getElementById('authUserEmail');
-    const signOutBtn = document.getElementById('authSignOutBtn');
-    const modal = document.getElementById('authModal');
+// --- Auth → 페이지 표시 결정 ---
+function initPageAuth() {
+    // 모든 인증 모달 처리는 auth.js의 initAuth()에 위임
+    initAuth();
 
-    const clearError = () => { const el = document.getElementById('authModalError'); if (el) { el.textContent = ''; el.style.display = 'none'; } };
-    const showError = (msg) => { const el = document.getElementById('authModalError'); if (el) { el.textContent = msg; el.style.display = 'block'; } };
-    const getErrMsg = (code) => ({
-        'auth/user-not-found': '등록되지 않은 이메일입니다.',
-        'auth/wrong-password': '비밀번호가 올바르지 않습니다.',
-        'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
-        'auth/weak-password': '비밀번호는 6자 이상이어야 합니다.',
-        'auth/invalid-email': '유효하지 않은 이메일 형식입니다.',
-        'auth/too-many-requests': '잠시 후 다시 시도해주세요.',
-        'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
-    })[code] || '로그인 중 오류가 발생했습니다.';
+    // 미로그인 시 로그인 버튼 클릭 → 모달 오픈
+    gotoSignInBtn.addEventListener('click', openAuthModal);
 
-    const showVerificationSentUI = (email) => {
-        modal.querySelector('.modal-tabs').style.display = 'none';
-        modal.querySelector('.google-btn').style.display = 'none';
-        modal.querySelector('.modal-divider').style.display = 'none';
-        document.getElementById('signinPanel').style.display = 'none';
-        document.getElementById('signupPanel').style.display = 'none';
-        document.getElementById('profileSetupPanel').style.display = 'none';
-        const panel = document.getElementById('verificationSentPanel');
-        panel.style.display = 'block';
-        document.getElementById('sentEmailAddress').textContent = email;
-    };
-
-    const switchTab = (tab) => {
-        const isSignIn = tab === 'signin';
-        document.getElementById('tabSignIn').classList.toggle('active', isSignIn);
-        document.getElementById('tabSignUp').classList.toggle('active', !isSignIn);
-        document.getElementById('signinPanel').style.display = isSignIn ? 'block' : 'none';
-        document.getElementById('signupPanel').style.display = isSignIn ? 'none' : 'block';
-        document.getElementById('verificationSentPanel').style.display = 'none';
-        modal.querySelector('.modal-tabs').style.display = '';
-        modal.querySelector('.google-btn').style.display = '';
-        modal.querySelector('.modal-divider').style.display = '';
-        clearError();
-    };
-
-    signInBtn.addEventListener('click', () => { modal.style.display = 'flex'; clearError(); });
-    gotoSignInBtn.addEventListener('click', () => { modal.style.display = 'flex'; clearError(); });
-    signOutBtn.addEventListener('click', () => signOut(auth));
-    document.getElementById('modalCloseBtn').addEventListener('click', () => { modal.style.display = 'none'; clearError(); switchTab('signin'); });
-    document.getElementById('tabSignIn').addEventListener('click', () => switchTab('signin'));
-    document.getElementById('tabSignUp').addEventListener('click', () => switchTab('signup'));
-
-    document.getElementById('googleSignInBtn').addEventListener('click', async () => {
-        clearError();
-        try { await signInWithPopup(auth, new GoogleAuthProvider()); modal.style.display = 'none'; }
-        catch (e) { showError(e.message); }
-    });
-
-    document.getElementById('emailSignInForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); clearError();
-        try {
-            const res = await signInWithEmailAndPassword(auth, document.getElementById('signinEmail').value, document.getElementById('signinPassword').value);
-            if (!res.user.emailVerified) {
-                await sendEmailVerification(res.user);
-                showVerificationSentUI(res.user.email);
-                await signOut(auth);
-                return;
-            }
-            modal.style.display = 'none';
-        } catch (err) { showError(getErrMsg(err.code)); }
-    });
-
-    document.getElementById('emailSignUpForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); clearError();
-        const pw = document.getElementById('signupPassword').value;
-        if (pw !== document.getElementById('signupConfirm').value) { showError('비밀번호가 일치하지 않습니다.'); return; }
-        try {
-            const res = await createUserWithEmailAndPassword(auth, document.getElementById('signupEmail').value, pw);
-            await sendEmailVerification(res.user);
-            showVerificationSentUI(res.user.email);
-            await signOut(auth);
-        } catch (err) { showError(getErrMsg(err.code)); }
-    });
-
-    document.getElementById('verifyDoneBtn').addEventListener('click', () => {
-        modal.style.display = 'none';
-        switchTab('signin');
-    });
-
-    // Auth state → 페이지 표시 결정
+    // 인증 상태에 따라 도안 목록 표시
     onAuthStateChanged(auth, async (user) => {
-        if (user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'))) {
-            signInBtn.style.display = 'none';
-            userArea.style.display = 'flex';
-            userEmail.textContent = user.displayName || user.email || '';
+        const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'));
+        if (isVerified) {
             notLoggedInEl.style.display = 'none';
             loggedInEl.style.display = 'block';
             await loadPatterns(user.uid);
         } else {
-            signInBtn.style.display = 'inline-block';
-            userArea.style.display = 'none';
             notLoggedInEl.style.display = 'block';
             loggedInEl.style.display = 'none';
         }
@@ -291,4 +200,4 @@ function escHtml(str) {
 }
 
 // --- Init ---
-initAuthModal();
+initPageAuth();

@@ -91,6 +91,7 @@ let pendingProfileUser = null;
 let nicknameChecked = false;
 let nicknameAvailable = false;
 let verificationTimer = null;
+let verificationFocusHandler = null;
 
 function showProfileSetup(user) {
     pendingProfileUser = user;
@@ -182,16 +183,21 @@ function startVerificationCheck() {
     };
     // 3초마다 체크 + 윈도우 포커스 시 체크
     verificationTimer = setInterval(check, 3000);
+    verificationFocusHandler = check;
     window.addEventListener('focus', check);
 }
 
 function stopVerificationCheck() {
     if (verificationTimer) clearInterval(verificationTimer);
     verificationTimer = null;
-    // 이벤트 리스너는 단순화를 위해 여기서는 해제하지 않거나, 별도 관리 필요
+    if (verificationFocusHandler) {
+        window.removeEventListener('focus', verificationFocusHandler);
+        verificationFocusHandler = null;
+    }
 }
 
 function hideProfileSetupUI() {
+    pendingProfileUser = null;
     stopVerificationCheck();
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = '';
@@ -326,6 +332,18 @@ export function initAuth() {
                 signInBtn.style.display = 'inline-block';
                 userArea.style.display = 'none';
                 return;
+            }
+
+            // 프로필 미완성 사용자는 프로필 설정 패널 표시 (이미 진행 중이 아닐 때)
+            if (!pendingProfileUser) {
+                try {
+                    const complete = await isProfileComplete(user.uid);
+                    if (!complete) {
+                        showProfileSetup(user);
+                    }
+                } catch (e) {
+                    console.error('Profile check failed:', e);
+                }
             }
 
             signInBtn.style.display = 'none';
@@ -518,6 +536,14 @@ function getAuthErrorMessage(code) {
         'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
     };
     return messages[code] || '로그인 중 오류가 발생했습니다.';
+}
+
+export function openAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        clearModalError();
+    }
 }
 
 // 캔버스를 Blob으로 변환 (Promise)
