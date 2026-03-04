@@ -43,13 +43,120 @@
       <div class="section-title">
         <h2 class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</h2>
       </div>
-      <div style="font-size:0.85rem;line-height:1.8;margin-top:1rem;">
-        <p class="i18n"
-           data-ko="이용안내 내용이 곧 업데이트될 예정입니다."
-           data-en="Guide content will be updated soon."
-           data-ja="ご利用案内は近日中に更新される予定です。">
-          이용안내 내용이 곧 업데이트될 예정입니다.
-        </p>
+      <div style="font-size:0.88rem;line-height:1.9;margin-top:1rem;max-width:780px;">
+
+        <!-- 1. 도안 생성기 -->
+        <section style="margin-bottom:2.25rem;">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.65rem;padding-bottom:0.4rem;border-bottom:1.5px solid var(--border-color);">1. AI 도안 생성기 사용 방법</h3>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">SSUESSUE KNITS의 핵심 기능입니다. 원하는 이미지를 업로드하면 AI가 뜨개질 도안으로 변환해 드립니다. 아래 단계를 따라 나만의 도안을 만들어보세요.</p>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">STEP 1 — 이미지 업로드</p>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">홈 화면에서 이미지 영역을 클릭하거나, 이미지 파일을 드래그&드롭하여 업로드하세요. JPG, PNG 등 일반적인 이미지 형식을 지원합니다. 단색 배경보다 윤곽이 뚜렷한 이미지일수록 더 깔끔한 도안이 만들어집니다.</p>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">STEP 2 — 설정값 조절</p>
+          <ul style="margin:0 0 0.75rem;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.4rem;"><strong>가로 길이(cm)</strong> — 완성될 작품의 가로 너비를 입력합니다. 이 값에 따라 코 수와 단 수가 자동으로 계산됩니다.</li>
+            <li style="margin-bottom:0.4rem;"><strong>실 종류</strong> — 코바늘·대바늘 실의 호수(mm) 또는 실 굵기(극세~극태)를 선택합니다. 게이지 계산에 사용됩니다.</li>
+            <li style="margin-bottom:0.4rem;"><strong>색상 수</strong> — 도안에 사용할 색상의 수를 설정합니다. 적을수록 심플한 도안, 많을수록 사진에 가까운 도안이 만들어집니다. 3~10색 사이를 권장합니다.</li>
+            <li style="margin-bottom:0.4rem;"><strong>그리드 표시</strong> — 도안에 격자 선을 표시할지 선택합니다.</li>
+            <li style="margin-bottom:0;"><strong>기법 비율</strong> — 색상 전환 빈도를 조절합니다. 1에 가까울수록 같은 색이 연속으로 이어지는 단순한 패턴, 0에 가까울수록 픽셀 아트처럼 세밀한 패턴이 만들어집니다.</li>
+          </ul>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">STEP 3 — 도안 생성</p>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">'도안 생성' 버튼을 클릭하면 AI가 도안을 만들어줍니다. 마음에 들지 않으면 설정값을 바꾸거나 같은 설정으로 다시 생성해 보세요. 하단의 생성 히스토리에서 이전에 만든 도안으로 돌아갈 수 있습니다.</p>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">STEP 4 — 도안 다운로드</p>
+          <ul style="margin:0;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.4rem;"><strong>PDF 저장</strong> — 도안 이미지와 색상 범례(Color Legend)가 포함된 PDF 파일을 저장합니다. 저장 시 파일 이름을 직접 입력할 수 있습니다.</li>
+            <li style="margin-bottom:0;"><strong>PNG 저장</strong> — 도안 이미지만 PNG 파일로 저장합니다.</li>
+          </ul>
+        </section>
+
+        <!-- 2. 도안 저장 -->
+        <section style="margin-bottom:2.25rem;">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.65rem;padding-bottom:0.4rem;border-bottom:1.5px solid var(--border-color);">2. 내 도안에 저장하기</h3>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">로그인한 회원이라면 생성한 도안을 내 도안 보관함에 저장할 수 있습니다. 저장한 도안은 마이페이지에서 언제든지 꺼내볼 수 있고, PDF/PNG로 다시 다운로드할 수 있습니다.</p>
+          <ol style="margin:0;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.5rem;">도안을 생성한 후 '내 도안에 저장' 버튼을 클릭합니다.</li>
+            <li style="margin-bottom:0.5rem;">저장 창이 열리면 <strong>도안 이름</strong>을 입력합니다(필수, 최대 50자).</li>
+            <li style="margin-bottom:0.5rem;"><strong>공개 여부</strong>를 설정합니다. 공개로 설정하면 내 프로필에서 다른 사용자도 볼 수 있습니다.</li>
+            <li style="margin-bottom:0;">'저장' 버튼을 누르면 마이페이지 > 내 도안에 자동으로 저장됩니다.</li>
+          </ol>
+        </section>
+
+        <!-- 3. 커뮤니티 -->
+        <section style="margin-bottom:2.25rem;">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.65rem;padding-bottom:0.4rem;border-bottom:1.5px solid var(--border-color);">3. 커뮤니티 이용 방법</h3>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">커뮤니티에서 완성 작품, 도안, 뜨개질 팁 등을 공유하고 다른 뜨개인들과 소통해보세요. 커뮤니티 기능은 로그인 후 이용할 수 있습니다.</p>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">글 작성하기</p>
+          <ol style="margin:0 0 0.9rem;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.4rem;">커뮤니티 페이지 우측 하단의 '글쓰기' 버튼을 클릭합니다.</li>
+            <li style="margin-bottom:0.4rem;">제목과 내용을 입력합니다.</li>
+            <li style="margin-bottom:0.4rem;">이미지를 최대 4장까지 첨부할 수 있습니다(각 5MB 이하 권장).</li>
+            <li style="margin-bottom:0.4rem;">내 도안 보관함에 저장된 도안이 있다면 게시글에 연결할 수 있습니다. 연결된 도안은 게시글 상세 페이지에서 PDF/PNG로 바로 다운로드할 수 있습니다.</li>
+            <li style="margin-bottom:0.4rem;">태그를 선택하면 커뮤니티 피드에서 해당 태그로 필터링됩니다.</li>
+            <li style="margin-bottom:0;">공개 여부를 설정한 후 '게시' 버튼을 누릅니다. 비공개 게시글은 본인만 볼 수 있습니다.</li>
+          </ol>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">좋아요 · 스크랩</p>
+          <ul style="margin:0 0 0.9rem;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.4rem;">게시글 하단의 하트(♥) 버튼으로 좋아요를 누를 수 있습니다. 다시 누르면 취소됩니다.</li>
+            <li style="margin-bottom:0;">북마크(🔖) 버튼으로 마음에 드는 게시글을 스크랩할 수 있습니다. 스크랩한 게시글은 마이페이지 > 스크랩 탭에서 모아볼 수 있습니다.</li>
+          </ul>
+
+          <p style="margin:0 0 0.4rem;font-weight:700;">댓글 작성 · 삭제</p>
+          <ul style="margin:0;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.4rem;">게시글 하단의 댓글 입력창에 내용을 입력하고 '댓글 등록' 버튼을 누릅니다.</li>
+            <li style="margin-bottom:0;">내가 작성한 댓글에는 '삭제' 버튼이 표시됩니다.</li>
+          </ul>
+        </section>
+
+        <!-- 4. 마이페이지 -->
+        <section style="margin-bottom:2.25rem;">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.65rem;padding-bottom:0.4rem;border-bottom:1.5px solid var(--border-color);">4. 마이페이지 이용 방법</h3>
+          <p style="margin:0 0 0.75rem;color:var(--secondary-color);">마이페이지는 프로필 수정, 내 도안 관리, 내 게시글 관리, 스크랩 보관함으로 구성되어 있습니다.</p>
+          <ul style="margin:0;padding-left:1.4rem;color:var(--secondary-color);">
+            <li style="margin-bottom:0.5rem;"><strong>프로필 수정</strong> — 닉네임, 실명(선택), 프로필 사진을 변경할 수 있습니다. 닉네임은 커뮤니티에서 공개됩니다.</li>
+            <li style="margin-bottom:0.5rem;"><strong>내 도안</strong> — 저장한 도안 목록을 확인합니다. 각 도안 카드에서 PDF·PNG 다운로드, 이름 변경, 공개 여부 변경, 삭제가 가능합니다.</li>
+            <li style="margin-bottom:0.5rem;"><strong>내 글</strong> — 내가 커뮤니티에 작성한 게시글 목록입니다. 클릭하면 게시글 상세 페이지로 이동하며, 수정·삭제는 게시글 상세 페이지에서 할 수 있습니다.</li>
+            <li style="margin-bottom:0;"><strong>스크랩</strong> — 스크랩한 게시글 목록을 모아볼 수 있습니다. 스크랩을 취소하려면 해당 게시글 상세 페이지에서 북마크 버튼을 다시 누르세요.</li>
+          </ul>
+        </section>
+
+        <!-- 5. FAQ -->
+        <section style="margin-bottom:0;">
+          <h3 style="font-size:1rem;font-weight:800;margin:0 0 0.65rem;padding-bottom:0.4rem;border-bottom:1.5px solid var(--border-color);">5. 자주 묻는 질문 (FAQ)</h3>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:1rem 1.25rem;">
+              <p style="margin:0 0 0.4rem;font-weight:700;">Q. 회원 가입 없이 도안을 만들 수 있나요?</p>
+              <p style="margin:0;color:var(--secondary-color);">A. 네, 도안 생성 기능은 로그인 없이도 이용할 수 있습니다. 단, 도안 저장·커뮤니티·마이페이지 등의 기능은 로그인 후 이용 가능합니다.</p>
+            </div>
+
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:1rem 1.25rem;">
+              <p style="margin:0 0 0.4rem;font-weight:700;">Q. 인증 메일이 오지 않아요.</p>
+              <p style="margin:0;color:var(--secondary-color);">A. 스팸 메일함을 먼저 확인해 주세요. 네이버·카카오·다음 등 국내 메일 서비스는 발신 서버 차단으로 수신이 안 될 수 있습니다. Gmail 주소로 가입하시면 안정적으로 수신하실 수 있습니다. 로그인 화면에서 '메일 다시 보내기' 버튼을 눌러 재발송할 수도 있습니다.</p>
+            </div>
+
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:1rem 1.25rem;">
+              <p style="margin:0 0 0.4rem;font-weight:700;">Q. PDF에 도안 이미지가 나오지 않아요.</p>
+              <p style="margin:0;color:var(--secondary-color);">A. 최신 업데이트 이후 저장된 도안은 PDF 다운로드 시 이미지가 정상적으로 포함됩니다. 만약 이전에 저장한 도안에서 문제가 발생한다면, 도안을 다시 생성하여 새로 저장해 주세요.</p>
+            </div>
+
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:1rem 1.25rem;">
+              <p style="margin:0 0 0.4rem;font-weight:700;">Q. 생성된 도안을 상업적으로 이용해도 되나요?</p>
+              <p style="margin:0;color:var(--secondary-color);">A. AI가 생성한 결과물의 저작권 귀속은 현행 법령에 따르며, 운영자는 이에 대한 별도의 보증을 하지 않습니다. 상업적 이용 전에 관련 법률 전문가와 상담하시기 바랍니다.</p>
+            </div>
+
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:1rem 1.25rem;">
+              <p style="margin:0 0 0.4rem;font-weight:700;">Q. 서비스 이용 중 불편한 점이나 건의사항이 있어요.</p>
+              <p style="margin:0;color:var(--secondary-color);">A. <a href="/about.html" style="color:var(--primary-color);text-decoration:underline;">소개 페이지</a>의 문의 양식 또는 이메일(yewon61137@gmail.com)로 연락 주시면 빠르게 답변해 드리겠습니다.</p>
+            </div>
+
+          </div>
+        </section>
+
       </div>
     </section>
   </main>
