@@ -368,13 +368,13 @@ function buildPatternCard(uid, patternId, data) {
             <button class="rename-btn">${tr('rename')}</button>
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
             <button class="pdf-btn">PDF</button>
-            <a href="${data.patternImageURL}" target="_blank" rel="noopener" class="png-download-btn">PNG</a>
+            <button class="png-download-btn">PNG</button>
             <button class="delete-btn">${tr('delete')}</button>
           </div>` : `
           <div class="pattern-card-actions">
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
             <button class="pdf-btn">PDF</button>
-            <a href="${data.patternImageURL}" target="_blank" rel="noopener" class="png-download-btn">PNG</a>
+            <button class="png-download-btn">PNG</button>
           </div>`;
 
     card.innerHTML = `
@@ -392,17 +392,48 @@ function buildPatternCard(uid, patternId, data) {
 
     card.querySelector('.pattern-card-thumb').addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
 
+    // 파일 다운로드 공통 헬퍼 (fetch→blob URL → 직접 저장)
+    // TODO: Google AdSense 승인 후 이 함수 호출 전 광고 모달 표시 로직 추가
+    async function downloadBlob(url, filename) {
+        try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        } catch (e) {
+            window.open(url, '_blank');
+        }
+    }
+
     // PDF 다운로드 (본인/타인 모두)
-    card.querySelector('.pdf-btn').addEventListener('click', () => {
+    // fetch로 blob URL 생성 → canvas taint 없이 이미지 삽입 가능
+    card.querySelector('.pdf-btn').addEventListener('click', async () => {
         if (typeof window.jspdf === 'undefined') {
             alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
             return;
         }
         const { jsPDF } = window.jspdf;
+        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+
+        // fetch로 blob URL 획득 → same-origin 취급되어 canvas taint 없음
+        let imgSrc = data.patternImageURL;
+        let blobUrl = null;
+        try {
+            const res = await fetch(data.patternImageURL);
+            const blob = await res.blob();
+            blobUrl = URL.createObjectURL(blob);
+            imgSrc = blobUrl;
+        } catch (e) { /* fetch 실패 시 원본 URL 사용 (taint fallback) */ }
+
         const img = new Image();
-        // crossOrigin 미설정: Firebase Storage CORS 설정 없이도 이미지 로드 가능
-        // canvas.toDataURL()이 SecurityError를 던지면 텍스트 전용 PDF 생성
         img.onload = () => {
+            const cleanup = () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const pdfW = pdf.internal.pageSize.getWidth();
             const pdfH = pdf.internal.pageSize.getHeight();
@@ -430,7 +461,6 @@ function buildPatternCard(uid, patternId, data) {
                 const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
                 pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
             } catch (e) {
-                // Canvas tainted (CORS) — 이미지 미삽입, 안내 텍스트 추가
                 pdf.setTextColor(120, 120, 120);
                 pdf.text('* 도안 이미지는 PNG 버튼으로 별도 저장해주세요.', margin, margin + 25);
                 pdf.setTextColor(0, 0, 0);
@@ -455,11 +485,20 @@ function buildPatternCard(uid, patternId, data) {
                     }
                 });
             }
-            const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
             pdf.save(`${safeName}.pdf`);
+            cleanup();
         };
-        img.onerror = () => alert('이미지를 불러오지 못했습니다.');
-        img.src = data.patternImageURL;
+        img.onerror = () => {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+            alert('이미지를 불러오지 못했습니다.');
+        };
+        img.src = imgSrc;
+    });
+
+    // PNG 직접 저장
+    card.querySelector('.png-download-btn').addEventListener('click', () => {
+        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+        downloadBlob(data.patternImageURL, `${safeName}.png`);
     });
 
     if (isMine) {

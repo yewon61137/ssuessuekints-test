@@ -306,8 +306,27 @@ async function loadLinkedPattern(uid, patternId) {
     }
 }
 
-// PDF 다운로드 (연결 도안)
-document.getElementById('postLinkedPdfBtn').addEventListener('click', () => {
+// 파일 다운로드 공통 헬퍼
+// TODO: Google AdSense 승인 후 이 함수 호출 전 광고 모달 표시 로직 추가
+async function downloadBlob(url, filename) {
+    try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (e) {
+        window.open(url, '_blank');
+    }
+}
+
+// PDF 다운로드 (연결 도안) — fetch로 blob URL 생성 → canvas taint 없음
+document.getElementById('postLinkedPdfBtn').addEventListener('click', async () => {
     const data = linkedPatternData;
     if (!data) return;
     if (typeof window.jspdf === 'undefined') {
@@ -317,8 +336,20 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
     const imgUrl = data.patternImageURL || postData?.patternImageURL;
     if (!imgUrl) return;
+    const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+
+    let imgSrc = imgUrl;
+    let blobUrl = null;
+    try {
+        const res = await fetch(imgUrl);
+        const blob = await res.blob();
+        blobUrl = URL.createObjectURL(blob);
+        imgSrc = blobUrl;
+    } catch (e) { /* fetch 실패 시 원본 URL 사용 */ }
+
     const img = new Image();
     img.onload = () => {
+        const cleanup = () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
         const pdfW = pdf.internal.pageSize.getWidth();
         const pdfH = pdf.internal.pageSize.getHeight();
@@ -370,11 +401,24 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', () => {
                 }
             });
         }
-        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
         pdf.save(`${safeName}.pdf`);
+        cleanup();
     };
-    img.onerror = () => alert('이미지를 불러오지 못했습니다.');
-    img.src = imgUrl;
+    img.onerror = () => {
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+        alert('이미지를 불러오지 못했습니다.');
+    };
+    img.src = imgSrc;
+});
+
+// PNG 직접 저장 (연결 도안)
+document.getElementById('postLinkedPngBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const url = linkedPatternData?.patternImageURL || postData?.patternImageURL;
+    if (!url) return;
+    const safeName = (linkedPatternData?.title || linkedPatternData?.name || postData?.title || 'pattern')
+        .replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+    downloadBlob(url, `${safeName}.png`);
 });
 
 // --- 게시글 삭제 ---
