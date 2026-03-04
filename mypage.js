@@ -18,7 +18,7 @@ const t = {
         rename: '이름변경', view_original: '원본', delete: '삭제',
         confirm_delete: '이 도안을 삭제하시겠습니까?', rename_prompt: '새 도안 이름을 입력하세요:',
         stitches: '코', rows: '단', btn_signin: '로그인', btn_signout: '로그아웃',
-        btn_mypage: '내 도안', btn_community: '커뮤니티',
+        btn_mypage: '마이페이지', btn_community: '커뮤니티',
         tab_signin: '로그인', tab_signup: '회원가입', btn_google: 'Google로 계속하기',
         btn_signup: '회원가입', or_divider: '또는', go_generate: '← 도안 만들기',
         footer_generate: '도안 만들기', footer_mypage: '내 도안',
@@ -29,6 +29,9 @@ const t = {
         nickname_ok: '사용 가능한 닉네임입니다.', nickname_taken: '이미 사용 중인 닉네임입니다.',
         nickname_invalid: '닉네임은 2~20자의 한글·영문·숫자·_만 사용할 수 있습니다.',
         profile_edit_error: '저장 중 오류가 발생했습니다.',
+        photo_change: '사진 변경',
+        placeholder_nickname: '닉네임 (2~20자, 필수)',
+        placeholder_realname: '실명 (선택)',
         mypatterns_title: '내 도안',
     },
     en: {
@@ -39,7 +42,7 @@ const t = {
         rename: 'Rename', view_original: 'Original', delete: 'Delete',
         confirm_delete: 'Delete this pattern?', rename_prompt: 'Enter new pattern name:',
         stitches: 'sts', rows: 'rows', btn_signin: 'Sign In', btn_signout: 'Sign Out',
-        btn_mypage: 'My Patterns', btn_community: 'Community',
+        btn_mypage: 'My Page', btn_community: 'Community',
         tab_signin: 'Sign In', tab_signup: 'Sign Up', btn_google: 'Continue with Google',
         btn_signup: 'Sign Up', or_divider: 'or', go_generate: '← Create Pattern',
         footer_generate: 'Create Pattern', footer_mypage: 'My Patterns',
@@ -50,6 +53,9 @@ const t = {
         nickname_ok: 'Available.', nickname_taken: 'Already in use.',
         nickname_invalid: '2-20 chars: letters, numbers, _',
         profile_edit_error: 'Error saving profile.',
+        photo_change: 'Change Photo',
+        placeholder_nickname: 'Nickname (2-20 chars, required)',
+        placeholder_realname: 'Real name (optional)',
         mypatterns_title: 'My Patterns',
     },
     ja: {
@@ -60,7 +66,7 @@ const t = {
         rename: '名前変更', view_original: '原画', delete: '削除',
         confirm_delete: 'この編み図を削除しますか？', rename_prompt: '新しい名前を入力してください:',
         stitches: '目', rows: '段', btn_signin: 'ログイン', btn_signout: 'ログアウト',
-        btn_mypage: 'マイ編み図', btn_community: 'コミュニティ',
+        btn_mypage: 'マイページ', btn_community: 'コミュニティ',
         tab_signin: 'ログイン', tab_signup: '新規登録', btn_google: 'Googleで続ける',
         btn_signup: '新規登録', or_divider: 'または', go_generate: '← 編み図を作る',
         footer_generate: '編み図を作る', footer_mypage: 'マイ編み図',
@@ -71,6 +77,9 @@ const t = {
         nickname_ok: '使用可能です。', nickname_taken: '既に使用されています。',
         nickname_invalid: '2〜20文字（ひらがな・英数字・_）',
         profile_edit_error: '保存中にエラーが発生しました。',
+        photo_change: '写真変更',
+        placeholder_nickname: 'ニックネーム（2〜20文字、必須）',
+        placeholder_realname: '本名（任意）',
         mypatterns_title: 'マイ編み図',
     }
 };
@@ -113,6 +122,12 @@ function applyLang(lang) {
         const key = 'tab_' + tab;
         if (t[lang] && t[lang][key]) btn.textContent = t[lang][key];
     });
+
+    // 프로필 편집 패널 — placeholder & label 번역
+    const editNicknameEl = document.getElementById('editNickname');
+    if (editNicknameEl) editNicknameEl.placeholder = tr('placeholder_nickname');
+    const editRealNameEl = document.getElementById('editRealName');
+    if (editRealNameEl) editRealNameEl.placeholder = tr('placeholder_realname');
 }
 
 langBtns.forEach(btn => {
@@ -139,11 +154,13 @@ function switchTab(tabName) {
     if (panel) panel.classList.add('active');
 
     if (!currentUid) return;
-    if (!tabLoaded[tabName]) {
+    // myposts는 항상 최신 목록을 보여주기 위해 매번 재로드
+    if (tabName === 'myposts') {
+        loadMyPosts(currentUid);
+    } else if (!tabLoaded[tabName]) {
         tabLoaded[tabName] = true;
         if (tabName === 'profile') loadProfilePanel(currentUid);
         else if (tabName === 'mypatterns') loadPatterns(currentUid);
-        else if (tabName === 'myposts') loadMyPosts(currentUid);
         else if (tabName === 'scraps') loadScraps(currentUid);
     }
 }
@@ -375,19 +392,27 @@ async function loadMyPosts(uid) {
     gridEl.innerHTML = '';
 
     try {
+        // orderBy 없이 uid 필터만 사용 (복합 인덱스 불필요), 클라이언트 정렬
         const q = query(
             collection(db, 'posts'),
             where('uid', '==', uid),
-            orderBy('createdAt', 'desc'),
             limit(50)
         );
         const snap = await getDocs(q);
         loadingEl.style.display = 'none';
         if (snap.empty) { emptyEl.style.display = 'block'; return; }
-        snap.forEach(docSnap => gridEl.appendChild(buildPostCard(docSnap.id, docSnap.data())));
+        // 최신순 정렬
+        const docs = snap.docs.sort((a, b) => {
+            const at = a.data().createdAt?.seconds || 0;
+            const bt = b.data().createdAt?.seconds || 0;
+            return bt - at;
+        });
+        docs.forEach(docSnap => gridEl.appendChild(buildPostCard(docSnap.id, docSnap.data())));
     } catch (e) {
         console.error('Failed to load posts:', e);
-        loadingEl.textContent = '불러오기 실패.';
+        loadingEl.style.display = 'none';
+        emptyEl.textContent = '불러오기 실패. 잠시 후 다시 시도해주세요.';
+        emptyEl.style.display = 'block';
     }
 }
 

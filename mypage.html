@@ -13,7 +13,7 @@
       <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
       <div class="auth-user" id="authUserArea" style="display:none;">
         <span class="auth-email" id="authUserEmail"></span>
-        <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">내 도안</a>
+        <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
         <a href="/community.html" class="lang-btn" data-i18n="btn_community">커뮤니티</a>
         <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
       </div>
@@ -53,7 +53,7 @@
           <div class="profile-edit-avatar-row">
             <div class="profile-edit-avatar" id="editAvatarPreview"></div>
             <div>
-              <label for="editPhotoInput" class="secondary-btn small-btn">사진 변경</label>
+              <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel" data-i18n="photo_change">사진 변경</label>
               <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
             </div>
           </div>
@@ -61,15 +61,15 @@
             <div class="profile-edit-row">
               <div class="nickname-input-group">
                 <div class="nickname-input-row">
-                  <input type="text" id="editNickname" placeholder="닉네임 (2~20자, 필수)" maxlength="20" required autocomplete="off">
-                  <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn">중복 확인</button>
+                  <input type="text" id="editNickname" maxlength="20" required autocomplete="off">
+                  <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn" data-i18n="nickname_check">중복 확인</button>
                 </div>
                 <div id="editNicknameStatus" class="nickname-status" style="display:none;"></div>
               </div>
             </div>
-            <input type="text" id="editRealName" placeholder="실명 (선택)" maxlength="50" autocomplete="name">
+            <input type="text" id="editRealName" maxlength="50" autocomplete="name">
             <div id="profileEditMsg" class="nickname-status" style="display:none;"></div>
-            <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn">저장</button>
+            <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn" data-i18n="profile_save">저장</button>
           </form>
         </div>
       </div>

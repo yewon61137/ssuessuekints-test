@@ -30,6 +30,7 @@ const clearSeedsBtn = document.getElementById('clearSeedsBtn');
 const showGridCheckbox = document.getElementById('showGrid');
 const generateBtn = document.getElementById('generateBtn');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+const saveToCloudBtn = document.getElementById('saveToCloudBtn');
 const statusMessage = document.getElementById('statusMessage');
 const resultPanel = document.getElementById('resultPanel');
 const patternInfo = document.getElementById('patternInfo');
@@ -70,6 +71,10 @@ const translations = {
         regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
         btn_generate: "도안 생성하기",
         btn_download: "PDF 다운로드",
+        btn_save_cloud: "내 도안에 저장",
+        btn_save_cloud_done: "저장 완료 ✓",
+        btn_save_cloud_saving: "저장 중...",
+        save_login_required: "로그인 후 저장할 수 있습니다.",
         btn_select_file: "파일 선택",
         no_file_selected: "선택된 파일 없음",
         result_title: "4. 생성된 도안",
@@ -92,7 +97,7 @@ const translations = {
         status_saved: "도안이 저장되었습니다.",
         btn_signin: "로그인",
         btn_signout: "로그아웃",
-        btn_mypage: "내 도안",
+        btn_mypage: "마이페이지",
         btn_community: "커뮤니티",
         tab_signin: "로그인",
         tab_signup: "회원가입",
@@ -126,6 +131,10 @@ const translations = {
         regen_hint: "💡 Re-generate to get slightly different color combinations.",
         btn_generate: "Generate Pattern",
         btn_download: "Download PDF",
+        btn_save_cloud: "Save to My Patterns",
+        btn_save_cloud_done: "Saved ✓",
+        btn_save_cloud_saving: "Saving...",
+        save_login_required: "Sign in to save.",
         btn_select_file: "Choose File",
         no_file_selected: "No file chosen",
         result_title: "4. Generated Pattern",
@@ -148,7 +157,7 @@ const translations = {
         status_saved: "Pattern saved to your account.",
         btn_signin: "Sign In",
         btn_signout: "Sign Out",
-        btn_mypage: "My Patterns",
+        btn_mypage: "My Page",
         btn_community: "Community",
         tab_signin: "Sign In",
         tab_signup: "Sign Up",
@@ -182,6 +191,10 @@ const translations = {
         regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
         btn_generate: "編み図を生成",
         btn_download: "PDFをダウンロード",
+        btn_save_cloud: "マイ編み図に保存",
+        btn_save_cloud_done: "保存完了 ✓",
+        btn_save_cloud_saving: "保存中...",
+        save_login_required: "ログインして保存してください。",
         btn_select_file: "ファイルを選択",
         no_file_selected: "選択されたファイルはありません",
         result_title: "4. 生成された編み図",
@@ -204,7 +217,7 @@ const translations = {
         status_saved: "編み図が保存されました。",
         btn_signin: "ログイン",
         btn_signout: "ログアウト",
-        btn_mypage: "マイ編み図",
+        btn_mypage: "マイページ",
         btn_community: "コミュニティ",
         tab_signin: "ログイン",
         tab_signup: "新規登録",
@@ -583,24 +596,9 @@ generateBtn.addEventListener('click', async () => {
             
             showStatus('status_done', false);
             downloadPdfBtn.disabled = false;
+            saveToCloudBtn.disabled = false;
+            saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '내 도안에 저장';
             saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
-
-            // 로그인한 경우 클라우드에 저장 (non-blocking)
-            const currentUser = getCurrentUser();
-            if (currentUser) {
-                const settings = {
-                    widthCm,
-                    yarnType: isMmMode ? null : yarnType,
-                    yarnMm: isMmMode ? yarnMm : null,
-                    colorCount,
-                    showGrid,
-                    techniqueRatio
-                };
-                savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML,
-                    patternInfo.textContent, settings)
-                    .then(() => showStatus('status_saved', false))
-                    .catch(e => console.error('Cloud save failed:', e));
-            }
 
             resultPanel.scrollIntoView({ behavior: 'smooth' });
             
@@ -736,6 +734,46 @@ downloadPdfBtn.addEventListener('click', () => {
         });
         pdf.save('knitting_pattern.pdf');
     } catch (e) {
+        showStatus('status_error', true);
+    }
+});
+
+saveToCloudBtn.addEventListener('click', async () => {
+    const user = getCurrentUser();
+    if (!user) {
+        showStatus('save_login_required', true);
+        return;
+    }
+    const tr = translations[currentLang];
+    saveToCloudBtn.disabled = true;
+    saveToCloudBtn.textContent = tr.btn_save_cloud_saving;
+
+    // 저장 시 필요한 설정값 수집
+    const isMmMode = document.querySelector('input[name="yarnUnit"]:checked')?.value === 'mm';
+    const yarnType = yarnWeightSelect.value;
+    const yarnMm = parseFloat(yarnMmInput.value) || null;
+    const colorCount = parseInt(colorCountInput.value) || 15;
+    const showGrid = showGridCheckbox.checked;
+    const techniqueRatio = parseFloat(techniqueRatioSelect.value) || 1;
+    const widthCm = parseFloat(targetWidthInput.value) || 50;
+
+    const settings = {
+        widthCm,
+        yarnType: isMmMode ? null : yarnType,
+        yarnMm: isMmMode ? yarnMm : null,
+        colorCount,
+        showGrid,
+        techniqueRatio
+    };
+
+    try {
+        await savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML, patternInfo.textContent, settings);
+        saveToCloudBtn.textContent = tr.btn_save_cloud_done;
+        saveToCloudBtn.disabled = true; // 중복 저장 방지
+    } catch (e) {
+        console.error('Cloud save failed:', e);
+        saveToCloudBtn.disabled = false;
+        saveToCloudBtn.textContent = tr.btn_save_cloud;
         showStatus('status_error', true);
     }
 });
