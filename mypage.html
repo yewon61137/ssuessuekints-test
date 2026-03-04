@@ -95,6 +95,32 @@
         </form>
       </div>
 
+      <!-- 프로필 설정 패널 (회원가입/첫 로그인 후 표시) -->
+      <div id="profileSetupPanel" style="display:none;">
+        <div class="profile-setup-header">
+          <p class="profile-setup-title">프로필 설정</p>
+          <p class="profile-setup-desc">커뮤니티에서 사용할 닉네임을 설정해주세요.</p>
+        </div>
+        <form id="profileSetupForm" class="auth-form">
+          <div class="profile-photo-upload-area">
+            <div class="profile-photo-preview" id="profilePhotoPreview">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <label for="profilePhotoInput" class="secondary-btn small-btn">사진 선택 (선택)</label>
+            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
+          </div>
+          <div class="nickname-input-group">
+            <div class="nickname-input-row">
+              <input type="text" id="profileNickname" placeholder="닉네임 (2~20자, 필수)" maxlength="20" required autocomplete="off">
+              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 확인</button>
+            </div>
+            <div id="nicknameStatus" class="nickname-status" style="display:none;"></div>
+          </div>
+          <input type="text" id="profileRealName" placeholder="실명 (선택)" maxlength="50" autocomplete="name">
+          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>완료</button>
+        </form>
+      </div>
+
       <div id="authModalError" class="auth-error" style="display:none;"></div>
     </div>
   </div>

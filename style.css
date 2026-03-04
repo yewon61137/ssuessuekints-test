@@ -735,6 +735,104 @@ canvas {
 }
 
 /* ==============================
+   Profile Setup Panel
+   ============================== */
+
+.profile-setup-header {
+  margin-bottom: 1.25rem;
+}
+
+.profile-setup-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.3rem;
+}
+
+.profile-setup-desc {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.profile-photo-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.profile-photo-preview {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  color: #aaa;
+}
+
+.nickname-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nickname-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nickname-input-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.nickname-status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.5rem;
+}
+
+.nickname-status.success {
+  color: #007700;
+  background: #f0fff0;
+  border: 1px solid #007700;
+}
+
+.nickname-status.error {
+  color: #cc0000;
+  background: #fff0f0;
+  border: 1px solid #cc0000;
+}
+
+@media (prefers-color-scheme: dark) {
+  .profile-photo-preview {
+    border-color: #fff;
+    color: #777;
+  }
+  .profile-setup-desc {
+    color: #aaa;
+  }
+  .nickname-status.success {
+    color: #66ff66;
+    background: #003300;
+    border-color: #66ff66;
+  }
+  .nickname-status.error {
+    color: #ff6666;
+    background: #2a1111;
+    border-color: #ff6666;
+  }
+}
+
+/* ==============================
    My Patterns Page
    ============================== */
 
