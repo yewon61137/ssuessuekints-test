@@ -129,7 +129,6 @@ function initAuthModal() {
     signInBtn.addEventListener('click', () => { modal.style.display = 'flex'; clearError(); });
     gotoSignInBtn.addEventListener('click', () => { modal.style.display = 'flex'; clearError(); });
     signOutBtn.addEventListener('click', () => signOut(auth));
-    modal.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; clearError(); } });
     document.getElementById('modalCloseBtn').addEventListener('click', () => { modal.style.display = 'none'; clearError(); });
     document.getElementById('tabSignIn').addEventListener('click', () => switchTab('signin'));
     document.getElementById('tabSignUp').addEventListener('click', () => switchTab('signup'));
