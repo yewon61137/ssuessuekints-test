@@ -386,10 +386,15 @@ export function initAuth() {
             }
 
             // 프로필 미완성 사용자는 프로필 설정 패널 표시 (이미 진행 중이 아닐 때)
+            let nickname = null;
             if (!pendingProfileUser) {
                 try {
-                    const complete = await isProfileComplete(user.uid);
-                    if (!complete) {
+                    const snap = await getDoc(doc(db, 'users', user.uid));
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        if (!data.profileCompleted) showProfileSetup(user);
+                        nickname = data.nickname || null;
+                    } else {
                         showProfileSetup(user);
                     }
                 } catch (e) {
@@ -399,7 +404,8 @@ export function initAuth() {
 
             signInBtn.style.display = 'none';
             userArea.style.display = 'flex';
-            userEmail.textContent = user.displayName || user.email || '';
+            // Firestore nickname 우선, 없으면 Auth displayName, 없으면 email
+            userEmail.textContent = nickname || user.displayName || user.email || '';
         } else {
             signInBtn.style.display = 'inline-block';
             userArea.style.display = 'none';
