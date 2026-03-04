@@ -21,7 +21,9 @@ import {
     serverTimestamp,
     doc,
     getDoc,
-    setDoc
+    setDoc,
+    deleteDoc,
+    updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {
     getStorage,
@@ -40,6 +42,55 @@ export const storage = getStorage(app);
 
 export function getCurrentUser() {
     return auth.currentUser;
+}
+
+// 사용자 프로필 조회
+export async function getUserProfile(uid) {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (!snap.exists()) return null;
+    return snap.data();
+}
+
+// 사용자 프로필 수정 (마이페이지 탭에서 호출)
+export async function updateUserProfile(uid, { nickname, currentNickname, realName, photoFile }) {
+    let profilePhotoURL = null;
+
+    // 기존 프로필 사진 URL 유지
+    const existing = await getUserProfile(uid);
+    profilePhotoURL = existing?.profilePhotoURL || null;
+
+    // 새 사진 업로드
+    if (photoFile) {
+        const photoRef = ref(storage, `users/${uid}/profile/avatar.jpg`);
+        await uploadBytes(photoRef, photoFile);
+        profilePhotoURL = await getDownloadURL(photoRef);
+    }
+
+    // 닉네임이 바뀐 경우 usernames 컬렉션 갱신
+    if (nickname !== currentNickname) {
+        // 새 닉네임 예약
+        await setDoc(doc(db, 'usernames', nickname), { uid });
+        // 기존 닉네임 해제
+        if (currentNickname) {
+            await deleteDoc(doc(db, 'usernames', currentNickname));
+        }
+    }
+
+    // Firestore users/{uid} 갱신
+    await updateDoc(doc(db, 'users', uid), {
+        nickname,
+        displayName: realName || null,
+        profilePhotoURL,
+        profileCompleted: true
+    });
+
+    // Firebase Auth displayName 업데이트
+    const user = auth.currentUser;
+    if (user) {
+        await updateProfile(user, { displayName: nickname, photoURL: profilePhotoURL || user.photoURL });
+    }
+
+    return profilePhotoURL;
 }
 
 // 닉네임 유효성 검사 (한글·영문·숫자·_ 2~20자)
