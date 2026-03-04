@@ -146,6 +146,13 @@ let currentUid = null;
 let isMine = true; // 본인 프로필 여부
 const tabLoaded = { profile: false, mypatterns: false, myposts: false, scraps: false };
 
+const panelIds = {
+    profile: 'panelProfile',
+    mypatterns: 'panelMyPatterns',
+    myposts: 'panelMyPosts',
+    scraps: 'panelScraps'
+};
+
 function switchTab(tabName) {
     currentTab = tabName;
     document.querySelectorAll('.mypage-tab').forEach(btn => {
@@ -154,7 +161,7 @@ function switchTab(tabName) {
     document.querySelectorAll('.mypage-panel').forEach(panel => {
         panel.classList.remove('active');
     });
-    const panel = document.getElementById('panel' + capitalize(tabName));
+    const panel = document.getElementById(panelIds[tabName]);
     if (panel) panel.classList.add('active');
 
     if (!currentUid) return;

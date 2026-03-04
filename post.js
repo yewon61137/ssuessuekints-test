@@ -115,6 +115,12 @@ function renderPost(pid, data) {
     document.getElementById('likeCount').textContent = data.likeCount || 0;
     document.getElementById('scrapCount').textContent = data.scrapCount || 0;
     document.getElementById('commentCountDisplay').textContent = data.commentCount || 0;
+
+    // 수정/삭제 버튼 (본인 글) — onAuthStateChanged보다 loadPost가 늦게 완료될 수 있으므로 여기서도 체크
+    if (currentUser && currentUser.uid === data.uid) {
+        document.getElementById('postEditBtn').style.display = 'inline-block';
+        document.getElementById('postDeleteBtn').style.display = 'inline-block';
+    }
 }
 
 // --- 좋아요/스크랩 상태 확인 ---
