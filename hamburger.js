@@ -1,5 +1,34 @@
 (function () {
   document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Globe language dropdown ── */
+    var langGlobeBtn = document.getElementById('langGlobeBtn');
+    var langDropdown = document.getElementById('langDropdown');
+
+    if (langGlobeBtn && langDropdown) {
+      langGlobeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        langDropdown.classList.toggle('open');
+      });
+
+      // Close when a language is selected
+      langDropdown.querySelectorAll('.lang-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          langDropdown.classList.remove('open');
+        });
+      });
+
+      // Close on outside click
+      document.addEventListener('click', function () {
+        langDropdown.classList.remove('open');
+      });
+
+      langDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    /* ── Hamburger menu ── */
     var hamburgerBtn = document.getElementById('hamburgerBtn');
     var mobileMenu = document.getElementById('mobileMenu');
     var mobileOverlay = document.getElementById('mobileOverlay');
@@ -31,7 +60,7 @@
       a.addEventListener('click', closeMenu);
     });
 
-    // Auth state sync
+    /* ── Auth state sync ── */
     var desktopSignInBtn = document.getElementById('authSignInBtn');
     var desktopUserArea = document.getElementById('authUserArea');
     var desktopUserEmail = document.getElementById('authUserEmail');
@@ -68,7 +97,7 @@
       });
     }
 
-    // i18n: watch html[lang] attribute
+    /* ── Mobile i18n sync ── */
     function applyMobileLang(lang) {
       document.querySelectorAll('.mobile-i18n').forEach(function (el) {
         var val = el.getAttribute('data-' + lang);

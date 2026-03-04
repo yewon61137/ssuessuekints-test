@@ -453,8 +453,56 @@ canvas {
   position: absolute;
   top: 1rem;
   left: 1rem;
+}
+
+.lang-globe-btn {
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1.5px solid #000;
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+  color: inherit;
+  line-height: 1;
+}
+
+.lang-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #fff;
+  border: 1.5px solid #000;
+  flex-direction: column;
+  min-width: 90px;
+  z-index: 600;
+}
+
+.lang-dropdown.open {
+  display: flex;
+}
+
+.lang-dropdown .lang-btn {
+  border: none;
+  border-bottom: 1px solid #eee;
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #fff;
+  cursor: pointer;
+  width: 100%;
+  color: #000;
+}
+
+.lang-dropdown .lang-btn:last-child {
+  border-bottom: none;
+}
+
+.lang-dropdown .lang-btn.active {
+  background: #000;
+  color: #fff;
 }
 
 .lang-btn {
@@ -712,6 +760,23 @@ canvas {
   }
   .hamburger-btn span {
     background: currentColor;
+  }
+  .lang-globe-btn {
+    border-color: #fff;
+    color: #e0e0e0;
+  }
+  .lang-dropdown {
+    background: #1e1e1e;
+    border-color: #fff;
+  }
+  .lang-dropdown .lang-btn {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-bottom-color: #333;
+  }
+  .lang-dropdown .lang-btn.active {
+    background: #fff;
+    color: #000;
   }
 }
 
