@@ -90,11 +90,13 @@ async function saveUserProfile(user, nickname, realName, photoFile) {
 let pendingProfileUser = null;
 let nicknameChecked = false;
 let nicknameAvailable = false;
+let verificationTimer = null;
 
 function showProfileSetup(user) {
     pendingProfileUser = user;
     nicknameChecked = false;
     nicknameAvailable = false;
+    stopVerificationCheck();
 
     const modal = document.getElementById('authModal');
     // 탭·Google 버튼·구분선 숨기기
@@ -156,9 +158,41 @@ function showVerificationSentUI(email) {
     panel.style.display = 'block';
     document.getElementById('sentEmailAddress').textContent = email;
     modal.style.display = 'flex';
+    
+    // 자동 인증 체크 시작
+    startVerificationCheck();
+}
+
+function startVerificationCheck() {
+    stopVerificationCheck();
+    const check = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        await user.reload();
+        if (auth.currentUser.emailVerified) {
+            stopVerificationCheck();
+            const complete = await isProfileComplete(auth.currentUser.uid);
+            if (!complete) {
+                showProfileSetup(auth.currentUser);
+            } else {
+                document.getElementById('authModal').style.display = 'none';
+                hideProfileSetupUI();
+            }
+        }
+    };
+    // 3초마다 체크 + 윈도우 포커스 시 체크
+    verificationTimer = setInterval(check, 3000);
+    window.addEventListener('focus', check);
+}
+
+function stopVerificationCheck() {
+    if (verificationTimer) clearInterval(verificationTimer);
+    verificationTimer = null;
+    // 이벤트 리스너는 단순화를 위해 여기서는 해제하지 않거나, 별도 관리 필요
 }
 
 function hideProfileSetupUI() {
+    stopVerificationCheck();
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = '';
     modal.querySelector('.google-btn').style.display = '';
@@ -288,8 +322,7 @@ export function initAuth() {
         if (user) {
             // 이메일 기반 가입 사용자인 경우 인증 여부 확인 (구글은 자동 인증됨)
             if (user.providerData.some(p => p.providerId === 'password') && !user.emailVerified) {
-                // 인증되지 않은 이메일 사용자는 로그아웃 처리 또는 제한
-                // 여기서는 UI만 로그아웃 상태로 유지하고 안내 메시지 표시 가능
+                // 인증되지 않은 이메일 사용자는 UI만 로그아웃 상태로 유지
                 signInBtn.style.display = 'inline-block';
                 userArea.style.display = 'none';
                 return;
@@ -313,6 +346,7 @@ export function initAuth() {
     // 로그아웃 버튼
     signOutBtn.addEventListener('click', () => {
         signOut(auth);
+        stopVerificationCheck();
     });
 
     // 모달 외부 클릭 → 닫지 않음 (X 버튼으로만 닫기)
@@ -361,7 +395,6 @@ export function initAuth() {
             if (!user.emailVerified) {
                 await sendEmailVerification(user);
                 showVerificationSentUI(user.email);
-                await signOut(auth); // 인증 전까지는 로그인 세션 유지 안함
                 return;
             }
 
@@ -395,7 +428,6 @@ export function initAuth() {
             // 이메일 인증 메일 발송
             await sendEmailVerification(user);
             showVerificationSentUI(user.email);
-            await signOut(auth); // 인증 전까지는 로그인 세션 유지 안함
             
         } catch (err) {
             showModalError(getAuthErrorMessage(err.code));
@@ -405,18 +437,42 @@ export function initAuth() {
     // 프로필 설정 패널 초기화
     initProfileSetupPanel();
     
-    // 이메일 인증 확인 패널의 버튼
+    // 이메일 인증 확인 패널의 버튼들
     const verifyDoneBtn = document.getElementById('verifyDoneBtn');
     if (verifyDoneBtn) {
-        verifyDoneBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            hideProfileSetupUI();
-            switchTab('signin');
+        verifyDoneBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (user) {
+                await user.reload();
+                if (user.emailVerified) {
+                    const complete = await isProfileComplete(user.uid);
+                    if (!complete) showProfileSetup(user);
+                    else { modal.style.display = 'none'; hideProfileSetupUI(); }
+                } else {
+                    showModalError('아직 인증이 완료되지 않았습니다. 메일함을 확인해주세요.');
+                }
+            }
+        });
+    }
+    
+    const resendEmailBtn = document.getElementById('resendEmailBtn');
+    if (resendEmailBtn) {
+        resendEmailBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await sendEmailVerification(user);
+                    alert('인증 메일을 다시 보냈습니다.');
+                } catch (e) {
+                    showModalError('메일 발송 실패: ' + e.message);
+                }
+            }
         });
     }
 }
 
 function switchTab(tab) {
+    stopVerificationCheck();
     const isSignIn = tab === 'signin';
     const signInTab = document.getElementById('tabSignIn');
     const signUpTab = document.getElementById('tabSignUp');
