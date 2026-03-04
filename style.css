@@ -449,10 +449,22 @@ canvas {
   white-space: nowrap;
 }
 
-.lang-selector {
+/* Header top bar (globe | nav/hamburger) */
+.header-bar {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.lang-selector {
+  position: relative;
 }
 
 .lang-globe-btn {
@@ -524,10 +536,6 @@ canvas {
   header {
     padding: 4rem 1rem 2.5rem;
   }
-  .lang-selector {
-    top: 0.75rem;
-    left: 0.75rem;
-  }
 }
 
 /* ==============================
@@ -535,9 +543,6 @@ canvas {
    ============================== */
 
 .auth-area {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   display: flex;
   gap: 0.4rem;
   align-items: center;
@@ -566,27 +571,12 @@ canvas {
   display: inline-block;
 }
 
-@media (max-width: 800px) {
-  .auth-area {
-    position: absolute;
-    top: 3rem;
-    right: 50%;
-    transform: translateX(50%);
-  }
-  header {
-    padding-top: 5.5rem;
-  }
-}
-
 /* ==============================
    Hamburger Menu
    ============================== */
 
 .hamburger-btn {
   display: none;
-  position: absolute;
-  top: 0.85rem;
-  right: 1rem;
   flex-direction: column;
   gap: 5px;
   cursor: pointer;

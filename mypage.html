@@ -9,7 +9,8 @@
 </head>
 <body>
   <header>
-    <div class="lang-selector">
+    <div class="header-bar">
+      <div class="lang-selector">
       <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       </button>
@@ -19,7 +20,7 @@
         <button class="lang-btn" data-lang="ja">日本語</button>
       </div>
     </div>
-    <div class="auth-area">
+      <div class="auth-area">
       <a href="/about.html" class="lang-btn" data-i18n="footer_about">소개</a>
       <a href="/community.html" class="lang-btn" data-i18n="btn_community">커뮤니티</a>
       <a href="/notice.html" class="lang-btn" data-i18n="btn_notice">공지사항</a>
@@ -30,10 +31,11 @@
         <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
       </div>
     </div>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
+    </div>
     <a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a>
     <div class="brand-kr">쓔쓔닛츠</div>
     <p class="tagline" id="mypageTitle">마이페이지</p>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
   </header>
 
   <main class="mypage-container">
