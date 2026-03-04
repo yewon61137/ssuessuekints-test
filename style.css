@@ -452,7 +452,7 @@ canvas {
 .lang-selector {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   display: flex;
   gap: 0.4rem;
 }
@@ -478,8 +478,7 @@ canvas {
   }
   .lang-selector {
     top: 0.75rem;
-    right: 50%;
-    transform: translateX(50%);
+    left: 0.75rem;
   }
 }
 
@@ -490,7 +489,7 @@ canvas {
 .auth-area {
   position: absolute;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   display: flex;
   gap: 0.4rem;
   align-items: center;
@@ -523,8 +522,8 @@ canvas {
   .auth-area {
     position: absolute;
     top: 3rem;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 50%;
+    transform: translateX(50%);
   }
   header {
     padding-top: 5.5rem;
@@ -1292,28 +1291,6 @@ canvas {
   }
 }
 
-/* Header right area (About link + lang selector) */
-.header-right {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.header-right .lang-selector {
-  position: static;
-  transform: none;
-}
-
-@media (max-width: 800px) {
-  .header-right {
-    top: 0.75rem;
-    right: 50%;
-    transform: translateX(50%);
-  }
-}
 
 /* Cookie Consent Banner */
 #cookieBanner {

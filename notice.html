@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공지사항 | SSUESSUE KNITS</title>
+  <meta name="description" content="SSUESSUE KNITS 공지사항 페이지입니다. 서비스 업데이트, 이용 안내 등 주요 공지를 확인하세요.">
+  <link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css">
+  <link href='/style.css' rel='stylesheet'>
+</head>
+<body>
+  <header>
+    <div class="lang-selector">
+      <button class="lang-btn active" data-lang="ko">KO</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="ja">JP</button>
+    </div>
+    <div class="auth-area">
+      <a href="/about.html" class="lang-btn i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+      <a href="/community.html" class="lang-btn i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
+      <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+    </div>
+    <a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a>
+    <div class="brand-kr">쓔쓔닛츠</div>
+  </header>
+
+  <main class="container">
+    <section class="step-section">
+      <div class="section-title">
+        <h2 class="i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</h2>
+      </div>
+
+      <div id="noticeList" style="display:flex;flex-direction:column;gap:1.5rem;margin-top:1rem;">
+        <!-- 공지 없음 메시지 -->
+        <p class="i18n" style="color:#888;font-size:0.85rem;"
+           data-ko="아직 등록된 공지사항이 없습니다."
+           data-en="No notices yet."
+           data-ja="まだお知らせはありません。">
+          아직 등록된 공지사항이 없습니다.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">SSUESSUE KNITS</span>
+      <nav class="footer-nav">
+        <a href="/about.html" class="i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+        <a href="/terms.html" class="i18n" data-ko="이용약관" data-en="Terms of Service" data-ja="利用規約">이용약관</a>
+        <a href="/privacy.html" class="i18n" data-ko="개인정보처리방침" data-en="Privacy Policy" data-ja="プライバシーポリシー">개인정보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
+    const pageTitles = {
+      ko: '공지사항',
+      en: 'Notice',
+      ja: 'お知らせ'
+    };
+    function applyLang(lang) {
+      localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang;
+      langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+      document.title = (pageTitles[lang] || pageTitles.ko) + ' | SSUESSUE KNITS';
+      document.querySelectorAll('.i18n').forEach(el => {
+        const val = el.getAttribute('data-' + lang);
+        if (val) el.textContent = val;
+      });
+    }
+    langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang && savedLang !== 'ko') applyLang(savedLang);
+  </script>
+  <script src="/cookie-consent.js"></script>
+</body>
+</html>

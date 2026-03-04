@@ -10,19 +10,21 @@
 </head>
 <body>
   <header>
-    <div class="auth-area">
-      <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
-      <div class="auth-user" id="authUserArea" style="display:none;">
-        <span class="auth-email" id="authUserEmail"></span>
-        <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
-        <a href="/community.html" class="lang-btn" data-i18n="btn_community">커뮤니티</a>
-        <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
-      </div>
-    </div>
     <div class="lang-selector">
       <button class="lang-btn active" data-lang="ko">KO</button>
       <button class="lang-btn" data-lang="en">EN</button>
       <button class="lang-btn" data-lang="ja">JP</button>
+    </div>
+    <div class="auth-area">
+      <a href="/about.html" class="lang-btn" data-i18n="footer_about">소개</a>
+      <a href="/community.html" class="lang-btn" data-i18n="btn_community">커뮤니티</a>
+      <a href="/notice.html" class="lang-btn" data-i18n="btn_notice">공지사항</a>
+      <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
+      <div class="auth-user" id="authUserArea" style="display:none;">
+        <span style="display:none;" id="authUserEmail"></span>
+        <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
+        <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
+      </div>
     </div>
     <a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a>
     <div class="brand-kr">쓔쓔닛츠</div>
@@ -55,11 +57,10 @@
     <div class="footer-inner">
       <span class="footer-brand">SSUESSUE KNITS</span>
       <nav class="footer-nav">
-        <a href="/" data-i18n="footer_generate">도안 만들기</a>
-        <a href="/mypage.html" data-i18n="footer_mypage">내 도안</a>
-        <a href="/community.html" data-i18n="footer_community">커뮤니티</a>
         <a href="/about.html" data-i18n="footer_about">소개</a>
+        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
         <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
+        <a href="/guide.html" data-i18n="footer_guide">이용안내</a>
       </nav>
     </div>
   </footer>
