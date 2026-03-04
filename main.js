@@ -732,7 +732,14 @@ downloadPdfBtn.addEventListener('click', () => {
                  if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 60; }
             }
         });
-        pdf.save('knitting_pattern.pdf');
+        const defaultName = (() => {
+            const nums = patternInfo.textContent.match(/\d+(\.\d+)?/g);
+            if (nums && nums.length >= 4) return `knitting_pattern_${nums[2]}cm`;
+            return 'knitting_pattern';
+        })();
+        const filename = window.prompt('저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
+        if (filename === null) return; // 취소
+        pdf.save(`${filename.trim() || defaultName}.pdf`);
     } catch (e) {
         showStatus('status_error', true);
     }
@@ -747,7 +754,6 @@ saveToCloudBtn.addEventListener('click', () => {
     }
     document.getElementById('patternSaveModal').style.display = 'flex';
     document.getElementById('patternTitleInput').value = '';
-    document.querySelectorAll('input[name="patternTag"]').forEach(cb => cb.checked = false);
     document.getElementById('patternIsPublic').checked = true;
     document.getElementById('patternSaveError').style.display = 'none';
     document.getElementById('patternSaveModalSubmit').disabled = false;
@@ -769,7 +775,6 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
 
     const title = document.getElementById('patternTitleInput').value.trim();
     if (!title) return;
-    const tags = Array.from(document.querySelectorAll('input[name="patternTag"]:checked')).map(cb => cb.value);
     const isPublic = document.getElementById('patternIsPublic').checked;
 
     const submitBtn = document.getElementById('patternSaveModalSubmit');
@@ -781,7 +786,7 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
     const isMmMode = document.querySelector('input[name="yarnUnit"]:checked')?.value === 'mm';
     const settings = {
         title,
-        tags,
+        tags: [],
         isPublic,
         widthCm: parseFloat(targetWidthInput.value) || 50,
         yarnType: isMmMode ? null : yarnWeightSelect.value,

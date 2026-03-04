@@ -286,7 +286,9 @@ async function loadLinkedPattern(uid, patternId) {
             const parts = [];
             if (linkedPatternData.stitches && linkedPatternData.rows)
                 parts.push(`${linkedPatternData.stitches}코 × ${linkedPatternData.rows}단`);
-            if (linkedPatternData.widthCm) parts.push(`${linkedPatternData.widthCm}cm`);
+            if (linkedPatternData.widthCm && linkedPatternData.heightCm)
+                parts.push(`${linkedPatternData.widthCm}cm × ${linkedPatternData.heightCm}cm`);
+            else if (linkedPatternData.widthCm) parts.push(`${linkedPatternData.widthCm}cm`);
             if (linkedPatternData.yarnType) parts.push(linkedPatternData.yarnType);
             if (linkedPatternData.yarnMm) parts.push(`${linkedPatternData.yarnMm}mm`);
             metaEl.textContent = parts.join(' · ');
@@ -373,8 +375,16 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', async () =
         let finalW = maxW;
         let finalH = (img.height / img.width) * finalW;
         if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
-        pdf.setFontSize(13);
-        pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
+        // 제목 (한글 포함 가능 — canvas에 그려서 이미지로 삽입)
+        const titleText = data.title || data.name || 'Pattern';
+        const titleCanvas = document.createElement('canvas');
+        titleCanvas.width = 900;
+        titleCanvas.height = 36;
+        const tCtx = titleCanvas.getContext('2d');
+        tCtx.font = '600 26px sans-serif';
+        tCtx.fillStyle = '#000000';
+        tCtx.fillText(titleText, 0, 26);
+        pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
         pdf.setFontSize(10);
         const sizeStr = (data.widthCm && data.heightCm)
             ? `${data.widthCm}cm × ${data.heightCm}cm`

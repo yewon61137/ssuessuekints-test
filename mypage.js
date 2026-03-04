@@ -387,7 +387,7 @@ function buildPatternCard(uid, patternId, data) {
             <p class="pattern-card-name" title="${displayName}" style="margin:0;flex:1;">${displayName}</p>
             ${publicBadge}
           </div>
-          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText} · ${date}</p>
+          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText}</p>
           ${actionsHtml}
         </div>
     `;
@@ -416,9 +416,16 @@ function buildPatternCard(uid, patternId, data) {
             let finalH = (img.height / img.width) * finalW;
             if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
 
-            // 제목
-            pdf.setFontSize(14);
-            pdf.text(data.title || data.name || 'Knitting Pattern', margin, margin + 5);
+            // 제목 (한글 포함 가능 — canvas에 그려서 이미지로 삽입)
+            const titleText = data.title || data.name || 'Knitting Pattern';
+            const titleCanvas = document.createElement('canvas');
+            titleCanvas.width = 900;
+            titleCanvas.height = 36;
+            const tCtx = titleCanvas.getContext('2d');
+            tCtx.font = '600 26px sans-serif';
+            tCtx.fillStyle = '#000000';
+            tCtx.fillText(titleText, 0, 26);
+            pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
 
             // 정보 줄 (원래 도안 PDF와 동일한 포맷)
             pdf.setFontSize(10);
