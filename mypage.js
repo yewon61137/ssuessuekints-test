@@ -394,95 +394,51 @@ function buildPatternCard(uid, patternId, data) {
 
     card.querySelector('.pattern-card-thumb').addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
 
-    // 파일 다운로드 공통 헬퍼 (fetch→blob URL → 직접 저장)
-    // TODO: Google AdSense 승인 후 이 함수 호출 전 광고 모달 표시 로직 추가
-    async function downloadBlob(url, filename) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        } catch (e) {
-            window.open(url, '_blank');
-        }
-    }
-
-    // 이미지를 blob URL로 획득 (Firebase SDK getBlob → fetch → 원본URL 순으로 시도)
-    // getBlob()은 CORS 불필요, canvas taint 없음 → PDF에 이미지 삽입 가능
-    async function getPatternBlobUrl() {
-        // 1순위: Firebase Storage SDK (patternStoragePath 있을 때)
-        if (data.patternStoragePath) {
-            try {
-                const blob = await getBlob(ref(storage, data.patternStoragePath));
-                return URL.createObjectURL(blob);
-            } catch (e) { /* 권한 없는 경우(타인 도안) fallback */ }
-        }
-        // 2순위: fetch (Firebase Storage CORS 설정된 경우)
-        try {
-            const res = await fetch(data.patternImageURL);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            return URL.createObjectURL(blob);
-        } catch (e) { /* CORS 미설정 fallback */ }
-        // 3순위: 원본 URL (canvas taint 가능성 있음)
-        return null;
-    }
-
-    // PDF 다운로드 (본인/타인 모두)
-    card.querySelector('.pdf-btn').addEventListener('click', async () => {
+    // PDF/PNG 공통 헬퍼: jsPDF로 도안 PDF 생성
+    // TODO: Google AdSense 승인 후 다운로드 직전 광고 모달 표시 로직 추가
+    function generatePatternPdf(imgSrc, cleanup) {
         if (typeof window.jspdf === 'undefined') {
             alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            if (cleanup) cleanup();
             return;
         }
         const { jsPDF } = window.jspdf;
         const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-
-        const blobUrl = await getPatternBlobUrl();
-        const imgSrc = blobUrl || data.patternImageURL;
-
         const img = new Image();
         img.onload = () => {
-            const cleanup = () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const pdfW = pdf.internal.pageSize.getWidth();
             const pdfH = pdf.internal.pageSize.getHeight();
             const margin = 15;
             const maxW = pdfW - margin * 2;
-            const maxH = pdfH - margin * 2 - 30;
+            const maxH = pdfH - margin * 2 - 35;
             let finalW = maxW;
             let finalH = (img.height / img.width) * finalW;
             if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
-            pdf.setFontSize(13);
-            pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
+
+            // 제목
+            pdf.setFontSize(14);
+            pdf.text(data.title || data.name || 'Knitting Pattern', margin, margin + 5);
+
+            // 정보 줄 (원래 도안 PDF와 동일한 포맷)
             pdf.setFontSize(10);
             const sizeStr = (data.widthCm && data.heightCm)
-                ? `${data.widthCm}cm × ${data.heightCm}cm`
+                ? `${data.widthCm}cm x ${data.heightCm}cm`
                 : (data.widthCm ? `${data.widthCm}cm` : '');
-            const infoLine = [
-                `${data.stitches || 0} Stitches × ${data.rows || 0} Rows`,
-                sizeStr,
-                data.yarnType || (data.yarnMm ? `${data.yarnMm}mm` : '')
-            ].filter(Boolean).join('  |  ');
-            pdf.text(infoLine, margin, margin + 13);
-            try {
-                const tmpCanvas = document.createElement('canvas');
-                tmpCanvas.width = img.width;
-                tmpCanvas.height = img.height;
-                tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-                const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
-                pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
-            } catch (e) {
-                pdf.setTextColor(120, 120, 120);
-                pdf.text('* 도안 이미지는 PNG 버튼으로 별도 저장해주세요.', margin, margin + 25);
-                pdf.setTextColor(0, 0, 0);
-            }
+            const infoLine = `${data.stitches || 0} Stitches x ${data.rows || 0} Rows` +
+                (sizeStr ? ` (${sizeStr})` : '') +
+                (data.yarnType ? ` · ${data.yarnType}` : (data.yarnMm ? ` · ${data.yarnMm}mm` : ''));
+            pdf.text(infoLine, margin, margin + 14);
+
+            // 도안 이미지
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = img.width;
+            tmpCanvas.height = img.height;
+            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
+            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
+            pdf.addImage(imgData, 'JPEG', margin, margin + 22, finalW, finalH);
+
+            // 색상 범례
             if (data.legendHTML) {
                 pdf.addPage();
                 pdf.setFontSize(12);
@@ -496,27 +452,66 @@ function buildPatternCard(uid, patternId, data) {
                         pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
                         pdf.rect(margin, y, 8, 8, 'F');
                         pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
-                        pdf.setFontSize(9);
-                        pdf.text(item.querySelector('span')?.textContent || '', margin + 12, y + 6);
-                        y += 12;
+                        pdf.setFontSize(10);
+                        pdf.text(item.querySelector('span')?.textContent || '', margin + 13, y + 6);
+                        y += 13;
                         if (y > pdfH - margin) y = margin;
                     }
                 });
             }
             pdf.save(`${safeName}.pdf`);
-            cleanup();
+            if (cleanup) cleanup();
         };
         img.onerror = () => {
-            if (blobUrl) URL.revokeObjectURL(blobUrl);
+            if (cleanup) cleanup();
             alert('이미지를 불러오지 못했습니다.');
         };
         img.src = imgSrc;
+    }
+
+    // PDF 다운로드
+    card.querySelector('.pdf-btn').addEventListener('click', async () => {
+        // 1순위: patternBase64 (저장 시점에 canvas에서 직접 생성 → CORS 완전 불필요)
+        if (data.patternBase64) {
+            generatePatternPdf(data.patternBase64, null);
+            return;
+        }
+        // 2순위: Firebase Storage getBlob (Storage 규칙 배포된 경우)
+        if (data.patternStoragePath) {
+            try {
+                const blob = await getBlob(ref(storage, data.patternStoragePath));
+                const blobUrl = URL.createObjectURL(blob);
+                generatePatternPdf(blobUrl, () => URL.revokeObjectURL(blobUrl));
+                return;
+            } catch (e) { /* fallback */ }
+        }
+        // 3순위: fetch (Firebase Storage CORS 설정된 경우)
+        try {
+            const res = await fetch(data.patternImageURL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            generatePatternPdf(blobUrl, () => URL.revokeObjectURL(blobUrl));
+            return;
+        } catch (e) { /* fallback */ }
+        // 최후: 원본 URL (구형 도안, canvas taint 가능)
+        generatePatternPdf(data.patternImageURL, null);
     });
 
     // PNG 직접 저장
     card.querySelector('.png-download-btn').addEventListener('click', async () => {
         const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-        // getBlob() 우선 시도 (CORS 불필요)
+        // patternBase64에서 직접 다운로드 (CORS 불필요)
+        if (data.patternBase64) {
+            const a = document.createElement('a');
+            a.href = data.patternBase64;
+            a.download = `${safeName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return;
+        }
+        // getBlob() 시도
         if (data.patternStoragePath) {
             try {
                 const blob = await getBlob(ref(storage, data.patternStoragePath));
@@ -531,7 +526,22 @@ function buildPatternCard(uid, patternId, data) {
                 return;
             } catch (e) { /* fallback */ }
         }
-        downloadBlob(data.patternImageURL, `${safeName}.png`);
+        // fetch fallback
+        try {
+            const res = await fetch(data.patternImageURL);
+            if (!res.ok) throw new Error();
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${safeName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        } catch (e) {
+            window.open(data.patternImageURL, '_blank');
+        }
     });
 
     if (isMine) {

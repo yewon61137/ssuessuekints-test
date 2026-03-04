@@ -638,7 +638,21 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
     const widthCm = parseFloat(nums[2]) || 0;
     const heightCm = parseFloat(nums[3]) || 0;
 
-    // 4. Firestore에 메타데이터 저장
+    // 4. PDF용 base64 생성 (save 시점에 canvas 직접 접근 → CORS 불필요)
+    //    최대 600px로 축소 후 JPEG 0.9 → Firestore에 저장
+    let patternBase64 = null;
+    try {
+        const maxDim = 600;
+        const scale = Math.min(1, maxDim / Math.max(patternCanvas.width, patternCanvas.height));
+        const b64Canvas = Object.assign(document.createElement('canvas'), {
+            width: Math.round(patternCanvas.width * scale),
+            height: Math.round(patternCanvas.height * scale)
+        });
+        b64Canvas.getContext('2d').drawImage(patternCanvas, 0, 0, b64Canvas.width, b64Canvas.height);
+        patternBase64 = b64Canvas.toDataURL('image/jpeg', 0.9);
+    } catch (e) { /* canvas 접근 실패 시 null 유지 */ }
+
+    // 5. Firestore에 메타데이터 저장
     const defaultTitle = `도안 ${new Date().toLocaleDateString('ko-KR')}`;
     const patternsRef = collection(db, `users/${user.uid}/patterns`);
     await addDoc(patternsRef, {
@@ -648,7 +662,8 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
         isPublic: settings.isPublic ?? true,
         patternImageURL,
         originalImageURL,
-        patternStoragePath: `${basePath}/pattern.png`, // getBlob()용 Storage 경로
+        patternStoragePath: `${basePath}/pattern.png`,
+        patternBase64,  // PDF 생성용 (CORS 없이 직접 사용)
         legendHTML,
         stitches,
         rows,

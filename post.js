@@ -338,25 +338,28 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', async () =
     if (!imgUrl) return;
     const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
 
-    // 이미지를 blob URL로 획득 (canvas taint 방지)
+    // 이미지 소스 결정: patternBase64 → getBlob → fetch → 원본URL
     let blobUrl = null;
-    // 1순위: Firebase Storage SDK getBlob (patternStoragePath 있을 때)
-    if (data.patternStoragePath) {
-        try {
-            const blob = await getBlob(ref(storage, data.patternStoragePath));
-            blobUrl = URL.createObjectURL(blob);
-        } catch (e) { /* fallback */ }
+    let imgSrc;
+    if (data.patternBase64) {
+        imgSrc = data.patternBase64; // data URL, CORS 불필요
+    } else {
+        if (data.patternStoragePath) {
+            try {
+                const blob = await getBlob(ref(storage, data.patternStoragePath));
+                blobUrl = URL.createObjectURL(blob);
+            } catch (e) { /* fallback */ }
+        }
+        if (!blobUrl) {
+            try {
+                const res = await fetch(imgUrl);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const blob = await res.blob();
+                blobUrl = URL.createObjectURL(blob);
+            } catch (e) { /* fallback */ }
+        }
+        imgSrc = blobUrl || imgUrl;
     }
-    // 2순위: fetch
-    if (!blobUrl) {
-        try {
-            const res = await fetch(imgUrl);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            blobUrl = URL.createObjectURL(blob);
-        } catch (e) { /* fallback to original URL */ }
-    }
-    let imgSrc = blobUrl || imgUrl;
 
     const img = new Image();
     img.onload = () => {
@@ -427,10 +430,38 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', async () =
 // PNG 직접 저장 (연결 도안)
 document.getElementById('postLinkedPngBtn').addEventListener('click', async (e) => {
     e.preventDefault();
-    const url = linkedPatternData?.patternImageURL || postData?.patternImageURL;
-    if (!url) return;
-    const safeName = (linkedPatternData?.title || linkedPatternData?.name || postData?.title || 'pattern')
+    const data = linkedPatternData;
+    const safeName = (data?.title || data?.name || postData?.title || 'pattern')
         .replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+
+    // patternBase64 우선 (CORS 불필요)
+    if (data?.patternBase64) {
+        const a = document.createElement('a');
+        a.href = data.patternBase64;
+        a.download = `${safeName}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+    }
+
+    const url = data?.patternImageURL || postData?.patternImageURL;
+    if (!url) return;
+
+    if (data?.patternStoragePath) {
+        try {
+            const blob = await getBlob(ref(storage, data.patternStoragePath));
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${safeName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            return;
+        } catch (e) { /* fallback */ }
+    }
     downloadBlob(url, `${safeName}.png`);
 });
 
