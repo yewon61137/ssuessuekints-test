@@ -286,15 +286,7 @@ export function initAuth() {
         signOut(auth);
     });
 
-    // 모달 외부 클릭 → 닫기
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            hideProfileSetupUI();
-            clearModalError();
-            switchTab('signin');
-        }
-    });
+    // 모달 외부 클릭 → 닫지 않음 (X 버튼으로만 닫기)
 
     // 탭 전환
     document.getElementById('tabSignIn').addEventListener('click', () => switchTab('signin'));
