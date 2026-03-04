@@ -392,16 +392,14 @@ async function loadMyPosts(uid) {
     gridEl.innerHTML = '';
 
     try {
-        // orderBy 없이 uid 필터만 사용 (복합 인덱스 불필요), 클라이언트 정렬
         const q = query(
             collection(db, 'posts'),
-            where('uid', '==', uid),
-            limit(50)
+            where('uid', '==', uid)
         );
         const snap = await getDocs(q);
         loadingEl.style.display = 'none';
         if (snap.empty) { emptyEl.style.display = 'block'; return; }
-        // 최신순 정렬
+        // 최신순 정렬 (클라이언트)
         const docs = snap.docs.sort((a, b) => {
             const at = a.data().createdAt?.seconds || 0;
             const bt = b.data().createdAt?.seconds || 0;
@@ -409,9 +407,10 @@ async function loadMyPosts(uid) {
         });
         docs.forEach(docSnap => gridEl.appendChild(buildPostCard(docSnap.id, docSnap.data())));
     } catch (e) {
-        console.error('Failed to load posts:', e);
+        console.error('loadMyPosts error:', e);
         loadingEl.style.display = 'none';
-        emptyEl.textContent = '불러오기 실패. 잠시 후 다시 시도해주세요.';
+        // 실제 오류 메시지를 노출해 진단 가능하도록
+        emptyEl.textContent = `오류: ${e.message}`;
         emptyEl.style.display = 'block';
     }
 }
