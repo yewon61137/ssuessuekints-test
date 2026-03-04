@@ -67,7 +67,17 @@
       <!-- 연결된 도안 -->
       <div class="post-linked-pattern" id="postLinkedPattern" style="display:none;">
         <span class="post-linked-label">연결된 도안</span>
-        <img id="postLinkedThumb" src="" alt="도안" class="post-linked-thumb">
+        <div class="post-linked-content">
+          <img id="postLinkedThumb" src="" alt="도안" class="post-linked-thumb" style="cursor:pointer;">
+          <div class="post-linked-info">
+            <p class="post-linked-title" id="postLinkedTitle"></p>
+            <p class="post-linked-meta" id="postLinkedMeta"></p>
+            <div class="post-linked-actions" id="postLinkedActions" style="display:none;gap:0.5rem;flex-wrap:wrap;">
+              <button class="secondary-btn small-btn" id="postLinkedPdfBtn">PDF 다운로드</button>
+              <a class="secondary-btn small-btn" id="postLinkedPngBtn" href="#" target="_blank" rel="noopener">PNG 다운로드</a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 액션바 (좋아요/스크랩) -->
@@ -216,6 +226,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script type="module" src="/post.js"></script>
   <div class="mobile-overlay" id="mobileOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">

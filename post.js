@@ -43,6 +43,7 @@ const params = new URLSearchParams(location.search);
 const postId = params.get('id');
 let currentUser = null;
 let postData = null;
+let linkedPatternData = null;
 let isLiked = false;
 let isScrapped = false;
 
@@ -108,7 +109,16 @@ function renderPost(pid, data) {
     // 연결 도안
     if (data.patternImageURL) {
         document.getElementById('postLinkedPattern').style.display = 'flex';
-        document.getElementById('postLinkedThumb').src = data.patternImageURL;
+        const thumbEl = document.getElementById('postLinkedThumb');
+        thumbEl.src = data.patternImageURL;
+        thumbEl.addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
+        // PNG 기본 링크
+        const pngBtn = document.getElementById('postLinkedPngBtn');
+        if (pngBtn) pngBtn.href = data.patternImageURL;
+        // 도안 세부 정보 로드 (patternId + uid 있을 때)
+        if (data.patternId && data.uid) {
+            loadLinkedPattern(data.uid, data.patternId);
+        }
     }
 
     // 카운터
@@ -261,6 +271,112 @@ async function submitComment(pid, content) {
     document.getElementById('commentInput').value = '';
 }
 
+// --- 연결 도안 세부 정보 로드 ---
+async function loadLinkedPattern(uid, patternId) {
+    try {
+        const snap = await getDoc(doc(db, `users/${uid}/patterns/${patternId}`));
+        if (!snap.exists()) return;
+        linkedPatternData = snap.data();
+
+        const titleEl = document.getElementById('postLinkedTitle');
+        if (titleEl) titleEl.textContent = linkedPatternData.title || linkedPatternData.name || '';
+
+        const metaEl = document.getElementById('postLinkedMeta');
+        if (metaEl) {
+            const parts = [];
+            if (linkedPatternData.stitches && linkedPatternData.rows)
+                parts.push(`${linkedPatternData.stitches}코 × ${linkedPatternData.rows}단`);
+            if (linkedPatternData.widthCm) parts.push(`${linkedPatternData.widthCm}cm`);
+            if (linkedPatternData.yarnType) parts.push(linkedPatternData.yarnType);
+            if (linkedPatternData.yarnMm) parts.push(`${linkedPatternData.yarnMm}mm`);
+            metaEl.textContent = parts.join(' · ');
+        }
+
+        // PNG 링크 갱신 (patternImageURL이 있으면 교체)
+        const pngBtn = document.getElementById('postLinkedPngBtn');
+        if (pngBtn && linkedPatternData.patternImageURL)
+            pngBtn.href = linkedPatternData.patternImageURL;
+
+        // 다운로드 버튼 표시
+        const actionsEl = document.getElementById('postLinkedActions');
+        if (actionsEl) actionsEl.style.display = 'flex';
+    } catch (e) {
+        // 비공개 도안 등 권한 없으면 조용히 무시 (썸네일만 표시)
+        console.log('Linked pattern details unavailable:', e.message);
+    }
+}
+
+// PDF 다운로드 (연결 도안)
+document.getElementById('postLinkedPdfBtn').addEventListener('click', () => {
+    const data = linkedPatternData;
+    if (!data) return;
+    if (typeof window.jspdf === 'undefined') {
+        alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const imgUrl = data.patternImageURL || postData?.patternImageURL;
+    if (!imgUrl) return;
+    const img = new Image();
+    img.onload = () => {
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const maxW = pdfW - margin * 2;
+        const maxH = pdfH - margin * 2 - 30;
+        let finalW = maxW;
+        let finalH = (img.height / img.width) * finalW;
+        if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
+        pdf.setFontSize(13);
+        pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
+        pdf.setFontSize(9);
+        const infoLine = [
+            `${data.stitches || 0}코 × ${data.rows || 0}단`,
+            data.widthCm ? `${data.widthCm}cm` : '',
+            data.yarnType || '',
+            data.yarnMm ? `${data.yarnMm}mm` : ''
+        ].filter(Boolean).join(' · ');
+        pdf.text(infoLine, margin, margin + 13);
+        try {
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = img.width;
+            tmpCanvas.height = img.height;
+            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
+            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
+            pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
+        } catch (e) {
+            pdf.setTextColor(120, 120, 120);
+            pdf.text('* 도안 이미지는 PNG 버튼으로 별도 저장해주세요.', margin, margin + 25);
+            pdf.setTextColor(0, 0, 0);
+        }
+        if (data.legendHTML) {
+            pdf.addPage();
+            pdf.setFontSize(12);
+            pdf.text('Color Legend', margin, margin + 5);
+            const tmpDiv = document.createElement('div');
+            tmpDiv.innerHTML = data.legendHTML;
+            let y = margin + 15;
+            tmpDiv.querySelectorAll('.color-item').forEach(item => {
+                const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
+                if (rgbMatch) {
+                    pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                    pdf.rect(margin, y, 8, 8, 'F');
+                    pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
+                    pdf.setFontSize(9);
+                    pdf.text(item.querySelector('span')?.textContent || '', margin + 12, y + 6);
+                    y += 12;
+                    if (y > pdfH - margin) y = margin;
+                }
+            });
+        }
+        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+        pdf.save(`${safeName}.pdf`);
+    };
+    img.onerror = () => alert('이미지를 불러오지 못했습니다.');
+    img.src = imgUrl;
+});
+
 // --- 게시글 삭제 ---
 async function deletePost(pid, imageURLs) {
     if (!confirm('게시글을 삭제하시겠습니까? 댓글과 이미지도 함께 삭제됩니다.')) return;
@@ -334,7 +450,10 @@ document.getElementById('editPostForm').addEventListener('submit', async e => {
         document.getElementById('editPostModal').style.display = 'none';
     } catch (err) {
         console.error('Post edit error:', err);
-        errorEl.textContent = '수정 중 오류가 발생했습니다.';
+        const msg = err.code === 'permission-denied'
+            ? '권한 없음: Firestore 규칙에 update 허용이 필요합니다.'
+            : `수정 오류: ${err.message || err.code || '알 수 없는 오류'}`;
+        errorEl.textContent = msg;
         errorEl.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.textContent = '저장';

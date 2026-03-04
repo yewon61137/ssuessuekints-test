@@ -368,11 +368,13 @@ function buildPatternCard(uid, patternId, data) {
             <button class="rename-btn">${tr('rename')}</button>
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
             <button class="pdf-btn">PDF</button>
+            <a href="${data.patternImageURL}" target="_blank" rel="noopener" class="png-download-btn">PNG</a>
             <button class="delete-btn">${tr('delete')}</button>
           </div>` : `
           <div class="pattern-card-actions">
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
             <button class="pdf-btn">PDF</button>
+            <a href="${data.patternImageURL}" target="_blank" rel="noopener" class="png-download-btn">PNG</a>
           </div>`;
 
     card.innerHTML = `
@@ -398,7 +400,8 @@ function buildPatternCard(uid, patternId, data) {
         }
         const { jsPDF } = window.jspdf;
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        // crossOrigin 미설정: Firebase Storage CORS 설정 없이도 이미지 로드 가능
+        // canvas.toDataURL()이 SecurityError를 던지면 텍스트 전용 PDF 생성
         img.onload = () => {
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const pdfW = pdf.internal.pageSize.getWidth();
@@ -412,14 +415,26 @@ function buildPatternCard(uid, patternId, data) {
             pdf.setFontSize(13);
             pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
             pdf.setFontSize(9);
-            const infoLine = `${data.stitches || 0} sts × ${data.rows || 0} rows${data.widthCm ? ` (${data.widthCm}cm)` : ''}`;
+            const infoLine = [
+                `${data.stitches || 0}코 × ${data.rows || 0}단`,
+                data.widthCm ? `${data.widthCm}cm` : '',
+                data.yarnType || '',
+                data.yarnMm ? `${data.yarnMm}mm` : ''
+            ].filter(Boolean).join(' · ');
             pdf.text(infoLine, margin, margin + 13);
-            const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = img.width;
-            tmpCanvas.height = img.height;
-            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
-            pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
+            try {
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = img.width;
+                tmpCanvas.height = img.height;
+                tmpCanvas.getContext('2d').drawImage(img, 0, 0);
+                const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
+                pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
+            } catch (e) {
+                // Canvas tainted (CORS) — 이미지 미삽입, 안내 텍스트 추가
+                pdf.setTextColor(120, 120, 120);
+                pdf.text('* 도안 이미지는 PNG 버튼으로 별도 저장해주세요.', margin, margin + 25);
+                pdf.setTextColor(0, 0, 0);
+            }
             if (data.legendHTML) {
                 pdf.addPage();
                 pdf.setFontSize(12);

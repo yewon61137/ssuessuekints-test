@@ -2180,7 +2180,7 @@ canvas {
 
 .post-linked-pattern {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   border: 2px solid #000;
   padding: 0.75rem 1rem;
@@ -2194,14 +2194,53 @@ canvas {
   letter-spacing: 0.05em;
   color: var(--secondary-color);
   white-space: nowrap;
+  padding-top: 0.2rem;
+}
+
+.post-linked-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .post-linked-thumb {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   image-rendering: pixelated;
   border: 1px solid #000;
+  flex-shrink: 0;
+}
+
+.post-linked-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.post-linked-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-linked-meta {
+  font-size: 0.78rem;
+  color: var(--secondary-color);
+  margin: 0;
+}
+
+.post-linked-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
 }
 
 .post-action-bar {
