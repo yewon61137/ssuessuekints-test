@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // 도안 이미지: 본인은 읽기/쓰기, 인증된 타인도 읽기 가능
+    match /users/{userId}/patterns/{patternId}/{filename} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 게시글 이미지: 누구나 읽기, 인증된 사용자 쓰기
+    match /posts/{postId}/images/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 프로필 사진: 누구나 읽기, 본인만 쓰기
+    match /users/{userId}/profile/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

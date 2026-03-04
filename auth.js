@@ -631,11 +631,12 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
     await uploadBytes(originalRef, originalBlob);
     const originalImageURL = await getDownloadURL(originalRef);
 
-    // 3. 숫자 파싱 (infoText: "120 Stitches x 150 Rows (50cm x 62.5cm)")
+    // 3. 숫자 파싱 (infoText: "120 Stitches x 150 Rows (approx. 50cm x 62.5cm)")
     const nums = (infoText || '').match(/\d+(\.\d+)?/g) || [];
     const stitches = parseInt(nums[0]) || 0;
     const rows = parseInt(nums[1]) || 0;
     const widthCm = parseFloat(nums[2]) || 0;
+    const heightCm = parseFloat(nums[3]) || 0;
 
     // 4. Firestore에 메타데이터 저장
     const defaultTitle = `도안 ${new Date().toLocaleDateString('ko-KR')}`;
@@ -647,10 +648,12 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
         isPublic: settings.isPublic ?? true,
         patternImageURL,
         originalImageURL,
+        patternStoragePath: `${basePath}/pattern.png`, // getBlob()용 Storage 경로
         legendHTML,
         stitches,
         rows,
         widthCm,
+        heightCm,
         yarnType: settings.yarnType || null,
         yarnMm: settings.yarnMm ? parseFloat(settings.yarnMm) : null,
         colorCount: settings.colorCount || 0,

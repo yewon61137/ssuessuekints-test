@@ -6,7 +6,7 @@ import {
     doc, getDoc, collection, query, orderBy, getDocs,
     addDoc, deleteDoc, updateDoc, serverTimestamp, runTransaction, increment
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject, listAll } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+import { ref, deleteObject, listAll, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // --- i18n (최소) ---
 const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
@@ -325,7 +325,7 @@ async function downloadBlob(url, filename) {
     }
 }
 
-// PDF 다운로드 (연결 도안) — fetch로 blob URL 생성 → canvas taint 없음
+// PDF 다운로드 (연결 도안) — getBlob() 우선(CORS 불필요), fetch 순으로 시도
 document.getElementById('postLinkedPdfBtn').addEventListener('click', async () => {
     const data = linkedPatternData;
     if (!data) return;
@@ -338,14 +338,25 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', async () =
     if (!imgUrl) return;
     const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
 
-    let imgSrc = imgUrl;
+    // 이미지를 blob URL로 획득 (canvas taint 방지)
     let blobUrl = null;
-    try {
-        const res = await fetch(imgUrl);
-        const blob = await res.blob();
-        blobUrl = URL.createObjectURL(blob);
-        imgSrc = blobUrl;
-    } catch (e) { /* fetch 실패 시 원본 URL 사용 */ }
+    // 1순위: Firebase Storage SDK getBlob (patternStoragePath 있을 때)
+    if (data.patternStoragePath) {
+        try {
+            const blob = await getBlob(ref(storage, data.patternStoragePath));
+            blobUrl = URL.createObjectURL(blob);
+        } catch (e) { /* fallback */ }
+    }
+    // 2순위: fetch
+    if (!blobUrl) {
+        try {
+            const res = await fetch(imgUrl);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            blobUrl = URL.createObjectURL(blob);
+        } catch (e) { /* fallback to original URL */ }
+    }
+    let imgSrc = blobUrl || imgUrl;
 
     const img = new Image();
     img.onload = () => {
@@ -361,13 +372,15 @@ document.getElementById('postLinkedPdfBtn').addEventListener('click', async () =
         if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
         pdf.setFontSize(13);
         pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
-        pdf.setFontSize(9);
+        pdf.setFontSize(10);
+        const sizeStr = (data.widthCm && data.heightCm)
+            ? `${data.widthCm}cm × ${data.heightCm}cm`
+            : (data.widthCm ? `${data.widthCm}cm` : '');
         const infoLine = [
-            `${data.stitches || 0}코 × ${data.rows || 0}단`,
-            data.widthCm ? `${data.widthCm}cm` : '',
-            data.yarnType || '',
-            data.yarnMm ? `${data.yarnMm}mm` : ''
-        ].filter(Boolean).join(' · ');
+            `${data.stitches || 0} Stitches × ${data.rows || 0} Rows`,
+            sizeStr,
+            data.yarnType || (data.yarnMm ? `${data.yarnMm}mm` : '')
+        ].filter(Boolean).join('  |  ');
         pdf.text(infoLine, margin, margin + 13);
         try {
             const tmpCanvas = document.createElement('canvas');

@@ -6,7 +6,7 @@ import {
     collection, query, orderBy, limit, getDocs,
     doc, getDoc, deleteDoc, updateDoc, where
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+import { ref, deleteObject, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // --- i18n ---
 const t = {
@@ -358,8 +358,10 @@ function buildPatternCard(uid, patternId, data) {
 
     // 세부 설정 텍스트
     const yarnInfo = data.yarnType ? data.yarnType : (data.yarnMm ? `${data.yarnMm}mm` : '');
-    const widthInfo = data.widthCm ? `${data.widthCm}cm` : '';
-    const settingsParts = [yarnInfo, widthInfo].filter(Boolean);
+    const sizeInfo = data.widthCm
+        ? (data.heightCm ? `${data.widthCm}cm × ${data.heightCm}cm` : `${data.widthCm}cm`)
+        : '';
+    const settingsParts = [yarnInfo, sizeInfo].filter(Boolean);
     const settingsText = settingsParts.length ? ` · ${settingsParts.join(' · ')}` : '';
     const publicBadge = isMine ? `<span class="pattern-visibility-badge">${data.isPublic ? '공개' : '비공개'}</span>` : '';
 
@@ -397,6 +399,7 @@ function buildPatternCard(uid, patternId, data) {
     async function downloadBlob(url, filename) {
         try {
             const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const blob = await res.blob();
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -411,8 +414,28 @@ function buildPatternCard(uid, patternId, data) {
         }
     }
 
+    // 이미지를 blob URL로 획득 (Firebase SDK getBlob → fetch → 원본URL 순으로 시도)
+    // getBlob()은 CORS 불필요, canvas taint 없음 → PDF에 이미지 삽입 가능
+    async function getPatternBlobUrl() {
+        // 1순위: Firebase Storage SDK (patternStoragePath 있을 때)
+        if (data.patternStoragePath) {
+            try {
+                const blob = await getBlob(ref(storage, data.patternStoragePath));
+                return URL.createObjectURL(blob);
+            } catch (e) { /* 권한 없는 경우(타인 도안) fallback */ }
+        }
+        // 2순위: fetch (Firebase Storage CORS 설정된 경우)
+        try {
+            const res = await fetch(data.patternImageURL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            return URL.createObjectURL(blob);
+        } catch (e) { /* CORS 미설정 fallback */ }
+        // 3순위: 원본 URL (canvas taint 가능성 있음)
+        return null;
+    }
+
     // PDF 다운로드 (본인/타인 모두)
-    // fetch로 blob URL 생성 → canvas taint 없이 이미지 삽입 가능
     card.querySelector('.pdf-btn').addEventListener('click', async () => {
         if (typeof window.jspdf === 'undefined') {
             alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -421,15 +444,8 @@ function buildPatternCard(uid, patternId, data) {
         const { jsPDF } = window.jspdf;
         const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
 
-        // fetch로 blob URL 획득 → same-origin 취급되어 canvas taint 없음
-        let imgSrc = data.patternImageURL;
-        let blobUrl = null;
-        try {
-            const res = await fetch(data.patternImageURL);
-            const blob = await res.blob();
-            blobUrl = URL.createObjectURL(blob);
-            imgSrc = blobUrl;
-        } catch (e) { /* fetch 실패 시 원본 URL 사용 (taint fallback) */ }
+        const blobUrl = await getPatternBlobUrl();
+        const imgSrc = blobUrl || data.patternImageURL;
 
         const img = new Image();
         img.onload = () => {
@@ -445,13 +461,15 @@ function buildPatternCard(uid, patternId, data) {
             if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
             pdf.setFontSize(13);
             pdf.text(data.title || data.name || 'Pattern', margin, margin + 5);
-            pdf.setFontSize(9);
+            pdf.setFontSize(10);
+            const sizeStr = (data.widthCm && data.heightCm)
+                ? `${data.widthCm}cm × ${data.heightCm}cm`
+                : (data.widthCm ? `${data.widthCm}cm` : '');
             const infoLine = [
-                `${data.stitches || 0}코 × ${data.rows || 0}단`,
-                data.widthCm ? `${data.widthCm}cm` : '',
-                data.yarnType || '',
-                data.yarnMm ? `${data.yarnMm}mm` : ''
-            ].filter(Boolean).join(' · ');
+                `${data.stitches || 0} Stitches × ${data.rows || 0} Rows`,
+                sizeStr,
+                data.yarnType || (data.yarnMm ? `${data.yarnMm}mm` : '')
+            ].filter(Boolean).join('  |  ');
             pdf.text(infoLine, margin, margin + 13);
             try {
                 const tmpCanvas = document.createElement('canvas');
@@ -496,8 +514,23 @@ function buildPatternCard(uid, patternId, data) {
     });
 
     // PNG 직접 저장
-    card.querySelector('.png-download-btn').addEventListener('click', () => {
+    card.querySelector('.png-download-btn').addEventListener('click', async () => {
         const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+        // getBlob() 우선 시도 (CORS 불필요)
+        if (data.patternStoragePath) {
+            try {
+                const blob = await getBlob(ref(storage, data.patternStoragePath));
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `${safeName}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                return;
+            } catch (e) { /* fallback */ }
+        }
         downloadBlob(data.patternImageURL, `${safeName}.png`);
     });
 
