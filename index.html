@@ -42,7 +42,11 @@
       <div class="control-group">
         <label for="imageUpload" class="main-label" data-i18n="upload_label">1. 도안으로 만들 이미지를 업로드하세요</label>
         <div class="input-desc">JPG, PNG (Max 10MB)</div>
-        <input type="file" id="imageUpload" accept="image/jpeg, image/png">
+        <div class="file-upload-wrapper">
+          <label for="imageUpload" class="file-upload-btn" data-i18n="btn_select_file">파일 선택</label>
+          <span id="fileNameDisplay" class="file-name-display" data-i18n="no_file_selected">선택된 파일 없음</span>
+          <input type="file" id="imageUpload" accept="image/jpeg, image/png" style="display:none;">
+        </div>
         <div class="copyright-notice" data-i18n="copyright_notice">
           ⚠️ 타인의 사진·캐릭터·예술 작품으로 생성한 도안을 상업적으로 이용할 경우 저작권법 위반의 책임은 전적으로 이용자 본인에게 있습니다. <a href="/privacy.html#disclaimer">자세히 보기</a>
         </div>

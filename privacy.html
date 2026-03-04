@@ -191,11 +191,22 @@
   <script>
     const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
     const blocks = document.querySelectorAll('.policy-block');
+    const titles = {
+      ko: '개인정보처리방침',
+      en: 'Privacy Policy',
+      ja: 'プライバシーポリシー'
+    };
     function applyLang(lang) {
       localStorage.setItem('lang', lang);
       document.documentElement.lang = lang;
       langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
       blocks.forEach(b => b.style.display = b.getAttribute('data-lang') === lang ? 'block' : 'none');
+      
+      const titleText = titles[lang] || titles.ko;
+      document.title = titleText + ' | SSUESSUE KNITS';
+      const privacyTitle = document.getElementById('privacyTitle');
+      if (privacyTitle) privacyTitle.textContent = titleText;
+
       document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;

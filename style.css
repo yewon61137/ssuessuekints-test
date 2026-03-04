@@ -1279,3 +1279,53 @@ canvas {
   font-size: 0.85rem;
   color: var(--secondary-color);
 }
+
+/* Custom File Upload Button */
+.file-upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.file-upload-btn {
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #000;
+  background-color: #fff;
+  color: #000;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+  line-height: 1;
+}
+
+.file-upload-btn:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.file-name-display {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .file-upload-btn {
+    background-color: #121212;
+    color: #fff;
+    border-color: #fff;
+  }
+  .file-upload-btn:hover {
+    background-color: #fff;
+    color: #000;
+  }
+}

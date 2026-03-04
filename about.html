@@ -151,10 +151,19 @@
 
   <script>
     const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
+    const pageTitles = {
+      ko: '소개',
+      en: 'About',
+      ja: '紹介'
+    };
     function applyLang(lang) {
       localStorage.setItem('lang', lang);
       document.documentElement.lang = lang;
       langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+      
+      const titleText = pageTitles[lang] || pageTitles.ko;
+      document.title = titleText + ' | SSUESSUE KNITS';
+
       document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;

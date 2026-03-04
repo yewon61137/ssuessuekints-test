@@ -70,6 +70,8 @@ const translations = {
         regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
         btn_generate: "도안 생성하기",
         btn_download: "PDF 다운로드",
+        btn_select_file: "파일 선택",
+        no_file_selected: "선택된 파일 없음",
         result_title: "4. 생성된 도안",
         result_placeholder: "도안을 생성하면 여기에 표시됩니다.",
         history_title: "최근 생성 기록 (클릭하여 비교)",
@@ -122,6 +124,8 @@ const translations = {
         regen_hint: "💡 Re-generate to get slightly different color combinations.",
         btn_generate: "Generate Pattern",
         btn_download: "Download PDF",
+        btn_select_file: "Choose File",
+        no_file_selected: "No file chosen",
         result_title: "4. Generated Pattern",
         result_placeholder: "Pattern will appear here after generation.",
         history_title: "Recent History (Click to compare)",
@@ -153,7 +157,7 @@ const translations = {
         upload_label: "1. 編み図にする画像をアップロードしてください",
         preview_title: "2. オリジナル画像と必須色の選択",
         preview_desc: "画像をクリック（モバイルは長押し）して、残したい重要な色を選択してください。",
-        upload_placeholder: "画像をアップ로드してください。",
+        upload_placeholder: "画像をアップロードしてください。",
         selected_colors: "選択された必須色",
         no_colors_selected: "まだ色が選択されていません。",
         clear_selection: "選択を解除",
@@ -161,8 +165,8 @@ const translations = {
         label_technique: "編み技法 (比率)",
         opt_ratio_1: "かぎ針編み / クロスステッチ (1:1)",
         opt_ratio_2: "棒針編み 人物 (5:7)",
-        opt_ratio_3: "棒針編み 풍경 (7:5)",
-        label_yarn_unit: "糸の太さ 입력 방식",
+        opt_ratio_3: "棒針編み 風景 (7:5)",
+        label_yarn_unit: "糸の太さの入力方式",
         unit_standard: "標準規格",
         unit_mm: "直径 (mm)",
         label_yarn_name: "糸の太さ (標準)",
@@ -174,6 +178,8 @@ const translations = {
         regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
         btn_generate: "編み図を生成",
         btn_download: "PDFをダウンロード",
+        btn_select_file: "ファイルを選択",
+        no_file_selected: "選択されたファイルはありません",
         result_title: "4. 生成された編み図",
         result_placeholder: "生成された編み図がここに表示されます。",
         history_title: "最近の履歴 (クリックで比較)",
@@ -182,9 +188,9 @@ const translations = {
         status_generating: "編み図を生成中... 少々お待ちください。",
         status_done: "編み図の生成が完了しました！",
         status_error: "生成中にエラーが発生しました",
-        status_format_err: "JPG 또는 PNG 파일만 업로드 가능합니다.",
-        status_size_err: "파일 사이즈가 너무 큽니다 (최대 10MB).",
-        status_pdf_err: "PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        status_format_err: "JPGまたはPNGファイルのみアップロード可能です。",
+        status_size_err: "ファイルサイズが大きすぎます (最大10MB)。",
+        status_pdf_err: "PDFライブラリを読み込めませんでした。しばらくしてからもう一度お試しください。",
         footer_generate: "編み図を作る",
         footer_mypage: "マイ編み図",
         footer_about: "紹介",
@@ -216,6 +222,12 @@ function changeLanguage(lang) {
             el.innerHTML = translations[lang][key];
         }
     });
+    // Handle special case for file name display which isn't data-i18n but updated dynamically
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    if (fileNameDisplay && (!imageUpload.files || imageUpload.files.length === 0)) {
+        fileNameDisplay.textContent = translations[lang].no_file_selected;
+    }
+
     langBtns.forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
@@ -272,7 +284,14 @@ initAuth();
 // --- 1. 이미지 업로드 처리 ---
 imageUpload.addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    
+    if (file) {
+        if (fileNameDisplay) fileNameDisplay.textContent = file.name;
+    } else {
+        if (fileNameDisplay) fileNameDisplay.textContent = translations[currentLang].no_file_selected;
+        return;
+    }
 
     if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
         showStatus('status_format_err', true);
@@ -282,6 +301,7 @@ imageUpload.addEventListener('change', (e) => {
     if (file.size > MAX_FILE_SIZE) {
         showStatus('status_size_err', true);
         e.target.value = ''; // Reset input
+        if (fileNameDisplay) fileNameDisplay.textContent = translations[currentLang].no_file_selected;
         return;
     }
 
