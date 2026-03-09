@@ -313,7 +313,7 @@ function buildCommentEl(pid, commentId, data) {
                 nickname: profile?.nickname || currentUser.displayName || '',
                 profilePhotoURL: profile?.profilePhotoURL || null,
                 content,
-                createdAt: null
+                createdAt: { seconds: Math.floor(Date.now() / 1000) }
             }));
             replyFormEl.querySelector('.reply-input').value = '';
             replyFormEl.style.display = 'none';
@@ -395,7 +395,7 @@ async function submitComment(pid, content) {
         nickname: profile?.nickname || currentUser.displayName || '',
         profilePhotoURL: profile?.profilePhotoURL || null,
         content,
-        createdAt: null
+        createdAt: { seconds: Math.floor(Date.now() / 1000) }
     };
     document.getElementById('commentsList').appendChild(buildCommentEl(pid, newDoc.id, commentData));
     document.getElementById('commentInput').value = '';
