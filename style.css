@@ -2159,8 +2159,8 @@ canvas {
   border-bottom: 2px solid var(--border-color);
 }
 .other-profile-avatar {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   border: 2px solid var(--border-color);
   background-size: cover;
@@ -2178,7 +2178,7 @@ canvas {
   gap: 0.2rem;
 }
 .other-profile-nickname {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 800;
   margin: 0;
 }

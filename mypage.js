@@ -666,7 +666,9 @@ function buildPostCard(postId, data) {
     card.className = 'post-card';
     card.href = `/post.html?id=${postId}`;
 
-    const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
+    const date = data.createdAt
+        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '';
     const thumb = data.images && data.images[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
         : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
@@ -718,7 +720,7 @@ function setupOtherUserView(profile) {
             avatarEl.innerHTML = '';
         } else {
             avatarEl.style.backgroundImage = '';
-            avatarEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+            avatarEl.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
         }
         const nicknameEl = document.getElementById('otherProfileNickname');
         if (nicknameEl) nicknameEl.textContent = profile?.nickname || '';

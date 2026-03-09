@@ -87,7 +87,9 @@ function renderPost(pid, data) {
         avatarEl.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
     document.getElementById('postAuthorName').textContent = data.nickname || '';
-    const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
+    const date = data.createdAt
+        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '';
     document.getElementById('postDate').textContent = date;
     if (data.uid) {
         document.getElementById('postAuthorLink').href = `/mypage.html?uid=${data.uid}`;
@@ -208,7 +210,9 @@ async function loadComments(pid) {
 function buildCommentEl(pid, commentId, data) {
     const el = document.createElement('div');
     el.className = 'comment-item';
-    const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
+    const date = data.createdAt
+        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '';
 
     const avatarHtml = data.profilePhotoURL
         ? `<div class="comment-avatar" style="background-image:url(${data.profilePhotoURL})"></div>`
