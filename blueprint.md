@@ -19,7 +19,16 @@
     *   사용된 색상 팔레트를 번호와 함께 화면 측면에 나열.
 *   **PDF 저장**: 생성된 도안 이미지와 색상표를 PDF 파일로 다운로드.
 
-## 3. 외부 서비스 연동 (External Integrations)
+## 4. SEO 및 GEO 최적화 (SEO & GEO Optimization)
+*   **Search Engine Optimization (SEO)**:
+    *   `robots.txt` 및 `sitemap.xml` 생성 및 연동.
+    *   메인 페이지(`index.html`)에 Open Graph (OG), Twitter Cards, Canonical, Hreflang 태그 적용.
+    *   JSON-LD 구조화 데이터 (`SoftwareApplication`) 삽입으로 검색 결과 노출 강화.
+*   **Geographic Optimization (GEO)**:
+    *   Cloudflare CDN을 통한 글로벌 트래픽 분산 및 빠른 응답 속도 확보.
+    *   `hreflang` 태그를 활용한 다국어(ko, en, ja) 타겟팅 최적화.
+
+## 5. 외부 서비스 연동 (External Integrations)
 *   **Google Analytics (GA4)**: 사용자 행동 분석 및 트래픽 추적을 위해 Google Tag (gtag.js) 연동. (ID: G-KSBJ5J8N4K)
 *   **Microsoft Clarity**: 사용자 경험(UX) 분석 및 세션 녹화, 히트맵 확인을 위해 연동. (ID: vsvc6kadap)
 

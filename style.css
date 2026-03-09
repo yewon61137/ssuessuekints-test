@@ -26,15 +26,17 @@ header {
   position: relative;
 }
 
-.brand {
+.brand, .brand h1 {
   font-family: "Helvetica Neue", Helvetica, "Arial", sans-serif;
   font-size: 3.5rem;
   font-weight: 950;
   text-transform: uppercase;
   letter-spacing: -0.03em;
   line-height: 0.85;
+  margin: 0;
   margin-bottom: 0.5rem;
   -webkit-text-stroke: 1.5px #000;
+  display: block;
 }
 
 /* Dark Mode Support */
