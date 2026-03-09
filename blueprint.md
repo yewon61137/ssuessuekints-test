@@ -21,9 +21,12 @@
 
 ## 3. 외부 서비스 연동 (External Integrations)
 *   **Google Analytics (GA4)**: 사용자 행동 분석 및 트래픽 추적을 위해 Google Tag (gtag.js) 연동. (ID: G-KSBJ5J8N4K)
+*   **Microsoft Clarity**: 사용자 경험(UX) 분석 및 세션 녹화, 히트맵 확인을 위해 연동. (ID: vsvc6kadap)
 
 ## 4. 개발 계획 (Action Plan)
-1.  **GA4 연동**: 모든 HTML 파일에 Google Analytics 추적 코드 삽입. (완료)
+1.  **외부 분석 도구 연동**:
+    *   Google Analytics (GA4) 태그 삽입 (완료)
+    *   Microsoft Clarity 스크립트 삽입 (진행 중)
 2.  **UI 업데이트**:
     *   코 수 입력 대신 '실 굵기 드롭다운', '가로 cm', '세로 cm' 입력창으로 변경.
 3.  **코어 로직 수정 (크기 및 배치)**:
