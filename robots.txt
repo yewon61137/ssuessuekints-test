@@ -1,5 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /mypage.html
+Disallow: /post.html
 
-# Sitemaps
+# Naver crawler
+User-agent: Yeti
+Allow: /
+
 Sitemap: https://ssuessueknits.com/sitemap.xml
+Sitemap: https://ssuessueknits.com/rss.xml
