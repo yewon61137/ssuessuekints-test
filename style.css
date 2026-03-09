@@ -2139,6 +2139,58 @@ canvas {
   color: var(--text-color);
 }
 
+.post-author-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+.post-author-link:hover .post-author-name {
+  text-decoration: underline;
+}
+
+/* 타인 프로필 헤더 */
+.other-profile-header {
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0 1.25rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+.other-profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.other-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.other-profile-nickname {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* community 피드 - 작성자 이름 클릭 */
+.post-card-author-link {
+  cursor: pointer;
+}
+.post-card-author-link:hover {
+  text-decoration: underline;
+}
+
 .post-date {
   font-size: 0.75rem;
   color: var(--secondary-color);

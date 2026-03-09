@@ -89,6 +89,9 @@ function renderPost(pid, data) {
     document.getElementById('postAuthorName').textContent = data.nickname || '';
     const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
     document.getElementById('postDate').textContent = date;
+    if (data.uid) {
+        document.getElementById('postAuthorLink').href = `/mypage.html?uid=${data.uid}`;
+    }
 
     // 이미지 갤러리
     const gallery = document.getElementById('postImageGallery');

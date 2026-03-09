@@ -118,15 +118,28 @@ function renderPostCard(postId, data) {
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
         : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
     const tagsHtml = (data.tags || []).slice(0, 3).map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
+    const authorHtml = data.uid
+        ? `<span class="post-card-author-link" data-author-uid="${escHtml(data.uid)}">${escHtml(data.nickname || '')}</span>`
+        : escHtml(data.nickname || '');
 
     card.innerHTML = `
         ${thumb}
         <div class="post-card-body">
           <div class="post-card-tags">${tagsHtml}</div>
           <p class="post-card-title">${escHtml(data.title || '')}</p>
-          <p class="post-card-meta">${escHtml(data.nickname || '')} · ${date} · ♥ ${data.likeCount || 0} · 💬 ${data.commentCount || 0}</p>
+          <p class="post-card-meta">${authorHtml} · ${date} · ♥ ${data.likeCount || 0} · 💬 ${data.commentCount || 0}</p>
         </div>
     `;
+
+    const authorEl = card.querySelector('.post-card-author-link');
+    if (authorEl) {
+        authorEl.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = `/mypage.html?uid=${authorEl.dataset.authorUid}`;
+        });
+    }
+
     return card;
 }
 

@@ -75,6 +75,15 @@
 
     <!-- 로그인 상태 -->
     <div id="loggedIn" style="display:none;">
+
+      <!-- 타인 프로필 헤더 (urlUid 있을 때만 표시) -->
+      <div id="otherProfileHeader" class="other-profile-header" style="display:none;">
+        <div class="other-profile-avatar" id="otherProfileAvatar"></div>
+        <div class="other-profile-info">
+          <p class="other-profile-nickname" id="otherProfileNickname"></p>
+        </div>
+      </div>
+
       <!-- 탭 내비게이션 -->
       <nav class="mypage-tabs" id="mypageTabs">
         <button class="mypage-tab active" data-tab="profile">프로필 수정</button>

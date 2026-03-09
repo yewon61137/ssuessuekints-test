@@ -671,15 +671,28 @@ function buildPostCard(postId, data) {
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
         : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
     const tagsHtml = (data.tags || []).slice(0, 3).map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
+    const authorHtml = data.uid
+        ? `<span class="post-card-author-link" data-author-uid="${escHtml(data.uid)}">${escHtml(data.nickname || '')}</span>`
+        : escHtml(data.nickname || '');
 
     card.innerHTML = `
         ${thumb}
         <div class="post-card-body">
           <div class="post-card-tags">${tagsHtml}</div>
           <p class="post-card-title">${escHtml(data.title || '')}</p>
-          <p class="post-card-meta">${escHtml(data.nickname || '')} · ${date} · ♥ ${data.likeCount || 0}</p>
+          <p class="post-card-meta">${authorHtml} · ${date} · ♥ ${data.likeCount || 0}</p>
         </div>
     `;
+
+    const authorEl = card.querySelector('.post-card-author-link');
+    if (authorEl) {
+        authorEl.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = `/mypage.html?uid=${authorEl.dataset.authorUid}`;
+        });
+    }
+
     return card;
 }
 
@@ -688,13 +701,31 @@ function escHtml(str) {
 }
 
 // 타인 프로필 뷰: 탭을 도안/게시글만 보이도록 설정
-function setupOtherUserView(nickname) {
+function setupOtherUserView(profile) {
     // 프로필수정/스크랩 탭 숨김
     document.querySelectorAll('.mypage-tab').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
         if (tab === 'profile' || tab === 'scraps') btn.style.display = 'none';
     });
+
+    // 프로필 헤더 표시
+    const headerEl = document.getElementById('otherProfileHeader');
+    if (headerEl) {
+        headerEl.style.display = 'flex';
+        const avatarEl = document.getElementById('otherProfileAvatar');
+        if (profile?.profilePhotoURL) {
+            avatarEl.style.backgroundImage = `url(${profile.profilePhotoURL})`;
+            avatarEl.innerHTML = '';
+        } else {
+            avatarEl.style.backgroundImage = '';
+            avatarEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+        }
+        const nicknameEl = document.getElementById('otherProfileNickname');
+        if (nicknameEl) nicknameEl.textContent = profile?.nickname || '';
+    }
+
     // 타이틀
+    const nickname = profile?.nickname;
     const title = nickname ? `${nickname}님의 프로필` : '프로필';
     document.getElementById('mypageTitle').textContent = title;
     // 첫 탭을 내 도안으로
@@ -721,7 +752,7 @@ function initPageAuth() {
                 tabLoaded['mypatterns'] = true; // switchTab이 중복 로드 안 하도록 미리 설정
                 // 타인 프로필 정보 로드
                 const profile = await getUserProfile(urlUid);
-                setupOtherUserView(profile?.nickname || null);
+                setupOtherUserView(profile || null);
                 loadPatterns(urlUid);
             }
         } else if (isVerified) {
