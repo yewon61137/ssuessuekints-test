@@ -673,16 +673,21 @@ function buildPostCard(postId, data) {
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
         : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
     const tagsHtml = (data.tags || []).slice(0, 3).map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
+
+    const avatarStyle = data.profilePhotoURL ? `style="background-image:url(${escHtml(data.profilePhotoURL)})"` : '';
+    const avatarInner = data.profilePhotoURL ? '' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    const avatarHtml = `<span class="post-card-avatar-sm" ${avatarStyle}>${avatarInner}</span>`;
+
     const authorHtml = data.uid
         ? `<span class="post-card-author-link" data-author-uid="${escHtml(data.uid)}">${escHtml(data.nickname || '')}</span>`
-        : escHtml(data.nickname || '');
+        : `<span>${escHtml(data.nickname || '')}</span>`;
 
     card.innerHTML = `
         ${thumb}
         <div class="post-card-body">
           <div class="post-card-tags">${tagsHtml}</div>
           <p class="post-card-title">${escHtml(data.title || '')}</p>
-          <p class="post-card-meta">${authorHtml} · ${date} · ♥ ${data.likeCount || 0}</p>
+          <div class="post-card-meta">${avatarHtml}${authorHtml}<span class="post-card-date"> · ${date}</span><span class="post-card-counts"> · ♥ ${data.likeCount || 0}</span></div>
         </div>
     `;
 
