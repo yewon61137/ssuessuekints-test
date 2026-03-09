@@ -207,25 +207,40 @@ async function loadComments(pid) {
     } catch (e) { console.error('Comments load error:', e); }
 }
 
+function formatDate(ts) {
+    if (!ts) return '';
+    return new Date(ts.seconds * 1000).toLocaleString('ko-KR', {
+        year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+}
+
+function makeAvatar(photoURL, size = 16) {
+    return photoURL
+        ? `<div class="comment-avatar" style="background-image:url(${photoURL})"></div>`
+        : `<div class="comment-avatar"><svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>`;
+}
+
 function buildCommentEl(pid, commentId, data) {
     const el = document.createElement('div');
     el.className = 'comment-item';
-    const date = data.createdAt
-        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-        : '';
-
-    const avatarHtml = data.profilePhotoURL
-        ? `<div class="comment-avatar" style="background-image:url(${data.profilePhotoURL})"></div>`
-        : `<div class="comment-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>`;
 
     el.innerHTML = `
         <div class="comment-header">
-          ${avatarHtml}
+          ${makeAvatar(data.profilePhotoURL)}
           <span class="comment-author">${escHtml(data.nickname || '')}</span>
-          <span class="comment-date">${date}</span>
+          <span class="comment-date">${formatDate(data.createdAt)}</span>
         </div>
         <p class="comment-body">${escHtml(data.content || '')}</p>
+        <div class="comment-footer"></div>
     `;
+
+    const footerEl = el.querySelector('.comment-footer');
+
+    // 답글 버튼
+    const replyBtn = document.createElement('button');
+    replyBtn.className = 'reply-btn link-btn';
+    replyBtn.textContent = '답글';
+    footerEl.appendChild(replyBtn);
 
     // 본인 댓글만 삭제 가능
     if (currentUser && currentUser.uid === data.uid) {
@@ -243,6 +258,114 @@ function buildCommentEl(pid, commentId, data) {
                 const countEl = document.getElementById('commentCountDisplay');
                 countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
             } catch (e) { console.error('Comment delete error:', e); }
+        });
+        footerEl.appendChild(delBtn);
+    }
+
+    // 답글 입력 폼
+    const replyFormEl = document.createElement('div');
+    replyFormEl.className = 'reply-form';
+    replyFormEl.style.display = 'none';
+    replyFormEl.innerHTML = `
+        <textarea class="reply-input" placeholder="답글을 입력하세요 (최대 500자)" maxlength="500" rows="2"></textarea>
+        <div class="reply-form-btns">
+          <button type="button" class="reply-cancel-btn secondary-btn small-btn">취소</button>
+          <button type="button" class="reply-submit-btn primary-btn small-btn">등록</button>
+        </div>
+    `;
+    el.appendChild(replyFormEl);
+
+    // 답글 목록
+    const repliesContainer = document.createElement('div');
+    repliesContainer.className = 'replies-container';
+    el.appendChild(repliesContainer);
+
+    // 답글 버튼 토글
+    replyBtn.addEventListener('click', () => {
+        if (!currentUser) { openAuthModal(); return; }
+        const isOpen = replyFormEl.style.display !== 'none';
+        replyFormEl.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) replyFormEl.querySelector('.reply-input').focus();
+    });
+
+    replyFormEl.querySelector('.reply-cancel-btn').addEventListener('click', () => {
+        replyFormEl.style.display = 'none';
+        replyFormEl.querySelector('.reply-input').value = '';
+    });
+
+    replyFormEl.querySelector('.reply-submit-btn').addEventListener('click', async () => {
+        const content = replyFormEl.querySelector('.reply-input').value.trim();
+        if (!content) return;
+        const submitBtn = replyFormEl.querySelector('.reply-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '등록 중...';
+        try {
+            const profile = await getUserProfile(currentUser.uid);
+            const newRef = await addDoc(collection(db, `posts/${pid}/comments/${commentId}/replies`), {
+                uid: currentUser.uid,
+                nickname: profile?.nickname || currentUser.displayName || '',
+                profilePhotoURL: profile?.profilePhotoURL || null,
+                content,
+                createdAt: serverTimestamp()
+            });
+            repliesContainer.appendChild(buildReplyEl(pid, commentId, newRef.id, {
+                uid: currentUser.uid,
+                nickname: profile?.nickname || currentUser.displayName || '',
+                profilePhotoURL: profile?.profilePhotoURL || null,
+                content,
+                createdAt: null
+            }));
+            replyFormEl.querySelector('.reply-input').value = '';
+            replyFormEl.style.display = 'none';
+        } catch (e) {
+            console.error('Reply submit error:', e);
+            alert('답글 등록 중 오류가 발생했습니다.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '등록';
+        }
+    });
+
+    // 기존 답글 로드
+    loadReplies(pid, commentId, repliesContainer);
+
+    return el;
+}
+
+// --- 답글 로드 ---
+async function loadReplies(pid, commentId, container) {
+    try {
+        const snap = await getDocs(query(
+            collection(db, `posts/${pid}/comments/${commentId}/replies`),
+            orderBy('createdAt', 'asc')
+        ));
+        snap.forEach(d => container.appendChild(buildReplyEl(pid, commentId, d.id, d.data())));
+    } catch (e) { console.error('Replies load error:', e); }
+}
+
+function buildReplyEl(pid, commentId, replyId, data) {
+    const el = document.createElement('div');
+    el.className = 'reply-item';
+
+    el.innerHTML = `
+        <div class="comment-header">
+          ${makeAvatar(data.profilePhotoURL)}
+          <span class="comment-author">${escHtml(data.nickname || '')}</span>
+          <span class="comment-date">${formatDate(data.createdAt)}</span>
+        </div>
+        <p class="comment-body">${escHtml(data.content || '')}</p>
+    `;
+
+    if (currentUser && currentUser.uid === data.uid) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'comment-delete-btn link-btn';
+        delBtn.textContent = '삭제';
+        delBtn.addEventListener('click', async () => {
+            if (!confirm('답글을 삭제하시겠습니까?')) return;
+            try {
+                await deleteDoc(doc(db, `posts/${pid}/comments/${commentId}/replies/${replyId}`));
+                el.remove();
+            } catch (e) { console.error('Reply delete error:', e); }
         });
         el.querySelector('.comment-header').appendChild(delBtn);
     }

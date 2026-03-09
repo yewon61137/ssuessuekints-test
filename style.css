@@ -2436,6 +2436,69 @@ canvas {
   font-weight: 700;
 }
 
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+  padding-left: 2rem;
+}
+
+.reply-btn {
+  font-size: 0.72rem;
+  color: var(--secondary-color);
+  font-weight: 700;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+.reply-btn:hover {
+  color: var(--text-color);
+  text-decoration: underline;
+}
+
+.reply-form {
+  margin-top: 0.5rem;
+  margin-left: 2rem;
+}
+.reply-input {
+  width: 100%;
+  resize: vertical;
+  border: 1.5px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+.reply-form-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  justify-content: flex-end;
+}
+
+.replies-container {
+  margin-top: 0.25rem;
+}
+.reply-item {
+  margin-left: 2rem;
+  border-left: 2px solid var(--accent-color);
+  padding: 0.5rem 0 0.25rem 0.75rem;
+  margin-top: 0.5rem;
+}
+@media (prefers-color-scheme: dark) {
+  .reply-input {
+    border-color: #fff;
+  }
+  .reply-item {
+    border-left-color: #444;
+  }
+}
+
 .comment-form {
   display: flex;
   gap: 0.75rem;
