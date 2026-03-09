@@ -358,6 +358,49 @@ canvas {
   background-color: #fff;
 }
 
+/* AI 피사체 분석 */
+.ai-analysis-area {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  background: var(--accent-color);
+}
+.ai-analysis-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.ai-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.ai-analysis-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.ai-analysis-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0;
+}
+.ai-focus-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-wrap: wrap;
+}
+.ai-focus-hint {
+  font-size: 0.72rem;
+  color: var(--secondary-color);
+  font-weight: 400;
+  width: 100%;
+}
+
 /* Color Lists */
 .seed-colors-area h3, .legend-panel h3 {
   font-size: 0.9rem;

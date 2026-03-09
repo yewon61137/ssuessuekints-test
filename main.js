@@ -8,6 +8,7 @@ let originalImage = null;
 let patternHistory = []; // { dataURL, legendHTML, infoText, id }
 let isPreviewMode = false;
 let seedColors = [];
+let aiAnalysis = null; // { subject, bbox: {x1,y1,x2,y2}, hasComplexBackground }
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -41,6 +42,10 @@ const magnifierCtx = magnifierCanvas.getContext('2d');
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
+const aiAnalysisArea = document.getElementById('aiAnalysisArea');
+const aiAnalysisText = document.getElementById('aiAnalysisText');
+const aiFocusLabel = document.getElementById('aiFocusLabel');
+const subjectFocusToggle = document.getElementById('subjectFocusToggle');
 const langBtns = document.querySelectorAll('.lang-btn');
 
 // --- 번역 데이터 (i18n) ---
@@ -361,7 +366,12 @@ imageUpload.addEventListener('change', (e) => {
             isPreviewMode = true;
             seedColors = [];
             renderSeedColors();
+            aiAnalysis = null;
+            aiAnalysisArea.style.display = 'none';
             showStatus('status_loaded', false);
+
+            // AI 피사체 분석 (비동기 — 도안 생성을 막지 않음)
+            analyzeImageSubject();
         };
         img.src = event.target.result;
     };
@@ -497,6 +507,44 @@ clearSeedsBtn.addEventListener('click', () => {
     renderSeedColors();
 });
 
+// --- AI 피사체 분석 ---
+async function analyzeImageSubject() {
+    if (!originalImage || !aiAnalysisArea) return;
+    aiAnalysisArea.style.display = 'block';
+    aiAnalysisText.textContent = 'AI 피사체 분석 중...';
+    aiFocusLabel.style.display = 'none';
+
+    try {
+        // previewCanvas는 이미 렌더된 상태 — 그대로 base64로 변환
+        const base64 = previewCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' })
+        });
+
+        if (!res.ok) throw new Error('API 오류');
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        aiAnalysis = data;
+        const subject = aiAnalysis.subject || '알 수 없음';
+        const hasBusy = aiAnalysis.hasComplexBackground;
+
+        aiAnalysisText.textContent = `AI 감지: ${subject}${hasBusy ? ' · 배경이 복잡한 사진입니다' : ''}`;
+
+        if (aiAnalysis.bbox) {
+            aiFocusLabel.style.display = 'flex';
+            subjectFocusToggle.checked = !!hasBusy; // 배경 복잡하면 기본 체크
+        }
+    } catch (e) {
+        console.warn('AI 분석 실패 (도안 생성에는 영향 없음):', e.message);
+        aiAnalysisArea.style.display = 'none';
+        aiAnalysis = null;
+    }
+}
+
 // --- 2. 도안 생성 로직 ---
 generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
@@ -536,7 +584,19 @@ generateBtn.addEventListener('click', async () => {
     const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
     tempCanvas.width = targetStitches;
     tempCanvas.height = targetRows;
-    tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
+
+    // 피사체 집중 모드: AI가 감지한 bbox 영역만 크롭해서 사용
+    if (subjectFocusToggle && subjectFocusToggle.checked && aiAnalysis?.bbox) {
+        const { x1, y1, x2, y2 } = aiAnalysis.bbox;
+        const iw = originalImage.width, ih = originalImage.height;
+        const sx = Math.max(0, x1) * iw;
+        const sy = Math.max(0, y1) * ih;
+        const sw = Math.min(1, x2 - x1) * iw;
+        const sh = Math.min(1, y2 - y1) * ih;
+        tempCtx.drawImage(originalImage, sx, sy, sw, sh, 0, 0, targetStitches, targetRows);
+    } else {
+        tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
+    }
 
     setTimeout(() => {
         try {
