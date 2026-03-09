@@ -220,6 +220,57 @@ function makeAvatar(photoURL, size = 16) {
         : `<div class="comment-avatar"><svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>`;
 }
 
+// --- 인라인 편집 헬퍼 ---
+function attachInlineEdit(el, bodyEl, firestorePath, data) {
+    const editBtn = document.createElement('button');
+    editBtn.className = 'comment-edit-btn link-btn';
+    editBtn.textContent = '수정';
+
+    editBtn.addEventListener('click', () => {
+        if (el.querySelector('.comment-edit-area')) return; // 이미 열려 있으면 무시
+        const editArea = document.createElement('div');
+        editArea.className = 'comment-edit-area';
+        editArea.innerHTML = `
+            <textarea class="reply-input" maxlength="500" rows="2"></textarea>
+            <div class="reply-form-btns">
+              <button type="button" class="edit-cancel-btn secondary-btn small-btn">취소</button>
+              <button type="button" class="edit-save-btn primary-btn small-btn">저장</button>
+            </div>
+        `;
+        editArea.querySelector('textarea').value = data.content;
+        bodyEl.style.display = 'none';
+        bodyEl.insertAdjacentElement('afterend', editArea);
+        editArea.querySelector('textarea').focus();
+
+        editArea.querySelector('.edit-cancel-btn').addEventListener('click', () => {
+            editArea.remove();
+            bodyEl.style.display = '';
+        });
+
+        editArea.querySelector('.edit-save-btn').addEventListener('click', async () => {
+            const newContent = editArea.querySelector('textarea').value.trim();
+            if (!newContent) return;
+            const saveBtn = editArea.querySelector('.edit-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '저장 중...';
+            try {
+                await updateDoc(doc(db, firestorePath), { content: newContent, updatedAt: serverTimestamp() });
+                data.content = newContent;
+                bodyEl.textContent = newContent;
+                bodyEl.style.display = '';
+                editArea.remove();
+            } catch (e) {
+                console.error('Edit error:', e);
+                alert('수정 중 오류가 발생했습니다.');
+                saveBtn.disabled = false;
+                saveBtn.textContent = '저장';
+            }
+        });
+    });
+
+    return editBtn;
+}
+
 function buildCommentEl(pid, commentId, data) {
     const el = document.createElement('div');
     el.className = 'comment-item';
@@ -242,8 +293,11 @@ function buildCommentEl(pid, commentId, data) {
     replyBtn.textContent = '답글';
     footerEl.appendChild(replyBtn);
 
-    // 본인 댓글만 삭제 가능
+    // 본인 댓글만 수정/삭제 가능
     if (currentUser && currentUser.uid === data.uid) {
+        const editBtn = attachInlineEdit(el, el.querySelector('.comment-body'), `posts/${pid}/comments/${commentId}`, data);
+        footerEl.appendChild(editBtn);
+
         const delBtn = document.createElement('button');
         delBtn.className = 'comment-delete-btn link-btn';
         delBtn.textContent = '삭제';
@@ -357,6 +411,12 @@ function buildReplyEl(pid, commentId, replyId, data) {
     `;
 
     if (currentUser && currentUser.uid === data.uid) {
+        const footerEl = document.createElement('div');
+        footerEl.className = 'comment-footer';
+
+        const editBtn = attachInlineEdit(el, el.querySelector('.comment-body'), `posts/${pid}/comments/${commentId}/replies/${replyId}`, data);
+        footerEl.appendChild(editBtn);
+
         const delBtn = document.createElement('button');
         delBtn.className = 'comment-delete-btn link-btn';
         delBtn.textContent = '삭제';
@@ -367,7 +427,8 @@ function buildReplyEl(pid, commentId, replyId, data) {
                 el.remove();
             } catch (e) { console.error('Reply delete error:', e); }
         });
-        el.querySelector('.comment-header').appendChild(delBtn);
+        footerEl.appendChild(delBtn);
+        el.appendChild(footerEl);
     }
     return el;
 }
