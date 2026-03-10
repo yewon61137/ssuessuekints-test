@@ -207,6 +207,76 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
     return { palette: centers, assignments };
 }
 
+// 선-양자화 후 다수결 축소
+// 1) 팔레트가 확정된 상태에서
+// 2) 각 코 칸에 속한 원본 픽셀들을 팔레트 색으로 스냅한 뒤
+// 3) 가장 많이 등장한 색(최빈값)을 그 칸의 색으로 결정
+// → 경계 혼합(회색 섞임) 없이 항상 팔레트 단색으로 배정됨
+export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols, outRows, palette) {
+    const data = imageData.data;
+    const assignments = new Array(outCols * outRows).fill(0);
+
+    for (let oy = 0; oy < outRows; oy++) {
+        const srcYStart = Math.floor(oy * fullHeight / outRows);
+        const srcYEnd   = Math.max(srcYStart + 1, Math.floor((oy + 1) * fullHeight / outRows));
+
+        for (let ox = 0; ox < outCols; ox++) {
+            const srcXStart = Math.floor(ox * fullWidth / outCols);
+            const srcXEnd   = Math.max(srcXStart + 1, Math.floor((ox + 1) * fullWidth / outCols));
+
+            const votes = new Array(palette.length).fill(0);
+            let totalPixels = 0;
+
+            for (let sy = srcYStart; sy < srcYEnd; sy++) {
+                for (let sx = srcXStart; sx < srcXEnd; sx++) {
+                    const idx = (sy * fullWidth + sx) * 4;
+                    if (data[idx + 3] <= 128) continue; // 투명 픽셀 제외
+
+                    const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+
+                    // 원본 픽셀을 가장 가까운 팔레트 색으로 스냅 (평균 아님)
+                    let minDist = Infinity, nearest = 0;
+                    for (let c = 0; c < palette.length; c++) {
+                        const dr = r - palette[c][0];
+                        const dg = g - palette[c][1];
+                        const db = b - palette[c][2];
+                        const dist = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+                        if (dist < minDist) { minDist = dist; nearest = c; }
+                    }
+                    votes[nearest]++;
+                    totalPixels++;
+                }
+            }
+
+            if (totalPixels === 0) {
+                // 완전 투명 칸: 중심 픽셀로 폴백
+                const cx = Math.floor((srcXStart + srcXEnd) / 2);
+                const cy = Math.floor((srcYStart + srcYEnd) / 2);
+                const idx = (cy * fullWidth + cx) * 4;
+                const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+                let minDist = Infinity, nearest = 0;
+                for (let c = 0; c < palette.length; c++) {
+                    const dr = r - palette[c][0];
+                    const dg = g - palette[c][1];
+                    const db = b - palette[c][2];
+                    const dist = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+                    if (dist < minDist) { minDist = dist; nearest = c; }
+                }
+                assignments[oy * outCols + ox] = nearest;
+            } else {
+                // 다수결: 가장 많이 득표한 팔레트 색 선택
+                let maxVotes = 0, winner = 0;
+                for (let c = 0; c < palette.length; c++) {
+                    if (votes[c] > maxVotes) { maxVotes = votes[c]; winner = c; }
+                }
+                assignments[oy * outCols + ox] = winner;
+            }
+        }
+    }
+
+    return assignments;
+}
+
 export function rgbToHex([r, g, b]) {
     return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
 }

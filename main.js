@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
+import { getPixelArray, kMeans, quantizeAndDownsample, rgbToHex, hexToRgb } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -558,10 +558,18 @@ generateBtn.addEventListener('click', async () => {
 
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-    tempCanvas.width = targetStitches;
-    tempCanvas.height = targetRows;
 
-    // 피사체 집중 모드: AI가 감지한 bbox 영역만 크롭해서 사용
+    // --- 선-양자화 다수결 축소 ---
+    // 1단계: 팔레트 추출용 고해상도 캔버스 (최대 1500px 제한으로 메모리 절약)
+    const MAX_FULL_RES = 1500;
+    const srcAspect = originalImage.height / originalImage.width;
+    const fullW = Math.min(originalImage.width, MAX_FULL_RES);
+    const fullH = Math.round(fullW * srcAspect);
+
+    tempCanvas.width = fullW;
+    tempCanvas.height = fullH;
+
+    // bbox 크롭 지원
     if (subjectFocusToggle && subjectFocusToggle.checked && aiAnalysis?.bbox) {
         const { x1, y1, x2, y2 } = aiAnalysis.bbox;
         const iw = originalImage.width, ih = originalImage.height;
@@ -569,16 +577,20 @@ generateBtn.addEventListener('click', async () => {
         const sy = Math.max(0, y1) * ih;
         const sw = Math.min(1, x2 - x1) * iw;
         const sh = Math.min(1, y2 - y1) * ih;
-        tempCtx.drawImage(originalImage, sx, sy, sw, sh, 0, 0, targetStitches, targetRows);
+        tempCtx.drawImage(originalImage, sx, sy, sw, sh, 0, 0, fullW, fullH);
     } else {
-        tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
+        tempCtx.drawImage(originalImage, 0, 0, fullW, fullH);
     }
 
     setTimeout(() => {
         try {
-            const imageData = tempCtx.getImageData(0, 0, targetStitches, targetRows);
-            const pixels = getPixelArray(imageData, targetStitches, targetRows);
-            const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15, seedColors);
+            // 2단계: 고해상도 픽셀로 팔레트 추출 (k-means)
+            const fullImageData = tempCtx.getImageData(0, 0, fullW, fullH);
+            const pixels = getPixelArray(fullImageData, fullW, fullH);
+            const { palette } = kMeans(pixels, colorCount, fullW, fullH, 15, seedColors);
+
+            // 3단계: 팔레트 확정 후 다수결 방식으로 코 칸별 색상 배정 (경계 혼합 없음)
+            const assignments = quantizeAndDownsample(fullImageData, fullW, fullH, targetStitches, targetRows, palette);
             
             let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             
