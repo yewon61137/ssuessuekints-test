@@ -1,6 +1,7 @@
 // mypage.js — 마이페이지 (4탭: 프로필 수정 / 내 도안 / 내 글 / 스크랩)
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js';
+import { t as sharedT, applyLang as _applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection, query, orderBy, limit, getDocs,
@@ -8,8 +9,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, deleteObject, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-// --- i18n ---
-const t = {
+// --- i18n (페이지별 문자열) ---
+const pageT = {
     ko: {
         mypage: '마이페이지', not_logged_in: '로그인하면 마이페이지를 이용할 수 있습니다.',
         go_to_signin: '로그인', loading: '불러오는 중...',
@@ -17,12 +18,7 @@ const t = {
         empty_posts: '작성한 글이 없습니다.', empty_scraps: '스크랩한 글이 없습니다.',
         rename: '이름변경', view_original: '원본', delete: '삭제',
         confirm_delete: '이 도안을 삭제하시겠습니까?', rename_prompt: '새 도안 이름을 입력하세요:',
-        stitches: '코', rows: '단', btn_signin: '로그인', btn_signout: '로그아웃',
-        btn_mypage: '마이페이지', btn_community: '커뮤니티',
-        tab_signin: '로그인', tab_signup: '회원가입', btn_google: 'Google로 계속하기',
-        btn_signup: '회원가입', or_divider: '또는', go_generate: '← 도안 만들기',
-        footer_generate: '도안 만들기', footer_mypage: '내 도안',
-        footer_community: '커뮤니티', footer_about: '소개', footer_privacy: '개인정보처리방침',
+        stitches: '코', rows: '단', go_generate: '← 도안 만들기',
         tab_profile: '프로필 수정', tab_mypatterns: '내 도안', tab_myposts: '내 글', tab_scraps: '스크랩',
         profile_save: '저장', profile_saving: '저장 중...', profile_saved: '저장되었습니다.',
         nickname_check: '중복 확인', nickname_checking: '확인 중...',
@@ -41,12 +37,7 @@ const t = {
         empty_posts: 'No posts yet.', empty_scraps: 'No scrapped posts yet.',
         rename: 'Rename', view_original: 'Original', delete: 'Delete',
         confirm_delete: 'Delete this pattern?', rename_prompt: 'Enter new pattern name:',
-        stitches: 'sts', rows: 'rows', btn_signin: 'Sign In', btn_signout: 'Sign Out',
-        btn_mypage: 'My Page', btn_community: 'Community',
-        tab_signin: 'Sign In', tab_signup: 'Sign Up', btn_google: 'Continue with Google',
-        btn_signup: 'Sign Up', or_divider: 'or', go_generate: '← Create Pattern',
-        footer_generate: 'Create Pattern', footer_mypage: 'My Patterns',
-        footer_community: 'Community', footer_about: 'About', footer_privacy: 'Privacy Policy',
+        stitches: 'sts', rows: 'rows', go_generate: '← Create Pattern',
         tab_profile: 'Edit Profile', tab_mypatterns: 'My Patterns', tab_myposts: 'My Posts', tab_scraps: 'Scraps',
         profile_save: 'Save', profile_saving: 'Saving...', profile_saved: 'Saved.',
         nickname_check: 'Check', nickname_checking: 'Checking...',
@@ -65,12 +56,7 @@ const t = {
         empty_posts: '投稿した記事がありません。', empty_scraps: 'スクラップした記事がありません。',
         rename: '名前変更', view_original: '原画', delete: '削除',
         confirm_delete: 'この編み図を削除しますか？', rename_prompt: '新しい名前を入力してください:',
-        stitches: '目', rows: '段', btn_signin: 'ログイン', btn_signout: 'ログアウト',
-        btn_mypage: 'マイページ', btn_community: 'コミュニティ',
-        tab_signin: 'ログイン', tab_signup: '新規登録', btn_google: 'Googleで続ける',
-        btn_signup: '新規登録', or_divider: 'または', go_generate: '← 編み図を作る',
-        footer_generate: '編み図を作る', footer_mypage: 'マイ編み図',
-        footer_community: 'コミュニティ', footer_about: '紹介', footer_privacy: 'プライバシーポリシー',
+        stitches: '目', rows: '段', go_generate: '← 編み図を作る',
         tab_profile: 'プロフィール編集', tab_mypatterns: 'マイ編み図', tab_myposts: '投稿', tab_scraps: 'スクラップ',
         profile_save: '保存', profile_saving: '保存中...', profile_saved: '保存されました。',
         nickname_check: '確認', nickname_checking: '確認中...',
@@ -85,7 +71,7 @@ const t = {
 };
 
 let currentLang = 'ko';
-function tr(key) { return (t[currentLang] && t[currentLang][key]) || key; }
+function tr(key) { return (pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[key]) || key; }
 
 // --- URL 파라미터로 타인 프로필 여부 판단 ---
 const urlUid = new URLSearchParams(location.search).get('uid');
@@ -102,13 +88,8 @@ const patternGridEl = document.getElementById('patternGrid');
 // --- Language ---
 function applyLang(lang) {
     currentLang = lang;
-    localStorage.setItem('lang', lang);
-    document.documentElement.lang = lang;
-    langBtns.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === lang));
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[lang] && t[lang][key]) el.textContent = t[lang][key];
-    });
+    _applyLang(lang, { extra: pageT });
+
     document.getElementById('mypageTitle').textContent = tr('mypage');
     const myPatternsTitle = document.getElementById('myPatternsTitle');
     if (myPatternsTitle) myPatternsTitle.textContent = tr('mypatterns_title');
@@ -122,8 +103,8 @@ function applyLang(lang) {
     // 탭 레이블
     document.querySelectorAll('.mypage-tab').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
-        const key = 'tab_' + tab;
-        if (t[lang] && t[lang][key]) btn.textContent = t[lang][key];
+        const val = pageT[lang]?.['tab_' + tab];
+        if (val) btn.textContent = val;
     });
 
     // 프로필 편집 패널 — placeholder & label 번역
@@ -137,8 +118,7 @@ langBtns.forEach(btn => {
     btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
 });
 
-const savedLang = localStorage.getItem('lang');
-if (savedLang && savedLang !== 'ko') applyLang(savedLang);
+applyLang(localStorage.getItem('lang') || 'ko');
 
 // --- Tab 컨트롤러 ---
 let currentTab = 'profile';

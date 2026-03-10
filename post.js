@@ -1,6 +1,7 @@
 // post.js — 게시글 상세 페이지
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     doc, getDoc, collection, query, orderBy, getDocs,
@@ -8,35 +9,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, deleteObject, listAll, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-// --- i18n (최소) ---
-const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
-const tMap = {
-    ko: { btn_signin: '로그인', btn_signout: '로그아웃', btn_mypage: '마이페이지', btn_community: '커뮤니티',
-          tab_signin: '로그인', tab_signup: '회원가입', btn_google: 'Google로 계속하기', btn_signup: '회원가입',
-          or_divider: '또는', footer_generate: '도안 만들기', footer_mypage: '내 도안',
-          footer_community: '커뮤니티', footer_about: '소개', footer_privacy: '개인정보처리방침' },
-    en: { btn_signin: 'Sign In', btn_signout: 'Sign Out', btn_mypage: 'My Page', btn_community: 'Community',
-          tab_signin: 'Sign In', tab_signup: 'Sign Up', btn_google: 'Continue with Google', btn_signup: 'Sign Up',
-          or_divider: 'or', footer_generate: 'Create Pattern', footer_mypage: 'My Patterns',
-          footer_community: 'Community', footer_about: 'About', footer_privacy: 'Privacy Policy' },
-    ja: { btn_signin: 'ログイン', btn_signout: 'ログアウト', btn_mypage: 'マイページ', btn_community: 'コミュニティ',
-          tab_signin: 'ログイン', tab_signup: '新規登録', btn_google: 'Googleで続ける', btn_signup: '新規登録',
-          or_divider: 'または', footer_generate: '編み図を作る', footer_mypage: 'マイ編み図',
-          footer_community: 'コミュニティ', footer_about: '紹介', footer_privacy: 'プライバシーポリシー' }
-};
-
-function applyLang(lang) {
-    localStorage.setItem('lang', lang);
-    document.documentElement.lang = lang;
-    langBtns.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === lang));
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (tMap[lang] && tMap[lang][key]) el.textContent = tMap[lang][key];
-    });
-}
-langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
-const savedLang = localStorage.getItem('lang');
-if (savedLang && savedLang !== 'ko') applyLang(savedLang);
+initLang();
 
 // --- 상태 ---
 const params = new URLSearchParams(location.search);

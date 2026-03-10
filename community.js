@@ -1,6 +1,7 @@
 // community.js — 커뮤니티 피드
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection, query, orderBy, limit, getDocs, addDoc,
@@ -16,51 +17,6 @@ let lastDoc = null;
 let isLoading = false;
 let currentUser = null;
 
-// --- i18n (최소) ---
-const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
-const tMap = {
-    ko: { btn_signin: '로그인', btn_signout: '로그아웃', btn_mypage: '마이페이지', btn_community: '커뮤니티',
-          btn_notice: '공지사항', footer_guide: '이용안내', footer_terms: '이용약관',
-          tagline_community: '커뮤니티', btn_write: '글쓰기',
-          tab_signin: '로그인', tab_signup: '회원가입', btn_google: 'Google로 계속하기', btn_signup: '회원가입',
-          or_divider: '또는', footer_generate: '도안 만들기', footer_mypage: '내 도안',
-          footer_community: '커뮤니티', footer_about: '소개', footer_privacy: '개인정보처리방침',
-          tag_all: '전체', tag_crochet: '코바늘', tag_knitting: '대바늘', tag_finished: '완성작',
-          tag_pattern_share: '도안공유', tag_wip: '진행중', tag_question: '질문',
-          feed_loading: '불러오는 중...', feed_empty: '게시글이 없습니다. 첫 글을 작성해보세요!', load_more: '더 보기' },
-    en: { btn_signin: 'Sign In', btn_signout: 'Sign Out', btn_mypage: 'My Page', btn_community: 'Community',
-          btn_notice: 'Notice', footer_guide: 'Guide', footer_terms: 'Terms of Service',
-          tagline_community: 'Community', btn_write: 'Write',
-          tab_signin: 'Sign In', tab_signup: 'Sign Up', btn_google: 'Continue with Google', btn_signup: 'Sign Up',
-          or_divider: 'or', footer_generate: 'Create Pattern', footer_mypage: 'My Patterns',
-          footer_community: 'Community', footer_about: 'About', footer_privacy: 'Privacy Policy',
-          tag_all: 'All', tag_crochet: 'Crochet', tag_knitting: 'Knitting', tag_finished: 'Finished',
-          tag_pattern_share: 'Pattern Share', tag_wip: 'WIP', tag_question: 'Q&A',
-          feed_loading: 'Loading...', feed_empty: 'No posts yet. Be the first to write!', load_more: 'Load More' },
-    ja: { btn_signin: 'ログイン', btn_signout: 'ログアウト', btn_mypage: 'マイページ', btn_community: 'コミュニティ',
-          btn_notice: 'お知らせ', footer_guide: 'ご利用案内', footer_terms: '利用規約',
-          tagline_community: 'コミュニティ', btn_write: '投稿する',
-          tab_signin: 'ログイン', tab_signup: '新規登録', btn_google: 'Googleで続ける', btn_signup: '新規登録',
-          or_divider: 'または', footer_generate: '編み図を作る', footer_mypage: 'マイ編み図',
-          footer_community: 'コミュニティ', footer_about: '紹介', footer_privacy: 'プライバシーポリシー',
-          tag_all: 'すべて', tag_crochet: 'かぎ針', tag_knitting: '棒針', tag_finished: '完成作品',
-          tag_pattern_share: '編み図共有', tag_wip: '制作中', tag_question: '質問',
-          feed_loading: '読み込み中...', feed_empty: '投稿がありません。最初の投稿をしてみましょう！', load_more: 'もっと見る' }
-};
-
-function applyLang(lang) {
-    localStorage.setItem('lang', lang);
-    document.documentElement.lang = lang;
-    langBtns.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === lang));
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (tMap[lang] && tMap[lang][key]) el.textContent = tMap[lang][key];
-    });
-}
-
-langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
-const savedLang = localStorage.getItem('lang') || 'ko';
-applyLang(savedLang);
 
 // --- 피드 로드 ---
 async function loadFeed(tagFilter = '', cursorDoc = null) {
@@ -342,7 +298,8 @@ function escHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// --- 인증 초기화 ---
+// --- 초기화 ---
+initLang();
 initAuth();
 
 onAuthStateChanged(auth, user => {

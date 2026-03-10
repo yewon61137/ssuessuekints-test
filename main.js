@@ -2,6 +2,7 @@
 
 import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud } from './auth.js';
+import { t as sharedT } from './i18n.js';
 
 // --- 상태 관리 ---
 let originalImage = null;
@@ -99,16 +100,6 @@ const translations = {
         footer_guide: "이용안내",
         copyright_notice: "⚠️ 타인의 사진·캐릭터·예술 작품으로 생성한 도안을 상업적으로 이용할 경우 저작권법 위반의 책임은 전적으로 이용자 본인에게 있습니다. <a href='/privacy.html#disclaimer' aria-label='저작권 면책 고지 자세히 보기'>자세히 보기</a>",
         status_saved: "도안이 저장되었습니다.",
-        btn_signin: "로그인",
-        btn_signout: "로그아웃",
-        btn_mypage: "마이페이지",
-        btn_community: "커뮤니티",
-        btn_notice: "공지사항",
-        tab_signin: "로그인",
-        tab_signup: "회원가입",
-        btn_google: "Google로 계속하기",
-        btn_signup: "회원가입",
-        or_divider: "또는"
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -159,16 +150,6 @@ const translations = {
         footer_guide: "Guide",
         copyright_notice: "⚠️ You are solely responsible for any copyright infringement if you use patterns generated from others' photos, characters, or artwork for commercial purposes. <a href='/privacy.html#disclaimer' aria-label='Learn more about copyright disclaimer'>Learn more</a>",
         status_saved: "Pattern saved to your account.",
-        btn_signin: "Sign In",
-        btn_signout: "Sign Out",
-        btn_mypage: "My Page",
-        btn_community: "Community",
-        btn_notice: "Notice",
-        tab_signin: "Sign In",
-        tab_signup: "Sign Up",
-        btn_google: "Continue with Google",
-        btn_signup: "Sign Up",
-        or_divider: "or"
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -219,16 +200,6 @@ const translations = {
         footer_guide: "ご利用案内",
         copyright_notice: "⚠️ 他者の写真・キャラクター・芸術作品から生成した編み図を商業目的で利用する場合、著作権法違反の責任はすべて利用者本人にあります。<a href='/privacy.html#disclaimer' aria-label='著作権免責事項の詳細を見る'>詳細を見る</a>",
         status_saved: "編み図が保存されました。",
-        btn_signin: "ログイン",
-        btn_signout: "ログアウト",
-        btn_mypage: "マイページ",
-        btn_community: "コミュニティ",
-        btn_notice: "お知らせ",
-        tab_signin: "ログイン",
-        tab_signup: "新規登録",
-        btn_google: "Googleで続ける",
-        btn_signup: "新規登録",
-        or_divider: "または"
     }
 };
 
@@ -240,10 +211,11 @@ function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
     document.documentElement.lang = lang;
+    const merged = { ...sharedT[lang], ...translations[lang] };
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang][key]) {
-            el.innerHTML = translations[lang][key];
+        if (merged[key]) {
+            el.innerHTML = merged[key];
         }
     });
     // Handle special case for file name display which isn't data-i18n but updated dynamically
@@ -266,7 +238,7 @@ langBtns.forEach(btn => {
 
 // 저장된 언어로 초기화
 const savedLang = localStorage.getItem('lang');
-if (savedLang && translations[savedLang] && savedLang !== 'ko') changeLanguage(savedLang);
+if (savedLang && savedLang !== 'ko') changeLanguage(savedLang);
 
 // --- 실 굵기 입력 방식 전환 ---
 yarnUnitRadios.forEach(radio => {
