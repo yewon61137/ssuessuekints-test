@@ -723,14 +723,16 @@ document.getElementById('editPostForm').addEventListener('submit', async e => {
 });
 
 // --- 이벤트 바인딩 ---
-document.getElementById('likeBtn').addEventListener('click', () => {
+document.getElementById('likeBtn').addEventListener('click', async () => {
     if (!currentUser) { openAuthModal(); return; }
-    toggleLike(postId, currentUser.uid);
+    try { await toggleLike(postId, currentUser.uid); }
+    catch (e) { console.error('Like error:', e); }
 });
 
-document.getElementById('scrapBtn').addEventListener('click', () => {
+document.getElementById('scrapBtn').addEventListener('click', async () => {
     if (!currentUser) { openAuthModal(); return; }
-    toggleScrap(postId, currentUser.uid);
+    try { await toggleScrap(postId, currentUser.uid); }
+    catch (e) { console.error('Scrap error:', e); }
 });
 
 document.getElementById('commentForm').addEventListener('submit', async e => {
