@@ -12,9 +12,7 @@ import {
     signInWithEmailAndPassword,
     updateProfile,
     sendEmailVerification,
-    applyActionCode,
-    RecaptchaVerifier,
-    signInWithPhoneNumber
+    applyActionCode
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     getFirestore,
@@ -146,9 +144,6 @@ let nicknameAvailable = false;
 let verificationTimer = null;
 let verificationFocusHandler = null;
 
-// --- 휴대전화 인증 상태 ---
-let confirmationResult = null;
-let recaptchaVerifier = null;
 
 function showProfileSetup(user) {
     pendingProfileUser = user;
@@ -160,14 +155,10 @@ function showProfileSetup(user) {
     // 탭·Google 버튼·구분선 숨기기
     modal.querySelector('.modal-tabs').style.display = 'none';
     modal.querySelector('.google-btn').style.display = 'none';
-    const phoneBtnEl = modal.querySelector('.phone-btn');
-    if (phoneBtnEl) phoneBtnEl.style.display = 'none';
     modal.querySelector('.modal-divider').style.display = 'none';
     document.getElementById('signinPanel').style.display = 'none';
     document.getElementById('signupPanel').style.display = 'none';
     document.getElementById('verificationSentPanel').style.display = 'none';
-    const phonePanel = document.getElementById('phonePanel');
-    if (phonePanel) phonePanel.style.display = 'none';
 
     const panel = document.getElementById('profileSetupPanel');
     panel.style.display = 'block';
@@ -211,14 +202,10 @@ function showVerificationSentUI(email) {
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = 'none';
     modal.querySelector('.google-btn').style.display = 'none';
-    const phoneBtnEl2 = modal.querySelector('.phone-btn');
-    if (phoneBtnEl2) phoneBtnEl2.style.display = 'none';
     modal.querySelector('.modal-divider').style.display = 'none';
     document.getElementById('signinPanel').style.display = 'none';
     document.getElementById('signupPanel').style.display = 'none';
     document.getElementById('profileSetupPanel').style.display = 'none';
-    const phonePanel2 = document.getElementById('phonePanel');
-    if (phonePanel2) phonePanel2.style.display = 'none';
 
     const panel = document.getElementById('verificationSentPanel');
     panel.style.display = 'block';
@@ -267,15 +254,11 @@ function hideProfileSetupUI() {
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = '';
     modal.querySelector('.google-btn').style.display = '';
-    const phoneBtnEl3 = modal.querySelector('.phone-btn');
-    if (phoneBtnEl3) phoneBtnEl3.style.display = '';
     modal.querySelector('.modal-divider').style.display = '';
     const setupPanel = document.getElementById('profileSetupPanel');
     if (setupPanel) setupPanel.style.display = 'none';
     const sentPanel = document.getElementById('verificationSentPanel');
     if (sentPanel) sentPanel.style.display = 'none';
-    const phonePanel3 = document.getElementById('phonePanel');
-    if (phonePanel3) phonePanel3.style.display = 'none';
     // 닉네임 체크 상태 리셋
     nicknameChecked = false;
     nicknameAvailable = false;
@@ -563,85 +546,6 @@ export function initAuth() {
         });
     }
 
-    // 휴대전화 로그인 버튼
-    const phoneSignInBtn = document.getElementById('phoneSignInBtn');
-    if (phoneSignInBtn) {
-        phoneSignInBtn.addEventListener('click', () => {
-            clearModalError();
-            showPhonePanel();
-        });
-    }
-
-    // 인증번호 발송
-    const sendCodeBtn = document.getElementById('sendCodeBtn');
-    if (sendCodeBtn) {
-        sendCodeBtn.addEventListener('click', async () => {
-            clearModalError();
-            const raw = document.getElementById('phoneNumber').value.trim();
-            if (!raw) { showModalError('전화번호를 입력해주세요.'); return; }
-            const phoneNum = formatPhoneNumber(raw);
-
-            sendCodeBtn.disabled = true;
-            sendCodeBtn.textContent = '발송 중...';
-            try {
-                if (recaptchaVerifier) { recaptchaVerifier.clear(); recaptchaVerifier = null; }
-                recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
-                confirmationResult = await signInWithPhoneNumber(auth, phoneNum, recaptchaVerifier);
-                document.getElementById('phoneStep1').style.display = 'none';
-                document.getElementById('phoneStep2').style.display = 'block';
-                document.getElementById('phoneCode').focus();
-            } catch (e) {
-                console.error('Phone send error:', e);
-                showModalError('SMS 발송 실패: ' + (e.message || e.code));
-                if (recaptchaVerifier) { recaptchaVerifier.clear(); recaptchaVerifier = null; }
-            } finally {
-                sendCodeBtn.disabled = false;
-                sendCodeBtn.textContent = '인증번호 받기';
-            }
-        });
-    }
-
-    // 인증번호 확인
-    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
-    if (verifyCodeBtn) {
-        verifyCodeBtn.addEventListener('click', async () => {
-            clearModalError();
-            const code = document.getElementById('phoneCode').value.trim();
-            if (!code) { showModalError('인증번호를 입력해주세요.'); return; }
-
-            verifyCodeBtn.disabled = true;
-            verifyCodeBtn.textContent = '확인 중...';
-            try {
-                const result = await confirmationResult.confirm(code);
-                const user = result.user;
-                const complete = await isProfileComplete(user.uid);
-                if (!complete) {
-                    showProfileSetup(user);
-                } else {
-                    modal.style.display = 'none';
-                    hideProfileSetupUI();
-                }
-            } catch (e) {
-                console.error('Phone verify error:', e);
-                showModalError('인증번호가 올바르지 않습니다. 다시 확인해주세요.');
-            } finally {
-                verifyCodeBtn.disabled = false;
-                verifyCodeBtn.textContent = '확인';
-            }
-        });
-    }
-
-    // 다시 받기
-    const resendCodeBtn = document.getElementById('resendCodeBtn');
-    if (resendCodeBtn) {
-        resendCodeBtn.addEventListener('click', () => {
-            confirmationResult = null;
-            document.getElementById('phoneStep1').style.display = 'block';
-            document.getElementById('phoneStep2').style.display = 'none';
-            document.getElementById('phoneCode').value = '';
-            clearModalError();
-        });
-    }
 }
 
 function switchTab(tab) {
@@ -665,40 +569,9 @@ function switchTab(tab) {
     if (modal) {
         modal.querySelector('.modal-tabs').style.display = '';
         modal.querySelector('.google-btn').style.display = '';
-        const phoneBtnEl4 = modal.querySelector('.phone-btn');
-        if (phoneBtnEl4) phoneBtnEl4.style.display = '';
         modal.querySelector('.modal-divider').style.display = '';
-        const phonePanel4 = document.getElementById('phonePanel');
-        if (phonePanel4) phonePanel4.style.display = 'none';
     }
     clearModalError();
-}
-
-function formatPhoneNumber(raw) {
-    const cleaned = raw.replace(/[^\d+]/g, '');
-    if (cleaned.startsWith('+')) return cleaned;
-    if (cleaned.startsWith('0')) return '+82' + cleaned.substring(1);
-    return '+' + cleaned;
-}
-
-function showPhonePanel() {
-    const modal = document.getElementById('authModal');
-    modal.querySelector('.modal-tabs').style.display = 'none';
-    modal.querySelector('.google-btn').style.display = 'none';
-    const phoneBtnEl = modal.querySelector('.phone-btn');
-    if (phoneBtnEl) phoneBtnEl.style.display = 'none';
-    modal.querySelector('.modal-divider').style.display = 'none';
-    document.getElementById('signinPanel').style.display = 'none';
-    document.getElementById('signupPanel').style.display = 'none';
-    document.getElementById('profileSetupPanel').style.display = 'none';
-    document.getElementById('verificationSentPanel').style.display = 'none';
-    document.getElementById('phonePanel').style.display = 'block';
-    document.getElementById('phoneStep1').style.display = 'block';
-    document.getElementById('phoneStep2').style.display = 'none';
-    document.getElementById('phoneNumber').value = '';
-    document.getElementById('phoneCode').value = '';
-    clearModalError();
-    modal.style.display = 'flex';
 }
 
 function showModalError(msg) {

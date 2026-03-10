@@ -907,29 +907,6 @@ canvas {
   background: #f5f5f5;
 }
 
-.phone-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid #dadce0;
-  border-radius: 6px;
-  padding: 10px 16px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 0.5rem;
-  max-width: none;
-  color: #000;
-  font-family: inherit;
-}
-
-.phone-btn:hover {
-  background: #f5f5f5;
-}
-
 .modal-divider {
   display: flex;
   align-items: center;
@@ -1010,14 +987,6 @@ canvas {
     border-color: #fff;
   }
   .google-btn:hover {
-    background: #2a2a2a;
-  }
-  .phone-btn {
-    background: #1e1e1e;
-    color: #e0e0e0;
-    border-color: #fff;
-  }
-  .phone-btn:hover {
     background: #2a2a2a;
   }
   .modal-divider {
