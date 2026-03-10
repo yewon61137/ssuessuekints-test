@@ -218,6 +218,10 @@ function changeLanguage(lang) {
             el.innerHTML = merged[key];
         }
     });
+    document.querySelectorAll('.i18n').forEach(el => {
+        const val = el.getAttribute('data-' + lang);
+        if (val) el.textContent = val;
+    });
     // Handle special case for file name display which isn't data-i18n but updated dynamically
     const fileNameDisplay = document.getElementById('fileNameDisplay');
     if (fileNameDisplay && (!imageUpload.files || imageUpload.files.length === 0)) {
