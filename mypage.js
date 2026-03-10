@@ -687,11 +687,13 @@ function escHtml(str) {
 
 // 타인 프로필 뷰: 탭을 도안/게시글만 보이도록 설정
 function setupOtherUserView(profile) {
-    // 프로필수정/내도안/스크랩 탭 숨김 (타인 프로필: 공개글만)
+    // 프로필수정/내도안/스크랩 탭·패널 완전 제거 (타인 프로필: 공개글만)
     document.querySelectorAll('.mypage-tab').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
-        if (tab === 'profile' || tab === 'mypatterns' || tab === 'scraps') btn.style.display = 'none';
+        if (tab === 'profile' || tab === 'mypatterns' || tab === 'scraps') btn.remove();
     });
+    const removeIds = ['panelProfile', 'panelMyPatterns', 'panelScraps'];
+    removeIds.forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
 
     // 프로필 헤더 표시
     const headerEl = document.getElementById('otherProfileHeader');
