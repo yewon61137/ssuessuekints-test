@@ -790,7 +790,7 @@ saveToCloudBtn.addEventListener('click', () => {
     }
     document.getElementById('patternSaveModal').style.display = 'flex';
     document.getElementById('patternTitleInput').value = '';
-    document.getElementById('patternIsPublic').checked = true;
+
     document.getElementById('patternSaveError').style.display = 'none';
     document.getElementById('patternSaveModalSubmit').disabled = false;
     document.getElementById('patternSaveModalSubmit').textContent = '저장';
