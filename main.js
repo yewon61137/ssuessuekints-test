@@ -811,8 +811,6 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
 
     const title = document.getElementById('patternTitleInput').value.trim();
     if (!title) return;
-    const isPublic = document.getElementById('patternIsPublic').checked;
-
     const submitBtn = document.getElementById('patternSaveModalSubmit');
     const errorEl = document.getElementById('patternSaveError');
     submitBtn.disabled = true;
@@ -823,7 +821,6 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
     const settings = {
         title,
         tags: [],
-        isPublic,
         widthCm: parseFloat(targetWidthInput.value) || 50,
         yarnType: isMmMode ? null : yarnWeightSelect.value,
         yarnMm: isMmMode ? (parseFloat(yarnMmInput.value) || null) : null,

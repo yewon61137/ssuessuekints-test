@@ -689,10 +689,10 @@ function escHtml(str) {
 
 // 타인 프로필 뷰: 탭을 도안/게시글만 보이도록 설정
 function setupOtherUserView(profile) {
-    // 프로필수정/스크랩 탭 숨김
+    // 프로필수정/내도안/스크랩 탭 숨김 (타인 프로필: 공개글만)
     document.querySelectorAll('.mypage-tab').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
-        if (tab === 'profile' || tab === 'scraps') btn.style.display = 'none';
+        if (tab === 'profile' || tab === 'mypatterns' || tab === 'scraps') btn.style.display = 'none';
     });
 
     // 프로필 헤더 표시
@@ -715,8 +715,8 @@ function setupOtherUserView(profile) {
     const nickname = profile?.nickname;
     const title = nickname ? `${nickname}님의 프로필` : '프로필';
     document.getElementById('mypageTitle').textContent = title;
-    // 첫 탭을 내 도안으로
-    switchTab('mypatterns');
+    // 첫 탭을 내 글로 (타인 프로필은 공개글만)
+    switchTab('myposts');
 }
 
 // --- Auth + 페이지 초기화 ---
@@ -736,11 +736,9 @@ function initPageAuth() {
 
             if (!tabLoaded['_init']) {
                 tabLoaded['_init'] = true;
-                tabLoaded['mypatterns'] = true; // switchTab이 중복 로드 안 하도록 미리 설정
                 // 타인 프로필 정보 로드
                 const profile = await getUserProfile(urlUid);
                 setupOtherUserView(profile || null);
-                loadPatterns(urlUid);
             }
         } else if (isVerified) {
             // 본인 프로필 모드
