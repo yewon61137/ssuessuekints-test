@@ -60,8 +60,6 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            // 비공개 게시글은 피드에서 숨김
-            if (data.isPublic === false) return;
             gridEl.appendChild(renderPostCard(docSnap.id, data));
         });
 
@@ -232,8 +230,6 @@ document.getElementById('writeForm').addEventListener('submit', async e => {
             }
         }
 
-        const isPublic = document.getElementById('writeIsPublic').checked;
-
         await addDoc(collection(db, 'posts'), {
             uid: user.uid,
             nickname: profile?.nickname || user.displayName || '',
@@ -242,7 +238,6 @@ document.getElementById('writeForm').addEventListener('submit', async e => {
             content,
             images: uploadedURLs,
             tags,
-            isPublic,
             likeCount: 0,
             scrapCount: 0,
             commentCount: 0,

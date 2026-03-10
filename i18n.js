@@ -15,7 +15,7 @@ export const t = {
         // 커뮤니티
         tagline_community: '커뮤니티', btn_write: '글쓰기',
         tag_all: '전체', tag_crochet: '코바늘', tag_knitting: '대바늘',
-        tag_finished: '완성작', tag_pattern_share: '도안공유', tag_wip: '진행중', tag_question: '질문',
+        tag_finished: '완성작', tag_wip: '진행중', tag_question: '질문',
         feed_loading: '불러오는 중...', feed_empty: '게시글이 없습니다. 첫 글을 작성해보세요!', load_more: '더 보기',
     },
     en: {
@@ -28,7 +28,7 @@ export const t = {
         footer_privacy: 'Privacy Policy', footer_guide: 'Guide', footer_terms: 'Terms of Service',
         tagline_community: 'Community', btn_write: 'Write',
         tag_all: 'All', tag_crochet: 'Crochet', tag_knitting: 'Knitting',
-        tag_finished: 'Finished', tag_pattern_share: 'Pattern Share', tag_wip: 'WIP', tag_question: 'Q&A',
+        tag_finished: 'Finished', tag_wip: 'WIP', tag_question: 'Q&A',
         feed_loading: 'Loading...', feed_empty: 'No posts yet. Be the first to write!', load_more: 'Load More',
     },
     ja: {
@@ -41,7 +41,7 @@ export const t = {
         footer_privacy: 'プライバシーポリシー', footer_guide: 'ご利用案内', footer_terms: '利用規約',
         tagline_community: 'コミュニティ', btn_write: '投稿する',
         tag_all: 'すべて', tag_crochet: 'かぎ針', tag_knitting: '棒針',
-        tag_finished: '完成作品', tag_pattern_share: '編み図共有', tag_wip: '制作中', tag_question: '質問',
+        tag_finished: '完成作品', tag_wip: '制作中', tag_question: '質問',
         feed_loading: '読み込み中...', feed_empty: '投稿がありません。最初の投稿をしてみましょう！', load_more: 'もっと見る',
     }
 };

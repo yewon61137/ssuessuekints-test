@@ -90,7 +90,6 @@
         <button class="tag-chip" data-tag="코바늘" data-i18n="tag_crochet">코바늘</button>
         <button class="tag-chip" data-tag="대바늘" data-i18n="tag_knitting">대바늘</button>
         <button class="tag-chip" data-tag="완성작" data-i18n="tag_finished">완성작</button>
-        <button class="tag-chip" data-tag="도안공유" data-i18n="tag_pattern_share">도안공유</button>
         <button class="tag-chip" data-tag="진행중" data-i18n="tag_wip">진행중</button>
         <button class="tag-chip" data-tag="질문" data-i18n="tag_question">질문</button>
       </div>
@@ -141,17 +140,11 @@
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="코바늘"> 코바늘</label>
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="대바늘"> 대바늘</label>
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="완성작"> 완성작</label>
-            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="도안공유"> 도안공유</label>
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="진행중"> 진행중</label>
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="질문"> 질문</label>
           </div>
         </div>
 
-        <!-- 공개 여부 -->
-        <label class="tag-checkbox-label" style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;">
-          <input type="checkbox" id="writeIsPublic" checked>
-          <span>공개 (커뮤니티 피드에 표시됩니다)</span>
-        </label>
 
         <div id="writeError" class="auth-error" style="display:none;"></div>
         <button type="submit" class="primary-btn auth-submit-btn" id="writeSubmitBtn">게시하기</button>
