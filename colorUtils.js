@@ -207,12 +207,48 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
     return { palette: centers, assignments };
 }
 
+// Sobel 엣지 감지 맵 생성 (0~1 정규화)
+export function computeEdgeMap(imageData, width, height) {
+    const data = imageData.data;
+
+    // 그레이스케일 변환
+    const gray = new Float32Array(width * height);
+    for (let i = 0; i < width * height; i++) {
+        gray[i] = data[i * 4] * 0.3 + data[i * 4 + 1] * 0.59 + data[i * 4 + 2] * 0.11;
+    }
+
+    const edges = new Float32Array(width * height);
+    let maxMag = 0;
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            const tl = gray[(y-1)*width+(x-1)], tc = gray[(y-1)*width+x], tr = gray[(y-1)*width+(x+1)];
+            const ml = gray[y*width+(x-1)],                                  mr = gray[y*width+(x+1)];
+            const bl = gray[(y+1)*width+(x-1)], bc = gray[(y+1)*width+x], br = gray[(y+1)*width+(x+1)];
+
+            const gx = -tl + tr - 2*ml + 2*mr - bl + br;
+            const gy = -tl - 2*tc - tr + bl + 2*bc + br;
+            const mag = Math.sqrt(gx*gx + gy*gy);
+            edges[y*width+x] = mag;
+            if (mag > maxMag) maxMag = mag;
+        }
+    }
+
+    if (maxMag > 0) {
+        for (let i = 0; i < edges.length; i++) edges[i] /= maxMag;
+    }
+
+    return edges;
+}
+
 // 선-양자화 후 다수결 축소
 // 1) 팔레트가 확정된 상태에서
 // 2) 각 코 칸에 속한 원본 픽셀들을 팔레트 색으로 스냅한 뒤
 // 3) 가장 많이 등장한 색(최빈값)을 그 칸의 색으로 결정
 // → 경계 혼합(회색 섞임) 없이 항상 팔레트 단색으로 배정됨
-export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols, outRows, palette) {
+// edgeMap: computeEdgeMap() 결과 (없으면 순수 다수결)
+// edgeThreshold: 이 값 이상의 엣지 강도면 다수결 대신 엣지 색상 우선 배정 (0~1)
+export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols, outRows, palette, edgeMap = null, edgeThreshold = 0.35) {
     const data = imageData.data;
     const assignments = new Array(outCols * outRows).fill(0);
 
@@ -226,15 +262,18 @@ export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols,
 
             const votes = new Array(palette.length).fill(0);
             let totalPixels = 0;
+            let maxEdgeStrength = 0;
+            let edgePaletteIdx = 0;
 
             for (let sy = srcYStart; sy < srcYEnd; sy++) {
                 for (let sx = srcXStart; sx < srcXEnd; sx++) {
-                    const idx = (sy * fullWidth + sx) * 4;
+                    const pixelIdx = sy * fullWidth + sx;
+                    const idx = pixelIdx * 4;
                     if (data[idx + 3] <= 128) continue; // 투명 픽셀 제외
 
                     const r = data[idx], g = data[idx + 1], b = data[idx + 2];
 
-                    // 원본 픽셀을 가장 가까운 팔레트 색으로 스냅 (평균 아님)
+                    // 원본 픽셀을 가장 가까운 팔레트 색으로 스냅
                     let minDist = Infinity, nearest = 0;
                     for (let c = 0; c < palette.length; c++) {
                         const dr = r - palette[c][0];
@@ -245,6 +284,15 @@ export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols,
                     }
                     votes[nearest]++;
                     totalPixels++;
+
+                    // 이 칸에서 엣지 강도가 가장 강한 픽셀 추적
+                    if (edgeMap) {
+                        const edgeStrength = edgeMap[pixelIdx];
+                        if (edgeStrength > maxEdgeStrength) {
+                            maxEdgeStrength = edgeStrength;
+                            edgePaletteIdx = nearest;
+                        }
+                    }
                 }
             }
 
@@ -263,8 +311,12 @@ export function quantizeAndDownsample(imageData, fullWidth, fullHeight, outCols,
                     if (dist < minDist) { minDist = dist; nearest = c; }
                 }
                 assignments[oy * outCols + ox] = nearest;
+            } else if (edgeMap && maxEdgeStrength >= edgeThreshold) {
+                // 강한 엣지 감지: 다수결 무시하고 엣지 픽셀 색상 우선 배정
+                // 얇은 윤곽선이 다수결에서 밀려도 색상이 살아남음
+                assignments[oy * outCols + ox] = edgePaletteIdx;
             } else {
-                // 다수결: 가장 많이 득표한 팔레트 색 선택
+                // 엣지 없음: 다수결로 결정
                 let maxVotes = 0, winner = 0;
                 for (let c = 0; c < palette.length; c++) {
                     if (votes[c] > maxVotes) { maxVotes = votes[c]; winner = c; }

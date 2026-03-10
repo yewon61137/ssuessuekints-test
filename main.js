@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, quantizeAndDownsample, rgbToHex, hexToRgb } from './colorUtils.js';
+import { getPixelArray, kMeans, quantizeAndDownsample, computeEdgeMap, rgbToHex, hexToRgb } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -589,8 +589,12 @@ generateBtn.addEventListener('click', async () => {
             const pixels = getPixelArray(fullImageData, fullW, fullH);
             const { palette } = kMeans(pixels, colorCount, fullW, fullH, 15, seedColors);
 
-            // 3단계: 팔레트 확정 후 다수결 방식으로 코 칸별 색상 배정 (경계 혼합 없음)
-            const assignments = quantizeAndDownsample(fullImageData, fullW, fullH, targetStitches, targetRows, palette);
+            // 3단계: Sobel 엣지 감지 맵 생성 (윤곽선 우선 배정용)
+            const edgeMap = computeEdgeMap(fullImageData, fullW, fullH);
+
+            // 4단계: 팔레트 확정 후 코 칸별 색상 배정
+            // 엣지 강도 0.35 이상인 칸은 다수결 대신 엣지 픽셀 색상 우선 적용
+            const assignments = quantizeAndDownsample(fullImageData, fullW, fullH, targetStitches, targetRows, palette, edgeMap, 0.35);
             
             let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             
