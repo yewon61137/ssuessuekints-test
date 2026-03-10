@@ -80,7 +80,7 @@ export function applyLang(lang, opts = {}) {
 
     // data-lang-section 블록 전환
     document.querySelectorAll('[data-lang-section]').forEach(el => {
-        el.style.display = el.getAttribute('data-lang-section') === lang ? '' : 'none';
+        el.style.display = el.getAttribute('data-lang-section') === lang ? 'block' : 'none';
     });
 }
 
