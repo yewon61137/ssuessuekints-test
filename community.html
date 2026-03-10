@@ -80,28 +80,28 @@
     </div>
     <h1><a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a></h1>
     <div class="brand-kr">쓔쓔닛츠</div>
-    <p class="tagline">커뮤니티</p>
+    <p class="tagline" data-i18n="tagline_community">커뮤니티</p>
   </header>
 
   <main class="community-container">
     <div class="community-toolbar">
       <div class="tag-filter-row" id="tagFilterRow">
-        <button class="tag-chip active" data-tag="">전체</button>
-        <button class="tag-chip" data-tag="코바늘">코바늘</button>
-        <button class="tag-chip" data-tag="대바늘">대바늘</button>
-        <button class="tag-chip" data-tag="완성작">완성작</button>
-        <button class="tag-chip" data-tag="도안공유">도안공유</button>
-        <button class="tag-chip" data-tag="진행중">진행중</button>
-        <button class="tag-chip" data-tag="질문">질문</button>
+        <button class="tag-chip active" data-tag="" data-i18n="tag_all">전체</button>
+        <button class="tag-chip" data-tag="코바늘" data-i18n="tag_crochet">코바늘</button>
+        <button class="tag-chip" data-tag="대바늘" data-i18n="tag_knitting">대바늘</button>
+        <button class="tag-chip" data-tag="완성작" data-i18n="tag_finished">완성작</button>
+        <button class="tag-chip" data-tag="도안공유" data-i18n="tag_pattern_share">도안공유</button>
+        <button class="tag-chip" data-tag="진행중" data-i18n="tag_wip">진행중</button>
+        <button class="tag-chip" data-tag="질문" data-i18n="tag_question">질문</button>
       </div>
-      <button class="primary-btn write-btn" id="writeBtn">글쓰기</button>
+      <button class="primary-btn write-btn" id="writeBtn" data-i18n="btn_write">글쓰기</button>
     </div>
 
-    <div id="feedLoading" class="mypage-empty">불러오는 중...</div>
-    <div id="feedEmpty" class="mypage-empty" style="display:none;">게시글이 없습니다. 첫 글을 작성해보세요!</div>
+    <div id="feedLoading" class="mypage-empty" data-i18n="feed_loading">불러오는 중...</div>
+    <div id="feedEmpty" class="mypage-empty" data-i18n="feed_empty" style="display:none;">게시글이 없습니다. 첫 글을 작성해보세요!</div>
     <div class="post-grid" id="postGrid"></div>
     <div id="loadMoreArea" style="text-align:center;margin:2rem 0;display:none;">
-      <button class="secondary-btn" id="loadMoreBtn" style="max-width:200px;">더 보기</button>
+      <button class="secondary-btn" id="loadMoreBtn" data-i18n="load_more" style="max-width:200px;">더 보기</button>
     </div>
   </main>
 
