@@ -318,8 +318,6 @@ async function loadPatterns(uid) {
         let count = 0;
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            // 타인 프로필: 공개 도안만 표시
-            if (!isMine && data.isPublic !== true) return;
             patternGridEl.appendChild(buildPatternCard(uid, docSnap.id, data));
             count++;
         });
@@ -343,7 +341,7 @@ function buildPatternCard(uid, patternId, data) {
         : '';
     const settingsParts = [yarnInfo, sizeInfo].filter(Boolean);
     const settingsText = settingsParts.length ? ` · ${settingsParts.join(' · ')}` : '';
-    const publicBadge = isMine ? `<span class="pattern-visibility-badge">${data.isPublic ? '공개' : '비공개'}</span>` : '';
+    const publicBadge = '';
 
     const actionsHtml = isMine ? `
           <div class="pattern-card-actions">

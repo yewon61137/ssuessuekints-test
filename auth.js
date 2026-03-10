@@ -659,7 +659,6 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
         title: settings.title || defaultTitle,
         name: settings.title || defaultTitle, // 하위 호환
         tags: settings.tags || [],
-        isPublic: settings.isPublic ?? true,
         patternImageURL,
         originalImageURL,
         patternStoragePath: `${basePath}/pattern.png`,
