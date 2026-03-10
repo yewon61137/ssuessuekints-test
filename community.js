@@ -169,8 +169,6 @@ async function openWriteModal() {
         resetImageSlot(i);
     }
 
-    // 내 도안 목록 로드
-    await loadMyPatternsForSelect();
 }
 
 function closeWriteModal() {
@@ -205,25 +203,6 @@ function handleImageSelect(e) {
     });
 }
 
-async function loadMyPatternsForSelect() {
-    if (!currentUser) return;
-    const select = document.getElementById('writePatternSelect');
-    select.innerHTML = '<option value="">연결 안 함</option>';
-    try {
-        const snap = await getDocs(query(
-            collection(db, `users/${currentUser.uid}/patterns`),
-            orderBy('createdAt', 'desc'),
-            limit(30)
-        ));
-        snap.forEach(d => {
-            const opt = document.createElement('option');
-            opt.value = d.id;
-            opt.setAttribute('data-thumb', d.data().patternImageURL || '');
-            opt.textContent = d.data().name || '도안';
-            select.appendChild(opt);
-        });
-    } catch (e) { console.error('Pattern load error:', e); }
-}
 
 document.getElementById('writeForm').addEventListener('submit', async e => {
     e.preventDefault();
@@ -241,15 +220,6 @@ document.getElementById('writeForm').addEventListener('submit', async e => {
         const title = document.getElementById('writeTitle').value.trim();
         const content = document.getElementById('writeContent').value.trim();
         const tags = Array.from(document.querySelectorAll('input[name="writeTag"]:checked')).map(cb => cb.value);
-
-        // 도안 연결
-        const patternSelect = document.getElementById('writePatternSelect');
-        const patternId = patternSelect.value || null;
-        let patternImageURL = null;
-        if (patternId) {
-            const selectedOpt = patternSelect.options[patternSelect.selectedIndex];
-            patternImageURL = selectedOpt.getAttribute('data-thumb') || null;
-        }
 
         // 이미지 업로드
         const postId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -271,8 +241,6 @@ document.getElementById('writeForm').addEventListener('submit', async e => {
             title,
             content,
             images: uploadedURLs,
-            patternId,
-            patternImageURL,
             tags,
             isPublic,
             likeCount: 0,

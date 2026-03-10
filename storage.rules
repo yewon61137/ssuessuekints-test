@@ -4,7 +4,7 @@ service firebase.storage {
 
     // 도안 이미지: 본인은 읽기/쓰기, 인증된 타인도 읽기 가능
     match /users/{userId}/patterns/{patternId}/{filename} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 

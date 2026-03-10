@@ -9,8 +9,7 @@ service cloud.firestore {
 
       // 내 도안
       match /patterns/{patternId} {
-        allow read: if (request.auth != null && request.auth.uid == userId)
-                    || resource.data.isPublic == true;
+        allow read: if request.auth != null && request.auth.uid == userId;
         allow create: if request.auth != null && request.auth.uid == userId;
         allow update, delete: if request.auth != null && request.auth.uid == userId;
       }
