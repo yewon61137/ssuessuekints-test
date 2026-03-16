@@ -1,9 +1,12 @@
 // mypage.js
 
-import { auth, db, storage, getCurrentUser, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js';
+import { auth, db, storage, initAuth, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { collection, query, where, getDocs, orderBy, doc, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, deleteObject } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+
+// --- URL 파라미터 ---
+const targetUid = new URLSearchParams(location.search).get('uid');
 
 // --- DOM 요소 ---
 const notLoggedIn = document.getElementById('notLoggedIn');
@@ -34,65 +37,83 @@ const profileEditForm = document.getElementById('profileEditForm');
 // --- 상태 관리 ---
 let currentUser = null;
 let currentProfile = null;
-let isNicknameChecked = true; // 초기엔 본인 닉네임이므로 true
+let isNicknameChecked = true;
+
+// 헤더 인증 UI 초기화 (로그인/로그아웃 버튼 등)
+initAuth();
 
 // --- 초기화 및 인증 감지 ---
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        notLoggedIn.style.display = 'none';
-        loggedIn.style.display = 'block';
-        
-        await loadUserProfile();
-        loadActivityStats();
-        loadMyPatterns();
-        loadMyPosts();
-        loadScraps();
-    } else {
+    const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId !== 'password'));
+    currentUser = isVerified ? user : null;
+
+    const viewUid = targetUid || currentUser?.uid;
+
+    if (!viewUid) {
+        // 비로그인 + ?uid= 없음 → 로그인 유도
         loggedIn.style.display = 'none';
         notLoggedIn.style.display = 'block';
+        return;
     }
+
+    const isOwnProfile = !targetUid || (currentUser && targetUid === currentUser.uid);
+
+    notLoggedIn.style.display = 'none';
+    loggedIn.style.display = 'block';
+
+    // 타인 프로필 → 편집 탭, 스크랩 탭 숨김
+    const editTabBtn = document.getElementById('editProfileTabBtn');
+    const scrapsTabBtn = document.querySelector('[data-tab="scraps"]');
+    if (!isOwnProfile) {
+        if (editTabBtn) editTabBtn.style.display = 'none';
+        if (scrapsTabBtn) scrapsTabBtn.style.display = 'none';
+        if (panels.scraps) panels.scraps.style.display = 'none';
+    }
+
+    await loadUserProfile(viewUid, isOwnProfile);
+    loadActivityStats(viewUid);
+    loadMyPatterns(viewUid, isOwnProfile);
+    loadMyPosts(viewUid);
+    if (isOwnProfile) loadScraps();
 });
 
 // --- 프로필 정보 로드 ---
-async function loadUserProfile() {
-    if (!currentUser) return;
-    
-    currentProfile = await getUserProfile(currentUser.uid);
-    if (currentProfile) {
-        // 메인 영역 업데이트
-        profileNicknameMain.textContent = currentProfile.nickname || 'NICKNAME';
-        profileBioMain.textContent = currentProfile.bio || '자기소개가 없습니다.';
-        
-        if (currentProfile.profilePhotoURL) {
-            profileAvatarMain.style.backgroundImage = `url(${currentProfile.profilePhotoURL})`;
-            profileAvatarMain.style.backgroundSize = 'cover';
-            profileAvatarMain.innerHTML = '';
-            
-            editAvatarPreview.style.backgroundImage = `url(${currentProfile.profilePhotoURL})`;
+async function loadUserProfile(uid, isOwnProfile) {
+    const profile = await getUserProfile(uid);
+    if (!profile) return;
+
+    if (isOwnProfile) currentProfile = profile;
+
+    profileNicknameMain.textContent = profile.nickname || 'NICKNAME';
+    profileBioMain.textContent = profile.bio || '자기소개가 없습니다.';
+
+    if (profile.profilePhotoURL) {
+        profileAvatarMain.style.backgroundImage = `url(${profile.profilePhotoURL})`;
+        profileAvatarMain.style.backgroundSize = 'cover';
+        profileAvatarMain.innerHTML = '';
+    }
+
+    // 편집 폼은 본인 프로필일 때만 채움
+    if (isOwnProfile) {
+        if (profile.profilePhotoURL && editAvatarPreview) {
+            editAvatarPreview.style.backgroundImage = `url(${profile.profilePhotoURL})`;
             editAvatarPreview.style.backgroundSize = 'cover';
             editAvatarPreview.innerHTML = '';
         }
-
-        // 편집 폼 업데이트
-        editNicknameInput.value = currentProfile.nickname || '';
-        editBioInput.value = currentProfile.bio || '';
-        editRealNameInput.value = currentProfile.displayName || '';
+        if (editNicknameInput) editNicknameInput.value = profile.nickname || '';
+        if (editBioInput) editBioInput.value = profile.bio || '';
+        if (editRealNameInput) editRealNameInput.value = profile.displayName || '';
     }
 }
 
 // --- 활동 통계 로드 ---
-async function loadActivityStats() {
-    if (!currentUser) return;
-
+async function loadActivityStats(uid) {
+    if (!uid) return;
     try {
-        // 1. 도안 수
-        const patternsSnap = await getDocs(collection(db, `users/${currentUser.uid}/patterns`));
+        const patternsSnap = await getDocs(collection(db, `users/${uid}/patterns`));
         patternCountEl.textContent = patternsSnap.size;
 
-        // 2. 내가 쓴 글 수
-        const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid));
-        const postsSnap = await getDocs(postsQuery);
+        const postsSnap = await getDocs(query(collection(db, 'posts'), where('uid', '==', uid)));
         postCountEl.textContent = postsSnap.size;
     } catch (e) {
         console.error('Stats load failed:', e);
@@ -222,28 +243,23 @@ profileEditForm.addEventListener('submit', async (e) => {
 });
 
 // --- 내 도안 로드 로직 ---
-async function loadMyPatterns() {
+async function loadMyPatterns(uid, isOwnProfile) {
     const grid = document.getElementById('patternGrid');
     const loading = document.getElementById('loadingMsg');
     const empty = document.getElementById('emptyMsg');
 
     try {
-        const q = query(collection(db, `users/${currentUser.uid}/patterns`), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, `users/${uid}/patterns`), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
 
         loading.style.display = 'none';
         grid.innerHTML = '';
 
-        if (snap.empty) {
-            empty.style.display = 'block';
-            return;
-        }
+        if (snap.empty) { empty.style.display = 'block'; return; }
 
         empty.style.display = 'none';
         snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const card = createPatternCard(docSnap.id, data);
-            grid.appendChild(card);
+            grid.appendChild(createPatternCard(docSnap.id, docSnap.data(), uid, isOwnProfile));
         });
     } catch (e) {
         console.error(e);
@@ -251,51 +267,50 @@ async function loadMyPatterns() {
     }
 }
 
-function createPatternCard(id, data) {
+function createPatternCard(id, data, uid, isOwnProfile) {
     const card = document.createElement('div');
     card.className = 'pattern-card';
-    
     const dateStr = data.createdAt?.toDate().toLocaleDateString() || '';
-    
+
     card.innerHTML = `
         <img src="${data.patternImageURL}" class="pattern-card-thumb" alt="${data.title}">
         <div class="pattern-card-body">
             <h3 class="pattern-card-name">${data.title}</h3>
             <p class="pattern-card-meta">${data.stitches}x${data.rows} | ${data.widthCm}cm | ${dateStr}</p>
-            <div class="pattern-card-actions">
+            ${isOwnProfile ? `<div class="pattern-card-actions">
                 <button class="small-btn download-btn">PDF</button>
                 <button class="small-btn delete-btn">삭제</button>
-            </div>
+            </div>` : ''}
         </div>
     `;
 
-    // 삭제 버튼 로직
-    card.querySelector('.delete-btn').addEventListener('click', async () => {
-        if (confirm('정말 삭제하시겠습니까?')) {
-            const basePath = `users/${currentUser.uid}/patterns/${id}`;
-            // Storage 이미지 삭제 (없어도 무시)
-            await Promise.allSettled([
-                deleteObject(ref(storage, `${basePath}/pattern.png`)),
-                deleteObject(ref(storage, `${basePath}/original.jpg`))
-            ]);
-            await deleteDoc(doc(db, `users/${currentUser.uid}/patterns`, id));
-            card.remove();
-            loadActivityStats();
-        }
-    });
+    if (isOwnProfile) {
+        card.querySelector('.delete-btn').addEventListener('click', async () => {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const basePath = `users/${uid}/patterns/${id}`;
+                await Promise.allSettled([
+                    deleteObject(ref(storage, `${basePath}/pattern.png`)),
+                    deleteObject(ref(storage, `${basePath}/original.jpg`))
+                ]);
+                await deleteDoc(doc(db, `users/${uid}/patterns`, id));
+                card.remove();
+                loadActivityStats(uid);
+            }
+        });
+    }
 
     return card;
 }
 
 // --- 내 글 로드 ---
-async function loadMyPosts() {
+async function loadMyPosts(uid) {
     const grid = document.getElementById('myPostsGrid');
     const loading = document.getElementById('myPostsLoading');
     const empty = document.getElementById('myPostsEmpty');
-    if (!grid) return;
+    if (!grid || !uid) return;
 
     try {
-        const q = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'posts'), where('uid', '==', uid), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
         loading.style.display = 'none';
         grid.innerHTML = '';
