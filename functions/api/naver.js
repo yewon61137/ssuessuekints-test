@@ -87,15 +87,24 @@ async function createFirebaseCustomToken(uid, claims, env) {
         claims: claims
     };
 
-    const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-    const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    // UTF-8 safe base64url 인코딩 (한글 닉네임 등 처리)
+    const toBase64Url = (obj) => {
+        const bytes = new TextEncoder().encode(JSON.stringify(obj));
+        let binary = '';
+        bytes.forEach(b => binary += String.fromCharCode(b));
+        return btoa(binary).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    };
+    const encodedHeader = toBase64Url(header);
+    const encodedPayload = toBase64Url(payload);
     
     const tokenToSign = `${encodedHeader}.${encodedPayload}`;
     
     // RSA-SHA256 서명 처리 (Cloudflare Subtle Crypto 사용)
-    const pemHeader = "-----BEGIN PRIVATE KEY-----";
-    const pemFooter = "-----END PRIVATE KEY-----";
-    const pemContents = privateKey.substring(pemHeader.length, privateKey.length - pemFooter.length).replace(/\s/g, '');
+    // PEM 헤더/푸터 제거 후 base64 추출 (trailing newline 등 robust하게 처리)
+    const pemContents = privateKey
+        .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+        .replace(/-----END PRIVATE KEY-----/g, '')
+        .replace(/\s+/g, '');
     const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
 
     const cryptoKey = await crypto.subtle.importKey(
