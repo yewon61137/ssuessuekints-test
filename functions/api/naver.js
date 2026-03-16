@@ -4,8 +4,12 @@ export async function onRequestGet(context) {
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
 
-    const clientId = env.NAVER_CLIENT_ID || 'Fe19uUByKG1KyTLtsg67';
-    const clientSecret = env.NAVER_CLIENT_SECRET || 'ankJ2qh8wi';
+    const clientId = env.NAVER_CLIENT_ID;
+    const clientSecret = env.NAVER_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+        return new Response(JSON.stringify({ error: 'Server configuration error' }), { status: 500 });
+    }
 
     if (!code) {
         return new Response(JSON.stringify({ error: 'Code is required' }), { status: 400 });

@@ -466,10 +466,9 @@ export function initAuth() {
             const clientId = 'Fe19uUByKG1KyTLtsg67';
             const redirectUri = encodeURIComponent(window.location.origin + '/auth-callback.html');
             const state = Math.random().toString(36).substring(2, 15);
-            
-            // 인증 수단 저장 (callback 페이지에서 사용)
+            // CSRF 방지용 state 저장
+            sessionStorage.setItem('oauth_state', state);
             sessionStorage.setItem('auth_provider', 'naver');
-            
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
             window.location.href = naverAuthUrl;
         });

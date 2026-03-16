@@ -2,7 +2,8 @@
 
 import { auth, db, storage, getCurrentUser, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-import { collection, query, where, getDocs, orderBy, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { collection, query, where, getDocs, orderBy, doc, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { ref, deleteObject } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // --- DOM 요소 ---
 const notLoggedIn = document.getElementById('notLoggedIn');
@@ -90,7 +91,7 @@ async function loadActivityStats() {
         patternCountEl.textContent = patternsSnap.size;
 
         // 2. 내가 쓴 글 수
-        const postsQuery = query(collection(db, 'posts'), where('authorId', '==', currentUser.uid));
+        const postsQuery = query(collection(db, 'posts'), where('uid', '==', currentUser.uid));
         const postsSnap = await getDocs(postsQuery);
         postCountEl.textContent = postsSnap.size;
     } catch (e) {
@@ -271,34 +272,85 @@ function createPatternCard(id, data) {
     // 삭제 버튼 로직
     card.querySelector('.delete-btn').addEventListener('click', async () => {
         if (confirm('정말 삭제하시겠습니까?')) {
+            const basePath = `users/${currentUser.uid}/patterns/${id}`;
+            // Storage 이미지 삭제 (없어도 무시)
+            await Promise.allSettled([
+                deleteObject(ref(storage, `${basePath}/pattern.png`)),
+                deleteObject(ref(storage, `${basePath}/original.jpg`))
+            ]);
             await deleteDoc(doc(db, `users/${currentUser.uid}/patterns`, id));
             card.remove();
-            loadActivityStats(); // 통계 갱신
+            loadActivityStats();
         }
     });
 
     return card;
 }
 
-// --- 내 글 / 스크랩 로드 (기본 틀만 유지) ---
+// --- 내 글 로드 ---
 async function loadMyPosts() {
     const grid = document.getElementById('myPostsGrid');
     const loading = document.getElementById('myPostsLoading');
     const empty = document.getElementById('myPostsEmpty');
-    
-    // 여기에 게시글 로드 로직 구현 (필요 시)
-    loading.style.display = 'none';
-    empty.style.display = 'block';
+    if (!grid) return;
+
+    try {
+        const q = query(collection(db, 'posts'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        loading.style.display = 'none';
+        grid.innerHTML = '';
+        if (snap.empty) { empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+        snap.forEach(docSnap => {
+            grid.appendChild(createPostCard(docSnap.id, docSnap.data()));
+        });
+    } catch (e) {
+        console.error(e);
+        loading.textContent = '게시글을 불러오는 중 오류가 발생했습니다.';
+    }
 }
 
+// --- 스크랩 로드 ---
 async function loadScraps() {
     const grid = document.getElementById('scrapsGrid');
     const loading = document.getElementById('scrapsLoading');
     const empty = document.getElementById('scrapsEmpty');
-    
-    // 여기에 스크랩 로드 로직 구현 (필요 시)
-    loading.style.display = 'none';
-    empty.style.display = 'block';
+    if (!grid) return;
+
+    try {
+        const scrapsSnap = await getDocs(collection(db, `users/${currentUser.uid}/scraps`));
+        loading.style.display = 'none';
+        grid.innerHTML = '';
+        if (scrapsSnap.empty) { empty.style.display = 'block'; return; }
+
+        const postDocs = await Promise.all(
+            scrapsSnap.docs.map(s => getDoc(doc(db, 'posts', s.id)))
+        );
+        const valid = postDocs.filter(d => d.exists());
+        if (!valid.length) { empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+        valid.forEach(d => grid.appendChild(createPostCard(d.id, d.data())));
+    } catch (e) {
+        console.error(e);
+        loading.textContent = '스크랩을 불러오는 중 오류가 발생했습니다.';
+    }
+}
+
+function createPostCard(id, data) {
+    const card = document.createElement('div');
+    card.className = 'pattern-card';
+    const thumb = data.images?.[0] || data.patternImageURL || '';
+    const dateStr = data.createdAt?.toDate().toLocaleDateString('ko-KR') || '';
+    card.innerHTML = `
+        ${thumb ? `<img src="${thumb}" class="pattern-card-thumb" alt="${data.title}" onerror="this.style.display='none'">` : '<div class="pattern-card-thumb no-thumb"></div>'}
+        <div class="pattern-card-body">
+            <h3 class="pattern-card-name">${data.title || ''}</h3>
+            <p class="pattern-card-meta">${dateStr} · 좋아요 ${data.likeCount || 0}</p>
+        </div>
+    `;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => { window.location.href = `/post.html?id=${id}`; });
+    return card;
 }
 
 // 로그인 버튼 연결
