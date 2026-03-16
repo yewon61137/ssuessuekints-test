@@ -52,7 +52,7 @@ export async function getUserProfile(uid) {
 }
 
 // 사용자 프로필 수정 (마이페이지 탭에서 호출)
-export async function updateUserProfile(uid, { nickname, currentNickname, realName, photoFile }) {
+export async function updateUserProfile(uid, { nickname, currentNickname, realName, bio, photoFile }) {
     let profilePhotoURL = null;
 
     // 기존 프로필 사진 URL 유지
@@ -80,6 +80,7 @@ export async function updateUserProfile(uid, { nickname, currentNickname, realNa
     await updateDoc(doc(db, 'users', uid), {
         nickname,
         displayName: realName || null,
+        bio: bio || '',
         profilePhotoURL,
         profileCompleted: true
     });
@@ -457,6 +458,22 @@ export function initAuth() {
             showModalError(e.message);
         }
     });
+
+    // 네이버 로그인
+    const naverBtn = document.getElementById('naverSignInBtn');
+    if (naverBtn) {
+        naverBtn.addEventListener('click', () => {
+            const clientId = 'Fe19uUByKG1KyTLtsg67';
+            const redirectUri = encodeURIComponent(window.location.origin + '/auth-callback.html');
+            const state = Math.random().toString(36).substring(2, 15);
+            
+            // 인증 수단 저장 (callback 페이지에서 사용)
+            sessionStorage.setItem('auth_provider', 'naver');
+            
+            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+            window.location.href = naverAuthUrl;
+        });
+    }
 
     // 이메일 로그인 폼
     document.getElementById('emailSignInForm').addEventListener('submit', async (e) => {

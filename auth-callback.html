@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 중... | SSUESSUE KNITS</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f9f9f9; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { firebaseConfig } from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+
+            if (error) {
+                alert('인증 중 오류가 발생했습니다: ' + error);
+                window.location.href = '/';
+                return;
+            }
+
+            if (code) {
+                try {
+                    // 세션 스토리지에서 인증 수단 확인 (naver 또는 kakao)
+                    const provider = sessionStorage.getItem('auth_provider') || 'naver';
+                    
+                    const response = await fetch(`/api/${provider}?code=${code}&state=${state}`);
+                    const data = await response.json();
+
+                    if (data.firebaseToken) {
+                        await signInWithCustomToken(auth, data.firebaseToken);
+                        window.location.href = '/';
+                    } else {
+                        throw new Error(data.error || 'Token generation failed');
+                    }
+                } catch (e) {
+                    console.error('Auth error:', e);
+                    alert('로그인 처리 중 오류가 발생했습니다.');
+                    window.location.href = '/';
+                }
+            }
+        }
+
+        handleCallback();
+    </script>
+</body>
+</html>

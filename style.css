@@ -884,12 +884,19 @@ canvas {
   border-bottom-color: #000;
 }
 
-.google-btn {
+/* Social Login */
+.social-login-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.social-btn {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
   border: 2px solid #000;
   padding: 0.8rem 1rem;
   font-size: 0.85rem;
@@ -897,14 +904,42 @@ canvas {
   text-transform: uppercase;
   cursor: pointer;
   letter-spacing: 0.05em;
-  margin-bottom: 1rem;
   max-width: none;
-  color: #000;
   font-family: inherit;
+  transition: all 0.2s;
 }
 
-.google-btn:hover {
-  background: #f5f5f5;
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 #000;
+}
+
+.google-btn {
+  background: #fff;
+  color: #000;
+}
+
+.naver-btn {
+  background-color: #03C75A;
+  color: #fff;
+}
+
+.naver-btn:hover {
+  background-color: #02b352;
+}
+
+.naver-icon {
+  background: #fff;
+  color: #03C75A;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  margin-right: 10px;
+  border: 1px solid #000;
 }
 
 .modal-divider {
@@ -2641,3 +2676,133 @@ canvas {
     box-shadow: 3px 3px 0 #fff;
   }
 }
+
+/* ==============================
+   Mypage V2 Enhanced UI
+   ============================== */
+
+.mypage-header-v2 {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.profile-main {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.profile-avatar-lg {
+  width: 120px;
+  height: 120px;
+  border: 3px solid var(--border-color);
+  background-color: var(--accent-color);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  flex-shrink: 0;
+}
+
+.profile-info-lg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-info-lg h2 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+}
+
+.profile-bio-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--secondary-color);
+  margin: 0;
+  max-width: 500px;
+  word-break: break-word;
+}
+
+.profile-stats {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-color);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--secondary-color);
+  letter-spacing: 0.05em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 30px;
+  background-color: var(--border-color);
+  opacity: 0.2;
+}
+
+.mypage-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.mypage-panel-header h1 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--text-color);
+}
+
+@media (max-width: 768px) {
+  .profile-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .profile-avatar-lg {
+    width: 90px;
+    height: 90px;
+  }
+  .profile-info-lg h2 {
+    font-size: 1.5rem;
+  }
+  .profile-stats {
+    gap: 1.5rem;
+  }
+}
+

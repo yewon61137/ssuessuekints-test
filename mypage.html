@@ -76,52 +76,43 @@
     <!-- 로그인 상태 -->
     <div id="loggedIn" style="display:none;">
 
-      <!-- 타인 프로필 헤더 (urlUid 있을 때만 표시) -->
-      <div id="otherProfileHeader" class="other-profile-header" style="display:none;">
-        <div class="other-profile-avatar" id="otherProfileAvatar"></div>
-        <div class="other-profile-info">
-          <p class="other-profile-nickname" id="otherProfileNickname"></p>
+      <!-- 프로필 상단 영역 (항상 표시) -->
+      <div id="profileHeader" class="mypage-header-v2">
+        <div class="profile-main">
+          <div class="profile-avatar-lg" id="profileAvatarMain">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="profile-info-lg">
+            <div class="profile-name-row">
+              <h2 id="profileNicknameMain">NICKNAME</h2>
+            </div>
+            <p id="profileBioMain" class="profile-bio-text">자기소개가 없습니다.</p>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-value" id="patternCount">0</span>
+                <span class="stat-label">Patterns</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-value" id="postCount">0</span>
+                <span class="stat-label">Posts</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 탭 내비게이션 -->
       <nav class="mypage-tabs" id="mypageTabs">
-        <button class="mypage-tab active" data-tab="profile">프로필 수정</button>
-        <button class="mypage-tab" data-tab="mypatterns">내 도안</button>
+        <button class="mypage-tab active" data-tab="mypatterns">내 도안</button>
         <button class="mypage-tab" data-tab="myposts">내 글</button>
         <button class="mypage-tab" data-tab="scraps">스크랩</button>
+        <button class="mypage-tab" data-tab="profile" id="editProfileTabBtn">프로필 수정</button>
       </nav>
 
-      <!-- 패널: 프로필 수정 -->
-      <div class="mypage-panel active" id="panelProfile">
-        <div class="profile-edit-section">
-          <div class="profile-edit-avatar-row">
-            <div class="profile-edit-avatar" id="editAvatarPreview"></div>
-            <div>
-              <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel" data-i18n="photo_change">사진 변경</label>
-              <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
-            </div>
-          </div>
-          <form class="profile-edit-form" id="profileEditForm">
-            <div class="profile-edit-row">
-              <div class="nickname-input-group">
-                <div class="nickname-input-row">
-                  <input type="text" id="editNickname" maxlength="20" required autocomplete="off">
-                  <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn" data-i18n="nickname_check">중복 확인</button>
-                </div>
-                <div id="editNicknameStatus" class="nickname-status" style="display:none;"></div>
-              </div>
-            </div>
-            <input type="text" id="editRealName" maxlength="50" autocomplete="name">
-            <div id="profileEditMsg" class="nickname-status" style="display:none;"></div>
-            <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn" data-i18n="profile_save">저장</button>
-          </form>
-        </div>
-      </div>
-
       <!-- 패널: 내 도안 -->
-      <div class="mypage-panel" id="panelMyPatterns">
-        <div class="mypage-header">
+      <div class="mypage-panel active" id="panelMyPatterns">
+        <div class="mypage-panel-header">
           <h1 id="myPatternsTitle">내 도안</h1>
           <a href="/" class="lang-btn" id="goGenerateLink">← 도안 만들기</a>
         </div>
@@ -143,6 +134,42 @@
         <div id="scrapsEmpty" class="mypage-empty" style="display:none;">스크랩한 글이 없습니다.</div>
         <div class="post-grid" id="scrapsGrid"></div>
       </div>
+
+      <!-- 패널: 프로필 수정 -->
+      <div class="mypage-panel" id="panelProfile">
+        <div class="profile-edit-section">
+          <div class="profile-edit-avatar-row">
+            <div class="profile-edit-avatar" id="editAvatarPreview"></div>
+            <div>
+              <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel" data-i18n="photo_change">사진 변경</label>
+              <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
+            </div>
+          </div>
+          <form class="profile-edit-form" id="profileEditForm">
+            <div class="profile-edit-row">
+              <label class="write-label">닉네임</label>
+              <div class="nickname-input-group">
+                <div class="nickname-input-row">
+                  <input type="text" id="editNickname" maxlength="20" required autocomplete="off">
+                  <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn" data-i18n="nickname_check">중복 확인</button>
+                </div>
+                <div id="editNicknameStatus" class="nickname-status" style="display:none;"></div>
+              </div>
+            </div>
+            <div class="profile-edit-row">
+              <label class="write-label">자기소개</label>
+              <textarea id="editBio" placeholder="자신을 소개해보세요! (최대 100자)" maxlength="100" style="width:100%; border:2px solid #000; padding:0.75rem; font-family:inherit; resize:none; min-height:80px; box-sizing:border-box;"></textarea>
+            </div>
+            <div class="profile-edit-row" style="display:none;">
+              <label class="write-label">실명 (선택)</label>
+              <input type="text" id="editRealName" maxlength="50" autocomplete="name">
+            </div>
+            <div id="profileEditMsg" class="nickname-status" style="display:none;"></div>
+            <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn" data-i18n="profile_save" style="max-width:none;">변경사항 저장</button>
+          </form>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -186,7 +213,7 @@
           <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
           <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
           <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signup">회원가입</button>
+          <button type="submit" class="primary-btn auth-submit-btn" id="emailSignUpSubmitBtn" data-i18n="btn_signup">회원가입</button>
         </form>
       </div>
 
@@ -247,7 +274,7 @@
     <div class="mobile-user-area" id="mobileUserArea" style="display:none;">
       <span class="mobile-nickname" id="mobileNickname"></span>
       <a href="/mypage.html" class="mobile-mypage-btn mobile-i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
-      <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+      <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="로그アウト">로그아웃</button>
     </div>
     <hr class="mobile-menu-divider">
     <nav class="mobile-menu-nav">
