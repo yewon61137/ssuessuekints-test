@@ -379,15 +379,20 @@ export function initAuth() {
     // 로그인 상태 변경 감지
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            // 즉시 로그인 상태 표시 (Firestore 응답 기다리지 않음)
+            signInBtn.style.display = 'none';
+            userArea.style.display = 'flex';
+            userEmail.textContent = user.displayName || user.email || '';
+
             // 프로필 미완성 사용자는 프로필 설정 패널 표시 (이미 진행 중이 아닐 때)
-            let nickname = null;
             if (!pendingProfileUser) {
                 try {
                     const snap = await getDoc(doc(db, 'users', user.uid));
                     if (snap.exists()) {
                         const data = snap.data();
                         if (!data.profileCompleted) showProfileSetup(user);
-                        nickname = data.nickname || null;
+                        // Firestore 닉네임으로 업데이트
+                        if (data.nickname) userEmail.textContent = data.nickname;
                     } else {
                         showProfileSetup(user);
                     }
@@ -395,11 +400,6 @@ export function initAuth() {
                     console.error('Profile check failed:', e);
                 }
             }
-
-            signInBtn.style.display = 'none';
-            userArea.style.display = 'flex';
-            // Firestore nickname 우선, 없으면 Auth displayName, 없으면 email
-            userEmail.textContent = nickname || user.displayName || user.email || '';
         } else {
             signInBtn.style.display = 'inline-block';
             userArea.style.display = 'none';

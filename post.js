@@ -766,8 +766,7 @@ function escHtml(str) {
 initAuth();
 
 onAuthStateChanged(auth, async user => {
-    const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'));
-    currentUser = isVerified ? user : null;
+    currentUser = user || null;
 
     // 댓글 입력 폼 표시 토글
     const commentForm = document.getElementById('commentForm');
