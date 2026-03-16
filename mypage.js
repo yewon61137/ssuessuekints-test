@@ -729,7 +729,7 @@ function initPageAuth() {
     gotoSignInBtn.addEventListener('click', openAuthModal);
 
     onAuthStateChanged(auth, async user => {
-        const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId !== 'password') || user.providerData.length === 0);
+        const isVerified = !!user;
 
         if (urlUid) {
             // 타인 프로필 모드: 로그인 여부 관계없이 표시

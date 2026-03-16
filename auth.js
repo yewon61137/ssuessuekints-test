@@ -379,14 +379,6 @@ export function initAuth() {
     // 로그인 상태 변경 감지
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // 이메일 기반 가입 사용자인 경우 인증 여부 확인 (구글은 자동 인증됨)
-            if (user.providerData.some(p => p.providerId === 'password') && !user.emailVerified) {
-                // 인증되지 않은 이메일 사용자는 UI만 로그아웃 상태로 유지
-                signInBtn.style.display = 'inline-block';
-                userArea.style.display = 'none';
-                return;
-            }
-
             // 프로필 미완성 사용자는 프로필 설정 패널 표시 (이미 진행 중이 아닐 때)
             let nickname = null;
             if (!pendingProfileUser) {

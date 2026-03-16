@@ -143,9 +143,12 @@ const writeModalClose = document.getElementById('writeModalClose');
 const imageFiles = [null, null, null, null];
 
 writeBtn.addEventListener('click', () => {
-    const isVerified = currentUser && (currentUser.emailVerified || currentUser.providerData.some(p => p.providerId === 'google.com'));
-    if (!isVerified) {
-        openAuthModal();
+    if (!currentUser) { openAuthModal(); return; }
+    const canWrite = currentUser.emailVerified ||
+        currentUser.providerData.some(p => p.providerId !== 'password') ||
+        currentUser.providerData.length === 0;
+    if (!canWrite) {
+        alert('이메일 인증 후 글쓰기가 가능합니다. 메일함을 확인해주세요.');
         return;
     }
     openWriteModal();
@@ -268,8 +271,7 @@ initLang();
 initAuth();
 
 onAuthStateChanged(auth, user => {
-    const isVerified = user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'));
-    currentUser = isVerified ? user : null;
+    currentUser = user || null;
 });
 
 // 페이지 로드 시 피드
