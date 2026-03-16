@@ -1,6 +1,6 @@
 // mypage.js — 마이페이지 (4탭: 프로필 수정 / 내 도안 / 내 글 / 스크랩)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js?v=4';
 import { t as sharedT, applyLang as _applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {

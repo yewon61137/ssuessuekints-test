@@ -153,9 +153,10 @@ function showProfileSetup(user) {
     stopVerificationCheck();
 
     const modal = document.getElementById('authModal');
-    // 탭·Google 버튼·구분선 숨기기
+    // 탭·소셜 버튼·구분선 숨기기
     modal.querySelector('.modal-tabs').style.display = 'none';
     modal.querySelector('.google-btn').style.display = 'none';
+    modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = 'none');
     modal.querySelector('.modal-divider').style.display = 'none';
     document.getElementById('signinPanel').style.display = 'none';
     document.getElementById('signupPanel').style.display = 'none';
@@ -255,6 +256,7 @@ function hideProfileSetupUI() {
     const modal = document.getElementById('authModal');
     modal.querySelector('.modal-tabs').style.display = '';
     modal.querySelector('.google-btn').style.display = '';
+    modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = '');
     modal.querySelector('.modal-divider').style.display = '';
     const setupPanel = document.getElementById('profileSetupPanel');
     if (setupPanel) setupPanel.style.display = 'none';
@@ -577,6 +579,7 @@ function switchTab(tab) {
     if (modal) {
         modal.querySelector('.modal-tabs').style.display = '';
         modal.querySelector('.google-btn').style.display = '';
+        modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = '');
         modal.querySelector('.modal-divider').style.display = '';
     }
     clearModalError();

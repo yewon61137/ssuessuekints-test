@@ -13,11 +13,13 @@
     <div class="loader"></div>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getAuth, signInWithCustomToken, updateProfile } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
         import { firebaseConfig } from './firebase-config.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         async function handleCallback() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -53,7 +55,26 @@
 
                     if (data.firebaseToken) {
                         // 2. Firebase 커스텀 토큰으로 로그인
-                        await signInWithCustomToken(auth, data.firebaseToken);
+                        const result = await signInWithCustomToken(auth, data.firebaseToken);
+                        const user = result.user;
+
+                        // 3. Firebase Auth 프로필 업데이트 (displayName, photoURL)
+                        if (data.naverUser) {
+                            const { nickname, profilePhotoURL } = data.naverUser;
+                            if (nickname || profilePhotoURL) {
+                                await updateProfile(user, {
+                                    displayName: nickname || user.displayName || '',
+                                    photoURL: profilePhotoURL || user.photoURL || ''
+                                });
+                            }
+                        }
+
+                        // 4. Firestore 프로필 미완성이면 flag를 sessionStorage에 저장 후 이동
+                        const snap = await getDoc(doc(db, 'users', user.uid));
+                        if (!snap.exists() || !snap.data().profileCompleted) {
+                            sessionStorage.setItem('naver_setup_needed', '1');
+                        }
+
                         window.location.href = '/';
                     } else {
                         throw new Error('인증 토큰이 유효하지 않습니다.');

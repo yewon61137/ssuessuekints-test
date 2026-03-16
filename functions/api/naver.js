@@ -54,7 +54,14 @@ export async function onRequestGet(context) {
             env
         );
 
-        return new Response(JSON.stringify({ firebaseToken }), {
+        return new Response(JSON.stringify({
+            firebaseToken,
+            naverUser: {
+                nickname: naverUser.nickname || '',
+                email: naverUser.email || null,
+                profilePhotoURL: naverUser.profile_image || null
+            }
+        }), {
             headers: { 'Content-Type': 'application/json' }
         });
 

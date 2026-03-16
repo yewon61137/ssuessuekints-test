@@ -1,6 +1,6 @@
 // community.js — 커뮤니티 피드
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js?v=4';
 import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
