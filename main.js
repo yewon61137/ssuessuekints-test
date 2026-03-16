@@ -43,10 +43,6 @@ const magnifierCtx = magnifierCanvas.getContext('2d');
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
-const aiAnalysisArea = document.getElementById('aiAnalysisArea');
-const aiAnalysisText = document.getElementById('aiAnalysisText');
-const aiFocusLabel = document.getElementById('aiFocusLabel');
-const subjectFocusToggle = document.getElementById('subjectFocusToggle');
 const langBtns = document.querySelectorAll('.lang-btn');
 
 // --- 번역 데이터 (i18n) ---
