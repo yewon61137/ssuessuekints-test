@@ -26,30 +26,37 @@
             const error = urlParams.get('error');
 
             if (error) {
-                alert('인증 중 오류가 발생했습니다: ' + error);
+                alert('네이버 인증 실패: ' + error);
                 window.location.href = '/';
                 return;
             }
 
             if (code) {
                 try {
-                    // 세션 스토리지에서 인증 수단 확인 (naver 또는 kakao)
-                    const provider = sessionStorage.getItem('auth_provider') || 'naver';
-                    
-                    const response = await fetch(`/api/${provider}?code=${code}&state=${state}`);
+                    // 1. 백엔드 API 호출
+                    const response = await fetch(`/api/naver?code=${code}&state=${state}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '서버 응답 오류');
+                    }
+
                     const data = await response.json();
 
                     if (data.firebaseToken) {
+                        // 2. Firebase 커스텀 토큰으로 로그인
                         await signInWithCustomToken(auth, data.firebaseToken);
                         window.location.href = '/';
                     } else {
-                        throw new Error(data.error || 'Token generation failed');
+                        throw new Error('인증 토큰이 유효하지 않습니다.');
                     }
                 } catch (e) {
                     console.error('Auth error:', e);
-                    alert('로그인 처리 중 오류가 발생했습니다.');
+                    alert('로그인 처리 중 오류가 발생했습니다: ' + e.message);
                     window.location.href = '/';
                 }
+            } else {
+                alert('인증 코드가 없습니다.');
+                window.location.href = '/';
             }
         }
 
