@@ -12,7 +12,8 @@ import {
     signInWithEmailAndPassword,
     updateProfile,
     sendEmailVerification,
-    applyActionCode
+    applyActionCode,
+    deleteUser
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     getFirestore,
@@ -21,6 +22,7 @@ import {
     serverTimestamp,
     doc,
     getDoc,
+    getDocs,
     setDoc,
     deleteDoc,
     updateDoc
@@ -29,7 +31,9 @@ import {
     getStorage,
     ref,
     uploadBytes,
-    getDownloadURL
+    getDownloadURL,
+    listAll,
+    deleteObject
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // ⚠️ firebase-config.js 파일에서 설정을 수정하세요
@@ -617,6 +621,42 @@ function getAuthErrorMessage(code) {
         'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
     };
     return messages[code] || '로그인 중 오류가 발생했습니다.';
+}
+
+// 회원 탈퇴: Firestore + Storage + Firebase Auth 계정 삭제
+export async function deleteUserAccount(user) {
+    const uid = user.uid;
+
+    // 1. 닉네임 조회 (usernames 해제용)
+    const profile = await getUserProfile(uid);
+    const nickname = profile?.nickname;
+
+    // 2. Firestore 서브컬렉션 삭제 (patterns, likes, scraps)
+    for (const sub of ['patterns', 'likes', 'scraps']) {
+        const snap = await getDocs(collection(db, 'users', uid, sub));
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    }
+
+    // 3. Storage 파일 삭제 (users/{uid}/ 하위 전체)
+    try {
+        const deleteDir = async (dirRef) => {
+            const result = await listAll(dirRef);
+            await Promise.all(result.items.map(item => deleteObject(item)));
+            await Promise.all(result.prefixes.map(prefix => deleteDir(prefix)));
+        };
+        await deleteDir(ref(storage, `users/${uid}`));
+    } catch (e) {
+        console.warn('Storage 삭제 일부 실패 (계속 진행):', e);
+    }
+
+    // 4. Firestore users/{uid} 문서 삭제
+    await deleteDoc(doc(db, 'users', uid));
+
+    // 5. 닉네임 예약 해제
+    if (nickname) await deleteDoc(doc(db, 'usernames', nickname));
+
+    // 6. Firebase Auth 계정 삭제
+    await deleteUser(user);
 }
 
 export function openAuthModal() {

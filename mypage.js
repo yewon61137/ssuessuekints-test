@@ -1,6 +1,6 @@
 // mypage.js — 마이페이지 (4탭: 프로필 수정 / 내 도안 / 내 글 / 스크랩)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable } from './auth.js?v=4';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=4';
 import { t as sharedT, applyLang as _applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -763,3 +763,53 @@ function initPageAuth() {
 }
 
 initPageAuth();
+
+// --- 회원 탈퇴 ---
+(function initWithdrawal() {
+    const withdrawalBtn = document.getElementById('withdrawalBtn');
+    const modal = document.getElementById('withdrawalModal');
+    const cancelBtn = document.getElementById('withdrawalCancelBtn');
+    const confirmBtn = document.getElementById('withdrawalConfirmBtn');
+    const input = document.getElementById('withdrawalConfirmInput');
+    const errorEl = document.getElementById('withdrawalError');
+    if (!withdrawalBtn || !modal) return;
+
+    withdrawalBtn.addEventListener('click', () => {
+        input.value = '';
+        errorEl.style.display = 'none';
+        modal.style.display = 'flex';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    confirmBtn.addEventListener('click', async () => {
+        if (input.value.trim() !== '탈퇴합니다') {
+            errorEl.textContent = '탈퇴합니다 를 정확히 입력해주세요.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        const user = auth.currentUser;
+        if (!user) return;
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = '처리 중...';
+        errorEl.style.display = 'none';
+        try {
+            await deleteUserAccount(user);
+            modal.style.display = 'none';
+            window.location.href = '/';
+        } catch (e) {
+            // 재인증이 필요한 경우 (로그인한 지 오래된 경우)
+            if (e.code === 'auth/requires-recent-login') {
+                errorEl.textContent = '보안을 위해 재로그인 후 다시 시도해주세요.';
+            } else {
+                errorEl.textContent = '탈퇴 처리 중 오류가 발생했습니다: ' + e.message;
+            }
+            errorEl.style.display = 'block';
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = '탈퇴하기';
+        }
+    });
+})();
