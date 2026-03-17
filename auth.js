@@ -494,8 +494,8 @@ export function initAuth() {
             const clientId = 'Fe19uUByKG1KyTLtsg67';
             const redirectUri = encodeURIComponent(window.location.origin + '/auth-callback.html');
             const state = Math.random().toString(36).substring(2, 15);
-            sessionStorage.setItem('oauth_state', state);
-            sessionStorage.setItem('auth_provider', 'naver');
+            // localStorage 사용: 팝업이 cross-origin 이동 후 돌아와도 접근 가능
+            localStorage.setItem('naver_oauth_state', state);
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
             const pw = 500, ph = 700;
@@ -505,22 +505,17 @@ export function initAuth() {
 
             if (!popup || popup.closed) {
                 // 팝업 차단 시 리다이렉트 폴백
+                localStorage.setItem('naver_redirect_fallback', '1');
                 window.location.href = naverAuthUrl;
                 return;
             }
 
-            function onNaverAuthMsg(e) {
-                if (e.origin !== window.location.origin) return;
-                if (!e.data || e.data.type !== 'naver_auth_complete') return;
-                window.removeEventListener('message', onNaverAuthMsg);
-
-                if (e.data.success) {
-                    if (e.data.naverEmail) sessionStorage.setItem('naver_pending_email', e.data.naverEmail);
-                    if (e.data.setupNeeded) {
+            function handleNaverResult(data) {
+                if (data.success) {
+                    if (data.naverEmail) sessionStorage.setItem('naver_pending_email', data.naverEmail);
+                    if (data.setupNeeded) {
                         sessionStorage.setItem('naver_setup_needed', '1');
-                        // onAuthStateChanged가 발생하면 프로필 설정 패널 표시
                     } else {
-                        // 기존 사용자: Firebase 인증 상태 반영 후 모달 닫기
                         const tryClose = setInterval(() => {
                             if (auth.currentUser) {
                                 clearInterval(tryClose);
@@ -531,10 +526,33 @@ export function initAuth() {
                         setTimeout(() => clearInterval(tryClose), 5000);
                     }
                 } else {
-                    showModalError(e.data.error || '네이버 로그인에 실패했습니다.');
+                    showModalError(data.error || '네이버 로그인에 실패했습니다.');
                 }
             }
+
+            // postMessage 수신 (window.opener가 살아있는 경우)
+            function onNaverAuthMsg(e) {
+                if (e.origin !== window.location.origin) return;
+                if (!e.data || e.data.type !== 'naver_auth_complete') return;
+                window.removeEventListener('message', onNaverAuthMsg);
+                window.removeEventListener('storage', onNaverStorage);
+                handleNaverResult(e.data);
+            }
+
+            // storage 이벤트 폴백 (window.opener가 null인 브라우저 대비)
+            function onNaverStorage(e) {
+                if (e.key !== 'naver_auth_result') return;
+                window.removeEventListener('message', onNaverAuthMsg);
+                window.removeEventListener('storage', onNaverStorage);
+                try {
+                    const result = JSON.parse(e.newValue);
+                    localStorage.removeItem('naver_auth_result');
+                    handleNaverResult(result);
+                } catch {}
+            }
+
             window.addEventListener('message', onNaverAuthMsg);
+            window.addEventListener('storage', onNaverStorage);
         });
     }
 
