@@ -715,6 +715,10 @@ function renderHistory() {
 }
 
 downloadPdfBtn.addEventListener('click', () => {
+    if (!getCurrentUser()) {
+        openAuthModal();
+        return;
+    }
     try {
         if (typeof window.jspdf === 'undefined') {
             showStatus('status_pdf_err', true);
