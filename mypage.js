@@ -1,6 +1,6 @@
 // mypage.js — 마이페이지 (4탭: 프로필 수정 / 내 도안 / 내 글 / 스크랩)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=5';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=6';
 import { t as sharedT, applyLang as _applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -121,7 +121,7 @@ langBtns.forEach(btn => {
 applyLang(localStorage.getItem('lang') || 'ko');
 
 // --- Tab 컨트롤러 ---
-let currentTab = 'profile';
+let currentTab = 'mypatterns'; // HTML 기본 active 탭과 일치
 let currentUid = null;
 let isMine = true; // 본인 프로필 여부
 const tabLoaded = { profile: false, mypatterns: false, myposts: false, scraps: false };
@@ -750,10 +750,8 @@ function initPageAuth() {
             notLoggedInEl.style.display = 'none';
             loggedInEl.style.display = 'block';
             currentUid = user.uid;
-            if (!tabLoaded['profile']) {
-                tabLoaded['profile'] = true;
-                await loadProfilePanel(user.uid);
-            }
+            // 현재 활성 탭 데이터 로드 (최초 1회)
+            switchTab(currentTab);
         } else {
             notLoggedInEl.style.display = 'block';
             loggedInEl.style.display = 'none';

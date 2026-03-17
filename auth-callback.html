@@ -28,8 +28,13 @@
             const error = urlParams.get('error');
 
             if (error) {
-                alert('네이버 인증 실패: ' + error);
-                window.location.href = '/';
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({ type: 'naver_auth_complete', success: false, error: '네이버 인증 실패: ' + error }, window.location.origin);
+                    window.close();
+                } else {
+                    alert('네이버 인증 실패: ' + error);
+                    window.location.href = '/';
+                }
                 return;
             }
 
@@ -37,8 +42,13 @@
             const savedState = sessionStorage.getItem('oauth_state');
             sessionStorage.removeItem('oauth_state');
             if (!state || state !== savedState) {
-                alert('보안 검증 실패. 다시 로그인해주세요.');
-                window.location.href = '/';
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 다시 로그인해주세요.' }, window.location.origin);
+                    window.close();
+                } else {
+                    alert('보안 검증 실패. 다시 로그인해주세요.');
+                    window.location.href = '/';
+                }
                 return;
             }
 
@@ -69,34 +79,51 @@
                             }
                         }
 
-                        // 4. Naver 이메일 sessionStorage에 보존 (user.email은 커스텀 토큰에서 null)
-                        if (data.naverUser?.email) {
-                            sessionStorage.setItem('naver_pending_email', data.naverUser.email);
-                        }
-
-                        // 5. Firestore 프로필 미완성이면 flag 저장 후 이동
+                        // 4. Firestore 프로필 완성 여부 확인
+                        let setupNeeded = false;
                         try {
                             const snap = await getDoc(doc(db, 'users', user.uid));
-                            if (!snap.exists() || !snap.data().profileCompleted) {
-                                sessionStorage.setItem('naver_setup_needed', '1');
-                            }
+                            if (!snap.exists() || !snap.data().profileCompleted) setupNeeded = true;
                         } catch {
-                            // Firestore 읽기 실패해도 신규 유저로 처리
-                            sessionStorage.setItem('naver_setup_needed', '1');
+                            setupNeeded = true;
                         }
 
-                        window.location.href = '/';
+                        // 5. 팝업이면 부모 창에 메시지 전달 후 닫기, 아니면 리다이렉트
+                        if (window.opener && !window.opener.closed) {
+                            window.opener.postMessage({
+                                type: 'naver_auth_complete',
+                                success: true,
+                                setupNeeded,
+                                naverEmail: data.naverUser?.email || null
+                            }, window.location.origin);
+                            window.close();
+                        } else {
+                            // 리다이렉트 폴백 (팝업 차단 등)
+                            if (data.naverUser?.email) sessionStorage.setItem('naver_pending_email', data.naverUser.email);
+                            if (setupNeeded) sessionStorage.setItem('naver_setup_needed', '1');
+                            window.location.href = '/';
+                        }
                     } else {
                         throw new Error('인증 토큰이 유효하지 않습니다.');
                     }
                 } catch (e) {
                     console.error('Auth error:', e);
-                    alert('로그인 처리 중 오류가 발생했습니다: ' + e.message);
-                    window.location.href = '/';
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage({ type: 'naver_auth_complete', success: false, error: '로그인 처리 중 오류: ' + e.message }, window.location.origin);
+                        window.close();
+                    } else {
+                        alert('로그인 처리 중 오류가 발생했습니다: ' + e.message);
+                        window.location.href = '/';
+                    }
                 }
             } else {
-                alert('인증 코드가 없습니다.');
-                window.location.href = '/';
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({ type: 'naver_auth_complete', success: false, error: '인증 코드가 없습니다.' }, window.location.origin);
+                    window.close();
+                } else {
+                    alert('인증 코드가 없습니다.');
+                    window.location.href = '/';
+                }
             }
         }
 

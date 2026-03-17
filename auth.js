@@ -487,18 +487,54 @@ export function initAuth() {
         }
     });
 
-    // 네이버 로그인
+    // 네이버 로그인 (팝업 방식)
     const naverBtn = document.getElementById('naverSignInBtn');
     if (naverBtn) {
         naverBtn.addEventListener('click', () => {
             const clientId = 'Fe19uUByKG1KyTLtsg67';
             const redirectUri = encodeURIComponent(window.location.origin + '/auth-callback.html');
             const state = Math.random().toString(36).substring(2, 15);
-            // CSRF 방지용 state 저장
             sessionStorage.setItem('oauth_state', state);
             sessionStorage.setItem('auth_provider', 'naver');
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-            window.location.href = naverAuthUrl;
+
+            const pw = 500, ph = 700;
+            const pl = Math.round(screen.width / 2 - pw / 2);
+            const pt = Math.round(screen.height / 2 - ph / 2);
+            const popup = window.open(naverAuthUrl, 'naver_auth', `width=${pw},height=${ph},left=${pl},top=${pt}`);
+
+            if (!popup || popup.closed) {
+                // 팝업 차단 시 리다이렉트 폴백
+                window.location.href = naverAuthUrl;
+                return;
+            }
+
+            function onNaverAuthMsg(e) {
+                if (e.origin !== window.location.origin) return;
+                if (!e.data || e.data.type !== 'naver_auth_complete') return;
+                window.removeEventListener('message', onNaverAuthMsg);
+
+                if (e.data.success) {
+                    if (e.data.naverEmail) sessionStorage.setItem('naver_pending_email', e.data.naverEmail);
+                    if (e.data.setupNeeded) {
+                        sessionStorage.setItem('naver_setup_needed', '1');
+                        // onAuthStateChanged가 발생하면 프로필 설정 패널 표시
+                    } else {
+                        // 기존 사용자: Firebase 인증 상태 반영 후 모달 닫기
+                        const tryClose = setInterval(() => {
+                            if (auth.currentUser) {
+                                clearInterval(tryClose);
+                                modal.style.display = 'none';
+                                callOnAuthComplete();
+                            }
+                        }, 200);
+                        setTimeout(() => clearInterval(tryClose), 5000);
+                    }
+                } else {
+                    showModalError(e.data.error || '네이버 로그인에 실패했습니다.');
+                }
+            }
+            window.addEventListener('message', onNaverAuthMsg);
         });
     }
 
