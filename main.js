@@ -1,7 +1,7 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
 import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
-import { initAuth, getCurrentUser, savePatternToCloud } from './auth.js?v=5';
+import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal } from './auth.js?v=5';
 import { t as sharedT } from './i18n.js';
 
 // --- 상태 관리 ---
@@ -781,7 +781,7 @@ downloadPdfBtn.addEventListener('click', () => {
 saveToCloudBtn.addEventListener('click', () => {
     const user = getCurrentUser();
     if (!user) {
-        showStatus('save_login_required', true);
+        openAuthModal();
         return;
     }
     document.getElementById('patternSaveModal').style.display = 'flex';
