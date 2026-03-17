@@ -56,9 +56,12 @@
     .verdict-box { background: #f9f5ff; border: 1.5px solid #d4b8ff; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
     .verdict-box h3 { color: var(--primary-color); margin: 0 0 0.5rem; font-size: 0.95rem; }
     .verdict-box p { margin: 0; font-size: 0.875rem; line-height: 1.8; }
-    .article-nav { display: flex; gap: 0.75rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
+    .article-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
     .article-nav a { font-size: 0.85rem; color: var(--primary-color); text-decoration: none; }
     .article-nav a:hover { text-decoration: underline; }
+    .article-nav-prev { text-align: left; }
+    .article-nav-center { text-align: center; }
+    .article-nav-next { text-align: right; }
     @media (max-width: 600px) { .article-title { font-size: 1.3rem; } .compare-table { font-size: 0.8rem; } }
   </style>
 </head>
@@ -160,10 +163,11 @@
         </ul>
         <p>도안 생성기에서 기법 비율 설정을 정확히 입력하면, 실제 완성품 크기와 더욱 가까운 도안을 만들 수 있습니다.</p>
 
-        <div class="article-nav">
-          <a href="/magazine/yarn-weight-guide.html">← 이전 글: 실 굵기 완벽 가이드</a>
-          <a href="/magazine/beginners-guide.html" style="margin-left:auto;">다음 글: 뜨개질 입문 가이드 →</a>
-        </div>
+        <nav class="article-nav">
+          <span class="article-nav-prev"><a href="/magazine/yarn-weight-guide.html">← 실 굵기 완벽 가이드</a></span>
+          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+          <span class="article-nav-next"><a href="/magazine/beginners-guide.html">뜨개질 입문 완전 가이드 →</a></span>
+        </nav>
       </div>
     </article>
   </main>

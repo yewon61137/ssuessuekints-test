@@ -54,9 +54,12 @@
     .step-content p { margin: 0; font-size: 0.875rem; line-height: 1.8; }
     .tip-box { background: #f0faf5; border: 1.5px solid #a8e0c5; border-radius: 12px; padding: 1.1rem 1.4rem; margin: 1.25rem 0; }
     .tip-box p { margin: 0; font-size: 0.875rem; line-height: 1.8; }
-    .article-nav { display: flex; gap: 0.75rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
+    .article-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
     .article-nav a { font-size: 0.85rem; color: var(--primary-color); text-decoration: none; }
     .article-nav a:hover { text-decoration: underline; }
+    .article-nav-prev { text-align: left; }
+    .article-nav-center { text-align: center; }
+    .article-nav-next { text-align: right; }
     @media (max-width: 600px) { .article-title { font-size: 1.3rem; } }
   </style>
 </head>
@@ -176,10 +179,11 @@
         <h2>픽셀 도안으로 나만의 뜨개 작품 만들기</h2>
         <p>기초를 어느 정도 익혔다면, SSUESSUE KNITS의 도안 생성기로 나만의 픽셀 도안을 만들어보세요. 좋아하는 사진이나 그림을 업로드하면 코바늘·대바늘 모두에 적용 가능한 컬러워크 도안을 자동으로 생성해 줍니다. 기법, 실 굵기, 완성 크기를 설정하면 필요한 코 수와 단 수를 자동으로 계산해 주기 때문에, 복잡한 수학 계산 없이 나만의 도안을 바로 시작할 수 있습니다.</p>
 
-        <div class="article-nav">
-          <a href="/magazine/crochet-vs-knitting.html">← 이전 글: 코바늘 vs 대바늘</a>
-          <a href="/magazine.html" style="margin-left:auto;">매거진 목록으로 →</a>
-        </div>
+        <nav class="article-nav">
+          <span class="article-nav-prev"><a href="/magazine/crochet-vs-knitting.html">← 코바늘 vs 대바늘</a></span>
+          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+          <span class="article-nav-next"><a href="/magazine/2026-knitting-trends.html">2026 뜨개질 트렌드 →</a></span>
+        </nav>
       </div>
     </article>
   </main>

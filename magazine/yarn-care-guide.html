@@ -37,9 +37,12 @@
     .care-card p{margin:0;font-size:.875rem;line-height:1.85}
     .warn-box{background:#fff8f0;border:1.5px solid #ffd599;border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0;font-size:.875rem;line-height:1.8}
     .warn-box strong{color:#cc6600}
-    .article-nav{display:flex;gap:.75rem;margin-top:3rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color)}
-    .article-nav a{font-size:.85rem;color:var(--primary-color);text-decoration:none}
-    .article-nav a:hover{text-decoration:underline}
+    .article-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
+    .article-nav a { font-size: 0.85rem; color: var(--primary-color); text-decoration: none; }
+    .article-nav a:hover { text-decoration: underline; }
+    .article-nav-prev { text-align: left; }
+    .article-nav-center { text-align: center; }
+    .article-nav-next { text-align: right; }
     @media(max-width:600px){.article-title{font-size:1.3rem}}
   </style>
 </head>
@@ -168,9 +171,11 @@
           <li>여름철에는 습기로 인한 곰팡이를 방지하기 위해 제습제를 함께 넣어두세요.</li>
         </ul>
 
-        <div class="article-nav">
-          <a href="/magazine.html">← 매거진 목록으로</a>
-        </div>
+        <nav class="article-nav">
+          <span class="article-nav-prev"><a href="/magazine/2026-knitting-trends.html">← 2026 뜨개질 트렌드</a></span>
+          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+          <span class="article-nav-next"><a href="/magazine/amigurumi-beginners.html">아미구루미 입문 가이드 →</a></span>
+        </nav>
       </div>
     </article>
   </main>

@@ -37,9 +37,12 @@
     .abbr-table td:first-child{font-weight:700;color:var(--text-color,#222);white-space:nowrap}
     .tip-box{background:#f0faf5;border:1.5px solid #a8e0c5;border-radius:12px;padding:1.1rem 1.4rem;margin:1.25rem 0}
     .tip-box p{margin:0;font-size:.875rem;line-height:1.8}
-    .article-nav{display:flex;gap:.75rem;margin-top:3rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color)}
-    .article-nav a{font-size:.85rem;color:var(--primary-color);text-decoration:none}
-    .article-nav a:hover{text-decoration:underline}
+    .article-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border-color); }
+    .article-nav a { font-size: 0.85rem; color: var(--primary-color); text-decoration: none; }
+    .article-nav a:hover { text-decoration: underline; }
+    .article-nav-prev { text-align: left; }
+    .article-nav-center { text-align: center; }
+    .article-nav-next { text-align: right; }
     @media(max-width:600px){.article-title{font-size:1.3rem}}
   </style>
 </head>
@@ -145,9 +148,11 @@
         <h2>아미구루미에서 픽셀 도안 활용하기</h2>
         <p>아미구루미에 컬러워크 패턴을 넣고 싶다면 SSUESSUE KNITS의 도안 생성기를 활용해보세요. 좋아하는 캐릭터나 이모티콘 이미지를 업로드해 픽셀 도안으로 변환한 뒤, 코바늘 1:1 비율로 설정해 사용할 수 있습니다. 특히 납작한 형태의 아미구루미(플라티(Platie), 키링 등)에 픽셀 패턴을 넣으면 세상에 하나뿐인 나만의 작품이 완성됩니다.</p>
 
-        <div class="article-nav">
-          <a href="/magazine.html">← 매거진 목록으로</a>
-        </div>
+        <nav class="article-nav">
+          <span class="article-nav-prev"><a href="/magazine/yarn-care-guide.html">← 소재별 세탁·보관 가이드</a></span>
+          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+          <span class="article-nav-next"><a href="/magazine/gauge-swatch-guide.html">게이지 스와치 완벽 가이드 →</a></span>
+        </nav>
       </div>
     </article>
   </main>
