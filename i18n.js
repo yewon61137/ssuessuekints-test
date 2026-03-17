@@ -82,6 +82,11 @@ export function applyLang(lang, opts = {}) {
     document.querySelectorAll('[data-lang-section]').forEach(el => {
         el.style.display = el.getAttribute('data-lang-section') === lang ? 'block' : 'none';
     });
+
+    // 네이버 로그인은 한국어 사용자에게만 표시
+    document.querySelectorAll('.naver-btn').forEach(el => {
+        el.style.display = lang === 'ko' ? '' : 'none';
+    });
 }
 
 /**
