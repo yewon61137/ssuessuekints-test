@@ -91,6 +91,12 @@
         <a href="/magazine.html" class="lang-btn">매거진</a>
         <a href="/notice.html" class="lang-btn">공지사항</a>
         <a href="/guide.html" class="lang-btn">이용안내</a>
+
+        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
@@ -106,7 +112,21 @@
         <p class="article-meta">SSUESSUE KNITS 편집팀 &nbsp;·&nbsp; 2026년 3월 5일</p>
       </div>
 
+      <div class="post-action-bar" style="margin-top:1.5rem;">
+        <button class="action-btn" id="likeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          좋아요 <span id="likeCount">0</span>
+        </button>
+        <button class="action-btn" id="scrapBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          스크랩 <span id="scrapCount">0</span>
+        </button>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+      </div>
+
       <div class="article-body">
+        <div class="article-lang" data-lang="ko">
+
 
         <p>뜨개질에서 가장 많이 무시되는 단계가 바로 게이지 스와치입니다. "에이, 귀찮아서…", "나는 손 세기가 일정하니까 괜찮겠지"라고 생각하며 건너뛰다가 완성 후 사이즈가 전혀 맞지 않아 낭패를 보는 경험, 뜨개인이라면 한 번쯤 해봤을 겁니다. 이 글에서는 게이지 스와치가 무엇인지, 왜 반드시 필요한지, 어떻게 올바르게 뜨고 측정하는지, 그리고 스와치 결과를 바탕으로 코 수와 단 수를 계산하는 방법까지 완전히 정리합니다.</p>
 
@@ -379,11 +399,101 @@
 
         <h2>마치며</h2>
         <p>게이지 스와치는 번거롭지만 완성 후 낭패를 막아주는 가장 확실한 보험입니다. 특히 비싼 실이나 시간이 많이 드는 프로젝트일수록 스와치에 투자한 30분이 몇 주의 수고를 아낄 수 있습니다. 처음에는 귀찮게 느껴지더라도 스와치 떠보기를 습관화하면, 뜨개질 실력도 자연스럽게 올라갑니다. 오늘부터 시작해보세요.</p>
+        </div><!-- /ko -->
+
+        <div class="article-lang" data-lang="en" style="display:none;">
+          <p>The most commonly skipped step in knitting is the gauge swatch. "I'll just start," you think — then the finished sweater is four sizes too big. This guide explains what gauge is, why it matters, and exactly how to measure and use it.</p>
+
+          <h2>What Is Gauge?</h2>
+          <p>Gauge is the number of stitches and rows per 10cm (4 inches) of fabric, measured in a specific stitch pattern. Patterns typically state it as: <em>22 sts × 30 rows = 10cm in stockinette on 4mm needles</em>.</p>
+          <p>Even with the same yarn and needle size, every knitter's gauge differs because hand tension varies. Tighter knitters get more stitches per 10cm; looser knitters get fewer.</p>
+
+          <h2>Why Swatch?</h2>
+          <p>A gauge mismatch means your finished piece will be a different size than the pattern intends. If the pattern calls for 20 sts/10cm and you get 18 sts/10cm, casting on 100 stitches gives you 100÷18×10 = 55.6cm instead of the intended 50cm — a 5.6cm difference before you've even started shaping.</p>
+          <p>Always swatch for: garments (sweaters, cardigans), fitted hats, socks, and any project where size matters. For scarves and shawls, swatching is optional.</p>
+
+          <h2>How to Swatch</h2>
+          <ol>
+            <li><strong>Make it big enough:</strong> Knit at least 15cm × 15cm — ideally 20cm × 20cm. Edges distort, so you measure only the center 10cm.</li>
+            <li><strong>Use the right stitch:</strong> Swatch in the same stitch pattern as the project (stockinette for a stockinette sweater, etc.).</li>
+            <li><strong>Wash and block first:</strong> Yarns change size after washing. Always wash, block, and dry your swatch the same way you'll care for the finished piece before measuring.</li>
+            <li><strong>Measure in the center:</strong> Place pins 10cm apart and count the stitches (and rows) between them. Record to the nearest half-stitch.</li>
+          </ol>
+
+          <h2>Adjusting Gauge</h2>
+          <p><strong>Too many stitches (too tight):</strong> Go up one needle size.<br>
+          <strong>Too few stitches (too loose):</strong> Go down one needle size.<br>
+          Re-swatch after each change.</p>
+
+          <p>If you can't achieve gauge by changing needle sizes, calculate the corrected stitch count:</p>
+          <div class="calc-box">
+            <strong>📐 Gauge Correction Formula</strong>
+            <p>Pattern gauge: 20 sts / 10cm | Your gauge: 18 sts / 10cm | Pattern CO: 100 sts</p>
+            <span class="calc-formula">Corrected CO = Pattern CO × (Your gauge ÷ Pattern gauge)</span>
+            <p>= 100 × (18 ÷ 20) = <strong>90 sts</strong></p>
+          </div>
+
+          <h2>Blocking &amp; Gauge</h2>
+          <p>Blocking changes your gauge. Wet-blocked wool often opens up, increasing stitch width. Cotton shrinks with washing. Always measure post-blocking. Never start a sized garment from pre-wash gauge measurements.</p>
+
+          <h2>Don't Throw Away Your Swatch</h2>
+          <p>Swatches make great fiber sample records. Attach the yarn label and a note about needle size, tension, and washing result. Over time you'll build a personal yarn reference library — invaluable when you return to a yarn months later.</p>
+        </div><!-- /en -->
+
+        <div class="article-lang" data-lang="ja" style="display:none;">
+          <p>編み物で最もよく省略されるのがゲージスワッチです。「まあ大丈夫だろう」と思って始めたら、完成したセーターがサイズ違い——そんな経験はありませんか？このガイドではゲージとは何か、なぜ必要か、どう測るかを完全解説します。</p>
+
+          <h2>ゲージとは？</h2>
+          <p>ゲージとは、特定の編み方で10cm四方に入る目数と段数のことです。図案には通常こう書かれています：<em>4mm針でメリヤス編み 22目×30段＝10cm</em>。</p>
+          <p>同じ糸・同じ針サイズを使っても、手の力加減によってゲージは人それぞれ異なります。きつく編む人は10cmあたりの目数が多くなり、ゆるく編む人は少なくなります。</p>
+
+          <h2>なぜスワッチが必要？</h2>
+          <p>ゲージが図案と合わないと、完成品のサイズが変わります。図案のゲージが10cmに20目で、あなたのゲージが18目なら、100目作り目すると幅は100÷18×10＝約55.6cm。図案の意図する50cmより5.6cmも広くなります。</p>
+          <p>必ずスワッチが必要なもの：ウェア（セーター・カーディガン）、ぴったりサイズの帽子・靴下、サイズが重要なすべての作品。スカーフやショールは任意でOK。</p>
+
+          <h2>スワッチの編み方</h2>
+          <ol>
+            <li><strong>十分大きく編む：</strong>最低15cm×15cm、できれば20cm×20cm。端が歪むため中央の10cmだけを測ります。</li>
+            <li><strong>正しい編み方で：</strong>プロジェクトと同じ技法でスワッチを編む（メリヤス編みの作品ならメリヤス編みで）。</li>
+            <li><strong>洗ってからブロッキングして測る：</strong>糸は洗濯でサイズが変わります。完成品と同じ方法で洗い、ブロッキングして乾かしてから測定する。</li>
+            <li><strong>中央で測定：</strong>ピンを10cm間隔で刺し、間の目数（段数）を数える。0.5目単位で記録。</li>
+          </ol>
+
+          <h2>ゲージの調整</h2>
+          <p><strong>目数が多すぎる（きつい）：</strong>針を1号上げる。<br>
+          <strong>目数が少なすぎる（ゆるい）：</strong>針を1号下げる。<br>
+          変更ごとに新しいスワッチを編み直す。</p>
+
+          <p>針サイズでゲージが合わせられない場合は目数を計算で補正できます：</p>
+          <div class="calc-box">
+            <strong>📐 ゲージ補正計算式</strong>
+            <p>図案ゲージ：20目/10cm ｜ 自分のゲージ：18目/10cm ｜ 図案の作り目：100目</p>
+            <span class="calc-formula">補正後の作り目 = 図案の作り目 × (自分のゲージ ÷ 図案のゲージ)</span>
+            <p>= 100 × (18 ÷ 20) = <strong>90目</strong></p>
+          </div>
+
+          <h2>ブロッキングとゲージの関係</h2>
+          <p>ブロッキングによってゲージは変わります。ウールはウェットブロッキング後に目が広がることが多く、コットンは洗濯で縮みます。必ずブロッキング後に測定を。洗濯前のゲージでウェアを始めないこと。</p>
+
+          <h2>スワッチを捨てないで</h2>
+          <p>スワッチは素材サンプルとして保管しておきましょう。糸のラベル・針サイズ・テンション・洗濯結果を記録してつけておくと、後で同じ糸を使う際にとても役立ちます。</p>
+        </div><!-- /ja -->
+      <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
+        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <div id="commentsList"></div>
+        <div class="comment-form" style="margin-top:1.25rem;">
+          <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
+          <div class="reply-form-btns" style="margin-top:0.5rem;">
+            <button id="commentSubmitBtn" class="primary-btn" style="font-size:0.85rem;">등록</button>
+          </div>
+        </div>
+      </section>
+
 
         <nav class="article-nav">
-          <span class="article-nav-prev"><a href="/magazine/amigurumi-beginners.html">← 아미구루미 입문 가이드</a></span>
-          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
-          <span class="article-nav-next"><a href="/magazine/crochet-basics.html">코바늘 기초 기법 →</a></span>
+          <span class="article-nav-prev" id="navPrev"><a href="/magazine/amigurumi-beginners.html">← 이전 글</a></span>
+          <span class="article-nav-center"><a href="/magazine.html" id="navList">목록으로</a></span>
+          <span class="article-nav-next" id="navNext"><a href="/magazine/crochet-basics.html">다음 글 →</a></span>
         </nav>
 
       </div>
@@ -418,6 +528,42 @@
       <a href="/notice.html" class="mobile-menu-link">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link">이용안내</a>
     </nav>
+  </div>
+  <script type="module">
+    import { initAuth } from '/auth.js?v=5';
+    import { initMagazineArticle } from '/magazine-article.js';
+    initAuth();
+    initMagazineArticle('gauge-swatch-guide');
+  </script>
+  <div id="authModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignIn">로그인</button>
+        <button class="modal-tab" id="tabSignUp">회원가입</button>
+      </div>
+      <button class="google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
+        <span>Google로 계속하기</span>
+      </button>
+      <div class="modal-divider"><span>또는</span></div>
+      <div id="signinPanel">
+        <form id="emailSignInForm" class="auth-form">
+          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
+        </form>
+      </div>
+      <div id="signupPanel" style="display:none;">
+        <form id="emailSignUpForm" class="auth-form">
+          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
+        </form>
+      </div>
+      <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
   </div>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>

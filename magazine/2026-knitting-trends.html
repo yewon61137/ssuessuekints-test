@@ -62,6 +62,12 @@
         <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
         <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
         <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案내">이용안내</a>
+
+        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
@@ -77,7 +83,21 @@
         <p class="article-meta">2026년 2월 5일 &nbsp;·&nbsp; SSUESSUE KNITS</p>
       </div>
 
+      <div class="post-action-bar" style="margin-top:1.5rem;">
+        <button class="action-btn" id="likeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          좋아요 <span id="likeCount">0</span>
+        </button>
+        <button class="action-btn" id="scrapBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          스크랩 <span id="scrapCount">0</span>
+        </button>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+      </div>
+
       <div class="article-body">
+        <div class="article-lang" data-lang="ko">
+
         <p>매년 패션과 라이프스타일 트렌드가 변화하듯, 뜨개질 씬에도 흐름이 있습니다. 2026년에는 어떤 기법, 소재, 색상이 주목받고 있을까요? 인스타그램, 핀터레스트, 라벨리(Ravelry) 등 글로벌 뜨개 커뮤니티의 흐름을 분석해 올해 뜨개 트렌드를 정리했습니다.</p>
 
         <h2>2026 뜨개 트렌드 Top 7</h2>
@@ -137,11 +157,79 @@
         <h2>트렌드를 내 작품에 적용하는 팁</h2>
         <p>트렌드를 무조건 따를 필요는 없습니다. 하지만 현재 유행하는 색상이나 기법을 하나씩 내 스타일에 접목해보는 것은 새로운 기술을 배우는 좋은 동기가 됩니다. 올해 트렌드 중 하나를 선택해 기존 프로젝트에 작은 변화를 주는 것부터 시작해보세요. 예를 들어, 평범한 머플러에 모자이크 패턴을 더하거나, 새 실을 구매할 때 버터 옐로우 컬러를 선택해보는 것만으로도 충분합니다.</p>
         <p>SSUESSUE KNITS의 도안 생성기를 활용하면 올해 트렌드인 픽셀 컬러워크 도안을 직접 만들어볼 수 있습니다. 좋아하는 이미지를 업로드하고 색상 수를 조절해 나만의 그래픽 패턴을 완성해보세요.</p>
+        </div><!-- /ko -->
+
+        <div class="article-lang" data-lang="en" style="display:none;">
+          <p>2026 is shaping up to be a landmark year for fiber arts. From arm knitting to pixel colorwork, here are the seven biggest trends dominating the knitting and crochet world this year.</p>
+
+          <h2>Trend 1: Jumbo Yarn &amp; Arm Knitting</h2>
+          <p>Super Bulky yarn knitted with your own arms — no needles required. This trend exploded on social media and shows no sign of slowing down. Chunky blankets and oversized cowls can be finished in 30–60 minutes. Great for instant gratification and gifting.</p>
+
+          <h2>Trend 2: Color Blocking</h2>
+          <p>Bold, graphic color blocking is everywhere in 2026 fashion, and knitting follows suit. Two to four high-contrast colors in geometric sections — no complicated colorwork required. Great for beginners who want their pieces to look striking.</p>
+
+          <h2>Trend 3: Texture Mix</h2>
+          <p>Combining different stitch textures in a single project — bobbles, cables, ribbing, and seed stitch in one piece. The effect is tactile and luxurious. Monochrome colorways let the texture do all the talking.</p>
+
+          <h2>Trend 4: Sustainable &amp; Natural Fibers</h2>
+          <p>Eco-conscious crafters are reaching for organic wool, recycled cotton, plant-based fibers (linen, bamboo, hemp), and undyed natural yarn. Brands offering transparent sourcing and low-impact dyes are seeing strong growth.</p>
+
+          <h2>Trend 5: Mosaic Crochet</h2>
+          <p>Mosaic crochet creates intricate geometric patterns using only one color per row — no yarn carrying required. The effect looks complex but the technique is surprisingly accessible for intermediate crafters.</p>
+
+          <h2>Trend 6: Modern Granny Square</h2>
+          <p>The classic granny square is back — reimagined in asymmetric arrangements, gradient color sequences, and unexpected yarn types (metallics, boucle). Join-as-you-go (JAYG) methods make assembly satisfying rather than tedious.</p>
+
+          <h2>Trend 7: Pixel Colorwork</h2>
+          <p>Cross-stitch-inspired pixel patterns applied to knitting and crochet. Perfect for creating personalized gifts — portraits, game characters, logos. SSUESSUE KNITS' pixel pattern generator lets you turn any image into a stitch chart automatically.</p>
+
+          <h2>2026 Color Trends</h2>
+          <p>Pantone and major yarn brands are pointing to: warm terracotta and clay tones, soft sage and dusty greens, warm off-whites and oatmeal, deep plum and berry, and bold cobalt blue as the palette of the year.</p>
+        </div><!-- /en -->
+
+        <div class="article-lang" data-lang="ja" style="display:none;">
+          <p>2026年はファイバーアーツにとって注目すべき年になりそうです。アーム編みからピクセルカラーワークまで、今年の編み物・かぎ針編みシーンを席巻する7大トレンドをご紹介します。</p>
+
+          <h2>トレンド1：ジャンボヤーン＆アーム編み</h2>
+          <p>超極太の糸を腕で編む——針不要のアーム編みがSNSで爆発的に広まり、2026年も継続中。もこもこのブランケットや大きなカウルが30〜60分で完成します。プレゼントにも最適。</p>
+
+          <h2>トレンド2：カラーブロッキング</h2>
+          <p>2026年のファッションを席巻するビビッドなカラーブロッキングが編み物にも波及。2〜4色のはっきりした配色をブロック状に配置するだけで、複雑なカラーワーク不要のインパクト大な作品が作れます。</p>
+
+          <h2>トレンド3：テクスチャーミックス</h2>
+          <p>ボブル・ケーブル・リブ・シードステッチなど、異なる編み目テクスチャーを1作品に組み合わせるスタイル。単色で編むことでテクスチャーがより際立ちます。</p>
+
+          <h2>トレンド4：サステナブル＆天然素材</h2>
+          <p>オーガニックウール・リサイクルコットン・リネン・バンブー・ヘンプなど環境に配慮した素材が注目を集めています。透明性の高い原材料調達とローインパクト染料を持つブランドが急成長中。</p>
+
+          <h2>トレンド5：モザイクかぎ針編み</h2>
+          <p>1段につき1色だけ使って幾何学模様を生み出すモザイクかぎ針編み。糸を渡す必要がなく、見た目は複雑ですが中級者なら意外と取り組みやすい技法です。</p>
+
+          <h2>トレンド6：モダン・グラニースクエア</h2>
+          <p>クラシックなグラニースクエアが再ブーム。非対称な配置・グラデーション・メタリック糸やブークレー糸など意外な素材との組み合わせで現代的に。JAYG（編みながらつなぐ）技法で組み立ても楽しくなります。</p>
+
+          <h2>トレンド7：ピクセルカラーワーク</h2>
+          <p>クロスステッチ風のピクセル柄を編み物・かぎ針編みに応用するスタイル。人物・ゲームキャラクター・ロゴなどオリジナル作品に最適。SSUESSUE KNITSのピクセル図案ジェネレーターなら、画像を自動で編み図に変換できます。</p>
+
+          <h2>2026年のカラートレンド</h2>
+          <p>テラコッタ・クレイなどのウォームトーン、セージ・くすみグリーン、オフホワイト・オートミール、ディーププラム・ベリー、コバルトブルーが今年のキーカラーです。</p>
+        </div><!-- /ja -->
+      <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
+        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <div id="commentsList"></div>
+        <div class="comment-form" style="margin-top:1.25rem;">
+          <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
+          <div class="reply-form-btns" style="margin-top:0.5rem;">
+            <button id="commentSubmitBtn" class="primary-btn" style="font-size:0.85rem;">등록</button>
+          </div>
+        </div>
+      </section>
+
 
         <nav class="article-nav">
-          <span class="article-nav-prev"><a href="/magazine/beginners-guide.html">← 뜨개질 입문 완전 가이드</a></span>
-          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
-          <span class="article-nav-next"><a href="/magazine/yarn-care-guide.html">소재별 세탁·보관 가이드 →</a></span>
+          <span class="article-nav-prev" id="navPrev"><a href="/magazine/beginners-guide.html">← 이전 글</a></span>
+          <span class="article-nav-center"><a href="/magazine.html" id="navList">목록으로</a></span>
+          <span class="article-nav-next" id="navNext"><a href="/magazine/yarn-care-guide.html">다음 글 →</a></span>
         </nav>
       </div>
     </article>
@@ -162,12 +250,7 @@
       <span>이메일: yewon61137@gmail.com</span>
     </div>
   </footer>
-  <script>
-    const langBtns=document.querySelectorAll('.lang-btn[data-lang]');
-    function applyLang(lang){localStorage.setItem('lang',lang);document.documentElement.lang=lang;langBtns.forEach(b=>b.classList.toggle('active',b.getAttribute('data-lang')===lang));document.querySelectorAll('.i18n').forEach(el=>{const v=el.getAttribute('data-'+lang);if(v)el.textContent=v;});}
-    langBtns.forEach(btn=>btn.addEventListener('click',()=>applyLang(btn.getAttribute('data-lang'))));
-    const s=localStorage.getItem('lang');if(s&&s!=='ko')applyLang(s);
-  </script>
+  
   <div class="mobile-overlay" id="mobileOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">
     <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
@@ -179,6 +262,42 @@
       <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案내">이용안내</a>
     </nav>
+  </div>
+  <script type="module">
+    import { initAuth } from '/auth.js?v=5';
+    import { initMagazineArticle } from '/magazine-article.js';
+    initAuth();
+    initMagazineArticle('2026-knitting-trends');
+  </script>
+  <div id="authModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignIn">로그인</button>
+        <button class="modal-tab" id="tabSignUp">회원가입</button>
+      </div>
+      <button class="google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
+        <span>Google로 계속하기</span>
+      </button>
+      <div class="modal-divider"><span>또는</span></div>
+      <div id="signinPanel">
+        <form id="emailSignInForm" class="auth-form">
+          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
+        </form>
+      </div>
+      <div id="signupPanel" style="display:none;">
+        <form id="emailSignUpForm" class="auth-form">
+          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
+        </form>
+      </div>
+      <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
   </div>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>

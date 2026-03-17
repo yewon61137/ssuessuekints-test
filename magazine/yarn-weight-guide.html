@@ -83,6 +83,12 @@
         <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
         <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
         <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+
+        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
@@ -98,7 +104,21 @@
         <p class="article-meta">2026년 1월 5일 &nbsp;·&nbsp; SSUESSUE KNITS</p>
       </div>
 
+      <div class="post-action-bar" style="margin-top:1.5rem;">
+        <button class="action-btn" id="likeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          좋아요 <span id="likeCount">0</span>
+        </button>
+        <button class="action-btn" id="scrapBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          스크랩 <span id="scrapCount">0</span>
+        </button>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+      </div>
+
       <div class="article-body">
+        <div class="article-lang" data-lang="ko">
+
         <p>뜨개질을 처음 시작할 때 가장 먼저 부딪히는 벽 중 하나가 바로 <strong>실 굵기(Yarn Weight)</strong> 선택입니다. 실 굵기는 완성품의 크기와 질감은 물론, 사용하는 바늘 굵기, 게이지(코 밀도), 완성 속도에까지 직접적인 영향을 미칩니다. 같은 디자인이라도 실 굵기가 달라지면 전혀 다른 결과물이 나오기 때문에, 프로젝트를 시작하기 전에 반드시 이해해야 하는 개념입니다.</p>
         <p>이 가이드에서는 Craft Yarn Council의 국제 표준을 기준으로 Lace(극세)부터 Super Bulky(극태)까지 7가지 실 굵기를 상세히 설명하고, 각 굵기에 어울리는 프로젝트와 올바른 선택 방법을 안내합니다.</p>
 
@@ -198,11 +218,116 @@
         <h2>SSUESSUE KNITS 도안 생성기와 실 굵기</h2>
         <p>SSUESSUE KNITS의 도안 생성기는 실 굵기를 표준 규격명(Lace, Fingering, DK 등) 또는 직경(mm)으로 입력할 수 있습니다. 입력된 굵기를 기준으로 10cm당 코 수(게이지)를 자동 계산하여 원하는 크기의 편물에 필요한 코 수와 단 수를 산출합니다.</p>
         <p>예를 들어, 가로 50cm 편물을 DK 굵기 실로 뜰 경우, 자동으로 약 110코가 필요하다고 계산됩니다. 실 굵기를 정확히 입력할수록 실제 완성품과 도안의 크기 차이가 줄어들기 때문에, 사용할 실의 굵기를 미리 확인하는 것이 중요합니다.</p>
+        </div><!-- /ko -->
+
+        <div class="article-lang" data-lang="en" style="display:none;">
+          <p>Walk into any yarn store and you'll be faced with a wall of yarn in wildly different thicknesses. Choosing the wrong weight leads to gauge problems and disappointing results. This guide breaks down all major yarn weights so you always pick the right one.</p>
+
+          <h2>What Is Yarn Weight?</h2>
+          <p>Yarn weight describes the thickness of the yarn strand. Thicker yarn knits up faster but uses more yarn per project; thinner yarn takes longer but gives finer detail. The Craft Yarn Council categorizes yarn into 7 standard weights (0–6).</p>
+
+          <h2>The 6 Main Yarn Weights</h2>
+
+          <h3>① Lace (Weight 0) — For delicate lacework</h3>
+          <p>The thinnest yarn available. Used for shawls, lacework, and fine accessories. Pairs with 1.5–2.5mm needles or hooks. Gauge: 32–42 sts / 10cm. Requires patience and good lighting — stitches are tiny.</p>
+
+          <h3>② Fingering / Sock (Weight 1) — Fine detail projects</h3>
+          <p>Lightweight yarn popular for socks, baby items, and fine shawls. Needle size: 2.25–3.25mm. Gauge: 28–32 sts / 10cm. Takes time but the finished fabric is soft and long-lasting.</p>
+
+          <h3>③ DK / Light Worsted (Weight 3) — Versatile all-rounder</h3>
+          <p>A versatile mid-weight beloved by intermediate knitters. Great for baby garments, lightweight sweaters, and accessories. Needle: 3.5–4.5mm. Gauge: 21–24 sts / 10cm.</p>
+
+          <h3>④ Worsted / Aran (Weight 4) — The most popular weight</h3>
+          <p>The most widely used yarn weight worldwide. Perfect for sweaters, hats, blankets, and bags. Needle: 4.5–5.5mm. Gauge: 16–20 sts / 10cm. Ideal for beginners — stitches are clearly visible.</p>
+
+          <h3>⑤ Bulky (Weight 5–6) — Fast and dramatic</h3>
+          <p>Thick yarn that works up quickly. Great for cozy winter projects — chunky cowls, beanies, and home décor. Needle: 6–9mm. Gauge: 12–15 sts / 10cm.</p>
+
+          <h3>⑥ Super Bulky (Weight 6+) — Arm knitting friendly</h3>
+          <p>Extremely thick yarn, often used for arm knitting or giant needles. Blankets can be completed in hours. Needle: 9mm+. Gauge: 7–11 sts / 10cm.</p>
+
+          <h2>Choosing the Right Weight</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;text-align:left;">Project Type</th>
+              <th style="padding:0.55rem 0.8rem;text-align:left;">Recommended Weight</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">First project / practice</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Worsted (4)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Socks / fine accessories</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Fingering (1)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Baby items</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DK (3) or Fingering (1)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Sweaters / cardigans</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DK (3) or Worsted (4)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Quick winter accessories</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Bulky (5–6)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">Quick blankets / arm knitting</td><td style="padding:0.5rem 0.8rem;">Super Bulky (6+)</td></tr>
+            </tbody>
+          </table>
+
+          <h2>Tips for Reading Yarn Labels</h2>
+          <p>Every yarn label shows the recommended needle/hook size and gauge. Always check the label first. The gauge (e.g., "20 sts × 26 rows = 10cm in stockinette") is printed on every quality yarn. If your gauge differs from the pattern, adjust needle size or stitch count.</p>
+
+          <div class="tip-box"><p>💡 <strong>Fiber matters too:</strong> Same weight yarn can feel completely different depending on fiber — wool is warm and elastic, cotton is cool and inelastic, acrylic is affordable and easy-care. Consider fiber content alongside weight when choosing yarn.</p></div>
+        </div><!-- /en -->
+
+        <div class="article-lang" data-lang="ja" style="display:none;">
+          <p>毛糸屋に行くと、太さも質感もまったく異なる糸が所狭しと並んでいます。太さを間違えるとゲージが合わず、思い通りの仕上がりになりません。このガイドでは主要な糸の太さをすべて解説し、常に正しい糸を選べるようにします。</p>
+
+          <h2>糸の太さ（ウェイト）とは？</h2>
+          <p>糸の太さは、糸の直径を表します。太い糸は早く編めますがプロジェクトあたりの使用量が多く、細い糸は時間がかかりますが細かいディテールを表現できます。クラフトヤーンカウンシル（CYC）は糸を7段階（0〜6）に分類しています。</p>
+
+          <h2>主要な6種類の太さ</h2>
+
+          <h3>① レース（太さ0） — 繊細なレース編み用</h3>
+          <p>最も細い糸。ショール・レース編み・繊細な小物に使用。針サイズ：1.5〜2.5mm。ゲージ：32〜42目/10cm。目が小さく、明るい場所での作業が必須です。</p>
+
+          <h3>② 極細/ソック（太さ1） — 細かな作品に</h3>
+          <p>靴下・ベビー用品・繊細なショールに人気の軽量糸。針：2.25〜3.25mm。ゲージ：28〜32目/10cm。</p>
+
+          <h3>③ 合細/DK（太さ3） — 汎用性の高い中間の太さ</h3>
+          <p>中級者に愛用される万能な太さ。ベビーウェア・軽めのセーター・小物に最適。針：3.5〜4.5mm。ゲージ：21〜24目/10cm。</p>
+
+          <h3>④ 並太/Worsted（太さ4） — 最も人気の太さ</h3>
+          <p>世界中で最も広く使われる太さ。セーター・帽子・ブランケット・バッグに最適。針：4.5〜5.5mm。ゲージ：16〜20目/10cm。目が見やすく初心者に理想的。</p>
+
+          <h3>⑤ 極太/Bulky（太さ5〜6） — スピーディーに仕上がる</h3>
+          <p>早く編めて存在感のある作品に。コワル・ニット帽・インテリア小物に。針：6〜9mm。ゲージ：12〜15目/10cm。</p>
+
+          <h3>⑥ 超極太/Super Bulky（太さ6+） — アーム編みにも</h3>
+          <p>非常に太く、アーム編みや極太針と相性抜群。ブランケットが数時間で完成。針：9mm以上。ゲージ：7〜11目/10cm。</p>
+
+          <h2>用途別おすすめの太さ</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;text-align:left;">作品の種類</th>
+              <th style="padding:0.55rem 0.8rem;text-align:left;">おすすめの太さ</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">初めての作品・練習</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">並太(4)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">靴下・繊細な小物</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">極細(1)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">ベビー用品</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">合細(3)または極細(1)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">セーター・カーディガン</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">合細(3)または並太(4)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">冬の小物を素早く</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">極太(5〜6)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">ブランケット・アーム編み</td><td style="padding:0.5rem 0.8rem;">超極太(6+)</td></tr>
+            </tbody>
+          </table>
+
+          <div class="tip-box"><p>💡 <strong>素材も重要：</strong>同じ太さでも素材によって全く異なる風合いになります。ウールは暖かく弾力があり、コットンは涼しく伸びにくく、アクリルは価格が手頃でお手入れ簡単。太さとあわせて素材も考えて選びましょう。</p></div>
+        </div><!-- /ja -->
+      <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
+        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <div id="commentsList"></div>
+        <div class="comment-form" style="margin-top:1.25rem;">
+          <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
+          <div class="reply-form-btns" style="margin-top:0.5rem;">
+            <button id="commentSubmitBtn" class="primary-btn" style="font-size:0.85rem;">등록</button>
+          </div>
+        </div>
+      </section>
+
 
         <nav class="article-nav">
           <span class="article-nav-prev"></span>
-          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
-          <span class="article-nav-next"><a href="/magazine/crochet-vs-knitting.html">코바늘 vs 대바늘 →</a></span>
+          <span class="article-nav-center"><a href="/magazine.html" id="navList">목록으로</a></span>
+          <span class="article-nav-next" id="navNext"><a href="/magazine/crochet-vs-knitting.html">다음 글 →</a></span>
         </nav>
       </div>
     </article>
@@ -224,21 +349,7 @@
     </div>
   </footer>
 
-  <script>
-    const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
-    function applyLang(lang) {
-      localStorage.setItem('lang', lang);
-      document.documentElement.lang = lang;
-      langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
-      document.querySelectorAll('.i18n').forEach(el => {
-        const val = el.getAttribute('data-' + lang);
-        if (val) el.textContent = val;
-      });
-    }
-    langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
-    const savedLang = localStorage.getItem('lang');
-    if (savedLang && savedLang !== 'ko') applyLang(savedLang);
-  </script>
+  
   <div class="mobile-overlay" id="mobileOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">
     <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
@@ -250,6 +361,42 @@
       <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
     </nav>
+  </div>
+  <script type="module">
+    import { initAuth } from '/auth.js?v=5';
+    import { initMagazineArticle } from '/magazine-article.js';
+    initAuth();
+    initMagazineArticle('yarn-weight-guide');
+  </script>
+  <div id="authModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignIn">로그인</button>
+        <button class="modal-tab" id="tabSignUp">회원가입</button>
+      </div>
+      <button class="google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
+        <span>Google로 계속하기</span>
+      </button>
+      <div class="modal-divider"><span>또는</span></div>
+      <div id="signinPanel">
+        <form id="emailSignInForm" class="auth-form">
+          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
+        </form>
+      </div>
+      <div id="signupPanel" style="display:none;">
+        <form id="emailSignUpForm" class="auth-form">
+          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
+        </form>
+      </div>
+      <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
   </div>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>

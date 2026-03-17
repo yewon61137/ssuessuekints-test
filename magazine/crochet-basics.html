@@ -96,6 +96,12 @@
         <a href="/magazine.html" class="lang-btn">매거진</a>
         <a href="/notice.html" class="lang-btn">공지사항</a>
         <a href="/guide.html" class="lang-btn">이용안내</a>
+
+        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
@@ -111,7 +117,21 @@
         <p class="article-meta">SSUESSUE KNITS 편집팀 &nbsp;·&nbsp; 2026년 3월 12일</p>
       </div>
 
+      <div class="post-action-bar" style="margin-top:1.5rem;">
+        <button class="action-btn" id="likeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          좋아요 <span id="likeCount">0</span>
+        </button>
+        <button class="action-btn" id="scrapBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          스크랩 <span id="scrapCount">0</span>
+        </button>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+      </div>
+
       <div class="article-body">
+        <div class="article-lang" data-lang="ko">
+
 
         <p>코바늘 뜨개는 하나의 바늘로 고리를 만들어가는 기법입니다. 대바늘과 달리 코 하나하나를 완결짓고 다음 코로 넘어가기 때문에 실수했을 때 풀기도 쉽고, 3D 입체물도 자유롭게 만들 수 있는 것이 특징입니다. 이 글에서는 코바늘의 모든 기초 기법을 사진 설명처럼 단계별로 정리했습니다. 처음 코바늘을 잡는 분도 이 글 하나로 기초를 완전히 익힐 수 있습니다.</p>
 
@@ -420,10 +440,150 @@
         <h2>마치며</h2>
 
         <p>코바늘의 모든 복잡해 보이는 기법도 사실은 사슬뜨기, 짧은뜨기, 긴뜨기 세 가지의 변형입니다. 이 세 가지를 손에 익히면, 도안에 나오는 어떤 기법도 낯설지 않게 됩니다. 가장 좋은 연습은 도안을 따라 실제 작품을 뜨는 것입니다. 처음에는 느리더라도 손이 기억하면 자연스럽게 빨라집니다. SSUESSUE KNITS의 도안 생성기로 나만의 픽셀 패턴을 만들어 코바늘 프로젝트에 활용해보세요.</p>
+        </div><!-- /ko -->
+
+        <div class="article-lang" data-lang="en" style="display:none;">
+          <p>Crochet uses a single hook to build fabric stitch by stitch. Unlike knitting, each stitch is completed before moving to the next — so mistakes are easy to fix and 3D shapes are simple to create. This guide covers every foundational technique you need.</p>
+
+          <h2>Tools &amp; Setup</h2>
+          <ul>
+            <li><strong>Hook:</strong> 4.5–5.5mm for beginners (Worsted/Aran weight yarn). Avoid buying a full set right away — try individual hooks in different materials (aluminum, wood, bamboo, ergonomic grip) to find your preference first.</li>
+            <li><strong>Yarn:</strong> Light-colored Worsted acrylic. Easy to see stitches, affordable, washable.</li>
+            <li><strong>Scissors, tapestry needle, stitch markers</strong></li>
+          </ul>
+
+          <h2>Abbreviation Quick Reference</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;">Abbr.</th><th style="padding:0.55rem 0.8rem;">Name</th><th style="padding:0.55rem 0.8rem;">Height</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">CH</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Chain</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">0 (foundation only)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SL ST</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Slip Stitch</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">~0 (join/move)</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Single Crochet</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">1 ch turning</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">HDC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Half Double Crochet</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">2 ch turning</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Double Crochet</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">3 ch turning</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">TR</td><td style="padding:0.5rem 0.8rem;">Treble Crochet</td><td style="padding:0.5rem 0.8rem;">4 ch turning</td></tr>
+            </tbody>
+          </table>
+
+          <h2>Chain (CH)</h2>
+          <p>Make a slip knot on the hook. Yarn over, pull through the loop. Repeat. Chains form your foundation row and turning chains at row starts.</p>
+
+          <h2>Single Crochet (SC)</h2>
+          <p>Insert hook into stitch. Yarn over, pull up a loop (2 loops on hook). Yarn over again, pull through both loops. One SC complete. The densest, most versatile crochet stitch.</p>
+
+          <h2>Half Double Crochet (HDC)</h2>
+          <p>Yarn over, insert hook. Yarn over, pull up loop (3 loops). Yarn over, pull through all 3 loops. Creates a mid-height stitch with a distinctive third ridge on the back.</p>
+
+          <h2>Double Crochet (DC)</h2>
+          <p>Yarn over, insert hook. Yarn over, pull up loop (3 loops). Yarn over, pull through 2 loops (2 remain). Yarn over, pull through last 2 loops. The most widely used stitch — fast and drapey.</p>
+
+          <h2>Treble Crochet (TR)</h2>
+          <p>Yarn over twice, insert hook. [Yarn over, pull through 2 loops] × 3. Creates tall, open fabric. Great for lace and summer garments.</p>
+
+          <h2>Increase (INC) &amp; Decrease (DEC)</h2>
+          <p><strong>Increase:</strong> Work 2 stitches into the same stitch. Adds one stitch to your count.</p>
+          <p><strong>Invisible Decrease:</strong> Insert hook through front loops only of 2 consecutive stitches simultaneously. Yarn over, pull through both front loops (2 on hook), yarn over, pull through both. Much neater than standard sc2tog — use this for amigurumi.</p>
+
+          <h2>Magic Ring</h2>
+          <p>Wrap yarn twice around finger to make a loop. Insert hook, work the required number of SC into the loop. Pull the yarn tail to close the center hole completely. Essential for working in the round.</p>
+
+          <h2>Working in the Round vs Flat</h2>
+          <p><strong>Flat (back and forth):</strong> Turn at end of each row. Good for rectangles, triangles, and flat panels.<br>
+          <strong>In the round:</strong> Work continuously in one direction — great for hats, bags, amigurumi. Use a stitch marker at the round start.</p>
+
+          <h2>Weaving in Ends</h2>
+          <p>Thread end onto a tapestry needle. Weave in multiple directions through the back of the fabric for at least 5cm. Trim close. This prevents unraveling even after washing.</p>
+
+          <h2>Recommended First Projects</h2>
+          <ul>
+            <li><strong>Coaster:</strong> SC only, flat. Done in 30 minutes.</li>
+            <li><strong>Ribbed beanie:</strong> HDC in the round with increases.</li>
+            <li><strong>Market bag:</strong> DC + chain spaces — open mesh structure.</li>
+            <li><strong>Amigurumi ball:</strong> SC + magic ring + INC/DEC.</li>
+            <li><strong>Granny square:</strong> DC + slip stitch + color changes — endlessly combinable.</li>
+          </ul>
+        </div><!-- /en -->
+
+        <div class="article-lang" data-lang="ja" style="display:none;">
+          <p>かぎ針編みは1本のフックで1目ずつ布地を作っていく技法です。棒針と違い、1目を完結させてから次に進むので、ミスの修正が簡単で立体的な形も自由自在。このガイドでは必要なすべての基礎技法を解説します。</p>
+
+          <h2>道具と準備</h2>
+          <ul>
+            <li><strong>かぎ針：</strong>入門者には4.5〜5.5mm（並太糸）がおすすめ。最初からセットを買わず、アルミ・木・竹・エルゴグリップなど素材別に単品で試して好みを見つけてから。</li>
+            <li><strong>糸：</strong>明るい色の並太アクリル糸。目が見やすく、リーズナブルで洗濯も簡単。</li>
+            <li><strong>はさみ・とじ針・段数マーカー</strong></li>
+          </ul>
+
+          <h2>略語早見表</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;">略語</th><th style="padding:0.55rem 0.8rem;">名称</th><th style="padding:0.55rem 0.8rem;">高さ（立ち上がり）</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">CH</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">くさり編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">0（作り目）</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SL ST</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">引き抜き編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">〜0（繋ぎ・移動）</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">細編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">くさり1目</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">HDC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">中長編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">くさり2目</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">長編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">くさり3目</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">TR</td><td style="padding:0.5rem 0.8rem;">長々編み</td><td style="padding:0.5rem 0.8rem;">くさり4目</td></tr>
+            </tbody>
+          </table>
+
+          <h2>くさり編み（CH）</h2>
+          <p>針にスリップノットを作る。糸をかけてループから引き出す。繰り返す。作り目と段の立ち上がりに使います。</p>
+
+          <h2>細編み（SC）</h2>
+          <p>目に針を入れる。糸をかけて引き出す（針に2目）。もう一度糸をかけて2目を一度に引き抜く。最もよく使う基本の目。</p>
+
+          <h2>中長編み（HDC）</h2>
+          <p>糸をかけて目に針を入れる。糸をかけて引き出す（3目）。糸をかけて3目を一度に引き抜く。特徴的な第三の畝ができ、厚みのあるテクスチャーに。</p>
+
+          <h2>長編み（DC）</h2>
+          <p>糸をかけて目に針を入れる。糸をかけて引き出す（3目）。糸をかけて2目を引き抜く（2目残）。もう一度糸をかけて残りの2目を引き抜く。速く編めてドレープが出る定番の目。</p>
+
+          <h2>長々編み（TR）</h2>
+          <p>糸を2回かけて目に針を入れる。[糸をかけて2目引き抜く]×3回。背が高く開放的な布地に。レース・夏物ウェアに。</p>
+
+          <h2>増し目（INC）と減し目（DEC）</h2>
+          <p><strong>増し目：</strong>同じ目に2回編む。目数が1つ増えます。</p>
+          <p><strong>目立たない減し目：</strong>連続する2目の頭の前目だけを同時に拾い、糸をかけて引き出す（針に2目）、もう一度糸をかけて引き抜く。アミグルミに最適のきれいな減し目。</p>
+
+          <h2>マジックリング</h2>
+          <p>指に糸を2回巻いてループを作る。ループの中に必要数の細編みを編む。糸尾を引いて中心の穴を完全に閉じる。輪編みの始まりに必須。</p>
+
+          <h2>往復編みと輪編み</h2>
+          <p><strong>往復編み：</strong>段の終わりで作品をひっくり返す。平面の作品に。<br>
+          <strong>輪編み：</strong>同じ方向に回り続ける。帽子・バッグ・アミグルミに。段の始まりに段数マーカーをつけて。</p>
+
+          <h2>糸始末</h2>
+          <p>とじ針に糸尾を通し、布地の裏面を複数方向に少なくとも5cm通す。根元で切る。洗濯後も解けません。</p>
+
+          <h2>おすすめの最初の作品</h2>
+          <ul>
+            <li><strong>コースター：</strong>細編みのみ。30分以内で完成。</li>
+            <li><strong>リブニット帽子：</strong>中長編みの輪編み＋増し目。</li>
+            <li><strong>マーケットバッグ：</strong>長編み＋くさり空間のネット編み。</li>
+            <li><strong>アミグルミボール：</strong>細編み＋マジックリング＋増減し目。</li>
+            <li><strong>グラニースクエア：</strong>長編み＋引き抜き＋配色変え——無限に組み合わせ可能。</li>
+          </ul>
+        </div><!-- /ja -->
+      <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
+        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <div id="commentsList"></div>
+        <div class="comment-form" style="margin-top:1.25rem;">
+          <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
+          <div class="reply-form-btns" style="margin-top:0.5rem;">
+            <button id="commentSubmitBtn" class="primary-btn" style="font-size:0.85rem;">등록</button>
+          </div>
+        </div>
+      </section>
+
 
         <nav class="article-nav">
-          <span class="article-nav-prev"><a href="/magazine/gauge-swatch-guide.html">← 게이지 스와치 완벽 가이드</a></span>
-          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+          <span class="article-nav-prev" id="navPrev"><a href="/magazine/gauge-swatch-guide.html">← 이전 글</a></span>
+          <span class="article-nav-center"><a href="/magazine.html" id="navList">목록으로</a></span>
           <span class="article-nav-next"></span>
         </nav>
 
@@ -459,6 +619,42 @@
       <a href="/notice.html" class="mobile-menu-link">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link">이용안내</a>
     </nav>
+  </div>
+  <script type="module">
+    import { initAuth } from '/auth.js?v=5';
+    import { initMagazineArticle } from '/magazine-article.js';
+    initAuth();
+    initMagazineArticle('crochet-basics');
+  </script>
+  <div id="authModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignIn">로그인</button>
+        <button class="modal-tab" id="tabSignUp">회원가입</button>
+      </div>
+      <button class="google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
+        <span>Google로 계속하기</span>
+      </button>
+      <div class="modal-divider"><span>또는</span></div>
+      <div id="signinPanel">
+        <form id="emailSignInForm" class="auth-form">
+          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
+        </form>
+      </div>
+      <div id="signupPanel" style="display:none;">
+        <form id="emailSignUpForm" class="auth-form">
+          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
+        </form>
+      </div>
+      <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
   </div>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>

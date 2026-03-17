@@ -65,6 +65,12 @@
         <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
         <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
         <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案내">이용안내</a>
+
+        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
@@ -80,7 +86,21 @@
         <p class="article-meta">2026년 2월 25일 &nbsp;·&nbsp; SSUESSUE KNITS</p>
       </div>
 
+      <div class="post-action-bar" style="margin-top:1.5rem;">
+        <button class="action-btn" id="likeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          좋아요 <span id="likeCount">0</span>
+        </button>
+        <button class="action-btn" id="scrapBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          스크랩 <span id="scrapCount">0</span>
+        </button>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+      </div>
+
       <div class="article-body">
+        <div class="article-lang" data-lang="ko">
+
         <p><strong>아미구루미(Amigurumi, 編みぐるみ)</strong>는 일본어로 '떠서 만든 인형'을 뜻합니다. 코바늘로 구 형태의 조각을 여러 개 만들어 솜을 채우고 이어 붙여 완성하는 입체 인형으로, 전 세계적으로 가장 인기 있는 코바늘 프로젝트 중 하나입니다. 귀여운 외모와 높은 완성도 덕분에 선물용으로도 많이 만들어집니다. 이 가이드에서는 아미구루미를 처음 시작하는 분들을 위해 필요한 도구, 기초 기법, 첫 작품 완성 과정을 단계별로 안내합니다.</p>
 
         <h2>아미구루미에 필요한 도구 & 재료</h2>
@@ -147,11 +167,133 @@
 
         <h2>아미구루미에서 픽셀 도안 활용하기</h2>
         <p>아미구루미에 컬러워크 패턴을 넣고 싶다면 SSUESSUE KNITS의 도안 생성기를 활용해보세요. 좋아하는 캐릭터나 이모티콘 이미지를 업로드해 픽셀 도안으로 변환한 뒤, 코바늘 1:1 비율로 설정해 사용할 수 있습니다. 특히 납작한 형태의 아미구루미(플라티(Platie), 키링 등)에 픽셀 패턴을 넣으면 세상에 하나뿐인 나만의 작품이 완성됩니다.</p>
+        </div><!-- /ko -->
+
+        <div class="article-lang" data-lang="en" style="display:none;">
+          <p>Amigurumi — the Japanese art of crocheting small stuffed animals and characters — has become one of the most popular applications of crochet worldwide. The word combines "ami" (crocheted/knitted) and "nuigurumi" (stuffed toy). This guide gets you started from zero.</p>
+
+          <h2>Tools &amp; Materials</h2>
+          <ul>
+            <li><strong>Crochet hook:</strong> Usually 2.0–3.0mm for standard amigurumi yarn. Slightly smaller than the yarn label recommends — tighter stitches mean the stuffing won't show through.</li>
+            <li><strong>Yarn:</strong> Worsted or DK weight acrylic in your desired colors. Acrylic is easy to care for and comes in hundreds of colors.</li>
+            <li><strong>Safety eyes:</strong> Available in sizes 6mm–15mm. Insert and secure before stuffing.</li>
+            <li><strong>Polyester fiberfill:</strong> Stuffing. Don't over-stuff (makes it rigid) or under-stuff (makes it floppy).</li>
+            <li><strong>Tapestry needle:</strong> For joining parts and weaving in ends.</li>
+            <li><strong>Stitch markers:</strong> Mark the beginning of each round when working in a spiral.</li>
+          </ul>
+
+          <h2>Essential Abbreviations</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;">Abbr.</th>
+              <th style="padding:0.55rem 0.8rem;">Name</th>
+              <th style="padding:0.55rem 0.8rem;">Description</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">MR</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Magic Ring</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Adjustable loop start — closes the center hole</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Single Crochet</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Basic tight stitch — main stitch of amigurumi</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">INC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Increase</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">2 SC into the same stitch — adds 1 stitch</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DEC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Decrease (inv.)</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Invisible decrease — joins 2 stitches into 1</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">CH</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Chain</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Foundation chain / space</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SL ST</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Slip Stitch</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">Round join / movement</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">BLO</td><td style="padding:0.5rem 0.8rem;">Back Loop Only</td><td style="padding:0.5rem 0.8rem;">Creates texture ridge / 3D effect</td></tr>
+            </tbody>
+          </table>
+
+          <h2>Basic Sphere Pattern</h2>
+          <p>The sphere is the foundation shape for heads and bodies. This pattern makes a sphere approx. 6cm in diameter with DK yarn and a 2.5mm hook.</p>
+          <ol>
+            <li>MR, 6 SC into ring (6)</li>
+            <li>INC × 6 (12)</li>
+            <li>[SC, INC] × 6 (18)</li>
+            <li>[SC × 2, INC] × 6 (24)</li>
+            <li>[SC × 3, INC] × 6 (30)</li>
+            <li>SC × 30 (30) — work even for 2–3 rounds here for a rounder shape</li>
+            <li>[SC × 3, DEC] × 6 (24) — insert safety eyes between rounds 4–5 before closing</li>
+            <li>[SC × 2, DEC] × 6 (18)</li>
+            <li>[SC, DEC] × 6 (12) — add stuffing now</li>
+            <li>DEC × 6 (6) — fasten off and close</li>
+          </ol>
+
+          <div class="tip-box"><p>💡 <strong>Invisible Decrease tip:</strong> Insert hook through front loops only of both stitches, yarn over, pull through both loops (2 loops on hook), yarn over, pull through both. Much neater than a standard sc2tog.</p></div>
+
+          <h2>Joining Parts</h2>
+          <p>Once all pieces are crocheted and stuffed, sew them together using a tapestry needle with a long tail of yarn. Pin parts in place with straight pins before sewing to get the positioning right. Secure with at least 8–10 passes.</p>
+
+          <h2>Using Pixel Patterns in Amigurumi</h2>
+          <p>Apply pixel patterns to flat amigurumi panels using the intarsia technique, or use surface embroidery after the piece is complete. SSUESSUE KNITS' pixel generator can create charts sized for single crochet — perfect for adding custom designs to amigurumi.</p>
+        </div><!-- /en -->
+
+        <div class="article-lang" data-lang="ja" style="display:none;">
+          <p>アミグルミ——かぎ針で編む小さなぬいぐるみ——は世界中で人気のクラフトです。「編み」と「ぬいぐるみ」を組み合わせた日本語が語源。このガイドでゼロから始められます。</p>
+
+          <h2>道具と材料</h2>
+          <ul>
+            <li><strong>かぎ針：</strong>標準的なアミグルミには通常2.0〜3.0mm。糸のラベルが推奨するサイズより少し細め——目を詰めることで中の綿が透けて見えなくなります。</li>
+            <li><strong>糸：</strong>並太〜合細のアクリル糸をお好みの色で。アクリルはお手入れしやすく色数も豊富です。</li>
+            <li><strong>安全目（セーフティアイ）：</strong>6mm〜15mmのサイズが揃っています。綿を入れる前に取り付けて固定。</li>
+            <li><strong>綿（ポリエステルわた）：</strong>詰め綿。詰めすぎると硬くなり、少なすぎるとフニャフニャに。</li>
+            <li><strong>とじ針：</strong>パーツの縫い合わせと糸始末に。</li>
+            <li><strong>段数マーカー：</strong>螺旋編みで段の始まりを目印するため。</li>
+          </ul>
+
+          <h2>基本略語</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;margin:1.25rem 0;">
+            <thead><tr style="background:var(--primary-color);color:#fff;">
+              <th style="padding:0.55rem 0.8rem;">略語</th>
+              <th style="padding:0.55rem 0.8rem;">名称</th>
+              <th style="padding:0.55rem 0.8rem;">説明</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">MR</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">マジックリング</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">輪の作り目——中心の穴を完全に閉じられる</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">細編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">アミグルミの基本目</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">INC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">増し目</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">同じ目に細編み2回——1目増える</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">DEC</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">目立たない減し目</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">前目の頭2目を同時に拾う——穴が目立たない</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">CH</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">くさり編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">作り目・空間作り</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">SL ST</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">引き抜き編み</td><td style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border-color);">段の繋ぎ・移動</td></tr>
+              <tr><td style="padding:0.5rem 0.8rem;">BLO</td><td style="padding:0.5rem 0.8rem;">裏目を拾う</td><td style="padding:0.5rem 0.8rem;">テクスチャーの畝・立体感を表現</td></tr>
+            </tbody>
+          </table>
+
+          <h2>基本の球体パターン</h2>
+          <p>球体は頭・胴体の基本形。合細糸＋2.5mm針で直径約6cmの球が作れます。</p>
+          <ol>
+            <li>MR、輪の中に細編み6目（6）</li>
+            <li>増し目×6（12）</li>
+            <li>[細編み1、増し目]×6（18）</li>
+            <li>[細編み2、増し目]×6（24）</li>
+            <li>[細編み3、増し目]×6（30）</li>
+            <li>細編み×30（30）※丸みを出すためここで2〜3段編む</li>
+            <li>[細編み3、減し目]×6（24）※目を閉じる前に安全目を4〜5段目の間に取り付ける</li>
+            <li>[細編み2、減し目]×6（18）</li>
+            <li>[細編み1、減し目]×6（12）※ここで綿を詰める</li>
+            <li>減し目×6（6）糸を切って閉じる</li>
+          </ol>
+
+          <div class="tip-box"><p>💡 <strong>目立たない減し目のコツ：</strong>2目の頭の前目だけを同時に拾い、糸をかけて引き出し（針に2目）、もう一度糸をかけて引き抜く。通常のSC2TOGより穴が目立たずきれいです。</p></div>
+
+          <h2>パーツの縫い合わせ</h2>
+          <p>すべてのパーツを編んで綿を詰めたら、とじ針に長めの糸尾を通して縫い合わせます。縫う前に待ち針でバランスを確認して。少なくとも8〜10回刺し通してしっかり固定します。</p>
+
+          <h2>アミグルミにピクセル図案を活用</h2>
+          <p>インタルシア技法でフラットなパネル部分にピクセル柄を編み込んだり、完成後に刺繍で模様を追加することができます。SSUESSUE KNITSのピクセルジェネレーターは細編みサイズの図案を自動生成できるので、アミグルミにオリジナルデザインを加えるのに最適です。</p>
+        </div><!-- /ja -->
+      <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
+        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <div id="commentsList"></div>
+        <div class="comment-form" style="margin-top:1.25rem;">
+          <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
+          <div class="reply-form-btns" style="margin-top:0.5rem;">
+            <button id="commentSubmitBtn" class="primary-btn" style="font-size:0.85rem;">등록</button>
+          </div>
+        </div>
+      </section>
+
 
         <nav class="article-nav">
-          <span class="article-nav-prev"><a href="/magazine/yarn-care-guide.html">← 소재별 세탁·보관 가이드</a></span>
-          <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
-          <span class="article-nav-next"><a href="/magazine/gauge-swatch-guide.html">게이지 스와치 완벽 가이드 →</a></span>
+          <span class="article-nav-prev" id="navPrev"><a href="/magazine/yarn-care-guide.html">← 이전 글</a></span>
+          <span class="article-nav-center"><a href="/magazine.html" id="navList">목록으로</a></span>
+          <span class="article-nav-next" id="navNext"><a href="/magazine/gauge-swatch-guide.html">다음 글 →</a></span>
         </nav>
       </div>
     </article>
@@ -172,12 +314,7 @@
       <span>이메일: yewon61137@gmail.com</span>
     </div>
   </footer>
-  <script>
-    const langBtns=document.querySelectorAll('.lang-btn[data-lang]');
-    function applyLang(lang){localStorage.setItem('lang',lang);document.documentElement.lang=lang;langBtns.forEach(b=>b.classList.toggle('active',b.getAttribute('data-lang')===lang));document.querySelectorAll('.i18n').forEach(el=>{const v=el.getAttribute('data-'+lang);if(v)el.textContent=v;});}
-    langBtns.forEach(btn=>btn.addEventListener('click',()=>applyLang(btn.getAttribute('data-lang'))));
-    const s=localStorage.getItem('lang');if(s&&s!=='ko')applyLang(s);
-  </script>
+  
   <div class="mobile-overlay" id="mobileOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">
     <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
@@ -189,6 +326,42 @@
       <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案내">이용안내</a>
     </nav>
+  </div>
+  <script type="module">
+    import { initAuth } from '/auth.js?v=5';
+    import { initMagazineArticle } from '/magazine-article.js';
+    initAuth();
+    initMagazineArticle('amigurumi-beginners');
+  </script>
+  <div id="authModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignIn">로그인</button>
+        <button class="modal-tab" id="tabSignUp">회원가입</button>
+      </div>
+      <button class="google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
+        <span>Google로 계속하기</span>
+      </button>
+      <div class="modal-divider"><span>또는</span></div>
+      <div id="signinPanel">
+        <form id="emailSignInForm" class="auth-form">
+          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
+        </form>
+      </div>
+      <div id="signupPanel" style="display:none;">
+        <form id="emailSignUpForm" class="auth-form">
+          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
+        </form>
+      </div>
+      <div id="authModalError" class="auth-error" style="display:none;"></div>
+    </div>
   </div>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>
