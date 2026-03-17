@@ -69,9 +69,19 @@
                             }
                         }
 
-                        // 4. Firestore 프로필 미완성이면 flag를 sessionStorage에 저장 후 이동
-                        const snap = await getDoc(doc(db, 'users', user.uid));
-                        if (!snap.exists() || !snap.data().profileCompleted) {
+                        // 4. Naver 이메일 sessionStorage에 보존 (user.email은 커스텀 토큰에서 null)
+                        if (data.naverUser?.email) {
+                            sessionStorage.setItem('naver_pending_email', data.naverUser.email);
+                        }
+
+                        // 5. Firestore 프로필 미완성이면 flag 저장 후 이동
+                        try {
+                            const snap = await getDoc(doc(db, 'users', user.uid));
+                            if (!snap.exists() || !snap.data().profileCompleted) {
+                                sessionStorage.setItem('naver_setup_needed', '1');
+                            }
+                        } catch {
+                            // Firestore 읽기 실패해도 신규 유저로 처리
                             sessionStorage.setItem('naver_setup_needed', '1');
                         }
 

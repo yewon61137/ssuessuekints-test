@@ -122,11 +122,14 @@ async function saveUserProfile(user, nickname, realName, photoFile) {
     }
 
     // 2. Firestore users/{uid} 저장
+    // 커스텀 토큰(네이버) 로그인 시 user.email이 null이므로 sessionStorage 백업 사용
+    const naverEmail = sessionStorage.getItem('naver_pending_email');
+    if (naverEmail) sessionStorage.removeItem('naver_pending_email');
     await setDoc(doc(db, 'users', user.uid), {
         nickname,
         displayName: realName || null,
         profilePhotoURL,
-        email: user.email || null,
+        email: user.email || naverEmail || null,
         joinedAt: serverTimestamp(),
         profileCompleted: true
     });
@@ -388,6 +391,12 @@ export function initAuth() {
 
             // 프로필 미완성 사용자는 프로필 설정 패널 표시 (이미 진행 중이 아닐 때)
             if (!pendingProfileUser) {
+                // 네이버 로그인 콜백에서 설정한 플래그 확인 (Firestore 의존 없이 즉시 처리)
+                if (sessionStorage.getItem('naver_setup_needed') === '1') {
+                    sessionStorage.removeItem('naver_setup_needed');
+                    showProfileSetup(user);
+                    return;
+                }
                 try {
                     const snap = await getDoc(doc(db, 'users', user.uid));
                     if (snap.exists()) {
@@ -400,6 +409,8 @@ export function initAuth() {
                     }
                 } catch (e) {
                     console.error('Profile check failed:', e);
+                    // Firestore 오류 시에도 프로필 설정 모달 표시
+                    showProfileSetup(user);
                 }
             }
         } else {
