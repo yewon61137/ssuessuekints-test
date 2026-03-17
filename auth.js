@@ -152,6 +152,21 @@ let nicknameAvailable = false;
 let verificationTimer = null;
 let verificationFocusHandler = null;
 
+// 로그인 완료 후 실행할 콜백 (모달 외부에서 설정)
+let onAuthCompleteCallback = null;
+
+export function setOnAuthComplete(fn) {
+    onAuthCompleteCallback = fn;
+}
+
+function callOnAuthComplete() {
+    if (onAuthCompleteCallback) {
+        const fn = onAuthCompleteCallback;
+        onAuthCompleteCallback = null;
+        setTimeout(fn, 150);
+    }
+}
+
 
 function showProfileSetup(user) {
     pendingProfileUser = user;
@@ -239,6 +254,7 @@ function startVerificationCheck() {
             } else {
                 document.getElementById('authModal').style.display = 'none';
                 hideProfileSetupUI();
+                callOnAuthComplete();
             }
         }
     };
@@ -367,6 +383,7 @@ function initProfileSetupPanel() {
             document.getElementById('authModal').style.display = 'none';
             hideProfileSetupUI();
             clearModalError();
+            callOnAuthComplete();
         } catch (err) {
             showModalError('프로필 저장 중 오류가 발생했습니다: ' + err.message);
             saveBtn.disabled = false;
@@ -441,12 +458,13 @@ export function initAuth() {
     document.getElementById('tabSignIn').addEventListener('click', () => switchTab('signin'));
     document.getElementById('tabSignUp').addEventListener('click', () => switchTab('signup'));
 
-    // 모달 닫기 버튼
+    // 모달 닫기 버튼 (X) — 사용자가 직접 닫은 경우 콜백 취소
     document.getElementById('modalCloseBtn').addEventListener('click', () => {
         modal.style.display = 'none';
         hideProfileSetupUI();
         clearModalError();
         switchTab('signin');
+        onAuthCompleteCallback = null;
     });
 
     // Google 로그인
@@ -462,6 +480,7 @@ export function initAuth() {
                 showProfileSetup(user);
             } else {
                 modal.style.display = 'none';
+                callOnAuthComplete();
             }
         } catch (e) {
             showModalError(e.message);
@@ -505,6 +524,7 @@ export function initAuth() {
                 showProfileSetup(user);
             } else {
                 modal.style.display = 'none';
+                callOnAuthComplete();
             }
         } catch (err) {
             showModalError(getAuthErrorMessage(err.code));
@@ -548,7 +568,7 @@ export function initAuth() {
                 if (user.emailVerified) {
                     const complete = await isProfileComplete(user.uid);
                     if (!complete) showProfileSetup(user);
-                    else { modal.style.display = 'none'; hideProfileSetupUI(); }
+                    else { modal.style.display = 'none'; hideProfileSetupUI(); callOnAuthComplete(); }
                 } else {
                     showModalError('아직 인증이 완료되지 않았습니다. 메일함을 확인해주세요.');
                 }
