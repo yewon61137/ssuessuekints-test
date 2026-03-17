@@ -92,5 +92,15 @@ export function initLang(opts = {}) {
     const handler = lang => applyLang(lang, opts);
     document.querySelectorAll('.lang-btn[data-lang]').forEach(btn =>
         btn.addEventListener('click', () => handler(btn.getAttribute('data-lang'))));
-    handler(localStorage.getItem('lang') || 'ko');
+    const saved = localStorage.getItem('lang');
+    if (saved) {
+        handler(saved);
+    } else {
+        // 첫 방문: 브라우저 언어 자동 감지
+        const browser = (navigator.language || 'ko').toLowerCase();
+        const detected = browser.startsWith('ja') ? 'ja'
+                       : browser.startsWith('ko') ? 'ko'
+                       : 'en'; // 그 외 모든 언어 → 영어
+        handler(detected);
+    }
 }
