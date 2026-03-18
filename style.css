@@ -1364,15 +1364,14 @@ canvas {
   padding-top: 0.75rem;
   border-top: 1px solid #e0e0e0;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .footer-biz-text {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  flex: 1;
 }
 
 .footer-biz span {
