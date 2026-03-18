@@ -38,721 +38,507 @@
   <meta property="twitter:title" content="SSUESSUE KNITS | 뜨개인을 위한 올인원 플랫폼">
   <meta property="twitter:description" content="뜨개 도안 생성, 게이지 계산, 단수 카운터까지. 뜨개인을 위한 스마트 올인원 플랫폼.">
   <meta property="twitter:image" content="https://ssuessueknits.com/og-image.png">
+  <link rel="alternate" hreflang="ko" href="https://ssuessueknits.com/" />
+  <link rel="alternate" hreflang="en" href="https://ssuessueknits.com/?lang=en" />
+  <link rel="alternate" hreflang="ja" href="https://ssuessueknits.com/?lang=ja" />
+  <link rel="alternate" hreflang="x-default" href="https://ssuessueknits.com/" />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://webfontworld.github.io">
   <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
+  <link href='/style.css' rel='stylesheet'>
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* ── Page base ── */
-    body {
-      font-family: 'DM Sans', 'GmarketSans', sans-serif;
-      background: #f5f2ec;
-      min-height: 100vh;
+    /* ── 홈 전용 레이아웃 ── */
+    .home-wrap {
       display: flex;
-      flex-direction: column;
-      overflow: hidden;
     }
 
-    /* ── HEADER ── */
-    .hdr {
-      height: 54px;
-      background: #f5f2ec;
-      border-bottom: 1px solid #e3dfd7;
-      display: flex;
-      align-items: center;
-      padding: 0 20px 0 24px;
+    /* SIDEBAR */
+    .home-sidebar {
+      width: 200px;
       flex-shrink: 0;
+      border-right: 2px solid #000;
+      padding: 1.5rem 0;
       position: sticky;
       top: 0;
-      z-index: 50;
-    }
-    .hdr-logo {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 17px;
-      color: #1a1a1a;
-      letter-spacing: -.3px;
-      margin-right: 32px;
-      white-space: nowrap;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .hdr-logo em {
-      font-style: normal;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 9px;
-      color: #bbb;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-    .hdr-gnb {
-      display: flex;
-      flex: 1;
-      height: 54px;
-      overflow: hidden;
-    }
-    .hdr-gnb a {
-      display: flex;
-      align-items: center;
-      padding: 0 13px;
-      font-size: 13px;
-      color: #888;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: color .15s;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-    .hdr-gnb a:hover { color: #1a1a1a; }
-    .hdr-gnb a.on { color: #1a1a1a; font-weight: 500; border-bottom-color: #1a1a1a; }
-
-    .hdr-r {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-    .lang-select {
-      font-size: 12px;
-      color: #888;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 4px 8px;
-      background: transparent;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .counter-fab {
-      background: #1a1a1a;
-      border: none;
-      border-radius: 8px;
-      height: 30px;
-      padding: 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      color: #f5f2ec;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-    .fab-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a9a6a; flex-shrink: 0; }
-    .hbtn {
-      height: 30px;
-      padding: 0 14px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-    .hb-out { background: transparent; border: 1px solid #ccc; color: #666; }
-    .hb-out:hover { border-color: #999; color: #333; }
-    .hb-fill { background: #1a1a1a; border: 1px solid #1a1a1a; color: #f5f2ec; }
-    .hb-fill:hover { background: #333; }
-    #authUserArea { display: none; align-items: center; gap: 8px; }
-    #authUserArea a { text-decoration: none; }
-
-    /* ── BODY LAYOUT ── */
-    .page-body {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-      height: calc(100vh - 54px);
-    }
-
-    /* ── SIDEBAR ── */
-    .sb {
-      width: 210px;
-      flex-shrink: 0;
-      background: #ece8e0;
-      border-right: 1px solid #e3dfd7;
-      display: flex;
-      flex-direction: column;
-      padding: 18px 0;
+      height: 100vh;
       overflow-y: auto;
+      background: #fff;
     }
-    .sb::-webkit-scrollbar { width: 3px; }
-    .sb::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
-    .sb-lbl {
-      font-size: 10px;
-      font-weight: 500;
-      color: #bbb;
-      letter-spacing: .07em;
+    .sb-section { margin-bottom: 0.25rem; }
+    .sb-label {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
       text-transform: uppercase;
-      padding: 0 18px 5px;
+      letter-spacing: 0.1em;
+      color: #999;
+      padding: 0.5rem 1.25rem 0.2rem;
     }
-    .sb-it {
+    .sb-link {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 7px 18px;
-      font-size: 13px;
-      color: #777;
-      cursor: pointer;
-      position: relative;
-      transition: all .12s;
-      text-decoration: none;
-    }
-    .sb-it:hover { color: #1a1a1a; background: #e5e0d7; }
-    .sb-it.on { color: #1a1a1a; font-weight: 500; background: #ddd8cf; }
-    .sb-it.on::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 5px; bottom: 5px;
-      width: 3px;
-      background: #1a1a1a;
-      border-radius: 0 2px 2px 0;
-    }
-    .sb-ico {
-      width: 15px; height: 15px;
-      flex-shrink: 0;
-      stroke: currentColor; fill: none;
-      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
-      opacity: .7;
-    }
-    .sb-it.on .sb-ico { opacity: 1; }
-    .sb-div { height: 1px; background: #e3dfd7; margin: 8px 18px; }
-    .sb-badge {
-      font-size: 9px;
-      background: #1a1a1a;
-      color: #f5f2ec;
-      padding: 1px 5px;
-      border-radius: 99px;
-      margin-left: auto;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.78rem;
       font-weight: 500;
+      color: #333;
+      text-decoration: none;
+      transition: background 0.1s, color 0.1s;
+    }
+    .sb-link:hover { background: #000; color: #fff; }
+    .sb-link.on { background: #000; color: #fff; font-weight: 700; }
+    .sb-link svg {
+      width: 13px; height: 13px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .sb-badge {
+      margin-left: auto;
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.1rem 0.3rem;
+      border: 1px solid currentColor;
+      letter-spacing: 0.04em;
     }
     .sb-cnt {
-      font-size: 10px;
-      background: #d8d3c9;
-      color: #555;
-      padding: 1px 6px;
-      border-radius: 99px;
       margin-left: auto;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .sb-div {
+      border-top: 1px solid #eee;
+      margin: 0.4rem 1.25rem;
     }
 
-    /* ── MAIN ── */
-    .main {
+    /* MAIN CONTENT */
+    .home-main {
       flex: 1;
-      overflow-y: auto;
-      padding: 28px 36px 40px;
+      min-width: 0;
+      padding: 2.5rem 2.5rem 5rem;
     }
-    .main::-webkit-scrollbar { width: 4px; }
-    .main::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
 
-    .top-bar {
+    /* GREETING */
+    .home-greeting { margin-bottom: 2.5rem; }
+    .home-greeting-title {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.3rem;
+    }
+    .home-greeting-sub {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .home-greeting-actions {
       display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 22px;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
     }
-    .pg-title {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 24px;
-      color: #1a1a1a;
-      line-height: 1.1;
+    .home-greeting-actions .primary-btn,
+    .home-greeting-actions .secondary-btn {
+      width: auto;
+      max-width: none;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.82rem;
     }
-    .pg-sub { font-size: 12px; color: #aaa; margin-top: 3px; }
-    .top-actions { display: flex; gap: 8px; }
-    .ta-btn {
-      height: 30px; padding: 0 14px; border-radius: 7px;
-      font-size: 12px; cursor: pointer; font-weight: 500; font-family: inherit;
-    }
-    .ta-out { background: transparent; border: 1px solid #ccc; color: #666; }
-    .ta-out:hover { border-color: #999; color: #333; }
-    .ta-fill { background: #1a1a1a; border: 1px solid #1a1a1a; color: #f5f2ec; }
-    .ta-fill:hover { background: #333; }
 
-    /* ── HERO ── */
-    .hero {
-      background: #1a1a1a;
-      border-radius: 16px;
-      padding: 26px 32px;
-      margin-bottom: 20px;
+    /* SECTION HEADER */
+    .home-sec-hdr {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.5rem;
+    }
+    .home-sec-ttl {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .home-sec-all {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #000;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: auto;
+    }
+    .home-sec-all:hover { text-decoration: underline; }
+
+    /* TOOL CARDS */
+    .home-tools-grid {
       display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 32px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .home-tool-card {
+      border: 2px solid #000;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+    }
+    .home-tool-card:hover { background: #000; color: #fff; }
+    .htc-top {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
     }
-    .h-eyebrow { font-size: 10px; color: #666; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
-    .h-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 24px; color: #f5f2ec; line-height: 1.2; margin-bottom: 8px; }
-    .h-desc { font-size: 12px; color: #777; line-height: 1.75; margin-bottom: 20px; max-width: 320px; }
-    .h-ctas { display: flex; gap: 8px; }
-    .h-cta-main {
-      background: #f5f2ec; color: #1a1a1a; border: none;
-      border-radius: 8px; padding: 9px 18px; font-size: 12px;
-      font-weight: 500; cursor: pointer; font-family: inherit;
-    }
-    .h-cta-main:hover { background: #e8e4dc; }
-    .h-cta-sub {
-      background: transparent; color: #555;
-      border: 1px solid #333; border-radius: 8px;
-      padding: 9px 16px; font-size: 12px;
-      cursor: pointer; font-family: inherit;
-    }
-    .h-cta-sub:hover { border-color: #666; color: #aaa; }
-    .h-right { display: flex; flex-direction: column; gap: 8px; }
-    .h-tool-card {
-      background: #252525; border-radius: 10px; padding: 12px 14px;
-      cursor: pointer; transition: background .15s;
-      display: flex; align-items: center; gap: 10px; text-decoration: none;
-    }
-    .h-tool-card:hover { background: #2e2e2e; }
     .htc-ico {
-      width: 28px; height: 28px;
-      background: #333; border-radius: 7px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 30px; height: 30px;
+      border: 1.5px solid currentColor;
+      display: flex; align-items: center; justify-content: center;
     }
-    .htc-ico svg { width: 14px; height: 14px; stroke: #aaa; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .htc-info { flex: 1; }
-    .htc-name { font-size: 12px; font-weight: 500; color: #e8e4dc; }
-    .htc-desc { font-size: 10px; color: #666; }
-    .htc-badge { font-size: 9px; background: #333; color: #aaa; padding: 2px 6px; border-radius: 99px; font-weight: 500; white-space: nowrap; }
-
-    /* ── SECTION HEADER ── */
-    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .sec-ttl { font-size: 13px; font-weight: 500; color: #1a1a1a; }
-    .sec-all { font-size: 12px; color: #aaa; cursor: pointer; text-decoration: none; }
-    .sec-all:hover { color: #555; }
-
-    /* ── TOOL CARDS ── */
-    .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .tc {
-      background: #fff; border: 1px solid #e8e4db; border-radius: 13px;
-      padding: 16px 18px; cursor: pointer; transition: border-color .15s;
-      display: flex; flex-direction: column; text-decoration: none;
+    .htc-ico svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
-    .tc:hover { border-color: #bbb; }
-    .tc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 11px; }
-    .tc-ico { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
-    .tc-ico svg { width: 17px; height: 17px; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-    .ico-dk { background: #1a1a1a; }
-    .ico-dk svg { stroke: #f5f2ec; }
-    .tc-badge { font-size: 9px; padding: 2px 7px; border-radius: 99px; font-weight: 500; }
-    .b-new { background: #1a1a1a; color: #f5f2ec; }
-    .b-soon { background: #e8e0d0; color: #7a6a55; }
-    .tc-name { font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 3px; }
-    .tc-desc { font-size: 11px; color: #aaa; line-height: 1.6; flex: 1; }
-    .tc-link { font-size: 11px; color: #888; margin-top: 10px; cursor: pointer; }
+    .htc-tag {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid currentColor;
+      padding: 0.1rem 0.35rem;
+    }
+    .htc-name {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .htc-desc {
+      font-size: 0.77rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .home-tool-card:hover .htc-desc { color: #bbb; }
+    .htc-link {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: auto;
+    }
 
-    /* ── BOTTOM 3-COL ── */
-    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 12px; }
+    /* BOTTOM GRID */
+    .home-bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .home-panel { border: 2px solid #000; padding: 1.25rem; }
+    .home-panel-hdr {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #000;
+    }
+    .home-panel-ttl {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .home-panel-all {
+      margin-left: auto;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #000;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .home-panel-all:hover { text-decoration: underline; }
 
-    /* Community card */
-    .comm-card { background: #fff; border: 1px solid #e8e4db; border-radius: 13px; padding: 16px 18px; }
-    .comm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .cg-item { cursor: pointer; }
+    /* Community grid */
+    .cg-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    .cg-item {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
     .cg-thumb {
-      height: 64px; background: #ede9e0; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+      aspect-ratio: 1;
+      border: 1.5px solid #000;
+      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
+      background: #f5f5f5;
     }
-    .cg-thumb svg { width: 20px; height: 20px; stroke: #bbb; fill: none; stroke-width: 1.2; }
-    .cg-name { font-size: 11px; font-weight: 500; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cg-meta { font-size: 10px; color: #bbb; }
+    .cg-thumb svg { width: 22px; height: 22px; stroke: #bbb; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .cg-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .cg-name { font-size: 0.7rem; font-weight: 700; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cg-meta { font-size: 0.62rem; color: #888; }
 
-    /* Project card */
-    .proj-card { background: #fff; border: 1px solid #e8e4db; border-radius: 13px; padding: 16px 18px; }
+    /* Project list */
     .proj-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 0; border-bottom: 1px solid #f2ede6;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid #eee;
     }
-    .proj-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .proj-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .pd-on { background: #4a9a6a; } .pd-pause { background: #e0b87a; }
+    .proj-item:last-child { border-bottom: none; }
     .proj-info { flex: 1; min-width: 0; }
-    .proj-name { font-size: 12px; font-weight: 500; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .proj-meta { font-size: 11px; color: #bbb; }
-    .proj-bar-wrap { width: 72px; flex-shrink: 0; }
-    .proj-bar-bg { height: 3px; background: #ede9e0; border-radius: 2px; }
-    .proj-bar-fill { height: 3px; background: #1a1a1a; border-radius: 2px; }
-    .proj-pct { font-size: 10px; color: #bbb; text-align: right; margin-top: 2px; }
+    .proj-name { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-rows { font-size: 0.68rem; color: #888; margin-top: 2px; }
+    .proj-bar-wrap { height: 2px; background: #eee; margin-top: 4px; }
+    .proj-bar-fill { height: 2px; background: #000; }
+    .proj-count { margin-left: auto; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
 
-    /* Magazine card */
-    .mag-card { background: #1a1a1a; border-radius: 13px; padding: 16px 18px; }
-    .mag-card .sec-ttl { color: #f5f2ec; }
-    .mag-list { display: flex; flex-direction: column; gap: 7px; }
-    .mag-it {
-      background: #252525; border-radius: 9px; padding: 10px 13px;
-      cursor: pointer; transition: background .12s; text-decoration: none; display: block;
+    /* Magazine list */
+    .mag-item {
+      display: block;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #eee;
+      text-decoration: none;
+      color: inherit;
     }
-    .mag-it:hover { background: #2e2e2e; }
-    .mag-cat { font-size: 9px; color: #666; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 3px; }
-    .mag-ititle { font-size: 12px; color: #d8d4cc; font-weight: 500; line-height: 1.4; }
+    .mag-item:last-child { border-bottom: none; }
+    .mag-item:hover .mag-title { text-decoration: underline; }
+    .mag-cat { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #888; }
+    .mag-title { font-size: 0.78rem; font-weight: 700; margin-top: 0.15rem; line-height: 1.4; }
+    .mag-meta { display: flex; justify-content: space-between; font-size: 0.65rem; color: #888; margin-top: 0.2rem; }
+    .mag-meta span:last-child { font-weight: 700; color: #000; }
 
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 24px 0; color: #bbb; font-size: 12px; gap: 6px;
+    /* Empty */
+    .home-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 1.5rem 0;
+      color: #bbb; font-size: 0.73rem; gap: 0.4rem; text-align: center;
     }
-    .empty-state svg { stroke: #ddd; }
+    .home-empty svg { stroke: #ddd; }
 
     /* ── MOBILE ── */
-    @media (max-width: 768px) {
-      .sb { display: none; }
-      .main { padding: 20px 16px 40px; }
-      .hero { grid-template-columns: 1fr; }
-      .h-right { display: none; }
-      .tool-grid { grid-template-columns: 1fr; }
-      .bottom-grid { grid-template-columns: 1fr; }
-      .hdr-gnb { display: none; }
-      .counter-fab span { display: none; }
+    @media (max-width: 900px) {
+      .home-sidebar { display: none; }
+      .home-main { padding: 1.5rem 1rem 3rem; }
+    }
+    @media (max-width: 700px) {
+      .home-tools-grid { grid-template-columns: 1fr; }
+      .home-bottom-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 480px) {
-      .hdr { padding: 0 12px; }
-      .hdr-logo { margin-right: 0; }
+      .home-tools-grid { grid-template-columns: repeat(2, 1fr); }
     }
-
-    /* ── MODAL (auth) — preserve existing structure ── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(0,0,0,.5); display: flex;
-      align-items: center; justify-content: center;
-    }
-    .modal-box {
-      background: #fff; border-radius: 16px;
-      padding: 2rem; width: 380px; max-width: 90vw;
-      position: relative; max-height: 90vh; overflow-y: auto;
-    }
-    .modal-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none; font-size: 1.2rem;
-      cursor: pointer; color: #888; line-height: 1;
-    }
-    .modal-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
-    .modal-tab {
-      flex: 1; padding: .6rem; border: 1.5px solid #ddd;
-      border-radius: 8px; background: transparent; cursor: pointer;
-      font-family: inherit; font-size: .9rem; color: #888;
-    }
-    .modal-tab.active { border-color: #1a1a1a; color: #1a1a1a; font-weight: 700; }
-    .social-login-group { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .75rem; }
-    .social-btn {
-      display: flex; align-items: center; justify-content: center;
-      padding: .7rem 1rem; border-radius: 8px; border: 1.5px solid #ddd;
-      background: #fff; cursor: pointer; font-family: inherit;
-      font-size: .9rem; font-weight: 500; gap: .5rem; width: 100%;
-    }
-    .social-btn:hover { background: #f9f9f9; }
-    .naver-btn { background: #03c75a; color: #fff; border-color: #03c75a; }
-    .naver-btn:hover { background: #02b350; }
-    .naver-icon { font-weight: 900; font-size: 1rem; }
-    .modal-divider { text-align: center; color: #bbb; font-size: .85rem; margin: .75rem 0; position: relative; }
-    .modal-divider::before, .modal-divider::after {
-      content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #eee;
-    }
-    .modal-divider::before { left: 0; } .modal-divider::after { right: 0; }
-    .auth-form { display: flex; flex-direction: column; gap: .6rem; }
-    .auth-form input {
-      padding: .7rem .9rem; border: 1.5px solid #ddd; border-radius: 8px;
-      font-family: inherit; font-size: .9rem;
-    }
-    .auth-form input:focus { outline: none; border-color: #1a1a1a; }
-    .primary-btn {
-      background: #1a1a1a; color: #fff; border: none;
-      border-radius: 8px; padding: .75rem 1.5rem;
-      font-family: inherit; font-size: .95rem; font-weight: 700;
-      cursor: pointer; width: 100%;
-    }
-    .primary-btn:hover { background: #333; }
-    .auth-submit-btn { margin-top: .25rem; }
-    .secondary-btn {
-      background: #f5f5f5; color: #333; border: 1.5px solid #ddd;
-      border-radius: 8px; padding: .6rem 1rem;
-      font-family: inherit; font-size: .85rem; cursor: pointer;
-    }
-    .small-btn { padding: .4rem .8rem; font-size: .8rem; }
-    .auth-error { color: #cc3333; font-size: .85rem; padding: .5rem .75rem; background: #fff5f5; border-radius: 6px; margin-top: .5rem; }
-    .profile-setup-header { margin-bottom: 1rem; }
-    .profile-setup-title { font-weight: 800; font-size: 1rem; margin-bottom: .25rem; }
-    .profile-setup-desc { font-size: .85rem; color: #888; }
-    .profile-photo-upload-area { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
-    .profile-photo-preview {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: #f0f0f0; display: flex; align-items: center; justify-content: center;
-      overflow: hidden; border: 1.5px solid #ddd;
-    }
-    .nickname-input-group { display: flex; flex-direction: column; gap: .35rem; }
-    .nickname-input-row { display: flex; gap: .5rem; }
-    .nickname-input-row input { flex: 1; }
-    .nickname-status { font-size: .8rem; padding: .3rem .5rem; }
   </style>
 </head>
 <body>
-  <!-- Hidden lang buttons for i18n.js compatibility -->
-  <button class="lang-btn" data-lang="ko" style="display:none;">한국어</button>
-  <button class="lang-btn" data-lang="en" style="display:none;">English</button>
-  <button class="lang-btn" data-lang="ja" style="display:none;">日本語</button>
-
-  <!-- HEADER -->
-  <div class="hdr">
-    <a class="hdr-logo" href="/">ssuessue knits <em>Beta</em></a>
-    <nav class="hdr-gnb">
-      <a class="on" href="/">홈</a>
-      <a href="/pattern.html" class="i18n" data-ko="도안 생성" data-en="Pattern" data-ja="編み図作成">도안 생성</a>
-      <a href="/toolkit.html" class="i18n" data-ko="게이지 계산기" data-en="Gauge Calc" data-ja="ゲージ計算機">게이지 계산기</a>
-      <a href="/community.html" class="i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
-      <a href="/magazine.html" class="i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
-      <a href="/notice.html" class="i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
-    </nav>
-    <div class="hdr-r">
-      <select class="lang-select" id="langSelectTop" onchange="window._applyLangFromSelect(this.value)">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="ja">日本語</option>
-      </select>
-      <button class="counter-fab" id="counterToggle">
-        <div class="fab-dot"></div>
-        <span class="i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</span>
-      </button>
-      <!-- Auth buttons — managed by initAuth() -->
-      <button class="hbtn hb-out" id="authSignInBtn">
-        <span class="i18n" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</span>
-      </button>
-      <div id="authUserArea">
-        <span style="display:none;" id="authUserEmail"></span>
-        <a href="/mypage.html" class="hbtn hb-out i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
-        <button class="hbtn hb-out" id="authSignOutBtn">
-          <span class="i18n" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</span>
+  <header>
+    <div class="header-bar">
+      <div class="lang-selector">
+        <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-btn active" data-lang="ko">한국어</button>
+          <button class="lang-btn" data-lang="en">English</button>
+          <button class="lang-btn" data-lang="ja">日本語</button>
+        </div>
       </div>
-      <button class="hbtn hb-fill" onclick="location.href='/pattern.html'">
-        <span class="i18n" data-ko="시작하기 →" data-en="Start →" data-ja="始める →">시작하기 →</span>
-      </button>
+      <div class="auth-area">
+        <a href="/about.html" class="lang-btn i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+        <a href="/community.html" class="lang-btn" data-i18n="btn_community">커뮤니티</a>
+        <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+        <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+        <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案내">이용안내</a>
+        <button class="lang-btn i18n" id="counterToggle" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</button>
+        <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <span style="display:none;" id="authUserEmail"></span>
+          <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
+        </div>
+      </div>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
-  </div>
+    <h1><a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a></h1>
+    <div class="brand-kr">쓔쓔닛츠</div>
+    <p class="tagline i18n" data-ko="뜨개인을 위한 올인원 플랫폼" data-en="All-in-one platform for knitters" data-ja="ニッターのためのオールインワン">뜨개인을 위한 올인원 플랫폼</p>
+  </header>
 
-  <div class="page-body">
+  <div class="home-wrap">
 
     <!-- SIDEBAR -->
-    <aside class="sb">
-      <div style="padding:0 0 8px;">
-        <div class="sb-lbl">메인</div>
-        <a class="sb-it on" href="/">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <aside class="home-sidebar">
+      <div class="sb-section">
+        <div class="sb-label i18n" data-ko="메인" data-en="Main" data-ja="メイン">메인</div>
+        <a class="sb-link on" href="/">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="i18n" data-ko="홈" data-en="Home" data-ja="ホーム">홈</span>
         </a>
-        <a class="sb-it" href="/pattern.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <a class="sb-link" href="/pattern.html">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           <span class="i18n" data-ko="도안 생성" data-en="Pattern" data-ja="編み図">도안 생성</span>
         </a>
       </div>
       <div class="sb-div"></div>
-      <div style="padding:8px 0;">
-        <div class="sb-lbl">
-          <span class="i18n" data-ko="뜨개 도구" data-en="Tools" data-ja="ツール">뜨개 도구</span>
-        </div>
-        <a class="sb-it" href="/toolkit.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <div class="sb-section">
+        <div class="sb-label i18n" data-ko="뜨개 도구" data-en="Tools" data-ja="ツール">뜨개 도구</div>
+        <a class="sb-link" href="/toolkit.html">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           <span class="i18n" data-ko="게이지 계산기" data-en="Gauge Calc" data-ja="ゲージ計算機">게이지 계산기</span>
           <span class="sb-badge">New</span>
         </a>
-        <a class="sb-it" href="#" id="sbRowCounter">
-          <svg class="sb-ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <a class="sb-link" href="#" id="sbRowCounter">
+          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           <span class="i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</span>
           <span class="sb-badge">New</span>
         </a>
-        <a class="sb-it" href="#" style="opacity:.6;pointer-events:none;">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <a class="sb-link" href="#" style="opacity:.4;pointer-events:none;">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           <span class="i18n" data-ko="실 계산기" data-en="Yarn Calc" data-ja="糸計算機">실 계산기</span>
-          <span class="sb-badge" style="background:#888;">예정</span>
+          <span class="sb-badge i18n" data-ko="예정" data-en="Soon" data-ja="予定">예정</span>
         </a>
       </div>
       <div class="sb-div"></div>
-      <div style="padding:8px 0;">
-        <div class="sb-lbl">
-          <span class="i18n" data-ko="내 공간" data-en="My Space" data-ja="マイスペース">내 공간</span>
-        </div>
-        <a class="sb-it" href="/mypage.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <div class="sb-section">
+        <div class="sb-label i18n" data-ko="내 공간" data-en="My Space" data-ja="マイスペース">내 공간</div>
+        <a class="sb-link" href="/mypage.html">
+          <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           <span class="i18n" data-ko="내 도안함" data-en="My Patterns" data-ja="マイ編み図">내 도안함</span>
           <span class="sb-cnt" id="savedCount">0</span>
         </a>
-        <a class="sb-it" href="#" id="sbProjects">
-          <svg class="sb-ico" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          <span class="i18n" data-ko="진행 중 프로젝트" data-en="In Progress" data-ja="進行中プロジェクト">진행 중 프로젝트</span>
+        <a class="sb-link" href="#" id="sbProjects">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="i18n" data-ko="진행 중" data-en="In Progress" data-ja="進行中">진행 중</span>
           <span class="sb-cnt" id="projectCount">0</span>
         </a>
       </div>
       <div class="sb-div"></div>
-      <div style="padding:8px 0;">
-        <div class="sb-lbl">
-          <span class="i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</span>
-        </div>
-        <a class="sb-it" href="/community.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          <span class="i18n" data-ko="완성작 갤러리" data-en="Gallery" data-ja="完成作品">완성작 갤러리</span>
+      <div class="sb-section">
+        <div class="sb-label i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</div>
+        <a class="sb-link" href="/community.html">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span class="i18n" data-ko="완성작" data-en="Gallery" data-ja="完成作品">완성작</span>
         </a>
-        <a class="sb-it" href="/community.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <a class="sb-link" href="/community.html">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span class="i18n" data-ko="자유게시판" data-en="Board" data-ja="掲示板">자유게시판</span>
         </a>
       </div>
       <div class="sb-div"></div>
-      <div style="padding:8px 0;">
-        <div class="sb-lbl">
-          <span class="i18n" data-ko="정보" data-en="Info" data-ja="情報">정보</span>
-        </div>
-        <a class="sb-it" href="/magazine.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+      <div class="sb-section">
+        <div class="sb-label i18n" data-ko="정보" data-en="Info" data-ja="情報">정보</div>
+        <a class="sb-link" href="/magazine.html">
+          <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
           <span class="i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</span>
         </a>
-        <a class="sb-it" href="/notice.html">
-          <svg class="sb-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <a class="sb-link" href="/notice.html">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span class="i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</span>
         </a>
       </div>
     </aside>
 
     <!-- MAIN -->
-    <main class="main">
+    <main class="home-main">
 
-      <!-- Top bar -->
-      <div class="top-bar">
-        <div>
-          <div class="pg-title" id="greetingTitle">안녕하세요 👋</div>
-          <div class="pg-sub i18n" data-ko="오늘도 즐거운 뜨개 시간 되세요" data-en="Have a wonderful knitting day" data-ja="今日も楽しい編み物の時間を">오늘도 즐거운 뜨개 시간 되세요</div>
-        </div>
-        <div class="top-actions">
-          <button class="ta-btn ta-out" onclick="location.href='/community.html'">
-            <span class="i18n" data-ko="커뮤니티 보기" data-en="Community" data-ja="コミュニティ">커뮤니티 보기</span>
-          </button>
-          <button class="ta-btn ta-fill" onclick="location.href='/pattern.html'">
+      <!-- GREETING -->
+      <div class="home-greeting">
+        <div class="home-greeting-title" id="greetingTitle">안녕하세요 👋</div>
+        <div class="home-greeting-sub i18n" data-ko="오늘도 즐거운 뜨개 시간 되세요" data-en="Have a wonderful knitting day" data-ja="今日も楽しい編み物の時間を">오늘도 즐거운 뜨개 시간 되세요</div>
+        <div class="home-greeting-actions">
+          <button class="primary-btn" onclick="location.href='/pattern.html'">
             <span class="i18n" data-ko="+ 도안 만들기" data-en="+ Create Pattern" data-ja="+ 編み図を作る">+ 도안 만들기</span>
           </button>
-        </div>
-      </div>
-
-      <!-- HERO -->
-      <div class="hero">
-        <div>
-          <div class="h-eyebrow i18n" data-ko="뜨개인을 위한 올인원 플랫폼" data-en="All-in-one platform for knitters" data-ja="ニッターのためのオールインワン">뜨개인을 위한 올인원 플랫폼</div>
-          <div class="h-title i18n" data-ko="뜨개의 모든 것,<br>한 곳에서." data-en="Everything knitting,<br>in one place." data-ja="編み物のすべてを、<br>ひとつの場所で。">뜨개의 모든 것,<br>한 곳에서.</div>
-          <div class="h-desc i18n"
-               data-ko="도안 생성부터 게이지 계산, 단수 카운터까지.<br>쓔쓔닛츠와 함께 더 즐거운 뜨개 시간을 만들어보세요."
-               data-en="From pattern generation to gauge calculation and row counting.<br>Make your knitting time more enjoyable with SSUESSUE KNITS."
-               data-ja="編み図作成からゲージ計算、段数カウンターまで。<br>쓔쓔닛츠でもっと楽しい編み物の時間を。">
-            도안 생성부터 게이지 계산, 단수 카운터까지.<br>쓔쓔닛츠와 함께 더 즐거운 뜨개 시간을 만들어보세요.
-          </div>
-          <div class="h-ctas">
-            <button class="h-cta-main" onclick="location.href='/pattern.html'">
-              <span class="i18n" data-ko="도안 만들기 →" data-en="Create Pattern →" data-ja="編み図を作る →">도안 만들기 →</span>
-            </button>
-            <button class="h-cta-sub" onclick="location.href='/guide.html'">
-              <span class="i18n" data-ko="도구 둘러보기" data-en="Explore Tools" data-ja="ツールを見る">도구 둘러보기</span>
-            </button>
-          </div>
-        </div>
-        <div class="h-right">
-          <a class="h-tool-card" href="/toolkit.html">
-            <div class="htc-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
-            <div class="htc-info">
-              <div class="htc-name i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</div>
-              <div class="htc-desc i18n" data-ko="스와치 → 코수·단수 자동 환산" data-en="Swatch → stitch & row auto calc" data-ja="スワッチ → 目数・段数自動換算">스와치 → 코수·단수 자동 환산</div>
-            </div>
-            <span class="htc-badge">New</span>
-          </a>
-          <a class="h-tool-card" href="#" id="heroRowCounter">
-            <div class="htc-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-            <div class="htc-info">
-              <div class="htc-name i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</div>
-              <div class="htc-desc i18n" data-ko="멀티 프로젝트 · 알림 · 목표 단수" data-en="Multi project · alerts · goal rows" data-ja="マルチプロジェクト・アラート">멀티 프로젝트 · 알림 · 목표 단수</div>
-            </div>
-            <span class="htc-badge">New</span>
-          </a>
-          <a class="h-tool-card" href="#" style="opacity:.7;pointer-events:none;">
-            <div class="htc-ico"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-            <div class="htc-info">
-              <div class="htc-name i18n" data-ko="실 계산기" data-en="Yarn Calculator" data-ja="糸計算機">실 계산기</div>
-              <div class="htc-desc i18n" data-ko="yardage · g 자동 추정" data-en="yardage · g auto estimate" data-ja="ヤーデージ・g 自動推定">yardage · g 자동 추정</div>
-            </div>
-            <span class="htc-badge">예정</span>
-          </a>
+          <button class="secondary-btn" onclick="location.href='/community.html'">
+            <span class="i18n" data-ko="커뮤니티 보기" data-en="Community" data-ja="コミュニティ">커뮤니티 보기</span>
+          </button>
         </div>
       </div>
 
       <!-- TOOLS -->
-      <div class="sec-hdr">
-        <div class="sec-ttl i18n" data-ko="뜨개 도구" data-en="Knitting Tools" data-ja="編み物ツール">뜨개 도구</div>
-        <a class="sec-all" href="/guide.html">
-          <span class="i18n" data-ko="전체 보기 →" data-en="View all →" data-ja="全て見る →">전체 보기 →</span>
+      <div class="home-sec-hdr">
+        <div class="home-sec-ttl i18n" data-ko="뜨개 도구" data-en="Knitting Tools" data-ja="編み物ツール">뜨개 도구</div>
+        <a class="home-sec-all" href="/guide.html">
+          <span class="i18n" data-ko="전체 보기 →" data-en="View All →" data-ja="全て見る →">전체 보기 →</span>
         </a>
       </div>
-      <div class="tool-grid">
-        <a class="tc" href="/pattern.html">
-          <div class="tc-top">
-            <div class="tc-ico ico-dk"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div class="home-tools-grid">
+        <a class="home-tool-card" href="/pattern.html">
+          <div class="htc-top">
+            <div class="htc-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
           </div>
-          <div class="tc-name i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</div>
-          <div class="tc-desc i18n"
-               data-ko="사진을 업로드하면 바늘·실 굵기에 맞는 컬러 도안을 자동으로 생성. PDF 저장 및 커뮤니티 공유 가능."
-               data-en="Upload a photo to auto-generate a color pattern for your yarn weight. Save as PDF or share with the community."
-               data-ja="写真をアップロードすると、針・糸の太さに合ったカラー編み図を自動生成。PDF保存・コミュニティ共有も可能。">
-            사진을 업로드하면 바늘·실 굵기에 맞는 컬러 도안을 자동으로 생성. PDF 저장 및 커뮤니티 공유 가능.
+          <div class="htc-name i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</div>
+          <div class="htc-desc i18n"
+               data-ko="사진 → 바늘·실 굵기에 맞는 컬러 도안 자동 생성. PDF 저장 가능."
+               data-en="Upload a photo → auto-generate a color pattern. Save as PDF."
+               data-ja="写真 → 針・糸に合ったカラー編み図を自動生成。PDF保存可。">
+            사진 → 바늘·실 굵기에 맞는 컬러 도안 자동 생성. PDF 저장 가능.
           </div>
-          <div class="tc-link i18n" data-ko="바로 시작하기 →" data-en="Get started →" data-ja="今すぐ始める →">바로 시작하기 →</div>
+          <div class="htc-link i18n" data-ko="바로 시작하기 →" data-en="Get Started →" data-ja="今すぐ始める →">바로 시작하기 →</div>
         </a>
-        <a class="tc" href="/toolkit.html">
-          <div class="tc-top">
-            <div class="tc-ico ico-dk"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
-            <span class="tc-badge b-new">New</span>
+        <a class="home-tool-card" href="/toolkit.html">
+          <div class="htc-top">
+            <div class="htc-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+            <span class="htc-tag">New</span>
           </div>
-          <div class="tc-name i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</div>
-          <div class="tc-desc i18n"
-               data-ko="스와치 측정값 입력 → 목표 치수에 맞는 코수·단수 자동 환산. 도안 게이지와 내 게이지 차이 비교."
-               data-en="Enter swatch measurements → auto-calculate stitches & rows for your target size. Compare pattern gauge vs yours."
-               data-ja="スワッチの測定値を入力 → 目標サイズに合わせた目数・段数を自動換算。">
-            스와치 측정값 입력 → 목표 치수에 맞는 코수·단수 자동 환산. 도안 게이지와 내 게이지 차이 비교.
+          <div class="htc-name i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</div>
+          <div class="htc-desc i18n"
+               data-ko="스와치 → 코수·단수 자동 환산. 도안 게이지 vs 내 게이지 비교."
+               data-en="Swatch → stitch & row auto-calc. Compare pattern vs your gauge."
+               data-ja="スワッチ → 目数・段数自動換算。ゲージ比較も。">
+            스와치 → 코수·단수 자동 환산. 도안 게이지 vs 내 게이지 비교.
           </div>
-          <div class="tc-link i18n" data-ko="계산하기 →" data-en="Calculate →" data-ja="計算する →">계산하기 →</div>
+          <div class="htc-link i18n" data-ko="계산하기 →" data-en="Calculate →" data-ja="計算する →">계산하기 →</div>
         </a>
-        <a class="tc" href="#" id="toolCounterCard">
-          <div class="tc-top">
-            <div class="tc-ico ico-dk"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-            <span class="tc-badge b-new">New</span>
+        <a class="home-tool-card" href="#" id="toolCounterCard">
+          <div class="htc-top">
+            <div class="htc-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <span class="htc-tag">New</span>
           </div>
-          <div class="tc-name i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</div>
-          <div class="tc-desc i18n"
-               data-ko="멀티 프로젝트 저장 · X단마다 알림 설정 · 목표 단수 진행 바. 우측 드로어로 어디서든 꺼내볼 수 있어요."
-               data-en="Multi-project save · set repeat alerts · goal row progress bar. Open from the side drawer anytime."
-               data-ja="マルチプロジェクト保存・繰り返しアラート・目標段数プログレスバー。サイドドロワーからいつでも開けます。">
-            멀티 프로젝트 저장 · X단마다 알림 설정 · 목표 단수 진행 바. 우측 드로어로 어디서든 꺼내볼 수 있어요.
+          <div class="htc-name i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</div>
+          <div class="htc-desc i18n"
+               data-ko="멀티 프로젝트 · X단마다 알림 · 목표 단수 진행 바."
+               data-en="Multi-project · repeat alerts · goal row progress bar."
+               data-ja="マルチプロジェクト・繰り返しアラート・目標段数バー。">
+            멀티 프로젝트 · X단마다 알림 · 목표 단수 진행 바.
           </div>
-          <div class="tc-link i18n" data-ko="카운터 열기 →" data-en="Open counter →" data-ja="カウンターを開く →">카운터 열기 →</div>
+          <div class="htc-link i18n" data-ko="카운터 열기 →" data-en="Open Counter →" data-ja="カウンターを開く →">카운터 열기 →</div>
         </a>
       </div>
 
       <!-- BOTTOM 3-COL -->
-      <div class="sec-hdr" style="margin-top:4px;">
-        <div class="sec-ttl i18n" data-ko="커뮤니티 · 프로젝트 · 매거진" data-en="Community · Projects · Magazine" data-ja="コミュニティ・プロジェクト・マガジン">커뮤니티 · 프로젝트 · 매거진</div>
+      <div class="home-sec-hdr">
+        <div class="home-sec-ttl i18n" data-ko="커뮤니티 · 프로젝트 · 매거진" data-en="Community · Projects · Magazine" data-ja="コミュニティ・プロジェクト・マガジン">커뮤니티 · 프로젝트 · 매거진</div>
       </div>
-      <div class="bottom-grid">
+      <div class="home-bottom-grid">
 
         <!-- Community -->
-        <div class="comm-card">
-          <div class="sec-hdr" style="margin-bottom:10px;">
-            <div class="sec-ttl i18n" data-ko="최근 완성작" data-en="Recent Work" data-ja="最近の完成作品">최근 완성작</div>
-            <a class="sec-all" href="/community.html">
+        <div class="home-panel">
+          <div class="home-panel-hdr">
+            <div class="home-panel-ttl i18n" data-ko="최근 완성작" data-en="Recent Work" data-ja="最近の完成作品">최근 완성작</div>
+            <a class="home-panel-all" href="/community.html">
               <span class="i18n" data-ko="갤러리 →" data-en="Gallery →" data-ja="ギャラリー →">갤러리 →</span>
             </a>
           </div>
-          <div class="comm-grid" id="communityGrid">
-            <!-- Populated by home.js -->
+          <div class="cg-grid" id="communityGrid">
             <div class="cg-item"><div class="cg-thumb"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="cg-name">—</div><div class="cg-meta">—</div></div>
             <div class="cg-item"><div class="cg-thumb"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="cg-name">—</div><div class="cg-meta">—</div></div>
             <div class="cg-item"><div class="cg-thumb"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="cg-name">—</div><div class="cg-meta">—</div></div>
@@ -760,37 +546,63 @@
         </div>
 
         <!-- Projects -->
-        <div class="proj-card">
-          <div class="sec-hdr" style="margin-bottom:10px;">
-            <div class="sec-ttl i18n" data-ko="진행 중 프로젝트" data-en="In Progress" data-ja="進行中">진행 중 프로젝트</div>
-            <a class="sec-all" href="#" id="projAllLink" onclick="document.querySelector('knitting-row-counter')?.toggleDrawer();return false;">
+        <div class="home-panel">
+          <div class="home-panel-hdr">
+            <div class="home-panel-ttl i18n" data-ko="진행 중 프로젝트" data-en="In Progress" data-ja="進行中">진행 중 프로젝트</div>
+            <a class="home-panel-all" href="#" onclick="document.querySelector('knitting-row-counter')?.toggleDrawer();return false;">
               <span class="i18n" data-ko="카운터 →" data-en="Counter →" data-ja="カウンター →">카운터 →</span>
             </a>
           </div>
           <div id="projectList">
-            <div class="empty-state">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <div class="home-empty">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span class="i18n" data-ko="단수 카운터에서 프로젝트를 추가해보세요" data-en="Add projects in the row counter" data-ja="段数カウンターでプロジェクトを追加">단수 카운터에서 프로젝트를 추가해보세요</span>
             </div>
           </div>
         </div>
 
         <!-- Magazine -->
-        <div class="mag-card">
-          <div class="sec-hdr" style="margin-bottom:10px;">
-            <div class="sec-ttl i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</div>
-            <a class="sec-all" href="/magazine.html">
+        <div class="home-panel">
+          <div class="home-panel-hdr">
+            <div class="home-panel-ttl i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</div>
+            <a class="home-panel-all" href="/magazine.html">
               <span class="i18n" data-ko="전체 →" data-en="All →" data-ja="全て →">전체 →</span>
             </a>
           </div>
-          <div class="mag-list" id="magazineList">
-            <!-- Populated by home.js -->
-          </div>
+          <div id="magazineList"><!-- home.js 로 채움 --></div>
         </div>
 
       </div>
     </main>
-  </div><!-- /.page-body -->
+  </div><!-- /.home-wrap -->
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">SSUESSUE KNITS</span>
+      <nav class="footer-nav">
+        <a href="/about.html" data-i18n="footer_about">소개</a>
+        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+        <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
+      </nav>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
+           onclick="(function(e){if(/Mobi|Android/i.test(navigator.userAgent)){e.preventDefault();window.location='instagram://user?username=ssuessue_knits';setTimeout(function(){window.location='https://www.instagram.com/ssuessue_knits/'},1500);}})(event)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://blog.naver.com/leah611" class="footer-social-link" aria-label="Naver Blog" target="_blank" rel="noopener noreferrer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-biz">
+      <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
+      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
+      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
+      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
+    </div>
+  </footer>
 
   <!-- AUTH MODAL -->
   <div id="authModal" class="modal-overlay" style="display:none;">
@@ -850,29 +662,53 @@
           <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>완료</button>
         </form>
       </div>
-      <div id="verificationSentPanel" style="display:none; text-align:center; padding:1rem 0;">
-        <div style="font-size:3rem;margin-bottom:1rem;">✉️</div>
-        <h3 style="margin-bottom:1rem;font-weight:800;">이메일 인증이 필요합니다</h3>
-        <p style="font-size:.9rem;line-height:1.6;color:#888;margin-bottom:1.5rem;">
-          <span id="sentEmailAddress" style="font-weight:700;color:#1a1a1a;"></span>(으)로 인증 메일을 보냈습니다.
+      <div id="verificationSentPanel" style="display:none; text-align:center; padding: 1rem 0;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✉️</div>
+        <h3 style="margin-bottom: 1rem; font-weight:800;">이메일 인증이 필요합니다</h3>
+        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--secondary-color); margin-bottom: 1.5rem;">
+          <span id="sentEmailAddress" style="font-weight:700; color:var(--primary-color);"></span>(으)로 인증 메일을 보냈습니다.<br>
+          메일함의 링크를 클릭하면 이 화면이 자동으로 전환됩니다.
         </p>
-        <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <p style="font-size: 0.8rem; color: #cc6600; margin-bottom: 1.5rem; background: #fff9f0; padding: 0.5rem 0.75rem; border: 1px solid #ffe0b3; text-align: left; line-height: 1.7;">
+          ⚠️ 메일이 오지 않았다면 <b>스팸함</b>을 꼭 확인해 주세요!<br>
+          📌 <b>네이버·카카오·다음 등 국내 메일</b>은 발신 서버 차단으로 수신이 안 될 수 있습니다.<br>
+          <b>Gmail</b> 주소로 가입하시면 안정적으로 받으실 수 있습니다.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
           <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">인증 완료 확인</button>
-          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%;max-width:none;">메일 다시 보내기</button>
+          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%; max-width:none;">메일 다시 보내기</button>
         </div>
       </div>
       <div id="authModalError" class="auth-error" style="display:none;"></div>
     </div>
   </div>
 
-  <!-- Row Counter -->
+  <!-- 모바일 메뉴 -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
+    <button class="mobile-signin-btn mobile-i18n" id="mobileSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+    <div class="mobile-user-area" id="mobileUserArea" style="display:none;">
+      <span class="mobile-nickname" id="mobileNickname"></span>
+      <a href="/mypage.html" class="mobile-mypage-btn mobile-i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+      <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+    </div>
+    <hr class="mobile-menu-divider">
+    <nav class="mobile-menu-nav">
+      <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
+      <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
+      <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
+      <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+      <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+      <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+      <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+    </nav>
+  </div>
+
   <script type="module" src="/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
-
-  <!-- Cookie consent -->
+  <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>
-
-  <!-- Homepage module -->
   <script type="module" src="/home.js"></script>
 </body>
 </html>

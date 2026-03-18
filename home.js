@@ -6,13 +6,11 @@ import {
     collection, query, where, orderBy, limit, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
-// ── Lang select helper ────────────────────────────────────────
+// ── Lang select helper (레거시, 기존 select 사용 페이지 호환) ──
 window._applyLangFromSelect = function(val) {
     const allowed = ['ko', 'en', 'ja'];
     const lang = allowed.includes(val) ? val : 'ko';
     applyLang(lang, { pageTitles: PAGE_TITLES });
-    const sel = document.getElementById('langSelectTop');
-    if (sel) sel.value = lang;
 };
 
 const PAGE_TITLES = { ko: '홈', en: 'Home', ja: 'ホーム' };
@@ -205,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGreeting('');
 
     wireRowCounterToggles();
+    syncLangSelect(lang);
 
     // Auth state → greeting + saved count
     onAuthStateChanged(auth, async user => {
