@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSBJ5J8N4K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KSBJ5J8N4K');
+  </script>
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vsvc6kadap");
+  </script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게이지 계산기 | SSUESSUE KNITS</title>
+  <meta name="description" content="뜨개질 게이지 계산 및 코 늘림/줄임 계산을 위한 스마트 도구함. SSUESSUE KNITS에서 더 편리하게 뜨개질하세요.">
+  
+  <link rel="preconnect" href="https://webfontworld.github.io">
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
+  <link href='/style.css' rel='stylesheet'>
+  <style>
+    /* Toolkit Specific Styles */
+    .toolkit-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .tool-card {
+      background: var(--panel-bg);
+      border: 1.5px solid var(--border-color);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tool-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+    .tool-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tool-title i { font-style: normal; font-size: 1.8rem; }
+    
+    .calc-group { margin-bottom: 1.25rem; }
+    .calc-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .calc-input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .calc-input-row input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .calc-unit { font-size: 0.85rem; color: var(--secondary-color); min-width: 3rem; }
+
+    .result-area {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px dashed var(--border-color);
+    }
+    .result-box {
+      background: var(--accent-color);
+      padding: 1.25rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .result-label { font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 0.25rem; }
+    .result-value { font-size: 1.75rem; font-weight: 900; color: var(--primary-color); }
+    .result-sub-value { font-size: 1rem; font-weight: 700; margin-top: 0.5rem; }
+
+    .shaping-pattern {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 6px;
+      white-space: pre-wrap;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .shaping-pattern { background: #2a2a2a; }
+    }
+
+    /* Unit toggle */
+    .unit-toggle-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--secondary-color);
+    }
+    .unit-btn {
+      padding: 0.28rem 0.75rem; border: 1.5px solid var(--border-color);
+      border-radius: 20px; background: white; font-size: 0.8rem;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .unit-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+    .result-dims { font-size: 0.85rem; color: var(--secondary-color); margin-top: 0.4rem; }
+
+    /* Gauge history */
+    .gauge-history { margin-top: 1.25rem; font-size: 0.85rem; }
+    .history-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 700; margin-bottom: 0.5rem; color: var(--secondary-color);
+    }
+    .history-clear-btn {
+      background: none; border: 1px solid var(--border-color); border-radius: 4px;
+      padding: 0.15rem 0.5rem; font-size: 0.75rem; cursor: pointer;
+      color: var(--secondary-color); font-family: inherit;
+    }
+    .history-item {
+      display: grid; grid-template-columns: 1.2rem 1fr 1fr 1fr;
+      gap: 0.4rem; padding: 0.4rem 0; border-bottom: 1px dotted var(--border-color); align-items: center;
+    }
+    .history-num { font-weight: 700; color: var(--primary-color); }
+    .history-result { font-weight: 700; }
+
+    /* Gauge bar + diff */
+    .gauge-bar-area {
+      margin-top: 1rem; padding: 0.85rem 1rem;
+      background: var(--accent-color, #f9f0ea); border-radius: 8px; font-size: 0.85rem;
+    }
+    .gauge-bar-label { margin-bottom: 0.3rem; }
+    .gauge-bar-track { height: 10px; background: var(--border-color, #e0d5c8); border-radius: 5px; overflow: hidden; }
+    .gauge-bar-fill  { height: 100%; border-radius: 5px; transition: width 0.3s ease; }
+    .pattern-bar { background: #a0a0b0; }
+    .my-bar      { background: var(--primary-color, #c87941); }
+    .gauge-diff-badge {
+      margin-top: 0.75rem; padding: 0.4rem 0.75rem; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 700; text-align: center;
+    }
+    .diff-tighter { background: #fff0e0; color: #c87941; }
+    .diff-looser  { background: #e8f4ff; color: #4a7fbd; }
+    .diff-equal   { background: #eaffea; color: #3a8a3a; }
+    .gauge-diff-area { margin-top: 0; }
+
+    @media (prefers-color-scheme: dark) {
+      .unit-btn { background: #2a2a2a; color: #ddd; }
+      .diff-tighter { background: #3d2010; color: #ffaa70; }
+      .diff-looser  { background: #0d2a3d; color: #70aaff; }
+      .diff-equal   { background: #0d3d0d; color: #70ee70; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <div class="lang-selector">
+        <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-btn active" data-lang="ko">한국어</button>
+          <button class="lang-btn" data-lang="en">English</button>
+          <button class="lang-btn" data-lang="ja">日本語</button>
+        </div>
+      </div>
+      <div class="auth-area">
+        <a href="/about.html" class="lang-btn i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+        <a href="/toolkit.html" class="lang-btn i18n active" data-ko="게이지 계산기" data-en="Gauge Calc" data-ja="ゲージ計算機">게이지 계산기</a>
+        <a href="/community.html" class="lang-btn i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
+        <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+        <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+        <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+        <button class="lang-btn i18n" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <div class="auth-user" id="authUserArea" style="display:none;">
+          <span style="display:none;" id="authUserEmail"></span>
+          <a href="/mypage.html" class="lang-btn i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+          <button class="lang-btn i18n" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+        </div>
+      </div>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
+    </div>
+    <h1><a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a></h1>
+    <div class="brand-kr">쓔쓔닛츠</div>
+    <h2 class="tagline i18n" data-ko="당신의 뜨개질을 돕는 스마트 도구함" data-en="Smart tools for your knitting journey." data-ja="あなたの編み物をサポートするスマートツール">당신의 뜨개질을 돕는 스마트 도구함</h2>
+  </header>
+
+  <main class="container">
+    <div class="toolkit-container">
+      
+      <!-- 1. 게이지 계산기 -->
+      <section class="tool-card" id="gaugeTool">
+        <h3 class="tool-title"><i>📏</i> <span data-i18n="tool_gauge_title">게이지 계산기</span></h3>
+        
+        <div class="calc-group">
+          <label data-i18n="label_my_gauge">내 게이지 (10cm 기준)</label>
+          <div class="calc-input-row" style="margin-bottom: 0.5rem;">
+            <input type="number" id="gaugeSts" value="22" step="0.5" min="1">
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="gaugeRows" value="30" step="0.5" min="1">
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
+          </div>
+        </div>
+
+        <div class="unit-toggle-row">
+          <span class="i18n" data-ko="단위" data-en="Unit" data-ja="単位">단위</span>
+          <button class="unit-btn active" id="unitCm">cm</button>
+          <button class="unit-btn" id="unitInch">inch</button>
+        </div>
+
+        <div class="calc-group">
+          <label class="i18n" data-ko="목표 사이즈" data-en="Target Size" data-ja="仕上がりサイズ">목표 사이즈</label>
+          <div class="calc-input-row" style="margin-bottom: 0.5rem;">
+            <input type="number" id="targetWidth" value="50" min="1">
+            <span class="calc-unit gauge-unit-label">cm</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="targetHeight" value="60" min="1">
+            <span class="calc-unit gauge-unit-label">cm</span>
+          </div>
+        </div>
+
+        <div class="result-area">
+          <div class="result-box">
+            <div class="result-label i18n" data-ko="필요한 총 코/단 수" data-en="Total Stitches & Rows" data-ja="必要な目数・段数">필요한 총 코/단 수</div>
+            <div class="result-value"><span id="resTotalSts">110</span> <small>sts</small> × <span id="resTotalRows">180</span> <small>rows</small></div>
+            <div id="resDimsCm"   class="result-dims">50.0 × 60.0 cm</div>
+            <div id="resDimsInch" class="result-dims">19.7" × 23.6"</div>
+          </div>
+        </div>
+        <div id="gaugeHistory" class="gauge-history"></div>
+      </section>
+
+      <!-- 2. 도안 변환 계산기 -->
+      <section class="tool-card" id="convertTool">
+        <h3 class="tool-title"><i>🔄</i> <span data-i18n="tool_convert_title">도안 변환 계산기</span></h3>
+        
+        <div class="calc-group">
+          <label data-i18n="label_pattern_gauge">도안 게이지 (10cm)</label>
+          <div class="calc-input-row" style="margin-bottom: 0.5rem;">
+            <input type="number" id="convPatternSts" value="20" step="0.5" min="1">
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="convPatternRows" value="28" step="0.5" min="1">
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
+          </div>
+        </div>
+
+        <div class="calc-group">
+          <label data-i18n="label_pattern_size">도안의 코/단 수</label>
+          <div class="calc-input-row" style="margin-bottom: 0.5rem;">
+            <input type="number" id="convInputSts" value="100" min="1">
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="convInputRows" value="140" min="1">
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
+          </div>
+        </div>
+
+        <div class="result-area">
+          <div class="result-box">
+            <div class="result-label" data-i18n="label_target_res">내가 뜰 코/단 수</div>
+            <div class="result-value"><span id="convResSts">110</span> <small>sts</small> × <span id="convResRows">150</span> <small>rows</small></div>
+          </div>
+          <div id="gaugeBarArea"  class="gauge-bar-area"></div>
+          <div id="gaugeDiffArea" class="gauge-diff-area"></div>
+        </div>
+      </section>
+
+      <!-- 3. 균등 늘림/줄임 계산기 -->
+      <section class="tool-card" id="shapingTool">
+        <h3 class="tool-title"><i>📐</i> <span data-i18n="tool_shaping_title">균등 늘림/줄임</span></h3>
+        
+        <div class="calc-group">
+          <label class="i18n" data-ko="현재 코 수" data-en="Current Stitches" data-ja="現在の目数">현재 코 수</label>
+          <div class="calc-input-row">
+            <input type="number" id="currentSts" value="100" min="1">
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
+          </div>
+        </div>
+
+        <div class="calc-group">
+          <label class="i18n" data-ko="늘릴/줄일 코 수" data-en="Amount to Inc/Dec" data-ja="増減する目数">늘릴/줄일 코 수</label>
+          <div class="calc-input-row">
+            <input type="number" id="shapingAmount" value="8" min="1">
+            <select id="shapingType" style="padding: 0.75rem; border: 1.5px solid var(--border-color); border-radius: 6px; background: white; font-family: inherit;">
+              <option value="inc" data-ko="늘림 (+)" data-en="Increase" data-ja="増し目">늘림 (+)</option>
+              <option value="dec" data-ko="줄임 (-)" data-en="Decrease" data-ja="減らし目">줄임 (-)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="result-area">
+          <div class="result-box">
+            <div class="result-label i18n" data-ko="최종 코 수" data-en="Final Stitches" data-ja="最終目数">최종 코 수</div>
+            <div class="result-value" id="resFinalSts">108</div>
+            <div id="shapingInstruction" class="shaping-pattern"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 블로킹 계산기 -->
+      <section class="tool-card" id="blockingTool">
+        <h3 class="tool-title"><i>💧</i>
+          <span class="i18n" data-ko="블로킹 계산기" data-en="Blocking Calculator" data-ja="ブロッキング計算機">블로킹 계산기</span>
+        </h3>
+
+        <div class="calc-group">
+          <label class="i18n" data-ko="블로킹 전 치수 (cm)" data-en="Pre-blocking Size (cm)" data-ja="ブロッキング前サイズ (cm)">블로킹 전 치수</label>
+          <div class="calc-input-row" style="margin-bottom:0.5rem;">
+            <input type="number" id="blockPreWidth" value="52" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="blockPreHeight" value="63" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
+          </div>
+        </div>
+
+        <div class="calc-group">
+          <label class="i18n" data-ko="블로킹 후 치수 (cm)" data-en="Post-blocking Size (cm)" data-ja="ブロッキング後サイズ (cm)">블로킹 후 치수</label>
+          <div class="calc-input-row" style="margin-bottom:0.5rem;">
+            <input type="number" id="blockPostWidth" value="50" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="blockPostHeight" value="60" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
+          </div>
+        </div>
+
+        <div class="calc-group">
+          <label class="i18n"
+            data-ko="원하는 완성 치수 → 블로킹 전 뜰 치수 역산"
+            data-en="Desired final size → cast-on size"
+            data-ja="希望の完成サイズ → 編み始めサイズを逆算">원하는 완성 치수 (역산)</label>
+          <div class="calc-input-row" style="margin-bottom:0.5rem;">
+            <input type="number" id="blockTargetWidth" value="50" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
+          </div>
+          <div class="calc-input-row">
+            <input type="number" id="blockTargetHeight" value="60" min="0" step="0.1">
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
+          </div>
+        </div>
+
+        <div class="result-area">
+          <div class="result-box">
+            <div class="result-label i18n" data-ko="블로킹 변화율" data-en="Blocking Rate" data-ja="ブロッキング変化率">블로킹 변화율</div>
+            <div id="blockRateDisplay" class="result-value" style="font-size:1.1rem;line-height:1.6;">-</div>
+            <div id="blockCastOnDisplay" style="margin-top:0.75rem;font-size:0.95rem;font-weight:700;"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">SSUESSUE KNITS</span>
+      <nav class="footer-nav">
+        <a href="/about.html" class="i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+        <a href="/terms.html" class="i18n" data-ko="이용약관" data-en="Terms of Service" data-ja="利用規約">이용약관</a>
+        <a href="/privacy.html" class="i18n" data-ko="개인정보처리방침" data-en="Privacy Policy" data-ja="プライバシーポリシー">개인정보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+      </nav>
+    </div>
+    <div class="footer-biz">
+      <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
+      <span>이메일: yewon61137@gmail.com</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/toolkit.js"></script>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
+    <hr class="mobile-menu-divider">
+    <nav class="mobile-menu-nav">
+      <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+      <a href="/toolkit.html" class="mobile-menu-link mobile-i18n active" data-ko="게이지 계산기" data-en="Gauge Calc" data-ja="ゲージ計算機">게이지 계산기</a>
+      <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
+      <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+      <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+      <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+    </nav>
+  </div>
+  <script src="/hamburger.js"></script>
+  <script type="module" src="/row-counter.js"></script>
+  <knitting-row-counter></knitting-row-counter>
+</body>
+</html>
