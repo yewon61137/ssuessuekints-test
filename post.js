@@ -735,6 +735,39 @@ document.getElementById('scrapBtn').addEventListener('click', async () => {
     catch (e) { console.error('Scrap error:', e); }
 });
 
+document.getElementById('shareBtn').addEventListener('click', () => {
+    const title = document.title;
+    const url   = location.href;
+    const desc  = document.querySelector('meta[name="description"]')?.content || '';
+    const lbl   = document.querySelector('#shareBtn .share-label');
+    const lang  = document.documentElement.lang || 'ko';
+    const okMsg = { ko: '링크 복사됨!', en: 'Link copied!', ja: 'コピー済！' };
+    const origMsg = { ko: '공유', en: 'Share', ja: 'シェア' };
+
+    function showCopied() {
+        if (lbl) lbl.textContent = okMsg[lang] || okMsg.ko;
+        setTimeout(() => { if (lbl) lbl.textContent = origMsg[lang] || origMsg.ko; }, 2000);
+    }
+    function copyFallback() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(showCopied).catch(() => execCopy());
+        } else { execCopy(); }
+    }
+    function execCopy() {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.cssText = 'position:fixed;opacity:0;';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showCopied(); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+
+    if (navigator.share) {
+        navigator.share({ title, text: desc, url }).catch(e => {
+            if (e.name !== 'AbortError') copyFallback();
+        });
+    } else { copyFallback(); }
+});
+
 document.getElementById('commentForm').addEventListener('submit', async e => {
     e.preventDefault();
     const content = document.getElementById('commentInput').value.trim();
