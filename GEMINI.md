@@ -1,5 +1,8 @@
 # **AI Development Guidelines for Modern Web Projects in Firebase Studio**
 
+> [!IMPORTANT]
+> **Git Branching Rule:** 모든 개발 및 수정 작업은 반드시 별도의 전용 브랜치(예: `feature/...`, `fix/...`, `gemini-update` 등)를 생성하여 진행하며, `main` 브랜치에서 직접 코드를 수정하지 않습니다. 이는 메인 코드의 안정성을 유지하고 다른 작업자(Claude 등)와의 충돌을 방지하기 위함입니다.
+
 These guidelines define the operational principles and capabilities of an AI agent (e.g., Gemini) interacting with framework-less web projects (HTML, CSS, JavaScript) within the Firebase Studio environment. The goal is to enable an efficient, automated, and error-resilient application design and development workflow that leverages modern, widely supported web standards (Baseline).
 
 ## **Environment & Context Awareness**

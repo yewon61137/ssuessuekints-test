@@ -1,50 +1,50 @@
-# Blueprint: 뜨개질 도안 생성기 (Knitting Pattern Generator)
+# Blueprint: SSUESSUE KNITS (뜨개질 도안 생성기 & 스마트 도구함)
 
 ## 1. 개요 (Overview)
-사용자가 이미지를 업로드하고 원하는 편물의 크기(cm) 및 실 굵기를 선택하면, 표준 게이지를 바탕으로 자동으로 코/단 수를 계산하고 이미지를 배치하여 뜨개질 도안으로 변환해주는 웹 애플리케이션입니다.
+사용자가 이미지를 업로드하고 원하는 편물의 크기(cm) 및 실 굵기를 선택하면, 표준 게이지를 바탕으로 자동으로 코/단 수를 계산하고 이미지를 배치하여 뜨개질 도안으로 변환해주는 웹 애플리케이션입니다. 추가적으로 뜨개질에 필요한 게이지 계산기 및 균등 늘림/줄임 계산 도구를 제공합니다.
 
 ## 2. 주요 기능 (Features)
-*   **이미지 업로드**: JPG, PNG 지원.
-*   **직관적인 설정 (실 굵기 및 cm 기반)**:
-    *   **실 굵기 (Yarn Weight)**: Fingering, DK, Aran/Worsted, Chunky, Super Bulky 등 선택. (선택 시 내부적으로 평균 게이지 적용)
-    *   **원하는 편물 크기 (cm)**: 가로(Width), 세로(Height) cm 입력.
-    *   **사용할 최대 색상 수**: 제한할 색상 수 입력.
-*   **도안 자동 생성 및 비율 유지 (Letterboxing)**:
-    *   입력된 cm와 실 굵기 게이지를 바탕으로 도안의 총 가로 코 수와 세로 단 수를 계산합니다.
-    *   원본 이미지의 비율이 깨지지 않도록, 계산된 도안 크기 안에서 이미지를 가운데에 맞추고(Fit) 남는 공간은 배경색(기본 흰색)으로 처리합니다.
-*   **개선된 색상 양자화 (Color Quantization)**:
-    *   그림자(명암 차이)보다는 고유한 색상(Hue, 채도 높은 색)을 보존하도록 색상 추출 알고리즘(K-means++)을 개선하여 뚜렷한 색상이 뭉개지는 현상을 방지합니다.
-*   **시각적 편의성**:
-    *   10코, 10단마다 굵은 선으로 그리드(Grid) 표시.
-    *   사용된 색상 팔레트를 번호와 함께 화면 측면에 나열.
-*   **PDF 저장**: 생성된 도안 이미지와 색상표를 PDF 파일로 다운로드.
+*   **이미지 업로드**: JPG, PNG 형식의 이미지 업로드 지원 (최대 10MB).
+*   **필수 색상 선택**: 이미지에서 반드시 도안에 포함하고 싶은 색상을 스포이드 방식으로 선택 가능.
+*   **AI 도안 생성**:
+    *   K-means++ 알고리즘을 사용한 지능적 색상 군집화.
+    *   실 굵기(표준 규격 또는 mm)에 따른 게이지 자동 계산.
+    *   기법 비율 설정 (코바늘 1:1, 대바늘 5:7 또는 7:5).
+*   **게이지 계산기 (Smart Knitting Toolkit)**:
+    *   **게이지 스와치 계산**: 목표 사이즈(cm)와 본인의 게이지를 입력하면 필요한 총 코/단 수 자동 계산.
+    *   **균등 늘림/줄임 계산**: 현재 코 수와 늘릴/줄일 코 수를 입력하면 균등한 간격을 계산하여 상세 작업 지침 제공.
+*   **단수 카운터 (Row Counter) 사이드 드로어**:
+    *   어떤 페이지에서든 접근 가능한 부유형 버튼(FAB)과 사이드 드로어 UI.
+    *   여러 개의 카운터 생성 및 관리 기능.
+    *   **일반 모드**: 단순 누적 단수 카운팅.
+    *   **반복 모드**: "3단마다 반복"과 같은 복잡한 도안을 위한 기능. 현재 반복 횟수와 반복 내 현재 단수를 동시에 관리.
+    *   증감(+/-), 초기화(Reset), 이름 수정, 삭제 기능.
+    *   브라우저 로컬 스토리지(`localStorage`)를 통한 데이터 유지.
+*   **도안 관리 및 공유**:
+    *   생성된 도안을 PDF 또는 PNG로 다운로드.
+    *   회원 가입 시 내 도안 보관함에 저장 및 관리.
+    *   커뮤니티를 통한 작품 공유 및 소통 (좋아요, 스크랩, 댓글/답글 기능).
+*   **다국어 지원**: 한국어, 영어, 일본어 완전 지원.
+
+## 3. 기술 스택 (Tech Stack)
+*   **Frontend**: Vanilla JS (ES Modules), HTML5, CSS3 (Modern Baseline).
+*   **Backend/BaaS**: Firebase (Auth, Firestore, Storage).
+*   **Deployment**: Cloudflare Pages.
+*   **Libraries**: jsPDF (PDF 생성).
 
 ## 4. SEO 및 GEO 최적화 (SEO & GEO Optimization)
 *   **Search Engine Optimization (SEO)**:
     *   `robots.txt` 및 `sitemap.xml` 생성 및 연동.
-    *   메인 페이지(`index.html`)에 Open Graph (OG), Twitter Cards, Canonical, Hreflang 태그 적용.
-    *   JSON-LD 구조화 데이터 (`SoftwareApplication`) 삽입으로 검색 결과 노출 강화.
+    *   메인 페이지 및 주요 페이지에 Open Graph (OG), Twitter Cards, Canonical, Hreflang 태그 적용.
+    *   JSON-LD 구조화 데이터 삽입으로 검색 결과 노출 강화.
 *   **Geographic Optimization (GEO)**:
-    *   Cloudflare CDN을 통한 글로벌 트래픽 분산 및 빠른 응답 속도 확보.
     *   `hreflang` 태그를 활용한 다국어(ko, en, ja) 타겟팅 최적화.
 
 ## 5. 외부 서비스 연동 (External Integrations)
-*   **Google Analytics (GA4)**: 사용자 행동 분석 및 트래픽 추적을 위해 Google Tag (gtag.js) 연동. (ID: G-KSBJ5J8N4K)
-*   **Microsoft Clarity**: 사용자 경험(UX) 분석 및 세션 녹화, 히트맵 확인을 위해 연동. (ID: vsvc6kadap)
-*   **Google AdSense**: 사이트 수익 창출을 위해 연동 및 소유권 확인 완료. (게시자 ID: pub-2930322697184296, `ads.txt` 적용 완료)
+*   **Google Analytics (GA4)**: 사용자 행동 분석 (ID: G-KSBJ5J8N4K).
+*   **Microsoft Clarity**: UX 분석 및 히트맵 (ID: vsvc6kadap).
+*   **Google AdSense**: 수익 창출 연동 완료.
+*   **Formspree**: 고객 문의(Contact) 양식 연동.
 
-## 4. 개발 계획 (Action Plan)
-1.  **외부 분석 및 수익화 도구 연동**:
-    *   Google Analytics (GA4) 태그 삽입 (완료)
-    *   Microsoft Clarity 스크립트 삽입 (완료)
-    *   Google AdSense 소유권 확인 및 `ads.txt` 생성 (완료)
-2.  **UI 업데이트**:
-    *   코 수 입력 대신 '실 굵기 드롭다운', '가로 cm', '세로 cm' 입력창으로 변경.
-3.  **코어 로직 수정 (크기 및 배치)**:
-    *   `실 굵기 -> 게이지 매핑표` 작성.
-    *   총 코 수 = (가로cm / 10) * 가로 게이지 코 수
-    *   총 단 수 = (세로cm / 10) * 세로 게이지 단 수
-    *   계산된 크기의 캔버스를 만들고, 비율을 유지하며 중앙에 원본 이미지를 그림.
-4.  **색상 처리 로직 개선**:
-    *   초기 중심점 선택 방식을 랜덤에서 거리를 고려한 K-means++ 방식으로 변경하여 눈에 띄는 색상이 중심점으로 선택될 확률을 높임.
-5.  **도안 및 색상표 렌더링**: 기존 로직 유지 및 적용.
+---
+*Last Updated: 2026-03-18*

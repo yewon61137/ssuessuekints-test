@@ -65,35 +65,47 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-bar">
-      <div class="lang-selector">
-        <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </button>
-        <div class="lang-dropdown" id="langDropdown">
-          <button class="lang-btn active" data-lang="ko">한국어</button>
-          <button class="lang-btn" data-lang="en">English</button>
-          <button class="lang-btn" data-lang="ja">日本語</button>
+    <header>
+    <div class="hdr-inner">
+      <a href="/" class="hdr-logo">SSUESSUE KNITS<span class="hdr-logo-kr">쓔쓔닛츠</span></a>
+      <nav class="gnb">
+        <div class="gnb-item gnb-has-sub">
+          <a class="gnb-link" href="#">
+            <span class="i18n" data-ko="도구" data-en="Tools" data-ja="ツール">Tools</span>
+            <svg class="gnb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="gnb-sub">
+            <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
+            <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
+            <a href="#" class="gnb-sub-link gnb-counter-btn i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+          </div>
         </div>
-      </div>
-      <div class="auth-area">
-        <a href="/about.html" class="lang-btn i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
-        <a href="/community.html" class="lang-btn i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
-        <a href="/magazine.html" class="lang-btn i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
-        <a href="/notice.html" class="lang-btn i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
-        <a href="/guide.html" class="lang-btn i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
-
-        <button class="lang-btn" id="authSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+        <a class="gnb-item gnb-link i18n" href="/community.html" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">Community</a>
+        <a class="gnb-item gnb-link i18n" href="/magazine.html" data-ko="매거진" data-en="Magazine" data-ja="マガジン">Magazine</a>
+      </nav>
+      <div class="hdr-right">
+        <div class="lang-selector">
+          <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </button>
+          <div class="lang-dropdown" id="langDropdown">
+            <button class="lang-btn active" data-lang="ko">한국어</button>
+            <button class="lang-btn" data-lang="en">English</button>
+            <button class="lang-btn" data-lang="ja">日本語</button>
+          </div>
+        </div>
+        <button class="hdr-icon-btn" id="counterToggle" aria-label="단수 카운터">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+        <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
         <div class="auth-user" id="authUserArea" style="display:none;">
-          <a href="/mypage.html" class="lang-btn" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
-          <button class="lang-btn" id="authSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+          <span style="display:none;" id="authUserEmail"></span>
+          <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
+          <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
         </div>
       </div>
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
     </div>
-    <h1><a href="/" class="brand" style="text-decoration:none;color:inherit;">SSUESSUE KNITS</a></h1>
-    <div class="brand-kr">쓔쓔닛츠</div>
   </header>
 
   <main class="container">
@@ -371,55 +383,33 @@
   </footer>
 
   
+    <!-- 모바일 메뉴 -->
   <div class="mobile-overlay" id="mobileOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">
     <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
+    <button class="mobile-signin-btn mobile-i18n" id="mobileSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+    <div class="mobile-user-area" id="mobileUserArea" style="display:none;">
+      <span class="mobile-nickname" id="mobileNickname"></span>
+      <a href="/mypage.html" class="mobile-mypage-btn mobile-i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+      <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+    </div>
     <hr class="mobile-menu-divider">
     <nav class="mobile-menu-nav">
-      <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+      <div class="mobile-menu-section-title mobile-i18n" data-ko="도구" data-en="Tools" data-ja="ツール">도구</div>
+      <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
+      <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
+      <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
       <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
       <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+      <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
       <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
       <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
     </nav>
   </div>
-  <script type="module">
-    import { initAuth } from '/auth.js?v=5';
-    import { initMagazineArticle } from '/magazine-article.js?v=2';
-    initAuth();
-    initMagazineArticle('yarn-weight-guide');
-  </script>
-  <div id="authModal" class="modal-overlay" style="display:none;">
-    <div class="modal-box">
-      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tabSignIn">로그인</button>
-        <button class="modal-tab" id="tabSignUp">회원가입</button>
-      </div>
-      <button class="google-btn" id="googleSignInBtn">
-        <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
-        <span>Google로 계속하기</span>
-      </button>
-      <div class="modal-divider"><span>또는</span></div>
-      <div id="signinPanel">
-        <form id="emailSignInForm" class="auth-form">
-          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn">로그인</button>
-        </form>
-      </div>
-      <div id="signupPanel" style="display:none;">
-        <form id="emailSignUpForm" class="auth-form">
-          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
-          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn">회원가입</button>
-        </form>
-      </div>
-      <div id="authModalError" class="auth-error" style="display:none;"></div>
-    </div>
-  </div>
+  <script type="module" src="/row-counter.js"></script>
+  <knitting-row-counter></knitting-row-counter>
   <script src="/hamburger.js"></script>
   <script src="/cookie-consent.js"></script>
+  <script src="/scroll-top.js"></script>
 </body>
 </html>
