@@ -414,7 +414,7 @@ function renderStripeSliders() {
     return;
   }
   container.style.display = '';
-  container.innerHTML = '';
+  container.innerHTML = `<div class="cp-section-label" style="margin-bottom:0.5rem;">${tr('cp_rows_per_color') || '색상별 단수'}</div>`;
   slots.forEach((slot, i) => {
     const row = document.createElement('div');
     row.className = 'cp-stripe-slider-row';
@@ -538,15 +538,13 @@ function clampHsl(h, s, l) {
 
 function generatePalettes() {
   const baseInput = document.getElementById('recBaseColor');
-  const seasonEl = document.getElementById('recSeason');
-  const moodEl   = document.getElementById('recMood');
   const techEl   = document.getElementById('recTechnique');
   const container = document.getElementById('recResults');
   if (!baseInput || !container) return;
 
   const baseHex = baseInput.value;
-  const season  = seasonEl ? seasonEl.value : 'all';
-  const mood    = moodEl ? moodEl.value : 'all';
+  const season  = document.querySelector('#recSeasonFilter .cp-filter-btn.active')?.dataset.val || 'all';
+  const mood    = document.querySelector('#recMoodFilter .cp-filter-btn.active')?.dataset.val || 'all';
   const tech    = techEl ? techEl.value : 'default';
   const { h, s, l } = hexToHsl(baseHex);
 
@@ -1140,3 +1138,24 @@ document.querySelectorAll('#curFilter .cp-filter-btn').forEach(btn => {
     renderCuration(btn.dataset.filter);
   });
 });
+
+// 조합 추천 — 시즌/무드 필터 버튼 토글
+['recSeasonFilter', 'recMoodFilter'].forEach(containerId => {
+  document.querySelectorAll(`#${containerId} .cp-filter-btn`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll(`#${containerId} .cp-filter-btn`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+
+// 조합 추천 — 기준색 헥스 입력 동기화
+(function initRecBaseColor() {
+  const colorInput = document.getElementById('recBaseColor');
+  const hexInput   = document.getElementById('recBaseHex');
+  if (!colorInput || !hexInput) return;
+  colorInput.addEventListener('input', () => { hexInput.value = colorInput.value; });
+  hexInput.addEventListener('input', () => {
+    if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value)) colorInput.value = hexInput.value;
+  });
+})();

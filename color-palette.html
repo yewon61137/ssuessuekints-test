@@ -104,33 +104,31 @@
       <!-- 왼쪽: 색상 슬롯 + 설정 -->
       <div class="cp-sim-left">
         <div class="cp-section-label i18n" data-ko="색상 슬롯" data-en="Color Slots" data-ja="カラースロット">색상 슬롯</div>
-        <div id="colorSlots" class="cp-color-slots"></div>
+        <div id="simSlots" class="cp-color-slots"></div>
         <div class="cp-slot-actions">
-          <button class="secondary-btn small-btn" id="addSlotBtn" data-i18n="cp_add_color">+ 색상 추가</button>
+          <button class="secondary-btn small-btn" id="simAddColorBtn" data-i18n="cp_add_color">+ 색상 추가</button>
         </div>
 
         <div class="cp-section-label" style="margin-top:1.5rem;">
           <span class="i18n" data-ko="텍스처" data-en="Texture" data-ja="テクスチャ">텍스처</span>
         </div>
         <div class="cp-texture-tabs" id="textureTabs">
-          <button class="cp-texture-tab active" data-texture="stockinette" data-i18n="cp_tex_stk">메리야스</button>
-          <button class="cp-texture-tab" data-texture="garter" data-i18n="cp_tex_gtr">가터</button>
-          <button class="cp-texture-tab" data-texture="stripes" data-i18n="cp_tex_str">줄무늬</button>
-          <button class="cp-texture-tab" data-texture="fairisle" data-i18n="cp_tex_fi">페어아일</button>
-          <button class="cp-texture-tab" data-texture="intarsia" data-i18n="cp_tex_int">인타샤</button>
+          <button class="cp-texture-btn active" data-texture="stockinette" data-i18n="cp_tex_stk">메리야스</button>
+          <button class="cp-texture-btn" data-texture="garter" data-i18n="cp_tex_gtr">가터</button>
+          <button class="cp-texture-btn" data-texture="stripes" data-i18n="cp_tex_str">줄무늬</button>
+          <button class="cp-texture-btn" data-texture="fairisle" data-i18n="cp_tex_fi">페어아일</button>
+          <button class="cp-texture-btn" data-texture="intarsia" data-i18n="cp_tex_int">인타샤</button>
         </div>
 
         <!-- 줄무늬 단수 슬라이더 (texture=stripes일때만 표시) -->
-        <div id="stripeControls" class="cp-stripe-controls" style="display:none;">
+        <div id="simStripeSliders" class="cp-stripe-controls" style="display:none;">
           <div class="cp-section-label i18n" data-ko="색상별 단수" data-en="Rows per color" data-ja="色ごとの段数">색상별 단수</div>
-          <div id="stripeSliders"></div>
         </div>
 
         <!-- 대비비 표시 -->
-        <div class="cp-contrast-box" id="contrastBox">
+        <div class="cp-contrast-box">
           <div class="cp-contrast-label i18n" data-ko="대비비 (첫 두 색상)" data-en="Contrast Ratio (first 2 colors)" data-ja="コントラスト比（最初の2色）">대비비 (첫 두 색상)</div>
-          <div class="cp-contrast-value" id="contrastValue">—</div>
-          <div class="cp-contrast-comment" id="contrastComment"></div>
+          <div id="simContrast" class="cp-contrast"></div>
         </div>
 
         <!-- 색약 시뮬레이션 -->
@@ -148,7 +146,7 @@
       <!-- 오른쪽: 캔버스 미리보기 -->
       <div class="cp-sim-right">
         <div class="cp-section-label i18n" data-ko="미리보기" data-en="Preview" data-ja="プレビュー">미리보기</div>
-        <canvas id="previewCanvas" class="cp-preview-canvas" width="420" height="300"></canvas>
+        <canvas id="simCanvas" class="cp-preview-canvas" width="420" height="300"></canvas>
       </div>
     </div>
   </div>
@@ -202,7 +200,7 @@
       </div>
       <button class="primary-btn" id="recGenerateBtn" data-i18n="cp_generate">추천 생성</button>
     </div>
-    <div id="recGrid" class="cp-palette-grid"></div>
+    <div id="recResults" class="cp-palette-grid"></div>
   </div>
 
   <!-- TAB 3: 줄무늬 배분 계산기 -->
@@ -212,7 +210,7 @@
         <div class="cp-rec-row">
           <div class="cp-rec-field">
             <label class="cp-section-label i18n" data-ko="총 단수" data-en="Total Rows" data-ja="総段数">총 단수</label>
-            <input type="number" id="stripeCalcRows" class="cp-number-input" value="100" min="1" max="9999">
+            <input type="number" id="stripeCalcTotalRows" class="cp-number-input" value="100" min="1" max="9999">
           </div>
           <div class="cp-rec-field">
             <label class="cp-section-label i18n" data-ko="색상 수" data-en="Colors" data-ja="色数">색상 수</label>
@@ -226,7 +224,7 @@
           </div>
         </div>
 
-        <div id="stripeCalcColorInputs" class="cp-color-slots" style="margin-bottom:1rem;"></div>
+        <div id="stripeCalcColors" class="cp-color-slots" style="margin-bottom:1rem;"></div>
 
         <div class="cp-rec-field" style="margin-bottom:1rem;">
           <label class="cp-section-label i18n" data-ko="배분 방식" data-en="Distribution" data-ja="配分方式">배분 방식</label>
@@ -279,7 +277,7 @@
         <button class="cp-filter-btn" data-filter="natural" data-i18n="cp_natural">내추럴</button>
       </div>
     </div>
-    <div id="curationGrid" class="cp-palette-grid"></div>
+    <div id="curGrid" class="cp-palette-grid"></div>
   </div>
 
   <!-- 토스트 -->
