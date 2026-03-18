@@ -3089,3 +3089,38 @@ header {
   .hdr-right #authUserArea { display: none !important; }
   .scroll-top-btn { right: 16px; bottom: 24px; width: 40px; height: 40px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER CONFLICT FIXES
+═══════════════════════════════════════════════════════════════ */
+
+/* 1. Mobile breakpoint sync — GNB/hdr-right 숨기기를 1024px에 맞춤 */
+@media (max-width: 1024px) {
+  .gnb { display: none !important; }
+  .hdr-icon-btn { display: none !important; }
+  .hdr-right .lang-selector { display: none !important; }
+  .hdr-right #authSignInBtn,
+  .hdr-right #authUserArea { display: none !important; }
+}
+@media (min-width: 1025px) {
+  .hamburger-btn { display: none !important; }
+}
+
+/* 2. Mobile header padding 리셋 (old 4rem 룰 덮어쓰기) */
+@media (max-width: 800px) {
+  header { padding: 0 !important; }
+}
+
+/* 3. Globe 버튼 — 새 헤더에서 테두리 제거 */
+header .lang-globe-btn {
+  border: none;
+  padding: 6px;
+  font-size: 0;
+}
+header .lang-globe-btn:hover { background: #f0f0f0; }
+
+/* 4. 홈 사이드바 — sticky 헤더(56px) 아래 고정 */
+.home-sidebar {
+  top: 56px !important;
+  height: calc(100vh - 56px) !important;
+}

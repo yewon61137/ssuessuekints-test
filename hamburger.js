@@ -111,6 +111,11 @@
 
     applyMobileLang(localStorage.getItem('lang') || 'ko');
 
+    /* ── GNB dropdown parent — href="#" 방지 ── */
+    document.querySelectorAll('.gnb-has-sub > .gnb-link').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); });
+    });
+
     /* ── Row counter toggle (header + GNB + mobile menu) ── */
     function toggleCounter(e) {
       e && e.preventDefault();
