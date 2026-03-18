@@ -9,6 +9,25 @@
 
 ---
 
+## 0. 도안 프라이버시 — 절대 규칙
+
+**사용자가 생성한 도안은 무조건 본인만 열람·다운로드할 수 있다. 저작권 보호.**
+
+### 적용 범위
+| 레이어 | 규칙 |
+|--------|------|
+| Firestore rules | `users/{uid}/patterns/{patternId}` read/write → `request.auth.uid == userId` 만 허용 (이미 적용) |
+| Storage rules | `users/{uid}/patterns/{patternId}/{filename}` read/write → `request.auth.uid == userId` 만 허용 (이미 적용) |
+| post.js | 커뮤니티 게시글에 도안이 연결되어 있어도 `연결된 도안` 섹션(썸네일·다운로드)은 **게시글 작성자 본인에게만 표시** |
+| mypage.js | 타인 프로필(`?uid=`) 보기 시 `내 도안함` 탭을 완전히 숨김. 사이드바 도안 통계도 숨김 |
+
+### 지켜야 할 구현 규칙
+- 도안 관련 UI(썸네일, PDF/PNG 버튼, 도안 탭)를 새로 추가할 때 반드시 `currentUser.uid === ownerUid` 조건으로 감싸야 한다.
+- `posts/{postId}`에 `patternImageURL`을 저장하는 기능을 수정·확장할 때, 이 URL이 비공개임을 전제하고 UI에서 노출하지 말 것.
+- 타인이 볼 수 있는 화면(커뮤니티 피드, 게시글 상세, 타인 프로필)에 도안 이미지·데이터를 렌더링하는 코드를 추가하면 안 된다.
+
+---
+
 ## 1. 헤더 & 푸터 — 내용 고정
 
 모든 페이지의 헤더와 푸터 구조는 **index.html 기준**으로 고정되어 있다.

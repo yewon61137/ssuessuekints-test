@@ -103,7 +103,7 @@ function tr(key) { return pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[ke
 const urlUid   = new URLSearchParams(location.search).get('uid'); // 타인 프로필 모드
 let   viewMode = urlUid ? 'other' : 'mine'; // 'mine' | 'other'
 let currentUid = null;
-let currentPanel = urlUid ? 'patterns' : 'profile'; // 타인 프로필은 도안부터
+let currentPanel = urlUid ? 'posts' : 'profile'; // 타인 프로필은 글 목록부터 (도안은 본인 전용)
 const panelLoaded = {};
 
 // ── 언어 적용 ─────────────────────────────────────────────────────────────────
@@ -206,22 +206,34 @@ async function fillSidebar(uid, readOnly = false) {
         joinEl.textContent = `${tr('joined')} ${d.toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')}`;
     }
 
+    // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨김
+    if (readOnly) {
+        document.getElementById('mpStatPatterns')?.closest('.mp-stat')?.style.setProperty('display', 'none');
+        document.getElementById('mpStatScraps')?.closest('.mp-stat')?.style.setProperty('display', 'none');
+    }
+
     // 통계 (병렬)
     const statsQueries = [
-        getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))),
         getDocs(query(collection(db, 'posts'), where('uid', '==', uid))),
     ];
-    if (!readOnly) statsQueries.push(getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))));
+    if (!readOnly) {
+        statsQueries.push(getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))));
+        statsQueries.push(getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))));
+    }
 
-    Promise.all(statsQueries).then(([patterns, posts, scraps]) => {
-        const pEl = document.getElementById('mpStatPatterns');
-        const poEl = document.getElementById('mpStatPosts');
-        const scEl = document.getElementById('mpStatScraps');
-        if (pEl) pEl.textContent = patterns.size;
-        if (poEl) poEl.textContent = posts.size;
-        if (scEl) {
-            if (readOnly) scEl.closest('.mp-stat')?.style.setProperty('display', 'none');
-            else scEl.textContent = scraps?.size ?? '—';
+    Promise.all(statsQueries).then((results) => {
+        if (readOnly) {
+            const [posts] = results;
+            const poEl = document.getElementById('mpStatPosts');
+            if (poEl) poEl.textContent = posts.size;
+        } else {
+            const [posts, patterns, scraps] = results;
+            const pEl  = document.getElementById('mpStatPatterns');
+            const poEl = document.getElementById('mpStatPosts');
+            const scEl = document.getElementById('mpStatScraps');
+            if (pEl)  pEl.textContent  = patterns.size;
+            if (poEl) poEl.textContent = posts.size;
+            if (scEl) scEl.textContent = scraps?.size ?? '—';
         }
     }).catch(() => {});
 }
@@ -883,14 +895,15 @@ onAuthStateChanged(auth, async user => {
 });
 
 function setupOtherUserView() {
-    // 프로필 편집 / 내 프로젝트 / 스크랩 탭 숨김
-    ['mpNavProfile', 'mpNavProjects', 'mpNavScraps'].forEach(id => {
+    // 도안은 본인 전용 — 타인 프로필에서 탭 자체를 숨김
+    // 프로필 편집 / 내 프로젝트 / 스크랩 탭도 숨김
+    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-    // 내 글·댓글 서브탭 중 '내 댓글'은 타인에게 불필요 — 숨김
+    // 내 댓글 서브탭도 불필요
     const commentTab = document.getElementById('subtabComments');
     if (commentTab) commentTab.style.display = 'none';
 
-    switchPanel(currentPanel); // 'patterns'
+    switchPanel(currentPanel); // 'posts'
 }

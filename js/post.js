@@ -15,6 +15,7 @@ initLang();
 const params = new URLSearchParams(location.search);
 const postId = params.get('id');
 let currentUser = null;
+let authUser = undefined; // undefined = 아직 미확인, null = 비로그인, object = 로그인
 let postData = null;
 let linkedPatternData = null;
 let isLiked = false;
@@ -84,19 +85,10 @@ function renderPost(pid, data) {
     const bodyEl = document.getElementById('postBody');
     bodyEl.textContent = data.content || '';
 
-    // 연결 도안
-    if (data.patternImageURL) {
-        document.getElementById('postLinkedPattern').style.display = 'flex';
-        const thumbEl = document.getElementById('postLinkedThumb');
-        thumbEl.src = data.patternImageURL;
-        thumbEl.addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
-        // PNG 기본 링크
-        const pngBtn = document.getElementById('postLinkedPngBtn');
-        if (pngBtn) pngBtn.href = data.patternImageURL;
-        // 도안 세부 정보 로드 (patternId + uid 있을 때)
-        if (data.patternId && data.uid) {
-            loadLinkedPattern(data.uid, data.patternId);
-        }
+    // 연결 도안: 본인(게시글 작성자)만 볼 수 있음
+    // authUser가 이미 확인된 상태라면 즉시 판단, 아직 미확인이면 onAuthStateChanged에서 처리
+    if (data.patternImageURL && authUser !== undefined && authUser && authUser.uid === data.uid) {
+        showLinkedPattern(data);
     }
 
     // 카운터
@@ -433,6 +425,22 @@ async function submitComment(pid, content) {
     };
     document.getElementById('commentsList').appendChild(buildCommentEl(pid, newDoc.id, commentData));
     document.getElementById('commentInput').value = '';
+}
+
+// --- 연결 도안 표시 (본인만) ---
+function showLinkedPattern(data) {
+    if (!data.patternImageURL) return;
+    const section = document.getElementById('postLinkedPattern');
+    if (!section || section.style.display !== 'none') return; // 이미 표시 중이면 중복 방지
+    section.style.display = 'flex';
+    const thumbEl = document.getElementById('postLinkedThumb');
+    thumbEl.src = data.patternImageURL;
+    thumbEl.addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
+    const pngBtn = document.getElementById('postLinkedPngBtn');
+    if (pngBtn) pngBtn.href = data.patternImageURL;
+    if (data.patternId && data.uid) {
+        loadLinkedPattern(data.uid, data.patternId);
+    }
 }
 
 // --- 연결 도안 세부 정보 로드 ---
@@ -808,6 +816,7 @@ initAuth();
 
 onAuthStateChanged(auth, async user => {
     currentUser = user || null;
+    authUser = currentUser;
 
     // 댓글 입력 폼 표시 토글
     const commentForm = document.getElementById('commentForm');
@@ -820,10 +829,12 @@ onAuthStateChanged(auth, async user => {
         commentLoginMsg.style.display = 'block';
     }
 
-    // 수정/삭제 버튼 (본인 글)
+    // 본인 글인 경우
     if (postData && currentUser && currentUser.uid === postData.uid) {
         document.getElementById('postEditBtn').style.display = 'inline-block';
         document.getElementById('postDeleteBtn').style.display = 'inline-block';
+        // 연결 도안: loadPost가 먼저 완료되어 postData가 있고 authUser가 아직 undefined였던 경우
+        showLinkedPattern(postData);
     }
 
     // 좋아요/스크랩 상태 확인
