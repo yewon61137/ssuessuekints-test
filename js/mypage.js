@@ -1,170 +1,259 @@
-// mypage.js — 마이페이지 (4탭: 프로필 수정 / 내 도안 / 내 글 / 스크랩)
+// mypage.js — 마이페이지 v2 (사이드바 5탭 레이아웃)
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=6';
 import { t as sharedT, applyLang as _applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-    collection, query, orderBy, limit, getDocs,
+    collection, collectionGroup, query, orderBy, limit, getDocs,
     doc, getDoc, deleteDoc, updateDoc, where
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, deleteObject, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-// --- i18n (페이지별 문자열) ---
+// ── i18n ──────────────────────────────────────────────────────────────────────
+
 const pageT = {
     ko: {
-        mypage: '마이페이지', not_logged_in: '로그인하면 마이페이지를 이용할 수 있습니다.',
+        tab_profile: '프로필', tab_patterns: '내 도안함',
+        tab_projects: '내 프로젝트', tab_posts: '내 글·댓글', tab_scraps: '스크랩',
+        subtab_posts: '내 글', subtab_comments: '내 댓글',
+        not_logged_in: '로그인하면 마이페이지를 이용할 수 있습니다.',
         go_to_signin: '로그인', loading: '불러오는 중...',
-        empty_patterns: '저장된 도안이 없습니다. 도안을 생성하고 저장해보세요!',
-        empty_posts: '작성한 글이 없습니다.', empty_scraps: '스크랩한 글이 없습니다.',
+        empty_patterns: '아직 저장된 도안이 없어요.',
+        empty_posts: '아직 작성한 글이 없어요.', empty_scraps: '스크랩한 게시글이 없어요.',
+        empty_comments: '아직 작성한 댓글이 없어요.', empty_projects: '진행 중인 프로젝트가 없어요.',
         rename: '이름변경', view_original: '원본', delete: '삭제',
         confirm_delete: '이 도안을 삭제하시겠습니까?', rename_prompt: '새 도안 이름을 입력하세요:',
         stitches: '코', rows: '단', go_generate: '← 도안 만들기',
-        tab_profile: '프로필 수정', tab_mypatterns: '내 도안', tab_myposts: '내 글', tab_scraps: '스크랩',
-        profile_save: '저장', profile_saving: '저장 중...', profile_saved: '저장되었습니다.',
+        profile_save: '변경사항 저장', profile_saving: '저장 중...', profile_saved: '저장되었습니다.',
         nickname_check: '중복 확인', nickname_checking: '확인 중...',
         nickname_ok: '사용 가능한 닉네임입니다.', nickname_taken: '이미 사용 중인 닉네임입니다.',
         nickname_invalid: '닉네임은 2~20자의 한글·영문·숫자·_만 사용할 수 있습니다.',
         profile_edit_error: '저장 중 오류가 발생했습니다.',
-        photo_change: '사진 변경',
-        placeholder_nickname: '닉네임 (2~20자, 필수)',
-        placeholder_realname: '실명 (선택)',
-        mypatterns_title: '내 도안',
+        photo_change: '사진 변경', label_nickname: '닉네임', label_bio: '자기소개',
+        bio_placeholder: '자신을 소개해보세요! (최대 100자)',
+        joined: '가입일', open_counter: '카운터 열기', done_badge: '완료',
+        done_projects: '완료된 프로젝트', stat_patterns: '도안', stat_posts: '게시글', stat_scraps: '스크랩',
+        unscrap: '스크랩 취소', confirm_unscrap: '스크랩을 취소하시겠습니까?',
+        title_profile: '프로필', title_patterns: '내 도안함',
+        title_projects: '내 프로젝트', title_posts: '내 글·댓글', title_scraps: '스크랩',
+        row_label: '단', goal_label: '목표', no_goal: '목표 없음',
+        progress_done: '% 완료', go_community: '커뮤니티 가기 →', go_counter: '단수 카운터 시작하기 →',
     },
     en: {
-        mypage: 'My Page', not_logged_in: 'Sign in to access your page.',
+        tab_profile: 'Profile', tab_patterns: 'My Patterns',
+        tab_projects: 'Projects', tab_posts: 'Posts & Comments', tab_scraps: 'Scraps',
+        subtab_posts: 'Posts', subtab_comments: 'Comments',
+        not_logged_in: 'Sign in to access your page.',
         go_to_signin: 'Sign In', loading: 'Loading...',
-        empty_patterns: 'No saved patterns yet. Generate a pattern and save it!',
+        empty_patterns: 'No saved patterns yet.',
         empty_posts: 'No posts yet.', empty_scraps: 'No scrapped posts yet.',
+        empty_comments: 'No comments yet.', empty_projects: 'No active projects.',
         rename: 'Rename', view_original: 'Original', delete: 'Delete',
         confirm_delete: 'Delete this pattern?', rename_prompt: 'Enter new pattern name:',
         stitches: 'sts', rows: 'rows', go_generate: '← Create Pattern',
-        tab_profile: 'Edit Profile', tab_mypatterns: 'My Patterns', tab_myposts: 'My Posts', tab_scraps: 'Scraps',
-        profile_save: 'Save', profile_saving: 'Saving...', profile_saved: 'Saved.',
+        profile_save: 'Save Changes', profile_saving: 'Saving...', profile_saved: 'Saved.',
         nickname_check: 'Check', nickname_checking: 'Checking...',
         nickname_ok: 'Available.', nickname_taken: 'Already in use.',
         nickname_invalid: '2-20 chars: letters, numbers, _',
         profile_edit_error: 'Error saving profile.',
-        photo_change: 'Change Photo',
-        placeholder_nickname: 'Nickname (2-20 chars, required)',
-        placeholder_realname: 'Real name (optional)',
-        mypatterns_title: 'My Patterns',
+        photo_change: 'Change Photo', label_nickname: 'Nickname', label_bio: 'Bio',
+        bio_placeholder: 'Tell us about yourself! (max 100 chars)',
+        joined: 'Joined', open_counter: 'Open Counter', done_badge: 'Done',
+        done_projects: 'Completed Projects', stat_patterns: 'Patterns', stat_posts: 'Posts', stat_scraps: 'Scraps',
+        unscrap: 'Unscrap', confirm_unscrap: 'Remove this scrap?',
+        title_profile: 'Profile', title_patterns: 'My Patterns',
+        title_projects: 'My Projects', title_posts: 'Posts & Comments', title_scraps: 'Scraps',
+        row_label: 'rows', goal_label: 'goal', no_goal: 'No goal',
+        progress_done: '% done', go_community: 'Go to Community →', go_counter: 'Start Row Counter →',
     },
     ja: {
-        mypage: 'マイページ', not_logged_in: 'ログインしてマイページを利用できます。',
+        tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
+        tab_projects: 'プロジェクト', tab_posts: '投稿・コメント', tab_scraps: 'スクラップ',
+        subtab_posts: '投稿', subtab_comments: 'コメント',
+        not_logged_in: 'ログインしてマイページを利用できます。',
         go_to_signin: 'ログイン', loading: '読み込み中...',
-        empty_patterns: '保存された編み図がありません。編み図を生成して保存してください！',
+        empty_patterns: '保存された編み図がありません。',
         empty_posts: '投稿した記事がありません。', empty_scraps: 'スクラップした記事がありません。',
+        empty_comments: 'コメントがありません。', empty_projects: 'プロジェクトがありません。',
         rename: '名前変更', view_original: '原画', delete: '削除',
         confirm_delete: 'この編み図を削除しますか？', rename_prompt: '新しい名前を入力してください:',
         stitches: '目', rows: '段', go_generate: '← 編み図を作る',
-        tab_profile: 'プロフィール編集', tab_mypatterns: 'マイ編み図', tab_myposts: '投稿', tab_scraps: 'スクラップ',
-        profile_save: '保存', profile_saving: '保存中...', profile_saved: '保存されました。',
+        profile_save: '変更を保存', profile_saving: '保存中...', profile_saved: '保存されました。',
         nickname_check: '確認', nickname_checking: '確認中...',
         nickname_ok: '使用可能です。', nickname_taken: '既に使用されています。',
         nickname_invalid: '2〜20文字（ひらがな・英数字・_）',
         profile_edit_error: '保存中にエラーが発生しました。',
-        photo_change: '写真変更',
-        placeholder_nickname: 'ニックネーム（2〜20文字、必須）',
-        placeholder_realname: '本名（任意）',
-        mypatterns_title: 'マイ編み図',
+        photo_change: '写真変更', label_nickname: 'ニックネーム', label_bio: '自己紹介',
+        bio_placeholder: '自己紹介をしてください！（最大100文字）',
+        joined: '登録日', open_counter: 'カウンターを開く', done_badge: '完了',
+        done_projects: '完了したプロジェクト', stat_patterns: '編み図', stat_posts: '投稿', stat_scraps: 'スクラップ',
+        unscrap: 'スクラップ解除', confirm_unscrap: 'スクラップを解除しますか？',
+        title_profile: 'プロフィール', title_patterns: 'マイ編み図',
+        title_projects: 'マイプロジェクト', title_posts: '投稿・コメント', title_scraps: 'スクラップ',
+        row_label: '段', goal_label: '目標', no_goal: '目標なし',
+        progress_done: '% 完了', go_community: 'コミュニティへ →', go_counter: 'カウンター開始 →',
     }
 };
 
-let currentLang = 'ko';
-function tr(key) { return (pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[key]) || key; }
+let currentLang = localStorage.getItem('lang') || 'ko';
+function tr(key) { return pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[key] ?? key; }
 
-// --- URL 파라미터로 타인 프로필 여부 판단 ---
-const urlUid = new URLSearchParams(location.search).get('uid');
+// ── 상태 ─────────────────────────────────────────────────────────────────────
 
-// --- DOM refs ---
-const notLoggedInEl = document.getElementById('notLoggedIn');
-const loggedInEl = document.getElementById('loggedIn');
-const gotoSignInBtn = document.getElementById('gotoSignInBtn');
-const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
-const loadingMsgEl = document.getElementById('loadingMsg');
-const emptyMsgEl = document.getElementById('emptyMsg');
-const patternGridEl = document.getElementById('patternGrid');
+let currentUid = null;
+let currentPanel = 'profile';
+const panelLoaded = {};
 
-// --- Language ---
-function applyLang(lang) {
+// ── 언어 적용 ─────────────────────────────────────────────────────────────────
+
+function applyPageLang(lang) {
     currentLang = lang;
     _applyLang(lang, { extra: pageT });
 
-    document.getElementById('mypageTitle').textContent = tr('mypage');
-    const myPatternsTitle = document.getElementById('myPatternsTitle');
-    if (myPatternsTitle) myPatternsTitle.textContent = tr('mypatterns_title');
-    const goGenerateLink = document.getElementById('goGenerateLink');
-    if (goGenerateLink) goGenerateLink.textContent = tr('go_generate');
-    document.getElementById('notLoggedInMsg').textContent = tr('not_logged_in');
-    gotoSignInBtn.textContent = tr('go_to_signin');
-    if (loadingMsgEl) loadingMsgEl.textContent = tr('loading');
-    if (emptyMsgEl) emptyMsgEl.textContent = tr('empty_patterns');
-
-    // 탭 레이블
-    document.querySelectorAll('.mypage-tab').forEach(btn => {
-        const tab = btn.getAttribute('data-tab');
-        const val = pageT[lang]?.['tab_' + tab];
-        if (val) btn.textContent = val;
+    // 탭 버튼
+    document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
+        const k = 'tab_' + btn.dataset.panel;
+        btn.textContent = tr(k);
     });
-
-    // 프로필 편집 패널 — placeholder & label 번역
-    const editNicknameEl = document.getElementById('editNickname');
-    if (editNicknameEl) editNicknameEl.placeholder = tr('placeholder_nickname');
-    const editRealNameEl = document.getElementById('editRealName');
-    if (editRealNameEl) editRealNameEl.placeholder = tr('placeholder_realname');
+    // 서브탭
+    document.querySelectorAll('.mp-subtab[data-subtab]').forEach(btn => {
+        const k = 'subtab_' + btn.dataset.subtab;
+        btn.textContent = tr(k);
+    });
+    // 패널 타이틀
+    ['profile','patterns','projects','posts','scraps'].forEach(p => {
+        const el = document.getElementById('title' + p.charAt(0).toUpperCase() + p.slice(1));
+        if (el) el.textContent = tr('title_' + p);
+    });
+    // 기타
+    const loginMsg = document.getElementById('notLoggedInMsg');
+    if (loginMsg) loginMsg.textContent = tr('not_logged_in');
+    const loginBtn = document.getElementById('gotoSignInBtn');
+    if (loginBtn) loginBtn.textContent = tr('go_to_signin');
+    const genLink = document.getElementById('goGenerateLink');
+    if (genLink) genLink.textContent = tr('go_generate');
+    const photoLabel = document.getElementById('editPhotoLabel');
+    if (photoLabel) photoLabel.textContent = tr('photo_change');
+    const labelNick = document.getElementById('labelNickname');
+    if (labelNick) labelNick.textContent = tr('label_nickname');
+    const labelBio = document.getElementById('labelBio');
+    if (labelBio) labelBio.textContent = tr('label_bio');
+    const bioEl = document.getElementById('editBio');
+    if (bioEl) bioEl.placeholder = tr('bio_placeholder');
+    const saveBtn = document.getElementById('profileEditSaveBtn');
+    if (saveBtn && saveBtn.textContent !== tr('profile_saving')) saveBtn.textContent = tr('profile_save');
+    const checkBtn = document.getElementById('editCheckNicknameBtn');
+    if (checkBtn && checkBtn.textContent !== tr('nickname_checking')) checkBtn.textContent = tr('nickname_check');
+    // 통계 라벨
+    document.querySelectorAll('.mp-stat-lbl[data-ko]').forEach(el => {
+        el.textContent = el.dataset[lang] || el.dataset.ko;
+    });
 }
 
-langBtns.forEach(btn => {
-    btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => applyPageLang(btn.getAttribute('data-lang')));
 });
+window.addEventListener('langChange', e => applyPageLang(e.detail.lang));
+applyPageLang(currentLang);
 
-applyLang(localStorage.getItem('lang') || 'ko');
+// ── 탭 전환 ───────────────────────────────────────────────────────────────────
 
-// --- Tab 컨트롤러 ---
-let currentTab = 'mypatterns'; // HTML 기본 active 탭과 일치
-let currentUid = null;
-let isMine = true; // 본인 프로필 여부
-const tabLoaded = { profile: false, mypatterns: false, myposts: false, scraps: false };
-
-const panelIds = {
-    profile: 'panelProfile',
-    mypatterns: 'panelMyPatterns',
-    myposts: 'panelMyPosts',
-    scraps: 'panelScraps'
-};
-
-function switchTab(tabName) {
-    currentTab = tabName;
-    document.querySelectorAll('.mypage-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+function switchPanel(name) {
+    currentPanel = name;
+    document.querySelectorAll('.mp-nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.panel === name);
     });
-    document.querySelectorAll('.mypage-panel').forEach(panel => {
-        panel.classList.remove('active');
-    });
-    const panel = document.getElementById(panelIds[tabName]);
+    document.querySelectorAll('.mp-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
     if (panel) panel.classList.add('active');
 
     if (!currentUid) return;
-    // myposts는 항상 최신 목록을 보여주기 위해 매번 재로드
-    if (tabName === 'myposts') {
-        loadMyPosts(currentUid);
-    } else if (!tabLoaded[tabName]) {
-        tabLoaded[tabName] = true;
-        if (tabName === 'profile') loadProfilePanel(currentUid);
-        else if (tabName === 'mypatterns') loadPatterns(currentUid);
-        else if (tabName === 'scraps') loadScraps(currentUid);
-    }
+    if (panelLoaded[name]) return;
+    panelLoaded[name] = true;
+
+    if (name === 'profile')   loadProfilePanel(currentUid);
+    else if (name === 'patterns')  loadPatterns(currentUid);
+    else if (name === 'projects')  loadProjects(currentUid);
+    else if (name === 'posts')     loadMyPosts(currentUid);
+    else if (name === 'scraps')    loadScraps(currentUid);
 }
 
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-document.querySelectorAll('.mypage-tab').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => switchPanel(btn.dataset.panel));
 });
 
-// --- Profile 패널 ---
+// ── 서브탭 (내 글·댓글) ────────────────────────────────────────────────────────
+
+let postsSubtab = 'myposts';
+document.querySelectorAll('.mp-subtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        postsSubtab = btn.dataset.subtab;
+        document.querySelectorAll('.mp-subtab').forEach(b => b.classList.toggle('active', b === btn));
+        document.getElementById('subPanelPosts').style.display     = postsSubtab === 'myposts'    ? '' : 'none';
+        document.getElementById('subPanelComments').style.display  = postsSubtab === 'mycomments' ? '' : 'none';
+        if (postsSubtab === 'mycomments' && currentUid && !panelLoaded['comments']) {
+            panelLoaded['comments'] = true;
+            loadMyComments(currentUid);
+        }
+    });
+});
+
+// ── 유틸 ─────────────────────────────────────────────────────────────────────
+
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function spinner(msg) {
+    const d = document.createElement('div');
+    d.className = 'mypage-empty mp-spinner';
+    d.textContent = msg || tr('loading');
+    return d;
+}
+
+// ── 사이드바 요약 채우기 ───────────────────────────────────────────────────────
+
+async function fillSidebar(uid) {
+    const profile = await getUserProfile(uid);
+    if (!profile) return;
+
+    // 아바타
+    const avatarEl = document.getElementById('mpAvatar');
+    if (profile.profilePhotoURL) {
+        avatarEl.style.backgroundImage = `url(${profile.profilePhotoURL})`;
+        avatarEl.style.backgroundSize = 'cover';
+        avatarEl.style.backgroundPosition = 'center';
+        avatarEl.innerHTML = '';
+    }
+    // 닉네임
+    const nickEl = document.getElementById('mpNickname');
+    if (nickEl) nickEl.textContent = profile.nickname || '';
+    // 가입일
+    const joinEl = document.getElementById('mpJoined');
+    if (joinEl && profile.joinedAt) {
+        const d = new Date(profile.joinedAt.seconds * 1000);
+        joinEl.textContent = `${tr('joined')} ${d.toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')}`;
+    }
+
+    // 통계 (병렬)
+    Promise.all([
+        getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))),
+        getDocs(query(collection(db, 'posts'), where('uid', '==', uid))),
+        getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))),
+    ]).then(([patterns, posts, scraps]) => {
+        const pEl = document.getElementById('mpStatPatterns');
+        const poEl = document.getElementById('mpStatPosts');
+        const scEl = document.getElementById('mpStatScraps');
+        if (pEl) pEl.textContent = patterns.size;
+        if (poEl) poEl.textContent = posts.size;
+        if (scEl) scEl.textContent = scraps.size;
+    }).catch(() => {});
+}
+
+// ── 프로필 패널 ───────────────────────────────────────────────────────────────
+
 let editNicknameChecked = false;
 let editNicknameAvailable = false;
 let originalNickname = '';
@@ -174,50 +263,49 @@ async function loadProfilePanel(uid) {
     if (!profile) return;
 
     originalNickname = profile.nickname || '';
-    document.getElementById('editNickname').value = originalNickname;
-    document.getElementById('editRealName').value = profile.displayName || '';
-    const editBioEl = document.getElementById('editBio');
-    if (editBioEl) editBioEl.value = profile.bio || '';
+    const nickInput = document.getElementById('editNickname');
+    if (nickInput) nickInput.value = originalNickname;
+    const bioEl = document.getElementById('editBio');
+    if (bioEl) bioEl.value = profile.bio || '';
 
-    // 아바타 미리보기
     const avatarEl = document.getElementById('editAvatarPreview');
-    if (profile.profilePhotoURL) {
-        avatarEl.style.backgroundImage = `url(${profile.profilePhotoURL})`;
-        avatarEl.innerHTML = '';
-    } else {
-        avatarEl.style.backgroundImage = '';
-        avatarEl.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    if (avatarEl) {
+        if (profile.profilePhotoURL) {
+            avatarEl.style.backgroundImage = `url(${profile.profilePhotoURL})`;
+            avatarEl.innerHTML = '';
+        } else {
+            avatarEl.style.backgroundImage = '';
+            avatarEl.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+        }
     }
 
-    // 초기 상태: 닉네임이 그대로면 저장 버튼 활성화
     editNicknameChecked = true;
     editNicknameAvailable = true;
-    document.getElementById('profileEditSaveBtn').disabled = false;
+    const saveBtn = document.getElementById('profileEditSaveBtn');
+    if (saveBtn) saveBtn.disabled = false;
 }
 
-// 프로필 편집 이벤트
-(function initProfileEditPanel() {
-    const nicknameInput = document.getElementById('editNickname');
-    const checkBtn = document.getElementById('editCheckNicknameBtn');
-    const statusEl = document.getElementById('editNicknameStatus');
+(function initProfilePanel() {
+    const nickInput  = document.getElementById('editNickname');
+    const checkBtn   = document.getElementById('editCheckNicknameBtn');
+    const statusEl   = document.getElementById('editNicknameStatus');
     const photoInput = document.getElementById('editPhotoInput');
-    const avatarEl = document.getElementById('editAvatarPreview');
-    const saveBtn = document.getElementById('profileEditSaveBtn');
-    const msgEl = document.getElementById('profileEditMsg');
+    const avatarEl   = document.getElementById('editAvatarPreview');
+    const saveBtn    = document.getElementById('profileEditSaveBtn');
+    const msgEl      = document.getElementById('profileEditMsg');
 
-    nicknameInput.addEventListener('input', () => {
+    if (!nickInput) return;
+
+    nickInput.addEventListener('input', () => {
         editNicknameChecked = false;
         editNicknameAvailable = false;
         statusEl.style.display = 'none';
-        // 닉네임이 원래와 같으면 저장 버튼 활성 유지
-        saveBtn.disabled = nicknameInput.value.trim() !== originalNickname;
-        if (nicknameInput.value.trim() === originalNickname) {
-            editNicknameChecked = true;
-            editNicknameAvailable = true;
-        }
+        const same = nickInput.value.trim() === originalNickname;
+        saveBtn.disabled = !same;
+        if (same) { editNicknameChecked = true; editNicknameAvailable = true; }
     });
 
-    photoInput.addEventListener('change', () => {
+    photoInput?.addEventListener('change', () => {
         const file = photoInput.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -228,8 +316,8 @@ async function loadProfilePanel(uid) {
         reader.readAsDataURL(file);
     });
 
-    checkBtn.addEventListener('click', async () => {
-        const nickname = nicknameInput.value.trim();
+    checkBtn?.addEventListener('click', async () => {
+        const nickname = nickInput.value.trim();
         if (!/^[a-zA-Z0-9가-힣_]{2,20}$/.test(nickname)) {
             statusEl.textContent = tr('nickname_invalid');
             statusEl.className = 'nickname-status error';
@@ -240,8 +328,7 @@ async function loadProfilePanel(uid) {
             statusEl.textContent = tr('nickname_ok');
             statusEl.className = 'nickname-status success';
             statusEl.style.display = 'block';
-            editNicknameChecked = true;
-            editNicknameAvailable = true;
+            editNicknameChecked = true; editNicknameAvailable = true;
             saveBtn.disabled = false;
             return;
         }
@@ -249,8 +336,7 @@ async function loadProfilePanel(uid) {
         checkBtn.textContent = tr('nickname_checking');
         try {
             const available = await checkNicknameAvailable(nickname);
-            editNicknameChecked = true;
-            editNicknameAvailable = available;
+            editNicknameChecked = true; editNicknameAvailable = available;
             statusEl.textContent = available ? tr('nickname_ok') : tr('nickname_taken');
             statusEl.className = 'nickname-status ' + (available ? 'success' : 'error');
             statusEl.style.display = 'block';
@@ -265,7 +351,7 @@ async function loadProfilePanel(uid) {
         }
     });
 
-    document.getElementById('profileEditForm').addEventListener('submit', async e => {
+    document.getElementById('profileEditForm')?.addEventListener('submit', async e => {
         e.preventDefault();
         if (!editNicknameChecked || !editNicknameAvailable) {
             msgEl.textContent = '닉네임 중복 확인을 완료해주세요.';
@@ -273,24 +359,20 @@ async function loadProfilePanel(uid) {
             msgEl.style.display = 'block';
             return;
         }
-        const nickname = nicknameInput.value.trim();
-        const realName = document.getElementById('editRealName').value.trim();
-        const bioEl = document.getElementById('editBio');
-        const bio = bioEl ? bioEl.value.trim() : '';
-        const photoFile = photoInput.files[0] || null;
-        const uid = currentUid;
+        const nickname  = nickInput.value.trim();
+        const bio       = document.getElementById('editBio')?.value.trim() || '';
+        const photoFile = photoInput?.files[0] || null;
 
         saveBtn.disabled = true;
         saveBtn.textContent = tr('profile_saving');
         msgEl.style.display = 'none';
-
         try {
-            await updateUserProfile(uid, { nickname, currentNickname: originalNickname, realName, bio, photoFile });
+            await updateUserProfile(currentUid, { nickname, currentNickname: originalNickname, bio, photoFile });
             originalNickname = nickname;
-            photoInput.value = '';
-            // 헤더 닉네임 갱신
-            const userEmailEl = document.getElementById('authUserEmail');
-            if (userEmailEl) userEmailEl.textContent = nickname;
+            if (photoInput) photoInput.value = '';
+            // 사이드바 닉네임 갱신
+            const nickEl = document.getElementById('mpNickname');
+            if (nickEl) nickEl.textContent = nickname;
             msgEl.textContent = tr('profile_saved');
             msgEl.className = 'nickname-status success';
             msgEl.style.display = 'block';
@@ -305,30 +387,27 @@ async function loadProfilePanel(uid) {
     });
 })();
 
-// --- Load Patterns ---
+// ── 내 도안함 ─────────────────────────────────────────────────────────────────
+
 async function loadPatterns(uid) {
-    loadingMsgEl.style.display = 'block';
-    emptyMsgEl.style.display = 'none';
-    patternGridEl.innerHTML = '';
+    const loadingEl = document.getElementById('patternsLoading');
+    const emptyEl   = document.getElementById('patternsEmpty');
+    const gridEl    = document.getElementById('patternGrid');
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    gridEl.innerHTML = '';
 
     try {
-        const q = query(
+        const snap = await getDocs(query(
             collection(db, `users/${uid}/patterns`),
-            orderBy('createdAt', 'desc'),
-            limit(50)
-        );
-        const snap = await getDocs(q);
-        loadingMsgEl.style.display = 'none';
-        let count = 0;
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            patternGridEl.appendChild(buildPatternCard(uid, docSnap.id, data));
-            count++;
-        });
-        if (count === 0) emptyMsgEl.style.display = 'block';
+            orderBy('createdAt', 'desc'), limit(50)
+        ));
+        loadingEl.style.display = 'none';
+        if (snap.empty) { emptyEl.style.display = 'block'; return; }
+        snap.forEach(ds => gridEl.appendChild(buildPatternCard(uid, ds.id, ds.data())));
     } catch (e) {
-        console.error('Failed to load patterns:', e);
-        loadingMsgEl.textContent = '불러오기 실패. 다시 시도해주세요.';
+        loadingEl.textContent = '불러오기 실패. 다시 시도해주세요.';
+        console.error(e);
     }
 }
 
@@ -337,47 +416,28 @@ function buildPatternCard(uid, patternId, data) {
     card.className = 'pattern-card';
     const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR') : '';
     const displayName = escHtml(data.title || data.name || '');
+    const yarnInfo  = data.yarnType || (data.yarnMm ? `${data.yarnMm}mm` : '');
+    const sizeInfo  = data.widthCm ? (data.heightCm ? `${data.widthCm}cm × ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
+    const settingsText = [yarnInfo, sizeInfo].filter(Boolean).join(' · ');
 
-    // 세부 설정 텍스트
-    const yarnInfo = data.yarnType ? data.yarnType : (data.yarnMm ? `${data.yarnMm}mm` : '');
-    const sizeInfo = data.widthCm
-        ? (data.heightCm ? `${data.widthCm}cm × ${data.heightCm}cm` : `${data.widthCm}cm`)
-        : '';
-    const settingsParts = [yarnInfo, sizeInfo].filter(Boolean);
-    const settingsText = settingsParts.length ? ` · ${settingsParts.join(' · ')}` : '';
-    const publicBadge = '';
-
-    const actionsHtml = isMine ? `
+    card.innerHTML = `
+        <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${displayName}" loading="lazy" onerror="this.style.background='#eee'">
+        <div class="pattern-card-body">
+          <p class="pattern-card-name" title="${displayName}">${displayName}</p>
+          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText ? ' · ' + settingsText : ''}</p>
+          <p class="pattern-card-meta" style="color:#aaa;">${date}</p>
           <div class="pattern-card-actions">
             <button class="rename-btn">${tr('rename')}</button>
             <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
             <button class="pdf-btn">PDF</button>
             <button class="png-download-btn">PNG</button>
             <button class="delete-btn">${tr('delete')}</button>
-          </div>` : `
-          <div class="pattern-card-actions">
-            <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
-            <button class="pdf-btn">PDF</button>
-            <button class="png-download-btn">PNG</button>
-          </div>`;
-
-    card.innerHTML = `
-        <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${displayName}" loading="lazy"
-             onerror="this.style.background='#eee'">
-        <div class="pattern-card-body">
-          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
-            <p class="pattern-card-name" title="${displayName}" style="margin:0;flex:1;">${displayName}</p>
-            ${publicBadge}
           </div>
-          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText}</p>
-          ${actionsHtml}
         </div>
     `;
 
     card.querySelector('.pattern-card-thumb').addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
 
-    // PDF/PNG 공통 헬퍼: jsPDF로 도안 PDF 생성
-    // TODO: Google AdSense 승인 후 다운로드 직전 광고 모달 표시 로직 추가
     function generatePatternPdf(imgSrc, cleanup) {
         if (typeof window.jspdf === 'undefined') {
             alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -391,58 +451,42 @@ function buildPatternCard(uid, patternId, data) {
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const pdfW = pdf.internal.pageSize.getWidth();
             const pdfH = pdf.internal.pageSize.getHeight();
-            const margin = 15;
-            const maxW = pdfW - margin * 2;
-            const maxH = pdfH - margin * 2 - 35;
-            let finalW = maxW;
-            let finalH = (img.height / img.width) * finalW;
+            const margin = 15, maxW = pdfW - margin * 2, maxH = pdfH - margin * 2 - 35;
+            let finalW = maxW, finalH = (img.height / img.width) * finalW;
             if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
 
-            // 제목 (한글 포함 가능 — canvas에 그려서 이미지로 삽입)
-            const titleText = data.title || data.name || 'Knitting Pattern';
             const titleCanvas = document.createElement('canvas');
-            titleCanvas.width = 900;
-            titleCanvas.height = 36;
+            titleCanvas.width = 900; titleCanvas.height = 36;
             const tCtx = titleCanvas.getContext('2d');
-            tCtx.font = '600 26px sans-serif';
-            tCtx.fillStyle = '#000000';
-            tCtx.fillText(titleText, 0, 26);
+            tCtx.font = '600 26px sans-serif'; tCtx.fillStyle = '#000000';
+            tCtx.fillText(data.title || data.name || 'Pattern', 0, 26);
             pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
 
-            // 정보 줄 (원래 도안 PDF와 동일한 포맷)
             pdf.setFontSize(10);
-            const sizeStr = (data.widthCm && data.heightCm)
-                ? `${data.widthCm}cm x ${data.heightCm}cm`
-                : (data.widthCm ? `${data.widthCm}cm` : '');
-            const infoLine = `${data.stitches || 0} Stitches x ${data.rows || 0} Rows` +
-                (sizeStr ? ` (${sizeStr})` : '') +
-                (data.yarnType ? ` · ${data.yarnType}` : (data.yarnMm ? ` · ${data.yarnMm}mm` : ''));
+            const sizeStr = data.widthCm ? (data.heightCm ? `${data.widthCm}cm x ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
+            const infoLine = `${data.stitches || 0} Stitches x ${data.rows || 0} Rows`
+                + (sizeStr ? ` (${sizeStr})` : '')
+                + (data.yarnType ? ` · ${data.yarnType}` : (data.yarnMm ? ` · ${data.yarnMm}mm` : ''));
             pdf.text(infoLine, margin, margin + 14);
 
-            // 도안 이미지
             const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = img.width;
-            tmpCanvas.height = img.height;
+            tmpCanvas.width = img.width; tmpCanvas.height = img.height;
             tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
-            pdf.addImage(imgData, 'JPEG', margin, margin + 22, finalW, finalH);
+            pdf.addImage(tmpCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin + 22, finalW, finalH);
 
-            // 색상 범례
             if (data.legendHTML) {
                 pdf.addPage();
-                pdf.setFontSize(12);
-                pdf.text('Color Legend', margin, margin + 5);
+                pdf.setFontSize(12); pdf.text('Color Legend', margin, margin + 5);
                 const tmpDiv = document.createElement('div');
                 tmpDiv.innerHTML = data.legendHTML;
                 let y = margin + 15;
                 tmpDiv.querySelectorAll('.color-item').forEach(item => {
                     const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
                     if (rgbMatch) {
-                        pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                        pdf.setFillColor(+rgbMatch[0], +rgbMatch[1], +rgbMatch[2]);
                         pdf.rect(margin, y, 8, 8, 'F');
                         pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
-                        pdf.setFontSize(10);
-                        pdf.text(item.querySelector('span')?.textContent || '', margin + 13, y + 6);
+                        pdf.setFontSize(10); pdf.text(item.querySelector('span')?.textContent || '', margin + 13, y + 6);
                         y += 13;
                         if (y > pdfH - margin) y = margin;
                     }
@@ -451,169 +495,255 @@ function buildPatternCard(uid, patternId, data) {
             pdf.save(`${safeName}.pdf`);
             if (cleanup) cleanup();
         };
-        img.onerror = () => {
-            if (cleanup) cleanup();
-            alert('이미지를 불러오지 못했습니다.');
-        };
+        img.onerror = () => { if (cleanup) cleanup(); alert('이미지를 불러오지 못했습니다.'); };
         img.src = imgSrc;
     }
 
-    // PDF 다운로드
     card.querySelector('.pdf-btn').addEventListener('click', async () => {
-        // 1순위: patternBase64 (저장 시점에 canvas에서 직접 생성 → CORS 완전 불필요)
-        if (data.patternBase64) {
-            generatePatternPdf(data.patternBase64, null);
-            return;
-        }
-        // 2순위: Firebase Storage getBlob (Storage 규칙 배포된 경우)
+        if (data.patternBase64) { generatePatternPdf(data.patternBase64, null); return; }
         if (data.patternStoragePath) {
             try {
                 const blob = await getBlob(ref(storage, data.patternStoragePath));
-                const blobUrl = URL.createObjectURL(blob);
-                generatePatternPdf(blobUrl, () => URL.revokeObjectURL(blobUrl));
-                return;
-            } catch (e) { /* fallback */ }
+                const url = URL.createObjectURL(blob);
+                generatePatternPdf(url, () => URL.revokeObjectURL(url)); return;
+            } catch {}
         }
-        // 3순위: fetch (Firebase Storage CORS 설정된 경우)
-        try {
-            const res = await fetch(data.patternImageURL);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            generatePatternPdf(blobUrl, () => URL.revokeObjectURL(blobUrl));
-            return;
-        } catch (e) { /* fallback */ }
-        // 최후: 원본 URL (구형 도안, canvas taint 가능)
-        generatePatternPdf(data.patternImageURL, null);
-    });
-
-    // PNG 직접 저장
-    card.querySelector('.png-download-btn').addEventListener('click', async () => {
-        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-        // patternBase64에서 직접 다운로드 (CORS 불필요)
-        if (data.patternBase64) {
-            const a = document.createElement('a');
-            a.href = data.patternBase64;
-            a.download = `${safeName}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            return;
-        }
-        // getBlob() 시도
-        if (data.patternStoragePath) {
-            try {
-                const blob = await getBlob(ref(storage, data.patternStoragePath));
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = `${safeName}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-                return;
-            } catch (e) { /* fallback */ }
-        }
-        // fetch fallback
         try {
             const res = await fetch(data.patternImageURL);
             if (!res.ok) throw new Error();
             const blob = await res.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `${safeName}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        } catch (e) {
-            window.open(data.patternImageURL, '_blank');
-        }
+            const url = URL.createObjectURL(blob);
+            generatePatternPdf(url, () => URL.revokeObjectURL(url)); return;
+        } catch {}
+        generatePatternPdf(data.patternImageURL, null);
     });
 
-    if (isMine) {
-        card.querySelector('.rename-btn').addEventListener('click', async () => {
-            const currentName = data.title || data.name || '';
-            const newName = window.prompt(tr('rename_prompt'), currentName);
-            if (!newName || newName.trim() === currentName) return;
-            const trimmed = newName.trim();
-            try {
-                await updateDoc(doc(db, `users/${uid}/patterns/${patternId}`), { title: trimmed, name: trimmed });
-                card.querySelector('.pattern-card-name').textContent = trimmed;
-                card.querySelector('.pattern-card-name').title = trimmed;
-                data.title = trimmed;
-                data.name = trimmed;
-            } catch (e) { console.error('Rename failed:', e); }
-        });
+    card.querySelector('.png-download-btn').addEventListener('click', async () => {
+        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+        const dl = url => {
+            const a = document.createElement('a');
+            a.href = url; a.download = `${safeName}.png`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        };
+        if (data.patternBase64) { dl(data.patternBase64); return; }
+        if (data.patternStoragePath) {
+            try { const blob = await getBlob(ref(storage, data.patternStoragePath)); const u = URL.createObjectURL(blob); dl(u); setTimeout(() => URL.revokeObjectURL(u), 1000); return; } catch {}
+        }
+        try {
+            const res = await fetch(data.patternImageURL); if (!res.ok) throw new Error();
+            const blob = await res.blob(); const u = URL.createObjectURL(blob); dl(u); setTimeout(() => URL.revokeObjectURL(u), 1000);
+        } catch { window.open(data.patternImageURL, '_blank'); }
+    });
 
-        card.querySelector('.delete-btn').addEventListener('click', async () => {
-            if (!window.confirm(tr('confirm_delete'))) return;
-            try {
-                const basePath = `users/${uid}/patterns/${patternId}`;
-                await Promise.allSettled([
-                    deleteObject(ref(storage, `${basePath}/pattern.png`)),
-                    deleteObject(ref(storage, `${basePath}/original.jpg`))
-                ]);
-                await deleteDoc(doc(db, `users/${uid}/patterns/${patternId}`));
-                card.remove();
-                if (patternGridEl.children.length === 0) emptyMsgEl.style.display = 'block';
-            } catch (e) { console.error('Delete failed:', e); }
-        });
-    }
+    card.querySelector('.rename-btn').addEventListener('click', async () => {
+        const current = data.title || data.name || '';
+        const newName = window.prompt(tr('rename_prompt'), current);
+        if (!newName || newName.trim() === current) return;
+        const trimmed = newName.trim();
+        try {
+            await updateDoc(doc(db, `users/${uid}/patterns/${patternId}`), { title: trimmed, name: trimmed });
+            card.querySelector('.pattern-card-name').textContent = trimmed;
+            data.title = trimmed; data.name = trimmed;
+        } catch (e) { console.error('Rename failed:', e); }
+    });
+
+    card.querySelector('.delete-btn').addEventListener('click', async () => {
+        if (!window.confirm(tr('confirm_delete'))) return;
+        try {
+            await Promise.allSettled([
+                deleteObject(ref(storage, `users/${uid}/patterns/${patternId}/pattern.png`)),
+                deleteObject(ref(storage, `users/${uid}/patterns/${patternId}/original.jpg`))
+            ]);
+            await deleteDoc(doc(db, `users/${uid}/patterns/${patternId}`));
+            card.remove();
+            const gridEl = document.getElementById('patternGrid');
+            if (gridEl && gridEl.children.length === 0) document.getElementById('patternsEmpty').style.display = 'block';
+            // 사이드바 통계 갱신
+            const statEl = document.getElementById('mpStatPatterns');
+            if (statEl && !isNaN(+statEl.textContent)) statEl.textContent = Math.max(0, +statEl.textContent - 1);
+        } catch (e) { console.error('Delete failed:', e); }
+    });
 
     return card;
 }
 
-// --- Load My Posts ---
+// ── 내 프로젝트 ───────────────────────────────────────────────────────────────
+
+async function loadProjects(uid) {
+    // localStorage 우선, 로그인 시 Firestore도 확인
+    let counters = [];
+    try {
+        const local = localStorage.getItem('ssuessue_row_counters');
+        if (local) counters = JSON.parse(local);
+    } catch {}
+
+    // Firestore 데이터 병합 (더 최신인 것 사용)
+    if (uid) {
+        try {
+            const snap = await getDoc(doc(db, 'users', uid, 'rowCounters', 'main'));
+            if (snap.exists()) {
+                const fsData = snap.data();
+                if (Array.isArray(fsData.counters) && fsData.counters.length) {
+                    const fsTime = fsData.updatedAt || 0;
+                    try {
+                        const lsRaw = localStorage.getItem('ssuessue_row_counters');
+                        const lsArr = lsRaw ? JSON.parse(lsRaw) : [];
+                        // 어느 쪽이 더 최신인지 id의 timestamp로 비교는 어려우므로 Firestore를 우선
+                        if (fsData.counters.length >= lsArr.length) counters = fsData.counters;
+                    } catch { counters = fsData.counters; }
+                }
+            }
+        } catch {}
+    }
+
+    const activeEl = document.getElementById('projectsActive');
+    const doneEl   = document.getElementById('projectsDone');
+    const doneWrap = document.getElementById('projectsDoneWrap');
+    const emptyEl  = document.getElementById('projectsEmpty');
+    const titleDone = document.getElementById('titleDoneProjects');
+    if (titleDone) titleDone.textContent = tr('done_projects');
+
+    activeEl.innerHTML = '';
+    doneEl.innerHTML   = '';
+
+    const active = counters.filter(c => !(c.goalRows > 0 && c.count >= c.goalRows));
+    const done   = counters.filter(c =>   c.goalRows > 0 && c.count >= c.goalRows);
+
+    if (active.length === 0 && done.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+    }
+    emptyEl.style.display = 'none';
+
+    active.forEach(c => activeEl.appendChild(buildProjectCard(c)));
+    if (done.length > 0) {
+        doneWrap.style.display = '';
+        done.forEach(c => doneEl.appendChild(buildProjectCard(c, true)));
+    }
+}
+
+function buildProjectCard(c, isDone = false) {
+    const card = document.createElement('div');
+    card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
+
+    const pct = c.goalRows > 0 ? Math.min(100, Math.round(c.count / c.goalRows * 100)) : null;
+    const name = escHtml(c.name || ('Project #' + c.id));
+    const rowLabel = tr('row_label');
+    const goalStr  = c.goalRows > 0
+        ? `${c.count} / ${c.goalRows} ${rowLabel}`
+        : `${c.count} ${rowLabel} · ${tr('no_goal')}`;
+
+    const progressHtml = pct !== null ? `
+        <div class="mp-progress-bar-wrap">
+            <div class="mp-progress-bar" style="width:${pct}%"></div>
+        </div>
+        <span class="mp-progress-pct">${pct}${tr('progress_done')}</span>
+    ` : '';
+
+    card.innerHTML = `
+        <div class="mp-project-header">
+            <span class="mp-project-name">${name}</span>
+            ${isDone ? `<span class="mp-project-badge">${escHtml(tr('done_badge'))}</span>` : ''}
+        </div>
+        <div class="mp-project-meta">${escHtml(goalStr)}</div>
+        ${progressHtml}
+        <div class="mp-project-actions">
+            <button class="secondary-btn small-btn mp-open-counter-btn">${escHtml(tr('open_counter'))}</button>
+        </div>
+    `;
+
+    card.querySelector('.mp-open-counter-btn').addEventListener('click', () => {
+        const rc = document.querySelector('knitting-row-counter');
+        if (rc) rc.toggleDrawer();
+    });
+
+    return card;
+}
+
+// ── 내 글 ─────────────────────────────────────────────────────────────────────
+
 async function loadMyPosts(uid) {
     const loadingEl = document.getElementById('myPostsLoading');
-    const emptyEl = document.getElementById('myPostsEmpty');
-    const gridEl = document.getElementById('myPostsGrid');
+    const emptyEl   = document.getElementById('myPostsEmpty');
+    const gridEl    = document.getElementById('myPostsGrid');
     loadingEl.style.display = 'block';
-    emptyEl.style.display = 'none';
+    emptyEl.style.display   = 'none';
     gridEl.innerHTML = '';
 
     try {
-        const q = query(
-            collection(db, 'posts'),
-            where('uid', '==', uid)
-        );
-        const snap = await getDocs(q);
+        const snap = await getDocs(query(collection(db, 'posts'), where('uid', '==', uid)));
         loadingEl.style.display = 'none';
         if (snap.empty) { emptyEl.style.display = 'block'; return; }
-        // 최신순 정렬 (클라이언트)
-        const docs = snap.docs.sort((a, b) => {
-            const at = a.data().createdAt?.seconds || 0;
-            const bt = b.data().createdAt?.seconds || 0;
-            return bt - at;
-        });
-        let count = 0;
-        docs.forEach(docSnap => {
-            const data = docSnap.data();
-            // 타인 프로필: 공개 게시글만 표시
-            if (!isMine && data.isPublic === false) return;
-            gridEl.appendChild(buildPostCard(docSnap.id, data));
-            count++;
-        });
-        if (count === 0) emptyEl.style.display = 'block';
+
+        const sorted = snap.docs.sort((a, b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0));
+        sorted.forEach(ds => gridEl.appendChild(buildPostCard(ds.id, ds.data())));
     } catch (e) {
-        console.error('loadMyPosts error:', e);
         loadingEl.style.display = 'none';
-        // 실제 오류 메시지를 노출해 진단 가능하도록
         emptyEl.textContent = `오류: ${e.message}`;
         emptyEl.style.display = 'block';
     }
 }
 
-// --- Load Scraps ---
+// ── 내 댓글 ───────────────────────────────────────────────────────────────────
+
+async function loadMyComments(uid) {
+    const loadingEl = document.getElementById('myCommentsLoading');
+    const emptyEl   = document.getElementById('myCommentsEmpty');
+    const listEl    = document.getElementById('myCommentsList');
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    listEl.innerHTML = '';
+
+    try {
+        const q = query(
+            collectionGroup(db, 'comments'),
+            where('uid', '==', uid),
+            orderBy('createdAt', 'desc'),
+            limit(30)
+        );
+        const snap = await getDocs(q);
+        loadingEl.style.display = 'none';
+        if (snap.empty) { emptyEl.style.display = 'block'; return; }
+
+        snap.forEach(ds => {
+            const data = ds.data();
+            // 경로: posts/{postId}/comments/{commentId}
+            const postId = ds.ref.parent.parent?.id;
+            const date = data.createdAt
+                ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR')
+                : '';
+            const item = document.createElement('a');
+            item.className = 'mp-comment-item';
+            item.href = postId ? `/post.html?id=${postId}` : '#';
+            const contentEl = document.createElement('p');
+            contentEl.className = 'mp-comment-content';
+            contentEl.textContent = data.content || '';
+            const metaEl = document.createElement('span');
+            metaEl.className = 'mp-comment-meta';
+            metaEl.textContent = date;
+            item.appendChild(contentEl);
+            item.appendChild(metaEl);
+            listEl.appendChild(item);
+        });
+    } catch (e) {
+        loadingEl.style.display = 'none';
+        if (e.code === 'failed-precondition') {
+            emptyEl.textContent = '댓글 목록 기능은 준비 중입니다.';
+        } else {
+            emptyEl.textContent = `오류: ${e.message}`;
+        }
+        emptyEl.style.display = 'block';
+    }
+}
+
+// ── 스크랩 ────────────────────────────────────────────────────────────────────
+
 async function loadScraps(uid) {
     const loadingEl = document.getElementById('scrapsLoading');
-    const emptyEl = document.getElementById('scrapsEmpty');
-    const gridEl = document.getElementById('scrapsGrid');
+    const emptyEl   = document.getElementById('scrapsEmpty');
+    const gridEl    = document.getElementById('scrapsGrid');
     loadingEl.style.display = 'block';
-    emptyEl.style.display = 'none';
+    emptyEl.style.display   = 'none';
     gridEl.innerHTML = '';
 
     try {
@@ -622,7 +752,7 @@ async function loadScraps(uid) {
         );
         if (scrapsSnap.empty) {
             loadingEl.style.display = 'none';
-            emptyEl.style.display = 'block';
+            emptyEl.style.display   = 'block';
             return;
         }
         const postDocs = await Promise.all(
@@ -630,157 +760,91 @@ async function loadScraps(uid) {
         );
         loadingEl.style.display = 'none';
         let count = 0;
-        postDocs.forEach(postDoc => {
-            if (postDoc.exists()) {
-                gridEl.appendChild(buildPostCard(postDoc.id, postDoc.data()));
-                count++;
-            }
+        scrapsSnap.docs.forEach((scrapDoc, i) => {
+            const postDoc = postDocs[i];
+            if (!postDoc.exists()) return;
+            const card = buildPostCard(postDoc.id, postDoc.data(), { showUnscrap: true, uid, scrapId: scrapDoc.id });
+            gridEl.appendChild(card);
+            count++;
         });
         if (count === 0) emptyEl.style.display = 'block';
     } catch (e) {
-        console.error('Failed to load scraps:', e);
         loadingEl.textContent = '불러오기 실패.';
+        console.error(e);
     }
 }
 
-function buildPostCard(postId, data) {
+// ── 게시글 카드 ───────────────────────────────────────────────────────────────
+
+function buildPostCard(postId, data, opts = {}) {
     const card = document.createElement('a');
     card.className = 'post-card';
     card.href = `/post.html?id=${postId}`;
 
     const date = data.createdAt
-        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR')
         : '';
-    const thumb = data.images && data.images[0]
+    const thumb = data.images?.[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
-        : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
-    const tagsHtml = (data.tags || []).slice(0, 3).map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
-
+        : (data.patternImageURL
+            ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>`
+            : '<div class="post-card-thumb post-card-thumb-empty"></div>');
+    const tagsHtml = (data.tags || []).slice(0, 3).map(t => `<span class="post-card-tag">${escHtml(t)}</span>`).join('');
     const avatarStyle = data.profilePhotoURL ? `style="background-image:url(${escHtml(data.profilePhotoURL)})"` : '';
     const avatarInner = data.profilePhotoURL ? '' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
-    const avatarHtml = `<span class="post-card-avatar-sm" ${avatarStyle}>${avatarInner}</span>`;
-
-    const authorHtml = data.uid
-        ? `<span class="post-card-author-link" data-author-uid="${escHtml(data.uid)}">${escHtml(data.nickname || '')}</span>`
-        : `<span>${escHtml(data.nickname || '')}</span>`;
 
     card.innerHTML = `
         ${thumb}
         <div class="post-card-body">
           <div class="post-card-tags">${tagsHtml}</div>
           <p class="post-card-title">${escHtml(data.title || '')}</p>
-          <div class="post-card-meta">${avatarHtml}${authorHtml}<span class="post-card-date"> · ${date}</span><span class="post-card-counts"> · ♥ ${data.likeCount || 0}</span></div>
+          <div class="post-card-meta">
+            <span class="post-card-avatar-sm" ${avatarStyle}>${avatarInner}</span>
+            <span>${escHtml(data.nickname || '')}</span>
+            <span class="post-card-date"> · ${date}</span>
+            <span class="post-card-counts"> · ♥ ${data.likeCount || 0}</span>
+          </div>
         </div>
     `;
 
-    const authorEl = card.querySelector('.post-card-author-link');
-    if (authorEl) {
-        authorEl.addEventListener('click', e => {
+    if (opts.showUnscrap) {
+        const unscrapBtn = document.createElement('button');
+        unscrapBtn.className = 'mp-unscrap-btn';
+        unscrapBtn.textContent = tr('unscrap');
+        unscrapBtn.addEventListener('click', async e => {
             e.preventDefault();
-            e.stopPropagation();
-            window.location.href = `/mypage.html?uid=${authorEl.dataset.authorUid}`;
+            if (!window.confirm(tr('confirm_unscrap'))) return;
+            try {
+                await deleteDoc(doc(db, `users/${opts.uid}/scraps/${opts.scrapId}`));
+                card.remove();
+                const gridEl = document.getElementById('scrapsGrid');
+                if (gridEl && gridEl.children.length === 0) {
+                    document.getElementById('scrapsEmpty').style.display = 'block';
+                }
+                const statEl = document.getElementById('mpStatScraps');
+                if (statEl && !isNaN(+statEl.textContent)) statEl.textContent = Math.max(0, +statEl.textContent - 1);
+            } catch (err) { console.error(err); }
         });
+        card.querySelector('.post-card-body').appendChild(unscrapBtn);
     }
 
     return card;
 }
 
-function escHtml(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// ── 회원 탈퇴 ─────────────────────────────────────────────────────────────────
 
-// 타인 프로필 뷰: 탭을 도안/게시글만 보이도록 설정
-function setupOtherUserView(profile) {
-    // 프로필수정/내도안/스크랩 탭·패널 완전 제거 (타인 프로필: 공개글만)
-    document.querySelectorAll('.mypage-tab').forEach(btn => {
-        const tab = btn.getAttribute('data-tab');
-        if (tab === 'profile' || tab === 'mypatterns' || tab === 'scraps') btn.remove();
-    });
-    const removeIds = ['panelProfile', 'panelMyPatterns', 'panelScraps'];
-    removeIds.forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
-
-    // 프로필 헤더 표시
-    const headerEl = document.getElementById('otherProfileHeader');
-    if (headerEl) {
-        headerEl.style.display = 'flex';
-        const avatarEl = document.getElementById('otherProfileAvatar');
-        if (profile?.profilePhotoURL) {
-            avatarEl.style.backgroundImage = `url(${profile.profilePhotoURL})`;
-            avatarEl.innerHTML = '';
-        } else {
-            avatarEl.style.backgroundImage = '';
-            avatarEl.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
-        }
-        const nicknameEl = document.getElementById('otherProfileNickname');
-        if (nicknameEl) nicknameEl.textContent = profile?.nickname || '';
-    }
-
-    // 타이틀
-    const nickname = profile?.nickname;
-    const title = nickname ? `${nickname}님의 프로필` : '프로필';
-    document.getElementById('mypageTitle').textContent = title;
-    // 첫 탭을 내 글로 (타인 프로필은 공개글만)
-    switchTab('myposts');
-}
-
-// --- Auth + 페이지 초기화 ---
-function initPageAuth() {
-    initAuth();
-    gotoSignInBtn.addEventListener('click', openAuthModal);
-
-    onAuthStateChanged(auth, async user => {
-        const isVerified = !!user;
-
-        if (urlUid) {
-            // 타인 프로필 모드: 로그인 여부 관계없이 표시
-            isMine = isVerified && user && user.uid === urlUid;
-            notLoggedInEl.style.display = 'none';
-            loggedInEl.style.display = 'block';
-            currentUid = urlUid;
-
-            if (!tabLoaded['_init']) {
-                tabLoaded['_init'] = true;
-                // 타인 프로필 정보 로드
-                const profile = await getUserProfile(urlUid);
-                setupOtherUserView(profile || null);
-            }
-        } else if (isVerified) {
-            // 본인 프로필 모드
-            isMine = true;
-            notLoggedInEl.style.display = 'none';
-            loggedInEl.style.display = 'block';
-            currentUid = user.uid;
-            // 현재 활성 탭 데이터 로드 (최초 1회)
-            switchTab(currentTab);
-        } else {
-            notLoggedInEl.style.display = 'block';
-            loggedInEl.style.display = 'none';
-            currentUid = null;
-        }
-    });
-}
-
-initPageAuth();
-
-// --- 회원 탈퇴 ---
 (function initWithdrawal() {
-    const withdrawalBtn = document.getElementById('withdrawalBtn');
-    const modal = document.getElementById('withdrawalModal');
-    const cancelBtn = document.getElementById('withdrawalCancelBtn');
+    const btn     = document.getElementById('withdrawalBtn');
+    const modal   = document.getElementById('withdrawalModal');
+    const cancelBtn  = document.getElementById('withdrawalCancelBtn');
     const confirmBtn = document.getElementById('withdrawalConfirmBtn');
-    const input = document.getElementById('withdrawalConfirmInput');
+    const input   = document.getElementById('withdrawalConfirmInput');
     const errorEl = document.getElementById('withdrawalError');
-    if (!withdrawalBtn || !modal) return;
+    if (!btn || !modal) return;
 
-    withdrawalBtn.addEventListener('click', () => {
-        input.value = '';
-        errorEl.style.display = 'none';
-        modal.style.display = 'flex';
-    });
-
-    cancelBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    btn.addEventListener('click', () => { input.value = ''; errorEl.style.display = 'none'; modal.style.display = 'flex'; });
+    cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
 
     confirmBtn.addEventListener('click', async () => {
         if (input.value.trim() !== '탈퇴합니다') {
@@ -790,7 +854,6 @@ initPageAuth();
         }
         const user = auth.currentUser;
         if (!user) return;
-
         confirmBtn.disabled = true;
         confirmBtn.textContent = '처리 중...';
         errorEl.style.display = 'none';
@@ -799,15 +862,31 @@ initPageAuth();
             modal.style.display = 'none';
             window.location.href = '/';
         } catch (e) {
-            // 재인증이 필요한 경우 (로그인한 지 오래된 경우)
-            if (e.code === 'auth/requires-recent-login') {
-                errorEl.textContent = '보안을 위해 재로그인 후 다시 시도해주세요.';
-            } else {
-                errorEl.textContent = '탈퇴 처리 중 오류가 발생했습니다: ' + e.message;
-            }
+            errorEl.textContent = e.code === 'auth/requires-recent-login'
+                ? '보안을 위해 재로그인 후 다시 시도해주세요.'
+                : '탈퇴 처리 중 오류가 발생했습니다: ' + e.message;
             errorEl.style.display = 'block';
             confirmBtn.disabled = false;
             confirmBtn.textContent = '탈퇴하기';
         }
     });
 })();
+
+// ── Auth 초기화 ───────────────────────────────────────────────────────────────
+
+initAuth();
+document.getElementById('gotoSignInBtn')?.addEventListener('click', openAuthModal);
+
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        currentUid = user.uid;
+        document.getElementById('notLoggedIn').style.display = 'none';
+        document.getElementById('loggedIn').style.display    = '';
+        await fillSidebar(user.uid);
+        switchPanel(currentPanel);
+    } else {
+        currentUid = null;
+        document.getElementById('notLoggedIn').style.display = '';
+        document.getElementById('loggedIn').style.display    = 'none';
+    }
+});

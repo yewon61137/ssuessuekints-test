@@ -3199,3 +3199,337 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   align-items: center;
   gap: 0.5rem;
 }
+
+/* ==============================
+   MyPage v2 — 사이드바 레이아웃
+   ============================== */
+
+.mp-page-wrap {
+  min-height: 60vh;
+}
+
+.mp-guest {
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}
+
+.mp-layout {
+  display: flex;
+  gap: 2.5rem;
+  max-width: 1100px;
+  width: 95%;
+  margin: 0 auto;
+  padding: 2.5rem 0 5rem;
+  align-items: flex-start;
+}
+
+/* ── 사이드바 ── */
+.mp-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 4.5rem;
+}
+
+.mp-user-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.mp-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.mp-user-info { width: 100%; }
+
+.mp-nickname {
+  font-weight: 800;
+  font-size: 0.95rem;
+  word-break: break-all;
+}
+
+.mp-joined {
+  font-size: 0.72rem;
+  color: #999;
+  margin-top: 0.2rem;
+}
+
+.mp-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.mp-stat { text-align: center; }
+.mp-stat-val { display: block; font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
+.mp-stat-lbl { font-size: 0.7rem; color: #888; }
+
+.mp-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mp-nav-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #555;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.mp-nav-btn:hover { background: #f5f5f5; color: #000; }
+.mp-nav-btn.active { background: #000; color: #fff; font-weight: 700; }
+
+/* ── 콘텐츠 영역 ── */
+.mp-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-panel { display: none; }
+.mp-panel.active { display: block; }
+
+.mp-panel-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #000;
+}
+
+.mp-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.mp-panel-header .mp-panel-title { margin-bottom: 0; }
+
+/* ── 서브탭 (내 글·댓글) ── */
+.mp-subtabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #000;
+  margin-bottom: 1.5rem;
+}
+
+.mp-subtab {
+  background: none;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: #888;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.mp-subtab.active { color: #000; font-weight: 700; border-bottom-color: #000; }
+.mp-subtab:hover { color: #000; }
+
+/* ── 프로젝트 카드 ── */
+.mp-project-card {
+  border-bottom: 1px solid #e8e8e8;
+  padding: 1.25rem 0;
+}
+.mp-project-card:last-child { border-bottom: none; }
+.mp-project-done .mp-project-name { color: #aaa; }
+
+.mp-project-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.mp-project-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mp-project-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #000;
+  color: #fff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.mp-project-meta {
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 0.6rem;
+}
+
+.mp-progress-bar-wrap {
+  height: 6px;
+  background: #e8e8e8;
+  border-radius: 3px;
+  margin-bottom: 0.3rem;
+  overflow: hidden;
+}
+.mp-progress-bar {
+  height: 100%;
+  background: #000;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.mp-progress-pct {
+  font-size: 0.75rem;
+  color: #666;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.mp-project-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mp-section-sub {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem;
+  color: #555;
+}
+
+/* ── 댓글 아이템 ── */
+.mp-comment-item {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e8e8e8;
+  transition: background 0.1s;
+}
+.mp-comment-item:last-child { border-bottom: none; }
+.mp-comment-item:hover { background: #fafafa; }
+
+.mp-comment-content {
+  font-size: 0.9rem;
+  margin: 0 0 0.3rem;
+  color: #222;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mp-comment-meta {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/* ── 스크랩 취소 버튼 ── */
+.mp-unscrap-btn {
+  margin-top: 0.5rem;
+  background: none;
+  border: 1px solid #ddd;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #888;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+.mp-unscrap-btn:hover { border-color: #000; color: #000; }
+
+/* ── 반응형 ── */
+@media (max-width: 768px) {
+  .mp-layout {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 0 3rem;
+    width: 100%;
+  }
+
+  .mp-sidebar {
+    width: 100%;
+    position: static;
+    border-bottom: 2px solid #000;
+    padding: 1rem 4% 0;
+  }
+
+  .mp-user-summary {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .mp-avatar {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .mp-stats-row {
+    justify-content: flex-start;
+    padding-bottom: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .mp-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mp-nav::-webkit-scrollbar { display: none; }
+
+  .mp-nav-btn {
+    white-space: nowrap;
+    padding: 0.65rem 1rem;
+    border-radius: 0;
+    border-bottom: 3px solid transparent;
+    font-size: 0.85rem;
+  }
+  .mp-nav-btn.active {
+    background: none;
+    color: #000;
+    border-bottom-color: #000;
+  }
+
+  .mp-content {
+    padding: 1.5rem 4%;
+  }
+}
