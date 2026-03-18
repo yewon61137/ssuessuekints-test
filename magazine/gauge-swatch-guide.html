@@ -107,21 +107,21 @@
   <main class="container">
     <article class="step-section">
       <div class="article-hero">
-        <span class="article-category">기법 · 테크닉</span>
-        <h1 class="article-title">게이지 스와치 완벽 가이드<br>— 뜨개 사이즈 맞추는 법</h1>
-        <p class="article-meta">SSUESSUE KNITS 편집팀 &nbsp;·&nbsp; 2026년 3월 5일</p>
+        <span class="article-category" data-ko="기법 · 테크닉" data-en="Technique" data-ja="テクニック">기법 · 테크닉</span>
+        <h1 class="article-title" data-ko="게이지 스와치 완벽 가이드<br>— 뜨개 사이즈 맞추는 법" data-en="Complete Guide to Gauge Swatches<br>— How to Get the Right Size" data-ja="ゲージスウォッチ完全ガイド<br>— サイズを合わせる方法">게이지 스와치 완벽 가이드<br>— 뜨개 사이즈 맞추는 법</h1>
+        <p class="article-meta" data-ko="SSUESSUE KNITS 편집팀 &nbsp;·&nbsp; 2026년 3월 5일" data-en="March 5, 2026 &nbsp;·&nbsp; SSUESSUE KNITS" data-ja="2026年3月5日 &nbsp;·&nbsp; SSUESSUE KNITS">SSUESSUE KNITS 편집팀 &nbsp;·&nbsp; 2026년 3월 5일</p>
       </div>
 
       <div class="post-action-bar" style="margin-top:1.5rem;">
         <button class="action-btn" id="likeBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          좋아요 <span id="likeCount">0</span>
+          <span id="likeBtnLabel">좋아요</span> <span id="likeCount">0</span>
         </button>
         <button class="action-btn" id="scrapBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          스크랩 <span id="scrapCount">0</span>
+          <span id="scrapBtnLabel">스크랩</span> <span id="scrapCount">0</span>
         </button>
-        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;"><span id="commentLabel">댓글</span> <span id="commentCountDisplay">0</span></span>
       </div>
 
       <div class="article-body">
@@ -479,7 +479,7 @@
           <p>スワッチは素材サンプルとして保管しておきましょう。糸のラベル・針サイズ・テンション・洗濯結果を記録してつけておくと、後で同じ糸を使う際にとても役立ちます。</p>
         </div><!-- /ja -->
       <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
-        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <h2 class="comments-title"><span id="commentLabel">댓글</span> <span id="commentCountDisplay">0</span></h2>
         <div id="commentsList"></div>
         <div class="comment-form" style="margin-top:1.25rem;">
           <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>

@@ -7,6 +7,23 @@ import {
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
 let currentUser = null;
+let currentLang = 'ko';
+
+const UI = {
+  like:                 { ko: '좋아요',               en: 'Like',                     ja: 'いいね' },
+  scrap:                { ko: '스크랩',               en: 'Save',                     ja: 'スクラップ' },
+  comments:             { ko: '댓글',                 en: 'Comments',                 ja: 'コメント' },
+  commentPlaceholder:   { ko: '댓글을 입력하세요...', en: 'Write a comment...',       ja: 'コメントを入力してください...' },
+  replyPlaceholder:     { ko: '답글을 입력하세요...', en: 'Write a reply...',         ja: '返信を入力してください...' },
+  submit:               { ko: '등록',                 en: 'Post',                     ja: '投稿' },
+  reply:                { ko: '답글',                 en: 'Reply',                    ja: '返信' },
+  delete:               { ko: '삭제',                 en: 'Delete',                   ja: '削除' },
+  cancel:               { ko: '취소',                 en: 'Cancel',                   ja: 'キャンセル' },
+  confirmComment:       { ko: '댓글을 삭제할까요?',   en: 'Delete this comment?',     ja: 'このコメントを削除しますか？' },
+  confirmReply:         { ko: '답글을 삭제할까요?',   en: 'Delete this reply?',       ja: 'この返信を削除しますか？' },
+};
+
+function t(key) { return UI[key]?.[currentLang] ?? UI[key]?.ko ?? key; }
 
 export function initMagazineArticle(articleId) {
   onAuthStateChanged(auth, user => { currentUser = user; });
@@ -27,34 +44,65 @@ function initArticleLang() {
 }
 
 function applyArticleLang(lang) {
+  currentLang = lang;
   localStorage.setItem('lang', lang);
   document.documentElement.lang = lang;
+
+  // 본문 언어 섹션
   document.querySelectorAll('.article-lang').forEach(el => {
     el.style.display = el.dataset.lang === lang ? '' : 'none';
   });
+
+  // data-ko/en/ja 속성 (헤더·푸터 등 일반 요소)
   document.querySelectorAll('[data-ko]').forEach(el => {
+    // article-title/meta는 아래에서 innerHTML로 별도 처리
+    if (el.classList.contains('article-title') || el.classList.contains('article-meta')) return;
     const val = el.dataset[lang];
     if (val !== undefined) el.textContent = val;
   });
+
+  // 언어 버튼 active 상태
   document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
-  // nav translations
+
+  // 아티클 hero — 카테고리
+  const catEl = document.querySelector('.article-category');
+  if (catEl?.dataset[lang]) catEl.textContent = catEl.dataset[lang];
+
+  // 아티클 hero — 제목 (innerHTML: <br> 태그 보존)
+  const titleEl = document.querySelector('.article-title');
+  if (titleEl?.dataset[lang]) titleEl.innerHTML = titleEl.dataset[lang];
+
+  // 아티클 hero — 날짜/메타 (innerHTML: &nbsp; 보존)
+  const metaEl = document.querySelector('.article-meta');
+  if (metaEl?.dataset[lang]) metaEl.innerHTML = metaEl.dataset[lang];
+
+  // 액션 바 라벨
+  const likeLabel = document.getElementById('likeBtnLabel');
+  if (likeLabel) likeLabel.textContent = t('like');
+  const scrapLabel = document.getElementById('scrapBtnLabel');
+  if (scrapLabel) scrapLabel.textContent = t('scrap');
+  const commentLabel = document.getElementById('commentLabel');
+  if (commentLabel) commentLabel.textContent = t('comments');
+
+  // 댓글 섹션 타이틀 라벨
+  const commentsTitleText = document.querySelector('.comments-title-text');
+  if (commentsTitleText) commentsTitleText.textContent = t('comments');
+
+  // 댓글 입력 폼
+  const commentInput = document.getElementById('commentInput');
+  if (commentInput) commentInput.placeholder = t('commentPlaceholder');
+  const commentSubmitBtn = document.getElementById('commentSubmitBtn');
+  if (commentSubmitBtn) commentSubmitBtn.textContent = t('submit');
+
+  // 아티클 하단 네비게이션
   const navPrev = document.getElementById('navPrev');
   const navNext = document.getElementById('navNext');
   const navList = document.getElementById('navList');
-  if (navPrev) {
-    const map = { ko: '← 이전 글', en: '← Prev', ja: '← 前の記事' };
-    navPrev.firstChild && (navPrev.firstChild.textContent = map[lang] || map.ko);
-  }
-  if (navNext) {
-    const map = { ko: '다음 글 →', en: 'Next →', ja: '次の記事 →' };
-    navNext.firstChild && (navNext.firstChild.textContent = map[lang] || map.ko);
-  }
-  if (navList) {
-    const map = { ko: '목록으로', en: 'All Articles', ja: '一覧へ' };
-    navList.textContent = map[lang] || map.ko;
-  }
+  if (navPrev?.firstChild) navPrev.firstChild.textContent = ({ ko: '← 이전 글', en: '← Prev', ja: '← 前の記事' })[lang] || '← 이전 글';
+  if (navNext?.firstChild) navNext.firstChild.textContent = ({ ko: '다음 글 →', en: 'Next →', ja: '次の記事 →' })[lang] || '다음 글 →';
+  if (navList) navList.textContent = ({ ko: '목록으로', en: 'All Articles', ja: '一覧へ' })[lang] || '목록으로';
 }
 
 // ─── Like / Scrap ─────────────────────────────────────────
@@ -183,16 +231,16 @@ function buildCommentEl(articleId, commentId, data) {
 
   const replyBtn = document.createElement('button');
   replyBtn.className = 'reply-btn link-btn';
-  replyBtn.textContent = '답글';
+  replyBtn.textContent = t('reply');
   replyBtn.addEventListener('click', () => toggleReplyForm(articleId, commentId, repliesEl));
   footerEl.appendChild(replyBtn);
 
   if (isMine) {
     const delBtn = document.createElement('button');
     delBtn.className = 'comment-delete-btn link-btn';
-    delBtn.textContent = '삭제';
+    delBtn.textContent = t('delete');
     delBtn.addEventListener('click', async () => {
-      if (!confirm('댓글을 삭제할까요?')) return;
+      if (!confirm(t('confirmComment'))) return;
       await deleteDoc(doc(db, 'magazine', articleId, 'comments', commentId));
       await runTransaction(db, async tx => {
         tx.set(doc(db, 'magazine', articleId), { commentCount: increment(-1) }, { merge: true });
@@ -232,9 +280,9 @@ function buildReplyEl(articleId, commentId, replyId, data) {
   if (isMine) {
     const delBtn = document.createElement('button');
     delBtn.className = 'comment-delete-btn link-btn';
-    delBtn.textContent = '삭제';
+    delBtn.textContent = t('delete');
     delBtn.addEventListener('click', async () => {
-      if (!confirm('답글을 삭제할까요?')) return;
+      if (!confirm(t('confirmReply'))) return;
       await deleteDoc(doc(db, 'magazine', articleId, 'comments', commentId, 'replies', replyId));
       el.remove();
     });
@@ -249,10 +297,10 @@ function toggleReplyForm(articleId, commentId, repliesEl) {
   const form = document.createElement('div');
   form.className = 'reply-form';
   form.innerHTML = `
-    <textarea class="reply-input" placeholder="답글을 입력하세요..." maxlength="500" rows="2"></textarea>
+    <textarea class="reply-input" placeholder="${t('replyPlaceholder')}" maxlength="500" rows="2"></textarea>
     <div class="reply-form-btns">
-      <button class="primary-btn reply-submit-btn" style="font-size:0.8rem;padding:0.4rem 1rem;">등록</button>
-      <button class="link-btn reply-cancel-btn">취소</button>
+      <button class="primary-btn reply-submit-btn" style="font-size:0.8rem;padding:0.4rem 1rem;">${t('submit')}</button>
+      <button class="link-btn reply-cancel-btn">${t('cancel')}</button>
     </div>`;
   repliesEl.appendChild(form);
   form.querySelector('.reply-cancel-btn').addEventListener('click', () => form.remove());

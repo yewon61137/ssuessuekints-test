@@ -98,21 +98,21 @@
   <main class="container">
     <article>
       <div class="article-hero">
-        <span class="article-category">입문 가이드</span>
-        <h2 class="article-title">뜨개질 입문 완전 가이드<br>— 도구 선택부터 첫 작품까지</h2>
-        <p class="article-meta">2026년 1월 25일 &nbsp;·&nbsp; SSUESSUE KNITS</p>
+        <span class="article-category" data-ko="입문 가이드" data-en="Beginner's Guide" data-ja="入門ガイド">입문 가이드</span>
+        <h2 class="article-title" data-ko="뜨개질 입문 완전 가이드<br>— 도구 선택부터 첫 작품까지" data-en="Complete Beginner's Guide to Knitting<br>— From Tools to Your First Project" data-ja="編み物入門完全ガイド<br>— 道具選びから最初の作品まで">뜨개질 입문 완전 가이드<br>— 도구 선택부터 첫 작품까지</h2>
+        <p class="article-meta" data-ko="2026년 1월 25일 &nbsp;·&nbsp; SSUESSUE KNITS" data-en="January 25, 2026 &nbsp;·&nbsp; SSUESSUE KNITS" data-ja="2026年1月25日 &nbsp;·&nbsp; SSUESSUE KNITS">2026년 1월 25일 &nbsp;·&nbsp; SSUESSUE KNITS</p>
       </div>
 
       <div class="post-action-bar" style="margin-top:1.5rem;">
         <button class="action-btn" id="likeBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          좋아요 <span id="likeCount">0</span>
+          <span id="likeBtnLabel">좋아요</span> <span id="likeCount">0</span>
         </button>
         <button class="action-btn" id="scrapBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          스크랩 <span id="scrapCount">0</span>
+          <span id="scrapBtnLabel">스크랩</span> <span id="scrapCount">0</span>
         </button>
-        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;">댓글 <span id="commentCountDisplay">0</span></span>
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--secondary-color);align-self:center;"><span id="commentLabel">댓글</span> <span id="commentCountDisplay">0</span></span>
       </div>
 
       <div class="article-body">
@@ -362,7 +362,7 @@
           <p>基礎をある程度習得したら、SSUESSUE KNITSの図案ジェネレーターで自分だけのピクセル図案を作ってみましょう。写真や絵をアップロードするだけで、かぎ針・棒針両方に使えるカラーワーク図案が自動生成されます。</p>
         </div><!-- /ja -->
       <section class="comments-section" style="margin-top:2.5rem;padding-top:1.5rem;border-top:1.5px solid var(--border-color);">
-        <h2 class="comments-title">댓글 <span id="commentCountDisplay">0</span></h2>
+        <h2 class="comments-title"><span id="commentLabel">댓글</span> <span id="commentCountDisplay">0</span></h2>
         <div id="commentsList"></div>
         <div class="comment-form" style="margin-top:1.25rem;">
           <textarea id="commentInput" class="reply-input" placeholder="댓글을 입력하세요..." maxlength="500" rows="3"></textarea>
