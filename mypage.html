@@ -46,6 +46,7 @@
             <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
             <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
             <a href="#" class="gnb-sub-link gnb-counter-btn i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+            <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
           </div>
         </div>
         <a class="gnb-item gnb-link i18n" href="/community.html" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
@@ -123,6 +124,7 @@
             <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">내 프로젝트</button>
             <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">내 글·댓글</button>
             <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
+            <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
           </nav>
         </aside>
 
@@ -229,6 +231,17 @@
               <a href="/community.html" style="color:#000;font-weight:700;">커뮤니티 구경하기 →</a>
             </div>
             <div class="post-grid" id="scrapsGrid"></div>
+          </div>
+
+          <!-- 내 팔레트 패널 -->
+          <div class="mp-panel" id="panelPalettes">
+            <h2 class="mp-panel-title" data-i18n="title_palettes">내 팔레트</h2>
+            <div id="palettesLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="palettesEmpty" class="mypage-empty" style="display:none;">
+              저장된 팔레트가 없어요.
+              <a href="/color-palette.html" style="color:#000;font-weight:700;">배색 도우미 가기 →</a>
+            </div>
+            <div class="cp-palette-grid" id="palettesGrid"></div>
           </div>
 
         </div><!-- /.mp-content -->
@@ -382,6 +395,7 @@
       <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
       <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
       <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+      <a href="/color-palette.html" class="mobile-menu-link mobile-i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
       <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
       <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
       <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>

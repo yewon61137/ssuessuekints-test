@@ -38,6 +38,10 @@ const pageT = {
         title_projects: '내 프로젝트', title_posts: '내 글·댓글', title_scraps: '스크랩',
         row_label: '단', goal_label: '목표', no_goal: '목표 없음',
         progress_done: '% 완료', go_community: '커뮤니티 가기 →', go_counter: '단수 카운터 시작하기 →',
+        tab_palettes: '내 팔레트', title_palettes: '내 팔레트',
+        palette_open: '배색 도우미에서 열기', palette_delete: '삭제', palette_rename: '이름 변경',
+        confirm_delete_palette: '이 팔레트를 삭제하시겠습니까?', palette_rename_prompt: '새 팔레트 이름:',
+        empty_palettes: '저장된 팔레트가 없어요.',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -65,6 +69,10 @@ const pageT = {
         title_projects: 'My Projects', title_posts: 'Posts & Comments', title_scraps: 'Scraps',
         row_label: 'rows', goal_label: 'goal', no_goal: 'No goal',
         progress_done: '% done', go_community: 'Go to Community →', go_counter: 'Start Row Counter →',
+        tab_palettes: 'My Palettes', title_palettes: 'My Palettes',
+        palette_open: 'Open in Color Palette', palette_delete: 'Delete', palette_rename: 'Rename',
+        confirm_delete_palette: 'Delete this palette?', palette_rename_prompt: 'New palette name:',
+        empty_palettes: 'No saved palettes yet.',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -92,6 +100,10 @@ const pageT = {
         title_projects: 'マイプロジェクト', title_posts: '投稿・コメント', title_scraps: 'スクラップ',
         row_label: '段', goal_label: '目標', no_goal: '目標なし',
         progress_done: '% 完了', go_community: 'コミュニティへ →', go_counter: 'カウンター開始 →',
+        tab_palettes: 'マイパレット', title_palettes: 'マイパレット',
+        palette_open: '配色アシスタントで開く', palette_delete: '削除', palette_rename: '名前変更',
+        confirm_delete_palette: 'このパレットを削除しますか？', palette_rename_prompt: '新しい名前を入力:',
+        empty_palettes: '保存されたパレットがありません。',
     }
 };
 
@@ -145,6 +157,7 @@ function switchPanel(name) {
     else if (name === 'projects')  loadProjects(currentUid);
     else if (name === 'posts')     loadMyPosts(currentUid);
     else if (name === 'scraps')    loadScraps(currentUid);
+    else if (name === 'palettes')  loadPalettes(currentUid);
 }
 
 document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
@@ -760,6 +773,102 @@ async function loadScraps(uid) {
     }
 }
 
+// ── 내 팔레트 ─────────────────────────────────────────────────────────────────
+
+async function loadPalettes(uid) {
+    const loadingEl = document.getElementById('palettesLoading');
+    const emptyEl   = document.getElementById('palettesEmpty');
+    const gridEl    = document.getElementById('palettesGrid');
+    if (!loadingEl || !gridEl) return;
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    gridEl.innerHTML = '';
+
+    // 비로그인: localStorage 팔레트
+    if (!uid) {
+        try {
+            const local = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
+            loadingEl.style.display = 'none';
+            if (!local.length) { emptyEl.style.display = 'block'; return; }
+            local.forEach(p => gridEl.appendChild(buildPaletteCard(null, p.id, p)));
+        } catch { emptyEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const snap = await getDocs(query(
+            collection(db, `users/${uid}/palettes`),
+            orderBy('createdAt', 'desc'), limit(100)
+        ));
+        loadingEl.style.display = 'none';
+        if (snap.empty) { emptyEl.style.display = 'block'; return; }
+        snap.forEach(ds => gridEl.appendChild(buildPaletteCard(uid, ds.id, ds.data())));
+    } catch (e) {
+        loadingEl.textContent = '불러오기 실패.';
+        console.error(e);
+    }
+}
+
+function buildPaletteCard(uid, paletteId, data) {
+    const card = document.createElement('div');
+    card.className = 'cp-palette-card mp-palette-card';
+
+    const date = data.createdAt
+        ? (typeof data.createdAt.seconds === 'number'
+            ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR')
+            : new Date(data.createdAt).toLocaleDateString('ko-KR'))
+        : '';
+    const colors = Array.isArray(data.colors) ? data.colors : [];
+    const swatches = colors.map(c =>
+        `<span class="cp-palette-swatch" style="background:${escHtml(c)};width:28px;height:28px;border-radius:4px;display:inline-block;"></span>`
+    ).join('');
+
+    card.innerHTML = `
+        <div class="cp-palette-swatches" style="display:flex;gap:4px;margin-bottom:0.6rem;">${swatches}</div>
+        <p class="cp-palette-name" style="font-size:0.9rem;font-weight:600;margin:0 0 0.25rem;">${escHtml(data.name || '팔레트')}</p>
+        <p style="font-size:0.75rem;color:#aaa;margin:0 0 0.75rem;">${date}</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <a href="/color-palette.html?palette=${encodeURIComponent(JSON.stringify(colors))}" class="secondary-btn small-btn">${escHtml(tr('palette_open'))}</a>
+            <button class="secondary-btn small-btn mp-palette-rename-btn">${escHtml(tr('palette_rename'))}</button>
+            <button class="secondary-btn small-btn mp-palette-delete-btn">${escHtml(tr('palette_delete'))}</button>
+        </div>
+    `;
+
+    card.querySelector('.mp-palette-rename-btn').addEventListener('click', async () => {
+        const newName = window.prompt(tr('palette_rename_prompt'), data.name || '');
+        if (!newName || newName.trim() === data.name) return;
+        const trimmed = newName.trim();
+        try {
+            if (uid) {
+                await updateDoc(doc(db, `users/${uid}/palettes/${paletteId}`), { name: trimmed });
+            } else {
+                const existing = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
+                const idx = existing.findIndex(p => p.id === paletteId);
+                if (idx !== -1) { existing[idx].name = trimmed; localStorage.setItem('ssuessue_palettes', JSON.stringify(existing)); }
+            }
+            card.querySelector('.cp-palette-name').textContent = trimmed;
+            data.name = trimmed;
+        } catch (e) { console.error(e); }
+    });
+
+    card.querySelector('.mp-palette-delete-btn').addEventListener('click', async () => {
+        if (!window.confirm(tr('confirm_delete_palette'))) return;
+        try {
+            if (uid) {
+                await deleteDoc(doc(db, `users/${uid}/palettes/${paletteId}`));
+            } else {
+                const existing = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
+                localStorage.setItem('ssuessue_palettes', JSON.stringify(existing.filter(p => p.id !== paletteId)));
+            }
+            card.remove();
+            const gridEl = document.getElementById('palettesGrid');
+            if (gridEl && gridEl.children.length === 0) document.getElementById('palettesEmpty').style.display = 'block';
+        } catch (e) { console.error(e); }
+    });
+
+    return card;
+}
+
 // ── 게시글 카드 ───────────────────────────────────────────────────────────────
 
 function buildPostCard(postId, data, opts = {}) {
@@ -895,7 +1004,7 @@ onAuthStateChanged(auth, async user => {
 function setupOtherUserView() {
     // 도안은 본인 전용 — 타인 프로필에서 탭 자체를 숨김
     // 프로필 편집 / 내 프로젝트 / 스크랩 탭도 숨김
-    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps'].forEach(id => {
+    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
