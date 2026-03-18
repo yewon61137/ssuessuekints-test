@@ -5,6 +5,15 @@ export const t = {
         // 내비게이션
         btn_signin: '로그인', btn_signout: '로그아웃',
         btn_mypage: '마이페이지', btn_community: '커뮤니티', btn_notice: '공지사항',
+        btn_toolkit: '게이지 계산기',
+        // 도구함 추가 번역
+        tool_gauge_title: '게이지 계산기',
+        tool_shaping_title: '균등 늘림/줄임',
+        tool_convert_title: '도안 변환 계산기',
+        label_pattern_gauge: '도안 게이지 (10cm)',
+        label_my_gauge: '나의 게이지 (10cm)',
+        label_pattern_size: '도안의 코/단 수',
+        label_target_res: '내가 뜰 코/단 수',
         // 인증 모달
         tab_signin: '로그인', tab_signup: '회원가입',
         btn_google: 'Google로 계속하기', btn_signup: '회원가입', or_divider: '또는',
@@ -18,10 +27,30 @@ export const t = {
         tag_finished: '완성작', tag_wip: '진행중', tag_question: '질문',
         feed_loading: '불러오는 중...', feed_empty: '게시글이 없습니다. 첫 글을 작성해보세요!', load_more: '더 보기',
         mag_read_more: '읽기 →',
+        // 단수 카운터
+        row_counter_title: '단수 카운터',
+        add_counter: '카운터 추가',
+        reset_all: '전체 초기화',
+        delete_confirm: '이 카운터를 삭제하시겠습니까?',
+        placeholder_project_name: '프로젝트 이름',
+        btn_reset: '초기화',
+        label_repeat_unit: '반복 단위',
+        label_repeat_count: '반복 횟수',
+        label_step_count: '현재 단',
+        btn_mode_normal: '일반',
+        btn_mode_repeat: '반복',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
         btn_mypage: 'My Page', btn_community: 'Community', btn_notice: 'Notice',
+        btn_toolkit: 'Gauge Calc',
+        tool_gauge_title: 'Gauge Calculator',
+        tool_shaping_title: 'Even Shaping',
+        tool_convert_title: 'Pattern Converter',
+        label_pattern_gauge: 'Pattern Gauge (10cm)',
+        label_my_gauge: 'My Gauge (10cm)',
+        label_pattern_size: 'Pattern Stitches/Rows',
+        label_target_res: 'My Stitches/Rows',
         tab_signin: 'Sign In', tab_signup: 'Sign Up',
         btn_google: 'Continue with Google', btn_signup: 'Sign Up', or_divider: 'or',
         footer_generate: 'Create Pattern', footer_mypage: 'My Patterns',
@@ -32,10 +61,30 @@ export const t = {
         tag_finished: 'Finished', tag_wip: 'WIP', tag_question: 'Q&A',
         feed_loading: 'Loading...', feed_empty: 'No posts yet. Be the first to write!', load_more: 'Load More',
         mag_read_more: 'Read →',
+        // Row Counter
+        row_counter_title: 'Row Counter',
+        add_counter: 'Add Counter',
+        reset_all: 'Reset All',
+        delete_confirm: 'Delete this counter?',
+        placeholder_project_name: 'Project Name',
+        btn_reset: 'Reset',
+        label_repeat_unit: 'Repeat Unit',
+        label_repeat_count: 'Repeat',
+        label_step_count: 'Row',
+        btn_mode_normal: 'Normal',
+        btn_mode_repeat: 'Repeat',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
-        btn_mypage: 'マイページ', btn_community: 'コミュニティ', btn_notice: 'お知らせ',
+        btn_mypage: 'マイ페이지', btn_community: 'コミュニ티', btn_notice: 'お知らせ',
+        btn_toolkit: 'ゲージ計算機',
+        tool_gauge_title: 'ゲージ計算機',
+        tool_shaping_title: '均等な増減目',
+        tool_convert_title: '編み図変換計算機',
+        label_pattern_gauge: '編み図のゲージ (10cm)',
+        label_my_gauge: '自分のゲージ (10cm)',
+        label_pattern_size: '編み図の目数・段数',
+        label_target_res: '自分が編む目数・段数',
         tab_signin: 'ログイン', tab_signup: '新規登録',
         btn_google: 'Googleで続ける', btn_signup: '新規登録', or_divider: 'または',
         footer_generate: '編み図を作る', footer_mypage: 'マイ編み図',
@@ -46,7 +95,19 @@ export const t = {
         tag_finished: '完成作品', tag_wip: '制作中', tag_question: '質問',
         feed_loading: '読み込み中...', feed_empty: '投稿がありません。最初の投稿をしてみましょう！', load_more: 'もっと見る',
         mag_read_more: '読む →',
-    }
+        // 段数カウンター
+        row_counter_title: '段数カウンター',
+        add_counter: 'カウンター追加',
+        reset_all: 'すべてリセット',
+        delete_confirm: 'このカウンターを削除しますか？',
+        placeholder_project_name: 'プロジェクト名',
+        btn_reset: '리셋',
+        label_repeat_unit: '繰り返し単位',
+        label_repeat_count: '繰り返し',
+        label_step_count: '現在の段',
+        btn_mode_normal: '一般',
+        btn_mode_repeat: '繰り返し',
+        }
 };
 
 /**
@@ -93,6 +154,9 @@ export function applyLang(lang, opts = {}) {
     document.querySelectorAll('.naver-btn').forEach(el => {
         el.style.display = lang === 'ko' ? '' : 'none';
     });
+
+    // 언어 변경 이벤트 디스패치
+    window.dispatchEvent(new CustomEvent('langChange', { detail: { lang } }));
 }
 
 /**
