@@ -88,7 +88,7 @@ function renderPostCard(postId, data) {
         : '';
     const thumb = data.images && data.images[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
-        : (data.patternImageURL ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>` : '<div class="post-card-thumb post-card-thumb-empty"></div>');
+        : '<div class="post-card-thumb post-card-thumb-empty"></div>';
     const tagsHtml = (data.tags || []).slice(0, 3).map(tag => `<span class="post-card-tag">${escHtml(tag)}</span>`).join('');
 
     const avatarStyle = data.profilePhotoURL ? `style="background-image:url(${escHtml(data.profilePhotoURL)})"` : '';

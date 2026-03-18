@@ -772,9 +772,7 @@ function buildPostCard(postId, data, opts = {}) {
         : '';
     const thumb = data.images?.[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
-        : (data.patternImageURL
-            ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.patternImageURL)})"></div>`
-            : '<div class="post-card-thumb post-card-thumb-empty"></div>');
+        : '<div class="post-card-thumb post-card-thumb-empty"></div>';
     const tagsHtml = (data.tags || []).slice(0, 3).map(t => `<span class="post-card-tag">${escHtml(t)}</span>`).join('');
     const avatarStyle = data.profilePhotoURL ? `style="background-image:url(${escHtml(data.profilePhotoURL)})"` : '';
     const avatarInner = data.profilePhotoURL ? '' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';

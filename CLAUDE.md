@@ -16,14 +16,15 @@
 ### 적용 범위
 | 레이어 | 규칙 |
 |--------|------|
-| Firestore rules | `users/{uid}/patterns/{patternId}` read/write → `request.auth.uid == userId` 만 허용 (이미 적용) |
-| Storage rules | `users/{uid}/patterns/{patternId}/{filename}` read/write → `request.auth.uid == userId` 만 허용 (이미 적용) |
-| post.js | 커뮤니티 게시글에 도안이 연결되어 있어도 `연결된 도안` 섹션(썸네일·다운로드)은 **게시글 작성자 본인에게만 표시** |
-| mypage.js | 타인 프로필(`?uid=`) 보기 시 `내 도안함` 탭을 완전히 숨김. 사이드바 도안 통계도 숨김 |
+| Firestore rules | `users/{uid}/patterns/{patternId}` read/write → `request.auth.uid == userId` 만 허용 |
+| Storage rules | `users/{uid}/patterns/{patternId}/{filename}` read/write → `request.auth.uid == userId` 만 허용 |
+| community.js / post.js / home.js | 커뮤니티 게시글 카드/상세에 도안 이미지(`patternImageURL`) 노출 금지 — 완전히 제거됨 |
+| mypage.js | 타인 프로필(`?uid=`) 보기 시 `내 도안함` 탭 숨김, 사이드바 도안 통계 숨김 |
 
 ### 지켜야 할 구현 규칙
-- 도안 관련 UI(썸네일, PDF/PNG 버튼, 도안 탭)를 새로 추가할 때 반드시 `currentUser.uid === ownerUid` 조건으로 감싸야 한다.
-- `posts/{postId}`에 `patternImageURL`을 저장하는 기능을 수정·확장할 때, 이 URL이 비공개임을 전제하고 UI에서 노출하지 말 것.
+- **"커뮤니티 게시글에 도안 연결하기" 기능은 삭제됨.** 다시 추가하지 말 것.
+- `posts` 컬렉션 문서에 `patternImageURL`, `patternId` 필드를 추가하는 코드를 작성하지 말 것.
+- 도안 관련 UI(썸네일, PDF/PNG 버튼, 도안 탭)를 어떤 형태로든 새로 추가할 때 반드시 본인(`currentUser.uid === ownerUid`) 전용으로 제한해야 한다.
 - 타인이 볼 수 있는 화면(커뮤니티 피드, 게시글 상세, 타인 프로필)에 도안 이미지·데이터를 렌더링하는 코드를 추가하면 안 된다.
 
 ---

@@ -74,7 +74,7 @@ async function loadCommunityPosts() {
         const items = [];
         snap.forEach(doc => {
             const d = doc.data();
-            const imgUrl = d.patternImageURL || (d.images && d.images[0]) || '';
+            const imgUrl = (d.images && d.images[0]) || '';
             const nick = d.nickname ? String(d.nickname).substring(0, 20) : '익명';
             const title = d.title ? String(d.title).substring(0, 40) : '';
             items.push({ id: doc.id, imgUrl, nick, title });

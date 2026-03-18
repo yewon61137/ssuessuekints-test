@@ -7,7 +7,7 @@ import {
     doc, getDoc, collection, query, orderBy, getDocs,
     addDoc, deleteDoc, updateDoc, serverTimestamp, runTransaction, increment
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject, listAll, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+import { ref, deleteObject, listAll } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 initLang();
 
@@ -15,9 +15,7 @@ initLang();
 const params = new URLSearchParams(location.search);
 const postId = params.get('id');
 let currentUser = null;
-let authUser = undefined; // undefined = 아직 미확인, null = 비로그인, object = 로그인
 let postData = null;
-let linkedPatternData = null;
 let isLiked = false;
 let isScrapped = false;
 
@@ -84,12 +82,6 @@ function renderPost(pid, data) {
     // 본문
     const bodyEl = document.getElementById('postBody');
     bodyEl.textContent = data.content || '';
-
-    // 연결 도안: 본인(게시글 작성자)만 볼 수 있음
-    // authUser가 이미 확인된 상태라면 즉시 판단, 아직 미확인이면 onAuthStateChanged에서 처리
-    if (data.patternImageURL && authUser !== undefined && authUser && authUser.uid === data.uid) {
-        showLinkedPattern(data);
-    }
 
     // 카운터
     document.getElementById('likeCount').textContent = data.likeCount || 0;
@@ -427,226 +419,6 @@ async function submitComment(pid, content) {
     document.getElementById('commentInput').value = '';
 }
 
-// --- 연결 도안 표시 (본인만) ---
-function showLinkedPattern(data) {
-    if (!data.patternImageURL) return;
-    const section = document.getElementById('postLinkedPattern');
-    if (!section || section.style.display !== 'none') return; // 이미 표시 중이면 중복 방지
-    section.style.display = 'flex';
-    const thumbEl = document.getElementById('postLinkedThumb');
-    thumbEl.src = data.patternImageURL;
-    thumbEl.addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
-    const pngBtn = document.getElementById('postLinkedPngBtn');
-    if (pngBtn) pngBtn.href = data.patternImageURL;
-    if (data.patternId && data.uid) {
-        loadLinkedPattern(data.uid, data.patternId);
-    }
-}
-
-// --- 연결 도안 세부 정보 로드 ---
-async function loadLinkedPattern(uid, patternId) {
-    try {
-        const snap = await getDoc(doc(db, `users/${uid}/patterns/${patternId}`));
-        if (!snap.exists()) return;
-        linkedPatternData = snap.data();
-
-        const titleEl = document.getElementById('postLinkedTitle');
-        if (titleEl) titleEl.textContent = linkedPatternData.title || linkedPatternData.name || '';
-
-        const metaEl = document.getElementById('postLinkedMeta');
-        if (metaEl) {
-            const parts = [];
-            if (linkedPatternData.stitches && linkedPatternData.rows)
-                parts.push(`${linkedPatternData.stitches}코 × ${linkedPatternData.rows}단`);
-            if (linkedPatternData.widthCm && linkedPatternData.heightCm)
-                parts.push(`${linkedPatternData.widthCm}cm × ${linkedPatternData.heightCm}cm`);
-            else if (linkedPatternData.widthCm) parts.push(`${linkedPatternData.widthCm}cm`);
-            if (linkedPatternData.yarnType) parts.push(linkedPatternData.yarnType);
-            if (linkedPatternData.yarnMm) parts.push(`${linkedPatternData.yarnMm}mm`);
-            metaEl.textContent = parts.join(' · ');
-        }
-
-        // PNG 링크 갱신 (patternImageURL이 있으면 교체)
-        const pngBtn = document.getElementById('postLinkedPngBtn');
-        if (pngBtn && linkedPatternData.patternImageURL)
-            pngBtn.href = linkedPatternData.patternImageURL;
-
-        // 다운로드 버튼 표시
-        const actionsEl = document.getElementById('postLinkedActions');
-        if (actionsEl) actionsEl.style.display = 'flex';
-    } catch (e) {
-        // 비공개 도안 등 권한 없으면 조용히 무시 (썸네일만 표시)
-        console.log('Linked pattern details unavailable:', e.message);
-    }
-}
-
-// 파일 다운로드 공통 헬퍼
-// TODO: Google AdSense 승인 후 이 함수 호출 전 광고 모달 표시 로직 추가
-async function downloadBlob(url, filename) {
-    try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    } catch (e) {
-        window.open(url, '_blank');
-    }
-}
-
-// PDF 다운로드 (연결 도안) — getBlob() 우선(CORS 불필요), fetch 순으로 시도
-document.getElementById('postLinkedPdfBtn').addEventListener('click', async () => {
-    const data = linkedPatternData;
-    if (!data) return;
-    if (typeof window.jspdf === 'undefined') {
-        alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-        return;
-    }
-    const { jsPDF } = window.jspdf;
-    const imgUrl = data.patternImageURL || postData?.patternImageURL;
-    if (!imgUrl) return;
-    const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-
-    // 이미지 소스 결정: patternBase64 → getBlob → fetch → 원본URL
-    let blobUrl = null;
-    let imgSrc;
-    if (data.patternBase64) {
-        imgSrc = data.patternBase64; // data URL, CORS 불필요
-    } else {
-        if (data.patternStoragePath) {
-            try {
-                const blob = await getBlob(ref(storage, data.patternStoragePath));
-                blobUrl = URL.createObjectURL(blob);
-            } catch (e) { /* fallback */ }
-        }
-        if (!blobUrl) {
-            try {
-                const res = await fetch(imgUrl);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const blob = await res.blob();
-                blobUrl = URL.createObjectURL(blob);
-            } catch (e) { /* fallback */ }
-        }
-        imgSrc = blobUrl || imgUrl;
-    }
-
-    const img = new Image();
-    img.onload = () => {
-        const cleanup = () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
-        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const pdfW = pdf.internal.pageSize.getWidth();
-        const pdfH = pdf.internal.pageSize.getHeight();
-        const margin = 15;
-        const maxW = pdfW - margin * 2;
-        const maxH = pdfH - margin * 2 - 30;
-        let finalW = maxW;
-        let finalH = (img.height / img.width) * finalW;
-        if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
-        // 제목 (한글 포함 가능 — canvas에 그려서 이미지로 삽입)
-        const titleText = data.title || data.name || 'Pattern';
-        const titleCanvas = document.createElement('canvas');
-        titleCanvas.width = 900;
-        titleCanvas.height = 36;
-        const tCtx = titleCanvas.getContext('2d');
-        tCtx.font = '600 26px sans-serif';
-        tCtx.fillStyle = '#000000';
-        tCtx.fillText(titleText, 0, 26);
-        pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
-        pdf.setFontSize(10);
-        const sizeStr = (data.widthCm && data.heightCm)
-            ? `${data.widthCm}cm × ${data.heightCm}cm`
-            : (data.widthCm ? `${data.widthCm}cm` : '');
-        const infoLine = [
-            `${data.stitches || 0} Stitches × ${data.rows || 0} Rows`,
-            sizeStr,
-            data.yarnType || (data.yarnMm ? `${data.yarnMm}mm` : '')
-        ].filter(Boolean).join('  |  ');
-        pdf.text(infoLine, margin, margin + 13);
-        try {
-            const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = img.width;
-            tmpCanvas.height = img.height;
-            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-            const imgData = tmpCanvas.toDataURL('image/jpeg', 0.92);
-            pdf.addImage(imgData, 'JPEG', margin, margin + 20, finalW, finalH);
-        } catch (e) {
-            pdf.setTextColor(120, 120, 120);
-            pdf.text('* 도안 이미지는 PNG 버튼으로 별도 저장해주세요.', margin, margin + 25);
-            pdf.setTextColor(0, 0, 0);
-        }
-        if (data.legendHTML) {
-            pdf.addPage();
-            pdf.setFontSize(12);
-            pdf.text('Color Legend', margin, margin + 5);
-            const tmpDiv = document.createElement('div');
-            tmpDiv.innerHTML = data.legendHTML;
-            let y = margin + 15;
-            tmpDiv.querySelectorAll('.color-item').forEach(item => {
-                const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
-                if (rgbMatch) {
-                    pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
-                    pdf.rect(margin, y, 8, 8, 'F');
-                    pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
-                    pdf.setFontSize(9);
-                    pdf.text(item.querySelector('span')?.textContent || '', margin + 12, y + 6);
-                    y += 12;
-                    if (y > pdfH - margin) y = margin;
-                }
-            });
-        }
-        pdf.save(`${safeName}.pdf`);
-        cleanup();
-    };
-    img.onerror = () => {
-        if (blobUrl) URL.revokeObjectURL(blobUrl);
-        alert('이미지를 불러오지 못했습니다.');
-    };
-    img.src = imgSrc;
-});
-
-// PNG 직접 저장 (연결 도안)
-document.getElementById('postLinkedPngBtn').addEventListener('click', async (e) => {
-    e.preventDefault();
-    const data = linkedPatternData;
-    const safeName = (data?.title || data?.name || postData?.title || 'pattern')
-        .replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-
-    // patternBase64 우선 (CORS 불필요)
-    if (data?.patternBase64) {
-        const a = document.createElement('a');
-        a.href = data.patternBase64;
-        a.download = `${safeName}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-    }
-
-    const url = data?.patternImageURL || postData?.patternImageURL;
-    if (!url) return;
-
-    if (data?.patternStoragePath) {
-        try {
-            const blob = await getBlob(ref(storage, data.patternStoragePath));
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `${safeName}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-            return;
-        } catch (e) { /* fallback */ }
-    }
-    downloadBlob(url, `${safeName}.png`);
-});
-
 // --- 게시글 삭제 ---
 async function deletePost(pid, imageURLs) {
     if (!confirm('게시글을 삭제하시겠습니까? 댓글과 이미지도 함께 삭제됩니다.')) return;
@@ -816,7 +588,6 @@ initAuth();
 
 onAuthStateChanged(auth, async user => {
     currentUser = user || null;
-    authUser = currentUser;
 
     // 댓글 입력 폼 표시 토글
     const commentForm = document.getElementById('commentForm');
@@ -829,12 +600,10 @@ onAuthStateChanged(auth, async user => {
         commentLoginMsg.style.display = 'block';
     }
 
-    // 본인 글인 경우
+    // 본인 글인 경우 수정/삭제 버튼 표시
     if (postData && currentUser && currentUser.uid === postData.uid) {
         document.getElementById('postEditBtn').style.display = 'inline-block';
         document.getElementById('postDeleteBtn').style.display = 'inline-block';
-        // 연결 도안: loadPost가 먼저 완료되어 postData가 있고 authUser가 아직 undefined였던 경우
-        showLinkedPattern(postData);
     }
 
     // 좋아요/스크랩 상태 확인
