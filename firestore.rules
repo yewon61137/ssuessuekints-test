@@ -65,6 +65,9 @@ service cloud.firestore {
     // 매거진 아티클 (카운트 + 댓글)
     match /magazine/{articleId} {
       allow read: if true;
+      // 첫 좋아요·스크랩·댓글 시 문서가 없으면 create, 있으면 update
+      allow create: if request.auth != null &&
+        request.resource.data.keys().hasOnly(['likeCount', 'scrapCount', 'commentCount']);
       allow update: if request.auth != null &&
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['likeCount', 'scrapCount', 'commentCount']);
