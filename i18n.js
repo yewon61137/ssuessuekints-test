@@ -93,6 +93,9 @@ export function applyLang(lang, opts = {}) {
     document.querySelectorAll('.naver-btn').forEach(el => {
         el.style.display = lang === 'ko' ? '' : 'none';
     });
+
+    // 언어 변경 이벤트 발행
+    window.dispatchEvent(new CustomEvent('langChange', { detail: { lang } }));
 }
 
 /**
