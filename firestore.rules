@@ -52,6 +52,38 @@ service cloud.firestore {
       }
     }
 
+    // 매거진 좋아요
+    match /users/{userId}/magazineLikes/{articleId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 매거진 스크랩
+    match /users/{userId}/magazineScraps/{articleId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 매거진 아티클 (카운트 + 댓글)
+    match /magazine/{articleId} {
+      allow read: if true;
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likeCount', 'scrapCount', 'commentCount']);
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null && request.auth.uid == resource.data.uid;
+        allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+
+        match /replies/{replyId} {
+          allow read: if true;
+          allow create: if request.auth != null;
+          allow update: if request.auth != null && request.auth.uid == resource.data.uid;
+          allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+        }
+      }
+    }
+
     // 닉네임 예약
     match /usernames/{username} {
       allow read: if true;
