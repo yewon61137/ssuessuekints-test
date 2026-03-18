@@ -119,17 +119,18 @@
       margin-bottom: 2.5rem;
     }
     .home-tool-card {
-      border: 2px solid #000;
-      padding: 1.5rem;
+      border: none;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 1.25rem 0;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      transition: background 0.15s, color 0.15s;
       cursor: pointer;
     }
-    .home-tool-card:hover { background: #000; color: #fff; }
+    .home-tool-card:hover .htc-name { text-decoration: underline; }
+    .home-tool-card:hover .htc-link { text-decoration: underline; }
     .htc-top {
       display: flex;
       align-items: center;
@@ -165,7 +166,6 @@
       line-height: 1.6;
       color: #666;
     }
-    .home-tool-card:hover .htc-desc { color: #bbb; }
     .htc-link {
       font-size: 0.72rem;
       font-weight: 700;
@@ -178,15 +178,15 @@
     .home-bottom-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
+      gap: 2.5rem;
     }
-    .home-panel { border: 2px solid #000; padding: 1.25rem; }
+    .home-panel { border: none; padding: 0; }
     .home-panel-hdr {
       display: flex;
       align-items: baseline;
       margin-bottom: 0.75rem;
       padding-bottom: 0.4rem;
-      border-bottom: 1px solid #000;
+      border-bottom: 2px solid #000;
     }
     .home-panel-ttl {
       font-family: 'GmarketSans', sans-serif;

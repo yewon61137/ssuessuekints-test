@@ -3144,3 +3144,34 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 .magazine-wrap {
   padding-top: 2rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   REMOVE SQUARE BORDERS — 각 페이지 사각형 틀 제거
+═══════════════════════════════════════════════════════════════ */
+
+/* Pattern generator step sections — 4면 박스 → 하단 구분선만 */
+.step-section {
+  border: none !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+}
+.step-section:last-child {
+  border-bottom: none !important;
+}
+
+/* Container top spacing — 헤더 아래 충분한 여백 */
+.container {
+  padding-top: 2.5rem !important;
+}
+.community-container {
+  padding-top: 2rem !important;
+}
+.post-detail-container {
+  padding-top: 2rem !important;
+}
+.mypage-container {
+  padding-top: 2rem !important;
+}
