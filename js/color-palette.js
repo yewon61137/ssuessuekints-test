@@ -33,7 +33,7 @@ const pageT = {
   cp_palette_name_prompt: { ko: '팔레트 이름을 입력하세요', en: 'Enter palette name', ja: 'パレット名を入力してください' },
   cp_saved:        { ko: '팔레트가 저장되었어요!', en: 'Palette saved!', ja: 'パレットが保存されました！' },
   cp_save_error:   { ko: '저장 중 오류가 발생했어요', en: 'Error saving palette', ja: '保存中にエラーが発生しました' },
-  cp_login_to_save: { ko: '로그인하면 클라우드에 저장돼요 ☁️', en: 'Sign in to save to cloud ☁️', ja: 'ログインするとクラウドに保存できます ☁️' },
+  cp_login_to_save: { ko: '팔레트 저장은 로그인이 필요해요', en: 'Please sign in to save palettes', ja: 'パレットを保存するにはログインが必要です' },
   cp_guest_saved:  { ko: '게스트로 저장되었어요 (기기에만 보관)', en: 'Saved as guest (this device only)', ja: 'ゲストとして保存しました（このデバイスのみ）' },
 
   cp_all:     { ko: '전체', en: 'All', ja: 'すべて' },
@@ -951,6 +951,11 @@ function renderCuration(filter) {
 
 async function savePalette(colors, name, technique = '', season = '', mood = '') {
   const user = auth.currentUser;
+  if (!user) {
+    openAuthModal();
+    showToast(tr('cp_login_to_save'));
+    return;
+  }
   try {
     if (user) {
       await addDoc(collection(db, `users/${user.uid}/palettes`), {
@@ -963,6 +968,7 @@ async function savePalette(colors, name, technique = '', season = '', mood = '')
       });
       showToast(tr('cp_saved'));
     } else {
+      // (unreachable — guarded above, kept for safety)
       const key = 'ssuessue_palettes';
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
       existing.push({

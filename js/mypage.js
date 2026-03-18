@@ -42,6 +42,7 @@ const pageT = {
         palette_open: '배색 도우미에서 열기', palette_delete: '삭제', palette_rename: '이름 변경',
         confirm_delete_palette: '이 팔레트를 삭제하시겠습니까?', palette_rename_prompt: '새 팔레트 이름:',
         empty_palettes: '저장된 팔레트가 없어요.',
+        login_to_save_palette: '팔레트를 저장하려면 로그인이 필요해요.',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -73,6 +74,7 @@ const pageT = {
         palette_open: 'Open in Color Palette', palette_delete: 'Delete', palette_rename: 'Rename',
         confirm_delete_palette: 'Delete this palette?', palette_rename_prompt: 'New palette name:',
         empty_palettes: 'No saved palettes yet.',
+        login_to_save_palette: 'Please sign in to save palettes.',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -104,6 +106,7 @@ const pageT = {
         palette_open: '配色アシスタントで開く', palette_delete: '削除', palette_rename: '名前変更',
         confirm_delete_palette: 'このパレットを削除しますか？', palette_rename_prompt: '新しい名前を入力:',
         empty_palettes: '保存されたパレットがありません。',
+        login_to_save_palette: 'パレットを保存するにはログインが必要です。',
     }
 };
 
@@ -784,14 +787,13 @@ async function loadPalettes(uid) {
     emptyEl.style.display   = 'none';
     gridEl.innerHTML = '';
 
-    // 비로그인: localStorage 팔레트
+    // 비로그인: 로그인 안내
     if (!uid) {
-        try {
-            const local = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
-            loadingEl.style.display = 'none';
-            if (!local.length) { emptyEl.style.display = 'block'; return; }
-            local.forEach(p => gridEl.appendChild(buildPaletteCard(null, p.id, p)));
-        } catch { emptyEl.style.display = 'block'; }
+        loadingEl.style.display = 'none';
+        const loginLabel = { ko: '로그인', en: 'Sign in', ja: 'ログイン' }[currentLang] || '로그인';
+        emptyEl.innerHTML = `${tr('login_to_save_palette')} <button id="paletteLoginBtn" style="background:none;border:none;cursor:pointer;color:#000;font-weight:700;text-decoration:underline;">${loginLabel}</button>`;
+        emptyEl.style.display = 'block';
+        document.getElementById('paletteLoginBtn')?.addEventListener('click', openAuthModal);
         return;
     }
 
@@ -839,13 +841,7 @@ function buildPaletteCard(uid, paletteId, data) {
         if (!newName || newName.trim() === data.name) return;
         const trimmed = newName.trim();
         try {
-            if (uid) {
-                await updateDoc(doc(db, `users/${uid}/palettes/${paletteId}`), { name: trimmed });
-            } else {
-                const existing = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
-                const idx = existing.findIndex(p => p.id === paletteId);
-                if (idx !== -1) { existing[idx].name = trimmed; localStorage.setItem('ssuessue_palettes', JSON.stringify(existing)); }
-            }
+            await updateDoc(doc(db, `users/${uid}/palettes/${paletteId}`), { name: trimmed });
             card.querySelector('.cp-palette-name').textContent = trimmed;
             data.name = trimmed;
         } catch (e) { console.error(e); }
@@ -854,12 +850,7 @@ function buildPaletteCard(uid, paletteId, data) {
     card.querySelector('.mp-palette-delete-btn').addEventListener('click', async () => {
         if (!window.confirm(tr('confirm_delete_palette'))) return;
         try {
-            if (uid) {
-                await deleteDoc(doc(db, `users/${uid}/palettes/${paletteId}`));
-            } else {
-                const existing = JSON.parse(localStorage.getItem('ssuessue_palettes') || '[]');
-                localStorage.setItem('ssuessue_palettes', JSON.stringify(existing.filter(p => p.id !== paletteId)));
-            }
+            await deleteDoc(doc(db, `users/${uid}/palettes/${paletteId}`));
             card.remove();
             const gridEl = document.getElementById('palettesGrid');
             if (gridEl && gridEl.children.length === 0) document.getElementById('palettesEmpty').style.display = 'block';
