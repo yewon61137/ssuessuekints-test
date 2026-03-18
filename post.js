@@ -735,38 +735,46 @@ document.getElementById('scrapBtn').addEventListener('click', async () => {
     catch (e) { console.error('Scrap error:', e); }
 });
 
-document.getElementById('shareBtn').addEventListener('click', () => {
-    const title = document.title;
-    const url   = location.href;
-    const desc  = document.querySelector('meta[name="description"]')?.content || '';
-    const lbl   = document.querySelector('#shareBtn .share-label');
-    const lang  = document.documentElement.lang || 'ko';
-    const okMsg = { ko: '링크 복사됨!', en: 'Link copied!', ja: 'コピー済！' };
-    const origMsg = { ko: '공유', en: 'Share', ja: 'シェア' };
+const _shareBtn = document.getElementById('shareBtn');
+if (_shareBtn) {
+    _shareBtn.addEventListener('click', () => {
+        const url  = location.href;
+        const lbl  = _shareBtn.querySelector('.share-label');
+        const lang = document.documentElement.lang || 'ko';
+        const OK   = { ko: '링크 복사됨!', en: 'Link copied!', ja: 'コピー済！' };
+        const ORIG = { ko: '공유', en: 'Share', ja: 'シェア' };
 
-    function showCopied() {
-        if (lbl) lbl.textContent = okMsg[lang] || okMsg.ko;
-        setTimeout(() => { if (lbl) lbl.textContent = origMsg[lang] || origMsg.ko; }, 2000);
-    }
-    function copyFallback() {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(url).then(showCopied).catch(() => execCopy());
-        } else { execCopy(); }
-    }
-    function execCopy() {
-        const ta = document.createElement('textarea');
-        ta.value = url; ta.style.cssText = 'position:fixed;opacity:0;';
-        document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); showCopied(); } catch(e) {}
-        document.body.removeChild(ta);
-    }
+        function showCopied() {
+            if (lbl) { lbl.textContent = OK[lang] || OK.ko; }
+            setTimeout(() => { if (lbl) lbl.textContent = ORIG[lang] || ORIG.ko; }, 2000);
+        }
+        function execCopy() {
+            try {
+                const ta = Object.assign(document.createElement('textarea'), {
+                    value: url, style: 'position:fixed;opacity:0;'
+                });
+                document.body.appendChild(ta);
+                ta.focus(); ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showCopied();
+            } catch (e) { /* silent */ }
+        }
+        function clipCopy() {
+            navigator.clipboard.writeText(url).then(showCopied).catch(execCopy);
+        }
 
-    if (navigator.share) {
-        navigator.share({ title, text: desc, url }).catch(e => {
-            if (e.name !== 'AbortError') copyFallback();
-        });
-    } else { copyFallback(); }
-});
+        if (navigator.share) {
+            navigator.share({ title: document.title, url }).catch(e => {
+                if (e.name !== 'AbortError') clipCopy();
+            });
+        } else if (navigator.clipboard) {
+            clipCopy();
+        } else {
+            execCopy();
+        }
+    });
+}
 
 document.getElementById('commentForm').addEventListener('submit', async e => {
     e.preventDefault();
