@@ -29,6 +29,14 @@ class RowCounter extends HTMLElement {
             this.render();
         });
 
+        // Wire up header/mobile counter trigger buttons on all pages
+        document.addEventListener('click', (e) => {
+            const t = e.target.closest('#counterToggle, .gnb-counter-btn, .mobile-counter-btn, #toolCounterCard, .home-panel-counter-btn');
+            if (!t) return;
+            e.preventDefault();
+            this.toggleDrawer();
+        });
+
         // Firestore sync: load saved state on sign-in
         try {
             auth.onAuthStateChanged(user => {
