@@ -43,6 +43,11 @@ const pageT = {
         confirm_delete_palette: '이 팔레트를 삭제하시겠습니까?', palette_rename_prompt: '새 팔레트 이름:',
         empty_palettes: '저장된 팔레트가 없어요.',
         login_to_save_palette: '팔레트를 저장하려면 로그인이 필요해요.',
+        tab_public_palettes: '공개 팔레트', title_public_palettes: '공개 팔레트',
+        empty_public_palettes: '공개된 팔레트가 없어요.',
+        palette_public: '공개', palette_private: '비공개',
+        palette_make_public: '공개로 전환', palette_make_private: '비공개로 전환',
+        tab_other_posts: '게시글', user_not_found: '존재하지 않는 사용자예요.',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -75,6 +80,11 @@ const pageT = {
         confirm_delete_palette: 'Delete this palette?', palette_rename_prompt: 'New palette name:',
         empty_palettes: 'No saved palettes yet.',
         login_to_save_palette: 'Please sign in to save palettes.',
+        tab_public_palettes: 'Public Palettes', title_public_palettes: 'Public Palettes',
+        empty_public_palettes: 'No public palettes yet.',
+        palette_public: 'Public', palette_private: 'Private',
+        palette_make_public: 'Make Public', palette_make_private: 'Make Private',
+        tab_other_posts: 'Posts', user_not_found: 'This user does not exist.',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -107,6 +117,11 @@ const pageT = {
         confirm_delete_palette: 'このパレットを削除しますか？', palette_rename_prompt: '新しい名前を入力:',
         empty_palettes: '保存されたパレットがありません。',
         login_to_save_palette: 'パレットを保存するにはログインが必要です。',
+        tab_public_palettes: '公開パレット', title_public_palettes: '公開パレット',
+        empty_public_palettes: '公開されたパレットがありません。',
+        palette_public: '公開', palette_private: '非公開',
+        palette_make_public: '公開にする', palette_make_private: '非公開にする',
+        tab_other_posts: '投稿', user_not_found: 'このユーザーは存在しません。',
     }
 };
 
@@ -155,12 +170,13 @@ function switchPanel(name) {
     if (panelLoaded[name]) return;
     panelLoaded[name] = true;
 
-    if (name === 'profile')   loadProfilePanel(currentUid);
-    else if (name === 'patterns')  loadPatterns(currentUid);
-    else if (name === 'projects')  loadProjects(currentUid);
-    else if (name === 'posts')     loadMyPosts(currentUid);
-    else if (name === 'scraps')    loadScraps(currentUid);
-    else if (name === 'palettes')  loadPalettes(currentUid);
+    if (name === 'profile')          loadProfilePanel(currentUid);
+    else if (name === 'patterns')        loadPatterns(currentUid);
+    else if (name === 'projects')        loadProjects(currentUid);
+    else if (name === 'posts')           loadMyPosts(currentUid);
+    else if (name === 'scraps')          loadScraps(currentUid);
+    else if (name === 'palettes')        loadPalettes(currentUid);
+    else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
 }
 
 document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
@@ -222,10 +238,11 @@ async function fillSidebar(uid, readOnly = false) {
         joinEl.textContent = `${tr('joined')} ${d.toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')}`;
     }
 
-    // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨김
+    // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨기고 받은 좋아요 표시
     if (readOnly) {
         document.getElementById('mpStatPatterns')?.closest('.mp-stat')?.style.setProperty('display', 'none');
         document.getElementById('mpStatScraps')?.closest('.mp-stat')?.style.setProperty('display', 'none');
+        document.getElementById('mpStatLikesWrap')?.style.setProperty('display', '');
     }
 
     // 통계 (병렬)
@@ -242,6 +259,10 @@ async function fillSidebar(uid, readOnly = false) {
             const [posts] = results;
             const poEl = document.getElementById('mpStatPosts');
             if (poEl) poEl.textContent = posts.size;
+            let totalLikes = 0;
+            posts.forEach(ds => { totalLikes += ds.data().likeCount || 0; });
+            const likesEl = document.getElementById('mpStatLikes');
+            if (likesEl) likesEl.textContent = totalLikes;
         } else {
             const [posts, patterns, scraps] = results;
             const pEl  = document.getElementById('mpStatPatterns');
@@ -811,6 +832,61 @@ async function loadPalettes(uid) {
     }
 }
 
+// ── 공개 팔레트 (타인 프로필) ──────────────────────────────────────────────────
+
+async function loadPublicPalettes(uid) {
+    const loadingEl = document.getElementById('publicPalettesLoading');
+    const emptyEl   = document.getElementById('publicPalettesEmpty');
+    const gridEl    = document.getElementById('publicPalettesGrid');
+    if (!loadingEl || !gridEl) return;
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    gridEl.innerHTML = '';
+
+    try {
+        const snap = await getDocs(query(
+            collection(db, `users/${uid}/palettes`),
+            where('isPublic', '==', true)
+        ));
+        loadingEl.style.display = 'none';
+        if (snap.empty) {
+            emptyEl.textContent = tr('empty_public_palettes');
+            emptyEl.style.display = 'block';
+            return;
+        }
+        const palettes = [];
+        snap.forEach(ds => palettes.push({ id: ds.id, ...ds.data() }));
+        palettes
+            .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+            .forEach(p => gridEl.appendChild(buildPublicPaletteCard(p)));
+    } catch (e) {
+        loadingEl.style.display = 'none';
+        emptyEl.textContent = tr('empty_public_palettes');
+        emptyEl.style.display = 'block';
+        console.error(e);
+    }
+}
+
+function buildPublicPaletteCard(data) {
+    const card = document.createElement('div');
+    card.className = 'cp-palette-card';
+    const colors = Array.isArray(data.colors) ? data.colors : [];
+    const swatches = colors.map(c =>
+        `<span style="background:${escHtml(c)};width:28px;height:28px;border-radius:4px;display:inline-block;"></span>`
+    ).join('');
+    const date = data.createdAt?.seconds
+        ? new Date(data.createdAt.seconds * 1000).toLocaleDateString(
+            currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')
+        : '';
+    card.innerHTML = `
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:0.6rem;">${swatches}</div>
+        <p style="font-size:0.9rem;font-weight:600;margin:0 0 0.25rem;">${escHtml(data.name || '팔레트')}</p>
+        <p style="font-size:0.75rem;color:#aaa;margin:0 0 0.75rem;">${date}</p>
+        <a href="/color-palette.html?palette=${encodeURIComponent(JSON.stringify(colors))}" class="secondary-btn small-btn">${escHtml(tr('palette_open'))}</a>
+    `;
+    return card;
+}
+
 function buildPaletteCard(uid, paletteId, data) {
     const card = document.createElement('div');
     card.className = 'cp-palette-card mp-palette-card';
@@ -825,16 +901,34 @@ function buildPaletteCard(uid, paletteId, data) {
         `<span class="cp-palette-swatch" style="background:${escHtml(c)};width:28px;height:28px;border-radius:4px;display:inline-block;"></span>`
     ).join('');
 
+    const isPublic = !!data.isPublic;
     card.innerHTML = `
-        <div class="cp-palette-swatches" style="display:flex;gap:4px;margin-bottom:0.6rem;">${swatches}</div>
-        <p class="cp-palette-name" style="font-size:0.9rem;font-weight:600;margin:0 0 0.25rem;">${escHtml(data.name || '팔레트')}</p>
+        <div class="cp-palette-swatches" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:0.6rem;">${swatches}</div>
+        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.25rem;">
+            <p class="cp-palette-name" style="font-size:0.9rem;font-weight:600;margin:0;">${escHtml(data.name || '팔레트')}</p>
+            <span class="mp-palette-badge ${isPublic ? 'badge-public' : 'badge-private'}">${escHtml(isPublic ? tr('palette_public') : tr('palette_private'))}</span>
+        </div>
         <p style="font-size:0.75rem;color:#aaa;margin:0 0 0.75rem;">${date}</p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             <a href="/color-palette.html?palette=${encodeURIComponent(JSON.stringify(colors))}" class="secondary-btn small-btn">${escHtml(tr('palette_open'))}</a>
+            <button class="secondary-btn small-btn mp-palette-toggle-btn">${escHtml(isPublic ? tr('palette_make_private') : tr('palette_make_public'))}</button>
             <button class="secondary-btn small-btn mp-palette-rename-btn">${escHtml(tr('palette_rename'))}</button>
             <button class="secondary-btn small-btn mp-palette-delete-btn">${escHtml(tr('palette_delete'))}</button>
         </div>
     `;
+
+    card.querySelector('.mp-palette-toggle-btn').addEventListener('click', async () => {
+        const newVal = !data.isPublic;
+        try {
+            await updateDoc(doc(db, `users/${uid}/palettes/${paletteId}`), { isPublic: newVal });
+            data.isPublic = newVal;
+            const badge = card.querySelector('.mp-palette-badge');
+            const btn   = card.querySelector('.mp-palette-toggle-btn');
+            badge.textContent = newVal ? tr('palette_public') : tr('palette_private');
+            badge.className   = `mp-palette-badge ${newVal ? 'badge-public' : 'badge-private'}`;
+            btn.textContent   = newVal ? tr('palette_make_private') : tr('palette_make_public');
+        } catch (e) { console.error(e); }
+    });
 
     card.querySelector('.mp-palette-rename-btn').addEventListener('click', async () => {
         const newName = window.prompt(tr('palette_rename_prompt'), data.name || '');
@@ -963,9 +1057,14 @@ document.getElementById('gotoSignInBtn')?.addEventListener('click', openAuthModa
 
 onAuthStateChanged(auth, async user => {
     if (urlUid) {
+        // 본인 uid로 접근 시 내 마이페이지로 리다이렉트
+        if (user && user.uid === urlUid) {
+            location.replace('/mypage.html');
+            return;
+        }
         // 타인 프로필 모드 — 로그인 여부와 무관하게 표시
         currentUid = urlUid;
-        viewMode   = user && user.uid === urlUid ? 'mine' : 'other';
+        viewMode   = 'other';
         document.getElementById('notLoggedIn').style.display = 'none';
         document.getElementById('loggedIn').style.display    = '';
         if (!panelLoaded['_sidebar']) {
@@ -992,16 +1091,33 @@ onAuthStateChanged(auth, async user => {
     }
 });
 
-function setupOtherUserView() {
-    // 도안은 본인 전용 — 타인 프로필에서 탭 자체를 숨김
-    // 프로필 편집 / 내 프로젝트 / 스크랩 탭도 숨김
+async function setupOtherUserView() {
+    // 도안/프로필/프로젝트/스크랩/내 팔레트 탭 숨김
     ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-    // 내 댓글 서브탭도 불필요
+    // 내 댓글 서브탭 숨김
     const commentTab = document.getElementById('subtabComments');
     if (commentTab) commentTab.style.display = 'none';
 
-    switchPanel(currentPanel); // 'posts'
+    // 공개 팔레트 탭 표시
+    const pubPalBtn = document.getElementById('mpNavPublicPalettes');
+    if (pubPalBtn) pubPalBtn.style.display = '';
+
+    // "내 글·댓글" → "게시글" 레이블 변경
+    const postsNavBtn = document.getElementById('mpNavPosts');
+    if (postsNavBtn) postsNavBtn.textContent = tr('tab_other_posts');
+    const postsTitle = document.querySelector('#panelPosts .mp-panel-title');
+    if (postsTitle) postsTitle.textContent = tr('tab_other_posts');
+
+    // 존재하지 않는 uid 체크
+    const profile = await getUserProfile(urlUid);
+    if (!profile) {
+        document.getElementById('loggedIn').innerHTML =
+            `<div class="mypage-empty" style="padding:4rem 1rem;">${escHtml(tr('user_not_found'))}</div>`;
+        return;
+    }
+
+    switchPanel('posts');
 }

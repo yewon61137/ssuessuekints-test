@@ -117,12 +117,17 @@
               <span class="mp-stat-val" id="mpStatScraps">—</span>
               <span class="mp-stat-lbl i18n" data-ko="스크랩" data-en="Scraps" data-ja="スクラップ">스크랩</span>
             </div>
+            <div class="mp-stat" id="mpStatLikesWrap" style="display:none;">
+              <span class="mp-stat-val" id="mpStatLikes">—</span>
+              <span class="mp-stat-lbl i18n" data-ko="받은 좋아요" data-en="Likes" data-ja="いいね">받은 좋아요</span>
+            </div>
           </div>
           <nav class="mp-nav" id="mpNav">
             <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile" data-i18n="tab_profile">프로필</button>
             <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns" data-i18n="tab_patterns">내 도안함</button>
             <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">내 프로젝트</button>
             <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">내 글·댓글</button>
+            <button class="mp-nav-btn" data-panel="publicPalettes" id="mpNavPublicPalettes" style="display:none;" data-i18n="tab_public_palettes">공개 팔레트</button>
             <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
             <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
           </nav>
@@ -242,6 +247,14 @@
               <a href="/color-palette.html" style="color:#000;font-weight:700;">배색 도우미 가기 →</a>
             </div>
             <div class="cp-palette-grid" id="palettesGrid"></div>
+          </div>
+
+          <!-- 공개 팔레트 패널 (타인 프로필) -->
+          <div class="mp-panel" id="panelPublicPalettes">
+            <h2 class="mp-panel-title" data-i18n="title_public_palettes">공개 팔레트</h2>
+            <div id="publicPalettesLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="publicPalettesEmpty" class="mypage-empty" style="display:none;"></div>
+            <div class="cp-palette-grid" id="publicPalettesGrid"></div>
           </div>
 
         </div><!-- /.mp-content -->
