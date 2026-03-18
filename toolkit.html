@@ -28,7 +28,7 @@
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
   <link href='/style.css' rel='stylesheet'>
   <style>
-    /* Toolkit Specific Styles */
+    /* ── 게이지 계산기 전용 스타일 ── */
     .toolkit-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -36,33 +36,32 @@
       margin-top: 2rem;
     }
     .tool-card {
-      background: var(--panel-bg);
-      border: 1.5px solid var(--border-color);
+      border: 2px solid #000;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .tool-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
     }
     .tool-title {
-      font-size: 1.5rem;
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 1rem;
       font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
       margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #000;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
-    .tool-title i { font-style: normal; font-size: 1.8rem; }
-    
+    .tool-title i { font-style: normal; font-size: 1.2rem; }
+
     .calc-group { margin-bottom: 1.25rem; }
     .calc-group label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .calc-input-row {
       display: flex;
@@ -71,99 +70,100 @@
     }
     .calc-input-row input {
       flex: 1;
-      padding: 0.75rem;
-      border: 1.5px solid var(--border-color);
-      border-radius: 6px;
-      font-family: inherit;
-      font-size: 1rem;
+      padding: 0.65rem 0.75rem;
+      border: 2px solid #000;
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.95rem;
+      background: #fff;
+      color: #000;
     }
-    .calc-unit { font-size: 0.85rem; color: var(--secondary-color); min-width: 3rem; }
+    .calc-input-row input:focus { outline: none; background: #f5f5f5; }
+    .calc-unit { font-size: 0.82rem; color: #666; min-width: 3rem; font-weight: 700; }
 
     .result-area {
       margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px dashed var(--border-color);
+      padding-top: 1.25rem;
+      border-top: 2px solid #000;
     }
     .result-box {
-      background: var(--accent-color);
+      background: #000;
+      color: #fff;
       padding: 1.25rem;
-      border-radius: 8px;
       text-align: center;
     }
-    .result-label { font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 0.25rem; }
-    .result-value { font-size: 1.75rem; font-weight: 900; color: var(--primary-color); }
-    .result-sub-value { font-size: 1rem; font-weight: 700; margin-top: 0.5rem; }
+    .result-label { font-size: 0.75rem; color: #aaa; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .result-value { font-size: 1.75rem; font-weight: 900; color: #fff; }
+    .result-sub-value { font-size: 0.95rem; font-weight: 700; margin-top: 0.5rem; color: #ccc; }
 
     .shaping-pattern {
       margin-top: 1rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       line-height: 1.7;
-      background: #f9f9f9;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
       padding: 1rem;
-      border-radius: 6px;
       white-space: pre-wrap;
-    }
-    
-    @media (prefers-color-scheme: dark) {
-      .shaping-pattern { background: #2a2a2a; }
     }
 
     /* Unit toggle */
     .unit-toggle-row {
       display: flex; align-items: center; gap: 0.5rem;
-      margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--secondary-color);
+      margin-bottom: 1.25rem; font-size: 0.82rem; color: #666;
     }
     .unit-btn {
-      padding: 0.28rem 0.75rem; border: 1.5px solid var(--border-color);
-      border-radius: 20px; background: white; font-size: 0.8rem;
-      cursor: pointer; font-family: inherit; transition: all 0.15s;
+      padding: 0.28rem 0.75rem;
+      border: 2px solid #000;
+      background: #fff;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: 'GmarketSans', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: background 0.1s, color 0.1s;
     }
-    .unit-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-    .result-dims { font-size: 0.85rem; color: var(--secondary-color); margin-top: 0.4rem; }
+    .unit-btn.active { background: #000; color: #fff; }
+    .result-dims { font-size: 0.82rem; color: #666; margin-top: 0.4rem; }
 
     /* Gauge history */
-    .gauge-history { margin-top: 1.25rem; font-size: 0.85rem; }
+    .gauge-history { margin-top: 1.25rem; font-size: 0.82rem; }
     .history-header {
       display: flex; justify-content: space-between; align-items: center;
-      font-weight: 700; margin-bottom: 0.5rem; color: var(--secondary-color);
+      font-weight: 800; margin-bottom: 0.5rem; color: #333;
+      text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.75rem;
     }
     .history-clear-btn {
-      background: none; border: 1px solid var(--border-color); border-radius: 4px;
-      padding: 0.15rem 0.5rem; font-size: 0.75rem; cursor: pointer;
-      color: var(--secondary-color); font-family: inherit;
+      background: none; border: 1px solid #000;
+      padding: 0.15rem 0.5rem; font-size: 0.72rem; cursor: pointer;
+      font-family: 'GmarketSans', sans-serif; font-weight: 700;
     }
+    .history-clear-btn:hover { background: #000; color: #fff; }
     .history-item {
       display: grid; grid-template-columns: 1.2rem 1fr 1fr 1fr;
-      gap: 0.4rem; padding: 0.4rem 0; border-bottom: 1px dotted var(--border-color); align-items: center;
+      gap: 0.4rem; padding: 0.4rem 0; border-bottom: 1px solid #eee; align-items: center;
     }
-    .history-num { font-weight: 700; color: var(--primary-color); }
+    .history-num { font-weight: 800; color: #000; }
     .history-result { font-weight: 700; }
 
     /* Gauge bar + diff */
     .gauge-bar-area {
       margin-top: 1rem; padding: 0.85rem 1rem;
-      background: var(--accent-color, #f9f0ea); border-radius: 8px; font-size: 0.85rem;
+      background: #f5f5f5; border: 1px solid #ddd; font-size: 0.85rem;
     }
-    .gauge-bar-label { margin-bottom: 0.3rem; }
-    .gauge-bar-track { height: 10px; background: var(--border-color, #e0d5c8); border-radius: 5px; overflow: hidden; }
-    .gauge-bar-fill  { height: 100%; border-radius: 5px; transition: width 0.3s ease; }
-    .pattern-bar { background: #a0a0b0; }
-    .my-bar      { background: var(--primary-color, #c87941); }
+    .gauge-bar-label { margin-bottom: 0.3rem; font-size: 0.78rem; font-weight: 700; }
+    .gauge-bar-track { height: 8px; background: #ddd; overflow: hidden; }
+    .gauge-bar-fill  { height: 100%; transition: width 0.3s ease; }
+    .pattern-bar { background: #888; }
+    .my-bar      { background: #000; }
     .gauge-diff-badge {
-      margin-top: 0.75rem; padding: 0.4rem 0.75rem; border-radius: 6px;
-      font-size: 0.85rem; font-weight: 700; text-align: center;
+      margin-top: 0.75rem; padding: 0.4rem 0.75rem;
+      font-size: 0.82rem; font-weight: 700; text-align: center;
+      border: 1px solid #000;
     }
-    .diff-tighter { background: #fff0e0; color: #c87941; }
-    .diff-looser  { background: #e8f4ff; color: #4a7fbd; }
-    .diff-equal   { background: #eaffea; color: #3a8a3a; }
+    .diff-tighter { background: #f5f5f5; color: #000; }
+    .diff-looser  { background: #f5f5f5; color: #000; }
+    .diff-equal   { background: #000; color: #fff; }
     .gauge-diff-area { margin-top: 0; }
-
-    @media (prefers-color-scheme: dark) {
-      .unit-btn { background: #2a2a2a; color: #ddd; }
-      .diff-tighter { background: #3d2010; color: #ffaa70; }
-      .diff-looser  { background: #0d2a3d; color: #70aaff; }
-      .diff-equal   { background: #0d3d0d; color: #70ee70; }
-    }
   </style>
 </head>
 <body>

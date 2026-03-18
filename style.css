@@ -3124,3 +3124,23 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   top: 56px !important;
   height: calc(100vh - 56px) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTENT SPACING — 헤더 아래 여백
+═══════════════════════════════════════════════════════════════ */
+.container,
+.community-container,
+.post-detail-container,
+.mypage-container,
+.mypage-wrap,
+.profile-main,
+.page-wrap,
+.notice-wrap,
+.about-wrap,
+.terms-wrap,
+.privacy-wrap,
+.guide-wrap,
+.toolkit-wrap,
+.magazine-wrap {
+  padding-top: 2rem;
+}
