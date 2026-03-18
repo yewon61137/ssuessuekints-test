@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="뜨개 배색 도우미 — 색상 조합 시뮬레이터, 팔레트 추천, 줄무늬 계산기. SSUESSUE KNITS의 배색 설계 툴.">
+  <meta property="og:title" content="배색 도우미 | SSUESSUE KNITS">
+  <meta property="og:description" content="뜨개 배색 도우미 — 색상 조합 시뮬레이터, 팔레트 추천, 줄무늬 계산기.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <title>배색 도우미 | SSUESSUE KNITS</title>
+  <link rel="preconnect" href="https://webfontworld.github.io">
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
+  <link href='/style.css?v=2' rel='stylesheet'>
+</head>
+<body>
+
+<header>
+  <div class="hdr-inner">
+    <a href="/" class="hdr-logo">SSUESSUE KNITS<span class="hdr-logo-kr">쓔쓔닛츠</span></a>
+    <nav class="gnb">
+      <div class="gnb-item gnb-has-sub">
+        <a class="gnb-link" href="#">
+          <span class="i18n" data-ko="도구" data-en="Tools" data-ja="ツール">Tools</span>
+          <svg class="gnb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </a>
+        <div class="gnb-sub">
+          <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
+          <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
+          <a href="#" class="gnb-sub-link gnb-counter-btn i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+          <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
+        </div>
+      </div>
+      <a class="gnb-item gnb-link i18n" href="/community.html" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">Community</a>
+      <a class="gnb-item gnb-link i18n" href="/magazine.html" data-ko="매거진" data-en="Magazine" data-ja="マガジン">Magazine</a>
+    </nav>
+    <div class="hdr-right">
+      <div class="lang-selector">
+        <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-btn active" data-lang="ko">한국어</button>
+          <button class="lang-btn" data-lang="en">English</button>
+          <button class="lang-btn" data-lang="ja">日本語</button>
+        </div>
+      </div>
+      <button class="hdr-icon-btn" id="counterToggle" aria-label="단수 카운터">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
+      <div class="auth-user" id="authUserArea" style="display:none;">
+        <span style="display:none;" id="authUserEmail"></span>
+        <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
+        <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
+      </div>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
+  <button class="mobile-signin-btn mobile-i18n" id="mobileSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
+  <div class="mobile-auth-user" id="mobileAuthUserArea" style="display:none;">
+    <a href="/mypage.html" class="mobile-mypage-btn mobile-i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
+    <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
+  </div>
+  <hr class="mobile-menu-divider">
+  <nav class="mobile-menu-nav">
+    <div class="mobile-menu-section-title mobile-i18n" data-ko="도구" data-en="Tools" data-ja="ツール">도구</div>
+    <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
+    <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
+    <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+    <a href="/color-palette.html" class="mobile-menu-link mobile-i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
+    <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
+    <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
+    <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
+    <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
+    <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+  </nav>
+</div>
+
+<main class="cp-wrap">
+  <div class="cp-header">
+    <h1 class="cp-title i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</h1>
+    <p class="cp-subtitle i18n" data-ko="색상 조합을 시뮬레이션하고 나만의 팔레트를 저장해보세요" data-en="Simulate color combinations and save your own palettes" data-ja="配色をシミュレーションして、自分だけのパレットを保存しよう">색상 조합을 시뮬레이션하고 나만의 팔레트를 저장해보세요</p>
+  </div>
+
+  <!-- 탭 네비게이션 -->
+  <div class="cp-tabs">
+    <button class="cp-tab active" data-tab="simulator" data-i18n="cp_tab_simulator">배색 시뮬레이터</button>
+    <button class="cp-tab" data-tab="recommend" data-i18n="cp_tab_recommend">조합 추천</button>
+    <button class="cp-tab" data-tab="stripe" data-i18n="cp_tab_stripe">줄무늬 계산기</button>
+    <button class="cp-tab" data-tab="curation" data-i18n="cp_tab_curation">팔레트 큐레이션</button>
+  </div>
+
+  <!-- TAB 1: 배색 시뮬레이터 -->
+  <div class="cp-panel active" id="panelSimulator">
+    <div class="cp-sim-layout">
+      <!-- 왼쪽: 색상 슬롯 + 설정 -->
+      <div class="cp-sim-left">
+        <div class="cp-section-label i18n" data-ko="색상 슬롯" data-en="Color Slots" data-ja="カラースロット">색상 슬롯</div>
+        <div id="simSlots" class="cp-color-slots"></div>
+        <div class="cp-slot-actions">
+          <button class="secondary-btn small-btn" id="simAddColorBtn" data-i18n="cp_add_color">+ 색상 추가</button>
+        </div>
+
+        <div class="cp-section-label" style="margin-top:1.5rem;">
+          <span class="i18n" data-ko="텍스처" data-en="Texture" data-ja="テクスチャ">텍스처</span>
+        </div>
+        <div class="cp-texture-tabs" id="textureTabs">
+          <button class="cp-texture-btn active" data-texture="stockinette" data-i18n="cp_tex_stk">메리야스</button>
+          <button class="cp-texture-btn" data-texture="garter" data-i18n="cp_tex_gtr">가터</button>
+          <button class="cp-texture-btn" data-texture="stripes" data-i18n="cp_tex_str">줄무늬</button>
+          <button class="cp-texture-btn" data-texture="fairisle" data-i18n="cp_tex_fi">페어아일</button>
+          <button class="cp-texture-btn" data-texture="intarsia" data-i18n="cp_tex_int">인타샤</button>
+        </div>
+
+        <!-- 줄무늬 단수 슬라이더 (texture=stripes일때만 표시) -->
+        <div id="simStripeSliders" class="cp-stripe-controls" style="display:none;">
+          <div class="cp-section-label i18n" data-ko="색상별 단수" data-en="Rows per color" data-ja="色ごとの段数">색상별 단수</div>
+        </div>
+
+        <!-- 대비비 표시 -->
+        <div class="cp-contrast-box">
+          <div class="cp-contrast-label i18n" data-ko="대비비 (첫 두 색상)" data-en="Contrast Ratio (first 2 colors)" data-ja="コントラスト比（最初の2色）">대비비 (첫 두 색상)</div>
+          <div id="simContrast" class="cp-contrast"></div>
+        </div>
+
+        <!-- 색약 시뮬레이션 -->
+        <div class="cp-section-label i18n" data-ko="색약 시뮬레이션" data-en="Color Blindness" data-ja="色覚シミュレーション">색약 시뮬레이션</div>
+        <div class="cp-cvd-btns">
+          <button class="cp-cvd-btn active" data-cvd="normal" data-i18n="cp_cvd_normal">정상</button>
+          <button class="cp-cvd-btn" data-cvd="protanopia" data-i18n="cp_cvd_prot">적녹(P)</button>
+          <button class="cp-cvd-btn" data-cvd="deuteranopia" data-i18n="cp_cvd_deut">적녹(D)</button>
+          <button class="cp-cvd-btn" data-cvd="tritanopia" data-i18n="cp_cvd_trit">청황</button>
+        </div>
+
+        <button class="primary-btn cp-save-btn" id="simSaveBtn" data-i18n="cp_save_palette">내 팔레트에 저장</button>
+      </div>
+
+      <!-- 오른쪽: 캔버스 미리보기 -->
+      <div class="cp-sim-right">
+        <div class="cp-section-label i18n" data-ko="미리보기" data-en="Preview" data-ja="プレビュー">미리보기</div>
+        <canvas id="simCanvas" class="cp-preview-canvas" width="420" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: 조합 추천 -->
+  <div class="cp-panel" id="panelRecommend">
+    <div class="cp-rec-controls">
+      <div class="cp-rec-row">
+        <div class="cp-rec-field">
+          <label class="cp-section-label i18n" data-ko="기준색" data-en="Base Color" data-ja="基準色">기준색</label>
+          <div class="cp-slot-row">
+            <input type="color" id="recBaseColor" value="#C07A7A" class="cp-color-input">
+            <input type="text" id="recBaseHex" value="#C07A7A" class="cp-hex-input" maxlength="7">
+          </div>
+        </div>
+        <div class="cp-rec-field">
+          <label class="cp-section-label i18n" data-ko="기법" data-en="Technique" data-ja="技法">기법</label>
+          <select id="recTechnique" class="cp-select">
+            <option value="all" data-i18n="cp_all">전체</option>
+            <option value="stripes" data-i18n="cp_tex_str">줄무늬</option>
+            <option value="fairisle" data-i18n="cp_tex_fi">페어아일</option>
+            <option value="intarsia" data-i18n="cp_tex_int">인타샤</option>
+            <option value="colorwork" data-i18n="cp_colorwork">배색뜨기</option>
+            <option value="accent" data-i18n="cp_accent">단색포인트</option>
+          </select>
+        </div>
+      </div>
+      <div class="cp-rec-row">
+        <div class="cp-rec-field">
+          <label class="cp-section-label i18n" data-ko="시즌" data-en="Season" data-ja="シーズン">시즌</label>
+          <div class="cp-filter-btns" id="recSeasonFilter">
+            <button class="cp-filter-btn active" data-val="all" data-i18n="cp_all">전체</button>
+            <button class="cp-filter-btn" data-val="spring" data-i18n="cp_spring">봄</button>
+            <button class="cp-filter-btn" data-val="summer" data-i18n="cp_summer">여름</button>
+            <button class="cp-filter-btn" data-val="autumn" data-i18n="cp_autumn">가을</button>
+            <button class="cp-filter-btn" data-val="winter" data-i18n="cp_winter">겨울</button>
+          </div>
+        </div>
+        <div class="cp-rec-field">
+          <label class="cp-section-label i18n" data-ko="무드" data-en="Mood" data-ja="ムード">무드</label>
+          <div class="cp-filter-btns" id="recMoodFilter">
+            <button class="cp-filter-btn active" data-val="all" data-i18n="cp_all">전체</button>
+            <button class="cp-filter-btn" data-val="warm" data-i18n="cp_warm">따뜻한</button>
+            <button class="cp-filter-btn" data-val="cool" data-i18n="cp_cool">차가운</button>
+            <button class="cp-filter-btn" data-val="vintage" data-i18n="cp_vintage">빈티지</button>
+            <button class="cp-filter-btn" data-val="modern" data-i18n="cp_modern">모던</button>
+            <button class="cp-filter-btn" data-val="pastel" data-i18n="cp_pastel">파스텔</button>
+            <button class="cp-filter-btn" data-val="natural" data-i18n="cp_natural">내추럴</button>
+          </div>
+        </div>
+      </div>
+      <button class="primary-btn" id="recGenerateBtn" data-i18n="cp_generate">추천 생성</button>
+    </div>
+    <div id="recResults" class="cp-palette-grid"></div>
+  </div>
+
+  <!-- TAB 3: 줄무늬 배분 계산기 -->
+  <div class="cp-panel" id="panelStripe">
+    <div class="cp-stripe-calc-layout">
+      <div class="cp-stripe-calc-left">
+        <div class="cp-rec-row">
+          <div class="cp-rec-field">
+            <label class="cp-section-label i18n" data-ko="총 단수" data-en="Total Rows" data-ja="総段数">총 단수</label>
+            <input type="number" id="stripeCalcTotalRows" class="cp-number-input" value="100" min="1" max="9999">
+          </div>
+          <div class="cp-rec-field">
+            <label class="cp-section-label i18n" data-ko="색상 수" data-en="Colors" data-ja="色数">색상 수</label>
+            <select id="stripeCalcColorCount" class="cp-select">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="stripeCalcColors" class="cp-color-slots" style="margin-bottom:1rem;"></div>
+
+        <div class="cp-rec-field" style="margin-bottom:1rem;">
+          <label class="cp-section-label i18n" data-ko="배분 방식" data-en="Distribution" data-ja="配分方式">배분 방식</label>
+          <div class="cp-filter-btns">
+            <button class="cp-filter-btn active" data-dist="equal" data-i18n="cp_dist_equal">균등</button>
+            <button class="cp-filter-btn" data-dist="golden" data-i18n="cp_dist_golden">황금비</button>
+            <button class="cp-filter-btn" data-dist="fibonacci" data-i18n="cp_dist_fib">피보나치</button>
+            <button class="cp-filter-btn" data-dist="custom" data-i18n="cp_dist_custom">직접 입력</button>
+          </div>
+        </div>
+
+        <button class="primary-btn" id="stripeCalcBtn" data-i18n="cp_calculate">계산하기</button>
+      </div>
+
+      <div class="cp-stripe-calc-right">
+        <div id="stripeCalcResult" style="display:none;">
+          <div class="cp-section-label i18n" data-ko="배분 결과" data-en="Distribution Result" data-ja="配分結果">배분 결과</div>
+          <table class="cp-stripe-table" id="stripeCalcTable">
+            <thead>
+              <tr>
+                <th data-i18n="cp_color">색상</th>
+                <th data-i18n="cp_rows">단수</th>
+                <th data-i18n="cp_ratio">비율</th>
+              </tr>
+            </thead>
+            <tbody id="stripeCalcTableBody"></tbody>
+          </table>
+          <canvas id="stripeCalcCanvas" class="cp-preview-canvas" width="420" height="180" style="margin-top:1rem;"></canvas>
+          <div class="cp-slot-actions" style="margin-top:1rem;gap:0.5rem;">
+            <button class="secondary-btn small-btn" id="stripeToSimBtn" data-i18n="cp_to_simulator">시뮬레이터로 보기</button>
+            <button class="primary-btn small-btn" id="stripeCalcSaveBtn" data-i18n="cp_save_palette">내 팔레트에 저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: 팔레트 큐레이션 -->
+  <div class="cp-panel" id="panelCuration">
+    <div class="cp-cur-filters">
+      <div class="cp-filter-btns" id="curFilter">
+        <button class="cp-filter-btn active" data-filter="all" data-i18n="cp_all">전체</button>
+        <button class="cp-filter-btn" data-filter="spring" data-i18n="cp_spring">봄</button>
+        <button class="cp-filter-btn" data-filter="summer" data-i18n="cp_summer">여름</button>
+        <button class="cp-filter-btn" data-filter="autumn" data-i18n="cp_autumn">가을</button>
+        <button class="cp-filter-btn" data-filter="winter" data-i18n="cp_winter">겨울</button>
+        <button class="cp-filter-btn" data-filter="vintage" data-i18n="cp_vintage">빈티지</button>
+        <button class="cp-filter-btn" data-filter="modern" data-i18n="cp_modern">모던</button>
+        <button class="cp-filter-btn" data-filter="pastel" data-i18n="cp_pastel">파스텔</button>
+        <button class="cp-filter-btn" data-filter="natural" data-i18n="cp_natural">내추럴</button>
+      </div>
+    </div>
+    <div id="curGrid" class="cp-palette-grid"></div>
+  </div>
+
+  <!-- 토스트 -->
+  <div id="cpToast" class="cp-toast" style="display:none;"></div>
+</main>
+
+<!-- Auth Modal -->
+<div id="authModal" class="auth-modal" style="display:none;">
+  <div class="auth-modal-inner">
+    <button class="auth-modal-close" id="authModalClose">✕</button>
+    <div id="authSignIn" class="auth-section">
+      <h2 class="auth-title" data-i18n="auth_signin_title">로그인</h2>
+      <button class="social-btn google-btn" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.02a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+        <span data-i18n="auth_google">Google로 계속하기</span>
+      </button>
+      <div class="auth-divider"><span data-i18n="auth_or">또는</span></div>
+      <form id="emailSignInForm">
+        <input type="email" id="signInEmail" class="auth-input" placeholder="이메일" required>
+        <div class="auth-pw-row">
+          <input type="password" id="signInPassword" class="auth-input" placeholder="비밀번호" required>
+          <button type="button" class="auth-pw-toggle" id="signInPwToggle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="auth-error" id="signInError" style="display:none;"></div>
+        <button type="submit" class="primary-btn auth-submit" id="signInSubmit" data-i18n="auth_signin_btn">로그인</button>
+      </form>
+      <div class="auth-switch">
+        <span data-i18n="auth_no_account">계정이 없으신가요?</span>
+        <button class="link-btn" id="goToSignUp" data-i18n="auth_go_signup">회원가입</button>
+      </div>
+      <div class="auth-switch">
+        <button class="link-btn" id="goToReset" data-i18n="auth_forgot_pw">비밀번호를 잊으셨나요?</button>
+      </div>
+    </div>
+    <div id="authSignUp" class="auth-section" style="display:none;">
+      <h2 class="auth-title" data-i18n="auth_signup_title">회원가입</h2>
+      <button class="social-btn google-btn" id="googleSignUpBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.02a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+        <span data-i18n="auth_google">Google로 계속하기</span>
+      </button>
+      <div class="auth-divider"><span data-i18n="auth_or">또는</span></div>
+      <form id="emailSignUpForm">
+        <input type="email" id="signUpEmail" class="auth-input" placeholder="이메일" required>
+        <div class="auth-pw-row">
+          <input type="password" id="signUpPassword" class="auth-input" placeholder="비밀번호 (6자 이상)" required minlength="6">
+          <button type="button" class="auth-pw-toggle" id="signUpPwToggle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="auth-error" id="signUpError" style="display:none;"></div>
+        <button type="submit" class="primary-btn auth-submit" id="signUpSubmit" data-i18n="auth_signup_btn">회원가입</button>
+      </form>
+      <div class="auth-switch">
+        <span data-i18n="auth_has_account">이미 계정이 있으신가요?</span>
+        <button class="link-btn" id="goToSignIn" data-i18n="auth_go_signin">로그인</button>
+      </div>
+    </div>
+    <div id="authReset" class="auth-section" style="display:none;">
+      <h2 class="auth-title" data-i18n="auth_reset_title">비밀번호 재설정</h2>
+      <form id="resetForm">
+        <input type="email" id="resetEmail" class="auth-input" placeholder="이메일" required>
+        <div class="auth-error" id="resetError" style="display:none;"></div>
+        <div class="auth-success" id="resetSuccess" style="display:none;"></div>
+        <button type="submit" class="primary-btn auth-submit" id="resetSubmit" data-i18n="auth_reset_btn">재설정 링크 전송</button>
+      </form>
+      <div class="auth-switch">
+        <button class="link-btn" id="goToSignInFromReset" data-i18n="auth_go_signin">로그인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-brand">SSUESSUE KNITS</span>
+    <nav class="footer-nav">
+      <a href="/about.html" data-i18n="footer_about">소개</a>
+      <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
+      <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
+      <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+      <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
+    </nav>
+  </div>
+  <div class="footer-biz">
+    <div class="footer-biz-text">
+      <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
+      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
+      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
+      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
+    </div>
+    <div class="footer-social">
+      <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="https://blog.naver.com/leah611" class="footer-social-link" aria-label="Naver Blog" target="_blank" rel="noopener noreferrer">
+        <svg width="17" height="17" viewBox="0 0 25 25" fill="currentColor" aria-hidden="true"><path d="M16.273 12.845L7.376 0H0v25h8.727V12.155L17.624 25H25V0h-8.727z"/></svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/js/color-palette.js"></script>
+<script type="module" src="/js/row-counter.js"></script>
+<knitting-row-counter></knitting-row-counter>
+<script src="/js/hamburger.js"></script>
+<script src="/js/cookie-consent.js"></script>
+<script src="/js/scroll-top.js"></script>
+
+</body>
+</html>
