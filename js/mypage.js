@@ -1,7 +1,7 @@
 // mypage.js — 마이페이지 v2 (사이드바 5탭 레이아웃)
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=6';
-import { t as sharedT, applyLang as _applyLang } from './i18n.js';
+import { t as sharedT, initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection, collectionGroup, query, orderBy, limit, getDocs,
@@ -100,61 +100,30 @@ function tr(key) { return pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[ke
 
 // ── 상태 ─────────────────────────────────────────────────────────────────────
 
+const urlUid   = new URLSearchParams(location.search).get('uid'); // 타인 프로필 모드
+let   viewMode = urlUid ? 'other' : 'mine'; // 'mine' | 'other'
 let currentUid = null;
-let currentPanel = 'profile';
+let currentPanel = urlUid ? 'patterns' : 'profile'; // 타인 프로필은 도안부터
 const panelLoaded = {};
 
 // ── 언어 적용 ─────────────────────────────────────────────────────────────────
+// initLang이 langChange를 발행하므로 여기서는 langChange만 수신해 placeholder 등 보조 처리만.
+// applyLang(extra: pageT)가 data-i18n, .i18n, data-ko/en/ja 전부 처리함.
 
-function applyPageLang(lang) {
+function applyPlaceholders(lang) {
     currentLang = lang;
-    _applyLang(lang, { extra: pageT });
-
-    // 탭 버튼
-    document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
-        const k = 'tab_' + btn.dataset.panel;
-        btn.textContent = tr(k);
-    });
-    // 서브탭
-    document.querySelectorAll('.mp-subtab[data-subtab]').forEach(btn => {
-        const k = 'subtab_' + btn.dataset.subtab;
-        btn.textContent = tr(k);
-    });
-    // 패널 타이틀
-    ['profile','patterns','projects','posts','scraps'].forEach(p => {
-        const el = document.getElementById('title' + p.charAt(0).toUpperCase() + p.slice(1));
-        if (el) el.textContent = tr('title_' + p);
-    });
-    // 기타
-    const loginMsg = document.getElementById('notLoggedInMsg');
-    if (loginMsg) loginMsg.textContent = tr('not_logged_in');
-    const loginBtn = document.getElementById('gotoSignInBtn');
-    if (loginBtn) loginBtn.textContent = tr('go_to_signin');
-    const genLink = document.getElementById('goGenerateLink');
-    if (genLink) genLink.textContent = tr('go_generate');
-    const photoLabel = document.getElementById('editPhotoLabel');
-    if (photoLabel) photoLabel.textContent = tr('photo_change');
-    const labelNick = document.getElementById('labelNickname');
-    if (labelNick) labelNick.textContent = tr('label_nickname');
-    const labelBio = document.getElementById('labelBio');
-    if (labelBio) labelBio.textContent = tr('label_bio');
     const bioEl = document.getElementById('editBio');
     if (bioEl) bioEl.placeholder = tr('bio_placeholder');
     const saveBtn = document.getElementById('profileEditSaveBtn');
     if (saveBtn && saveBtn.textContent !== tr('profile_saving')) saveBtn.textContent = tr('profile_save');
     const checkBtn = document.getElementById('editCheckNicknameBtn');
     if (checkBtn && checkBtn.textContent !== tr('nickname_checking')) checkBtn.textContent = tr('nickname_check');
-    // 통계 라벨
-    document.querySelectorAll('.mp-stat-lbl[data-ko]').forEach(el => {
-        el.textContent = el.dataset[lang] || el.dataset.ko;
-    });
 }
 
-document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
-    btn.addEventListener('click', () => applyPageLang(btn.getAttribute('data-lang')));
-});
-window.addEventListener('langChange', e => applyPageLang(e.detail.lang));
-applyPageLang(currentLang);
+window.addEventListener('langChange', e => applyPlaceholders(e.detail.lang));
+
+// initLang: 언어 버튼 클릭 → applyLang(extra:pageT) → data-i18n/i18n 전체 처리 → langChange 발행
+initLang({ extra: pageT });
 
 // ── 탭 전환 ───────────────────────────────────────────────────────────────────
 
@@ -215,7 +184,7 @@ function spinner(msg) {
 
 // ── 사이드바 요약 채우기 ───────────────────────────────────────────────────────
 
-async function fillSidebar(uid) {
+async function fillSidebar(uid, readOnly = false) {
     const profile = await getUserProfile(uid);
     if (!profile) return;
 
@@ -238,17 +207,22 @@ async function fillSidebar(uid) {
     }
 
     // 통계 (병렬)
-    Promise.all([
+    const statsQueries = [
         getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))),
         getDocs(query(collection(db, 'posts'), where('uid', '==', uid))),
-        getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))),
-    ]).then(([patterns, posts, scraps]) => {
+    ];
+    if (!readOnly) statsQueries.push(getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))));
+
+    Promise.all(statsQueries).then(([patterns, posts, scraps]) => {
         const pEl = document.getElementById('mpStatPatterns');
         const poEl = document.getElementById('mpStatPosts');
         const scEl = document.getElementById('mpStatScraps');
         if (pEl) pEl.textContent = patterns.size;
         if (poEl) poEl.textContent = posts.size;
-        if (scEl) scEl.textContent = scraps.size;
+        if (scEl) {
+            if (readOnly) scEl.closest('.mp-stat')?.style.setProperty('display', 'none');
+            else scEl.textContent = scraps?.size ?? '—';
+        }
     }).catch(() => {});
 }
 
@@ -878,15 +852,45 @@ initAuth();
 document.getElementById('gotoSignInBtn')?.addEventListener('click', openAuthModal);
 
 onAuthStateChanged(auth, async user => {
-    if (user) {
-        currentUid = user.uid;
+    if (urlUid) {
+        // 타인 프로필 모드 — 로그인 여부와 무관하게 표시
+        currentUid = urlUid;
+        viewMode   = user && user.uid === urlUid ? 'mine' : 'other';
         document.getElementById('notLoggedIn').style.display = 'none';
         document.getElementById('loggedIn').style.display    = '';
-        await fillSidebar(user.uid);
-        switchPanel(currentPanel);
+        if (!panelLoaded['_sidebar']) {
+            panelLoaded['_sidebar'] = true;
+            await fillSidebar(urlUid, /* readOnly */ true);
+            setupOtherUserView();
+        }
+    } else if (user) {
+        currentUid = user.uid;
+        viewMode   = 'mine';
+        document.getElementById('notLoggedIn').style.display = 'none';
+        document.getElementById('loggedIn').style.display    = '';
+        if (!panelLoaded['_sidebar']) {
+            panelLoaded['_sidebar'] = true;
+            await fillSidebar(user.uid);
+            switchPanel(currentPanel);
+        }
     } else {
         currentUid = null;
         document.getElementById('notLoggedIn').style.display = '';
         document.getElementById('loggedIn').style.display    = 'none';
+        // 비로그인이지만 타인 프로필이 없으면 로그인 유도
+        if (!urlUid) openAuthModal();
     }
 });
+
+function setupOtherUserView() {
+    // 프로필 편집 / 내 프로젝트 / 스크랩 탭 숨김
+    ['mpNavProfile', 'mpNavProjects', 'mpNavScraps'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    // 내 글·댓글 서브탭 중 '내 댓글'은 타인에게 불필요 — 숨김
+    const commentTab = document.getElementById('subtabComments');
+    if (commentTab) commentTab.style.display = 'none';
+
+    switchPanel(currentPanel); // 'patterns'
+}

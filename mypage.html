@@ -83,8 +83,8 @@
     <!-- 비로그인 -->
     <div id="notLoggedIn" class="mp-guest" style="display:none;">
       <div class="mypage-empty">
-        <p id="notLoggedInMsg">로그인하면 마이페이지를 이용할 수 있습니다.</p>
-        <button class="primary-btn" id="gotoSignInBtn" style="margin-top:1.5rem;max-width:260px;">로그인</button>
+        <p id="notLoggedInMsg" data-i18n="not_logged_in">로그인하면 마이페이지를 이용할 수 있습니다.</p>
+        <button class="primary-btn" id="gotoSignInBtn" data-i18n="go_to_signin" style="margin-top:1.5rem;max-width:260px;">로그인</button>
       </div>
     </div>
 
@@ -106,23 +106,23 @@
           <div class="mp-stats-row">
             <div class="mp-stat">
               <span class="mp-stat-val" id="mpStatPatterns">—</span>
-              <span class="mp-stat-lbl" data-ko="도안" data-en="Patterns" data-ja="編み図">도안</span>
+              <span class="mp-stat-lbl i18n" data-ko="도안" data-en="Patterns" data-ja="編み図">도안</span>
             </div>
             <div class="mp-stat">
               <span class="mp-stat-val" id="mpStatPosts">—</span>
-              <span class="mp-stat-lbl" data-ko="게시글" data-en="Posts" data-ja="投稿">게시글</span>
+              <span class="mp-stat-lbl i18n" data-ko="게시글" data-en="Posts" data-ja="投稿">게시글</span>
             </div>
             <div class="mp-stat">
               <span class="mp-stat-val" id="mpStatScraps">—</span>
-              <span class="mp-stat-lbl" data-ko="스크랩" data-en="Scraps" data-ja="スクラップ">스크랩</span>
+              <span class="mp-stat-lbl i18n" data-ko="스크랩" data-en="Scraps" data-ja="スクラップ">스크랩</span>
             </div>
           </div>
           <nav class="mp-nav" id="mpNav">
-            <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile">프로필</button>
-            <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns">내 도안함</button>
-            <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects">내 프로젝트</button>
-            <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts">내 글·댓글</button>
-            <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps">스크랩</button>
+            <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile" data-i18n="tab_profile">프로필</button>
+            <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns" data-i18n="tab_patterns">내 도안함</button>
+            <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">내 프로젝트</button>
+            <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">내 글·댓글</button>
+            <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
           </nav>
         </aside>
 
@@ -131,18 +131,18 @@
 
           <!-- Panel: 프로필 -->
           <div class="mp-panel active" id="panelProfile">
-            <h2 class="mp-panel-title" id="titleProfile">프로필</h2>
+            <h2 class="mp-panel-title" id="titleProfile" data-i18n="title_profile">프로필</h2>
             <div class="profile-edit-section">
               <div class="profile-edit-avatar-row">
                 <div class="profile-edit-avatar" id="editAvatarPreview"></div>
                 <div>
-                  <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel">사진 변경</label>
+                  <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel" data-i18n="photo_change">사진 변경</label>
                   <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
                 </div>
               </div>
               <form class="profile-edit-form" id="profileEditForm">
                 <div class="profile-edit-row">
-                  <label class="write-label" id="labelNickname">닉네임</label>
+                  <label class="write-label" id="labelNickname" data-i18n="label_nickname">닉네임</label>
                   <div class="nickname-input-group">
                     <div class="nickname-input-row">
                       <input type="text" id="editNickname" maxlength="20" required autocomplete="off">
@@ -152,7 +152,7 @@
                   </div>
                 </div>
                 <div class="profile-edit-row">
-                  <label class="write-label" id="labelBio">자기소개</label>
+                  <label class="write-label" id="labelBio" data-i18n="label_bio">자기소개</label>
                   <textarea id="editBio" maxlength="100" style="width:100%;border:2px solid #000;padding:0.75rem;font-family:inherit;resize:none;min-height:80px;box-sizing:border-box;"></textarea>
                 </div>
                 <div id="profileEditMsg" class="nickname-status" style="display:none;"></div>
@@ -167,8 +167,8 @@
           <!-- Panel: 내 도안함 -->
           <div class="mp-panel" id="panelPatterns">
             <div class="mp-panel-header">
-              <h2 class="mp-panel-title" id="titlePatterns">내 도안함</h2>
-              <a href="/pattern.html" class="secondary-btn small-btn" id="goGenerateLink">← 도안 만들기</a>
+              <h2 class="mp-panel-title" id="titlePatterns" data-i18n="title_patterns">내 도안함</h2>
+              <a href="/pattern.html" class="secondary-btn small-btn" id="goGenerateLink" data-i18n="go_generate">← 도안 만들기</a>
             </div>
             <div id="patternsLoading" class="mypage-empty">불러오는 중...</div>
             <div id="patternsEmpty" class="mypage-empty" style="display:none;">
@@ -180,7 +180,7 @@
 
           <!-- Panel: 내 프로젝트 -->
           <div class="mp-panel" id="panelProjects">
-            <h2 class="mp-panel-title" id="titleProjects">내 프로젝트</h2>
+            <h2 class="mp-panel-title" id="titleProjects" data-i18n="title_projects">내 프로젝트</h2>
             <div id="projectsEmpty" class="mypage-empty" style="display:none;">
               진행 중인 프로젝트가 없어요.
               <a href="#" class="gnb-counter-btn" style="color:#000;font-weight:700;">단수 카운터 시작하기 →</a>
@@ -196,10 +196,10 @@
 
           <!-- Panel: 내 글·댓글 -->
           <div class="mp-panel" id="panelPosts">
-            <h2 class="mp-panel-title" id="titlePosts">내 글·댓글</h2>
+            <h2 class="mp-panel-title" id="titlePosts" data-i18n="title_posts">내 글·댓글</h2>
             <div class="mp-subtabs" id="postsSubtabs">
-              <button class="mp-subtab active" data-subtab="myposts" id="subtabPosts">내 글</button>
-              <button class="mp-subtab" data-subtab="mycomments" id="subtabComments">내 댓글</button>
+              <button class="mp-subtab active" data-subtab="myposts" id="subtabPosts" data-i18n="subtab_posts">내 글</button>
+              <button class="mp-subtab" data-subtab="mycomments" id="subtabComments" data-i18n="subtab_comments">내 댓글</button>
             </div>
             <!-- 내 글 -->
             <div id="subPanelPosts">
@@ -222,7 +222,7 @@
 
           <!-- Panel: 스크랩 -->
           <div class="mp-panel" id="panelScraps">
-            <h2 class="mp-panel-title" id="titleScraps">스크랩</h2>
+            <h2 class="mp-panel-title" id="titleScraps" data-i18n="title_scraps">스크랩</h2>
             <div id="scrapsLoading" class="mypage-empty">불러오는 중...</div>
             <div id="scrapsEmpty" class="mypage-empty" style="display:none;">
               스크랩한 게시글이 없어요.
