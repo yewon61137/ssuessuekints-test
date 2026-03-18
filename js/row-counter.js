@@ -1,7 +1,7 @@
 // row-counter.js — 단수 카운터 Web Component (Side Drawer)
 
 import { t } from './i18n.js';
-import { db, auth } from './auth.js?v=6';
+import { db, auth } from './auth.js';
 import {
     doc, setDoc, getDoc
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';

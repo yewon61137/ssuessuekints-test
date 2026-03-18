@@ -1,6 +1,6 @@
 // mypage.js — 마이페이지 v2 (사이드바 5탭 레이아웃)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js?v=6';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js';
 import { t as sharedT, initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {

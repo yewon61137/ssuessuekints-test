@@ -1,7 +1,7 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
 import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
-import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js?v=6';
+import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
 // --- 상태 관리 ---

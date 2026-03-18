@@ -1,4 +1,4 @@
-import { auth, db, initAuth, openAuthModal } from './auth.js?v=6';
+import { auth, db, initAuth, openAuthModal } from './auth.js';
 import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -794,52 +794,38 @@ function calculateStripes() {
   const rowDist = distributeRows(n, totalRows, currentDist);
 
   stripeCalcResult = { colors, rowDist };
-
-  // Render table
   container.style.display = '';
-  const table = document.createElement('table');
-  table.className = 'cp-stripe-table';
-  const thead = document.createElement('thead');
-  const hrow = document.createElement('tr');
-  [tr('cp_color'), tr('cp_rows'), tr('cp_ratio')].forEach(h => {
-    const th = document.createElement('th');
-    th.textContent = h;
-    hrow.appendChild(th);
-  });
-  thead.appendChild(hrow);
-  table.appendChild(thead);
 
-  const tbody = document.createElement('tbody');
-  const effectiveTotal = rowDist.reduce((a, b) => a + b, 0);
-  colors.forEach((c, i) => {
-    const tr2 = document.createElement('tr');
+  // Update the static tbody — don't wipe the whole container (canvas + buttons live there)
+  const tbody = document.getElementById('stripeCalcTableBody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const effectiveTotal = rowDist.reduce((a, b) => a + b, 0);
+    colors.forEach((c, i) => {
+      const row = document.createElement('tr');
 
-    const tdColor = document.createElement('td');
-    const swatch = document.createElement('span');
-    swatch.className = 'cp-slot-swatch';
-    swatch.style.background = c;
-    const hexSpan = document.createElement('span');
-    hexSpan.textContent = ` ${c}`;
-    tdColor.appendChild(swatch);
-    tdColor.appendChild(hexSpan);
+      const tdColor = document.createElement('td');
+      const swatch = document.createElement('span');
+      swatch.className = 'cp-slot-swatch';
+      swatch.style.background = c;
+      const hexSpan = document.createElement('span');
+      hexSpan.textContent = ` ${c}`;
+      tdColor.appendChild(swatch);
+      tdColor.appendChild(hexSpan);
 
-    const tdRows = document.createElement('td');
-    tdRows.textContent = rowDist[i];
+      const tdRows = document.createElement('td');
+      tdRows.textContent = rowDist[i];
 
-    const tdRatio = document.createElement('td');
-    tdRatio.textContent = `${((rowDist[i] / effectiveTotal) * 100).toFixed(1)}%`;
+      const tdRatio = document.createElement('td');
+      tdRatio.textContent = `${((rowDist[i] / effectiveTotal) * 100).toFixed(1)}%`;
 
-    tr2.appendChild(tdColor);
-    tr2.appendChild(tdRows);
-    tr2.appendChild(tdRatio);
-    tbody.appendChild(tr2);
-  });
-  table.appendChild(tbody);
+      row.appendChild(tdColor);
+      row.appendChild(tdRows);
+      row.appendChild(tdRatio);
+      tbody.appendChild(row);
+    });
+  }
 
-  container.innerHTML = '';
-  container.appendChild(table);
-
-  // Render preview
   if (previewCanvas) {
     renderStripePreview(previewCanvas, colors, rowDist);
   }
@@ -952,23 +938,8 @@ function renderCuration(filter) {
 async function savePalette(colors, name, technique = '', season = '', mood = '') {
   const user = auth.currentUser;
   if (!user) {
-    openAuthModal();
-    showToast(tr('cp_login_to_save'));
-    return;
-  }
-  try {
-    if (user) {
-      await addDoc(collection(db, `users/${user.uid}/palettes`), {
-        name,
-        colors,
-        technique,
-        season,
-        mood,
-        createdAt: serverTimestamp(),
-      });
-      showToast(tr('cp_saved'));
-    } else {
-      // (unreachable — guarded above, kept for safety)
+    // Guest: save to localStorage, then nudge to sign in
+    try {
       const key = 'ssuessue_palettes';
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
       existing.push({
@@ -982,8 +953,22 @@ async function savePalette(colors, name, technique = '', season = '', mood = '')
       });
       localStorage.setItem(key, JSON.stringify(existing));
       showToast(tr('cp_guest_saved'));
-      setTimeout(() => showToast(tr('cp_login_to_save'), true), 2000);
+      setTimeout(() => showToast(tr('cp_login_to_save'), true), 2500);
+    } catch (e) {
+      showToast(tr('cp_save_error'));
     }
+    return;
+  }
+  try {
+    await addDoc(collection(db, `users/${user.uid}/palettes`), {
+      name,
+      colors,
+      technique,
+      season,
+      mood,
+      createdAt: serverTimestamp(),
+    });
+    showToast(tr('cp_saved'));
   } catch (e) {
     console.error('savePalette error:', e);
     showToast(tr('cp_save_error'));

@@ -1,5 +1,5 @@
 // home.js — 홈페이지 JS (index.html)
-import { auth, db, initAuth } from './auth.js?v=5';
+import { auth, db, initAuth } from './auth.js';
 import { initLang, applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async user => {
         if (user) {
             try {
-                const { getUserProfile } = await import('./auth.js?v=5');
+                const { getUserProfile } = await import('./auth.js');
                 const profile = await getUserProfile(user.uid);
                 _currentNickname = profile?.nickname || '';
             } catch (e) {

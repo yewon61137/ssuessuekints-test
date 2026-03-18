@@ -1,4 +1,4 @@
-import { auth, db, openAuthModal, getUserProfile } from '/auth.js?v=5';
+import { auth, db, openAuthModal, getUserProfile } from '/js/auth.js';
 import {
   doc, getDoc, setDoc, deleteDoc, serverTimestamp,
   collection, query, orderBy, getDocs, addDoc,

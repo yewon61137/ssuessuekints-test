@@ -1,7 +1,7 @@
 // toolkit.js — 게이지, 균등 늘림/줄임, 도안 변환, 블로킹 계산 로직
 
 import { initLang } from './i18n.js';
-import { initAuth } from './auth.js?v=6';
+import { initAuth } from './auth.js';
 
 // --- 상수 ---
 const CM_PER_INCH = 2.54;
