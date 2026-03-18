@@ -17,6 +17,7 @@ export const t = {
         tag_all: '전체', tag_crochet: '코바늘', tag_knitting: '대바늘',
         tag_finished: '완성작', tag_wip: '진행중', tag_question: '질문',
         feed_loading: '불러오는 중...', feed_empty: '게시글이 없습니다. 첫 글을 작성해보세요!', load_more: '더 보기',
+        mag_read_more: '읽기 →',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -30,6 +31,7 @@ export const t = {
         tag_all: 'All', tag_crochet: 'Crochet', tag_knitting: 'Knitting',
         tag_finished: 'Finished', tag_wip: 'WIP', tag_question: 'Q&A',
         feed_loading: 'Loading...', feed_empty: 'No posts yet. Be the first to write!', load_more: 'Load More',
+        mag_read_more: 'Read →',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
@@ -43,6 +45,7 @@ export const t = {
         tag_all: 'すべて', tag_crochet: 'かぎ針', tag_knitting: '棒針',
         tag_finished: '完成作品', tag_wip: '制作中', tag_question: '質問',
         feed_loading: '読み込み中...', feed_empty: '投稿がありません。最初の投稿をしてみましょう！', load_more: 'もっと見る',
+        mag_read_more: '読む →',
     }
 };
 
@@ -68,7 +71,10 @@ export function applyLang(lang, opts = {}) {
     // data-ko/en/ja + .i18n 패턴
     document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
-        if (val) el.textContent = val;
+        if (val !== null) {
+            if (/<[a-z]/i.test(val) || val.includes('&')) el.innerHTML = val;
+            else el.textContent = val;
+        }
     });
 
     // data-i18n 패턴 (공통 + 페이지별 병합)

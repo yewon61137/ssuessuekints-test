@@ -13,6 +13,8 @@ const UI = {
   like:                 { ko: '좋아요',               en: 'Like',                     ja: 'いいね' },
   scrap:                { ko: '스크랩',               en: 'Save',                     ja: 'スクラップ' },
   comments:             { ko: '댓글',                 en: 'Comments',                 ja: 'コメント' },
+  share:                { ko: '공유',                 en: 'Share',                    ja: 'シェア' },
+  shareSuccess:         { ko: '링크가 복사되었습니다!', en: 'Link copied!',            ja: 'リンクをコピーしました！' },
   commentPlaceholder:   { ko: '댓글을 입력하세요...', en: 'Write a comment...',       ja: 'コメントを入力してください...' },
   replyPlaceholder:     { ko: '답글을 입력하세요...', en: 'Write a reply...',         ja: '返信を入力してください...' },
   submit:               { ko: '등록',                 en: 'Post',                     ja: '投稿' },
@@ -29,6 +31,7 @@ export function initMagazineArticle(articleId) {
   onAuthStateChanged(auth, user => { currentUser = user; });
   initArticleLang();
   initLikeScrap(articleId);
+  initShare();
   loadComments(articleId);
   setupCommentForm(articleId);
 }
@@ -83,8 +86,8 @@ function applyArticleLang(lang) {
   if (likeLabel) likeLabel.textContent = t('like');
   const scrapLabel = document.getElementById('scrapBtnLabel');
   if (scrapLabel) scrapLabel.textContent = t('scrap');
-  const commentLabel = document.getElementById('commentLabel');
-  if (commentLabel) commentLabel.textContent = t('comments');
+  const shareBtnLabel = document.getElementById('shareBtnLabel');
+  if (shareBtnLabel) shareBtnLabel.textContent = t('share');
 
   // 댓글 섹션 타이틀 라벨
   const commentsTitleText = document.querySelector('.comments-title-text');
@@ -103,6 +106,44 @@ function applyArticleLang(lang) {
   if (navPrev?.firstChild) navPrev.firstChild.textContent = ({ ko: '← 이전 글', en: '← Prev', ja: '← 前の記事' })[lang] || '← 이전 글';
   if (navNext?.firstChild) navNext.firstChild.textContent = ({ ko: '다음 글 →', en: 'Next →', ja: '次の記事 →' })[lang] || '다음 글 →';
   if (navList) navList.textContent = ({ ko: '목록으로', en: 'All Articles', ja: '一覧へ' })[lang] || '목록으로';
+}
+
+// ─── Share ────────────────────────────────────────────────
+
+function initShare() {
+  document.getElementById('shareBtn')?.addEventListener('click', async () => {
+    const url = location.href;
+    if (navigator.share) {
+      try { await navigator.share({ url }); } catch (e) {
+        if (e.name !== 'AbortError') copyUrl(url);
+      }
+    } else {
+      copyUrl(url);
+    }
+  });
+}
+
+function copyUrl(url) {
+  const done = () => showToast(t('shareSuccess'));
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(done);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); done();
+  }
+}
+
+function showToast(msg) {
+  const old = document.getElementById('shareToast');
+  if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'shareToast';
+  el.textContent = msg;
+  el.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:0.55rem 1.2rem;border-radius:8px;font-size:0.85rem;z-index:9999;pointer-events:none;';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
 }
 
 // ─── Like / Scrap ─────────────────────────────────────────
