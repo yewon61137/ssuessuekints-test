@@ -3216,17 +3216,17 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 
 .mp-layout {
   display: flex;
-  gap: 2.5rem;
+  gap: 2rem;
   max-width: 1100px;
   width: 95%;
   margin: 0 auto;
-  padding: 2.5rem 0 5rem;
+  padding: 1.75rem 0 3rem;
   align-items: flex-start;
 }
 
 /* ── 사이드바 ── */
 .mp-sidebar {
-  width: 220px;
+  width: 180px;
   flex-shrink: 0;
   position: sticky;
   top: 4.5rem;
@@ -3237,14 +3237,14 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.75rem;
   border-bottom: 1px solid #e8e8e8;
 }
 
 .mp-avatar {
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #f0f0f0;
   border: 2px solid #000;
@@ -3254,7 +3254,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   overflow: hidden;
 }
 
@@ -3262,33 +3262,33 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 
 .mp-nickname {
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   word-break: break-all;
 }
 
 .mp-joined {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #999;
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
 .mp-stats-row {
   display: flex;
   justify-content: center;
-  gap: 1.25rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid #e8e8e8;
 }
 
 .mp-stat { text-align: center; }
-.mp-stat-val { display: block; font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
-.mp-stat-lbl { font-size: 0.7rem; color: #888; }
+.mp-stat-val { display: block; font-weight: 800; font-size: 0.9rem; line-height: 1.2; }
+.mp-stat-lbl { font-size: 0.65rem; color: #888; }
 
 .mp-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .mp-nav-btn {
@@ -3296,11 +3296,11 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   text-align: left;
   background: none;
   border: none;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.88rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
   font-family: inherit;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #555;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
@@ -3318,10 +3318,10 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 .mp-panel.active { display: block; }
 
 .mp-panel-title {
-  font-size: 1.4rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  margin: 0 0 1.5rem;
-  padding-bottom: 0.75rem;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.6rem;
   border-bottom: 2px solid #000;
 }
 
@@ -3329,7 +3329,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.1rem;
 }
 .mp-panel-header .mp-panel-title { margin-bottom: 0; }
 
@@ -3493,8 +3493,8 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   }
 
   .mp-avatar {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
     margin-bottom: 0;
     flex-shrink: 0;
   }
