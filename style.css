@@ -1325,13 +1325,9 @@ canvas {
   max-width: 1100px;
   width: 95%;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "brand nav"
-    "brand social";
-  align-items: start;
-  gap: 0.4rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .footer-brand {
@@ -1340,16 +1336,12 @@ canvas {
   font-size: 0.85rem;
   letter-spacing: -0.02em;
   color: #000;
-  grid-area: brand;
-  align-self: center;
 }
 
 .footer-nav {
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
-  grid-area: nav;
-  justify-self: end;
 }
 
 .footer-nav a {
@@ -1372,8 +1364,15 @@ canvas {
   padding-top: 0.75rem;
   border-top: 1px solid #e0e0e0;
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-biz-text {
+  display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  flex: 1;
 }
 
 .footer-biz span {
@@ -1386,8 +1385,7 @@ canvas {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  grid-area: social;
-  justify-self: end;
+  flex-shrink: 0;
 }
 
 .footer-social-link {
@@ -1421,15 +1419,16 @@ canvas {
 
 @media (max-width: 600px) {
   .footer-inner {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "brand"
-      "nav"
-      "social";
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.75rem;
   }
-  .footer-nav { justify-self: start; gap: 1rem; }
-  .footer-social { justify-self: start; }
+  .footer-biz {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .footer-social { margin-top: 0.25rem; }
 }
 
 @media (prefers-color-scheme: dark) {
