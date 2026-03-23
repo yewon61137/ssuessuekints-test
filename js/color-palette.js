@@ -658,12 +658,28 @@ renderSlots();
 redrawPreview();
 updateContrast();
 
+const textureDescs = {
+  stockinette: { ko: '가장 기본이 되는 V자 코 모양입니다. 색상이 1단씩 번갈아가며 얇은 가로줄 배색을 만듭니다.', en: 'Basic V-shaped stitches. Colors alternate every 1 row creating thin stripes.', ja: '基本的なV字目です。色が1段ずつ交互になり、細いストライプ配色のようになります。' },
+  garter: { ko: '가로로 올록볼록한 코 모양입니다. 색상이 1단씩 번갈아가며 입체감 있는 배색을 만듭니다.', en: 'Bumpy horizontal ridges. Colors alternate every 1 row.', ja: '横にでこぼこした形です。色が1段ずつ交互になり、立体感のある配色になります。' },
+  stripes: { ko: '원하는 두께의 줄무늬를 직접 만들 수 있습니다. 아래 슬라이더에서 색상별 단수를 조절해 보세요!', en: 'Create custom stripes. Adjust the row thickness for each color using the sliders below!', ja: 'お好みの太さのストライプを作成できます。下の各色ごとの段数調整スライダーを動かしてみてください！' },
+  fairisle: { ko: '가로로 실을 건너가며 뜨는 기법입니다. 눈꽃 무늬 같은 반복 요소가 자동으로 반영됩니다.', en: 'Stranded knitting technique. A repeating pattern is simulated automatically.', ja: '横に糸を渡して編む技法で、繰り返しの模様が自動的にシミュレーションされます。' },
+  intarsia: { ko: '큰 색상 블록을 표현할 때 쓰는 기법입니다. 캔버스를 큼직한 구역으로 나누어 배색 느낌을 확인합니다.', en: 'Used for large color blocks. The canvas is divided into large solid areas.', ja: '大きな色ブロックを表現する技法で、キャンバスを大きなブロックに分けてシミュレーションします。' }
+};
+
 // Simulator: texture buttons
 document.querySelectorAll('.cp-texture-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.cp-texture-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentTexture = btn.dataset.texture;
+    
+    // Update description text dynamically
+    const descEl = document.getElementById('textureDesc');
+    if (descEl) {
+      const lang = localStorage.getItem('lang') || 'ko';
+      descEl.textContent = textureDescs[currentTexture][lang] || textureDescs[currentTexture].ko;
+    }
+    
     renderStripeSliders();
     redrawPreview();
   });
