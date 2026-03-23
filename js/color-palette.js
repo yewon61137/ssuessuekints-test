@@ -199,6 +199,66 @@ function shadeHex(hex, amount) {
 
 // ─── CANVAS RENDERING ────────────────────────────────────────────────────────
 
+// 스티치 하나를 그리는 헬퍼 함수 (메리야스 코 모양)
+function drawStitch(ctx, x, y, w, h, color, isPurl = false) {
+  const darker = shadeHex(color, -25);
+  const lighter = shadeHex(color, 20);
+
+  // 배경 베이스
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+
+  if (!isPurl) {
+    // V자 모양 (메리야스)
+    ctx.strokeStyle = darker;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    const cx = x + w / 2;
+    // 왼쪽 날개
+    ctx.moveTo(x + 1.5, y + 1);
+    ctx.quadraticCurveTo(x + 2, y + h - 1.5, cx, y + h - 1);
+    // 오른쪽 날개
+    ctx.moveTo(x + w - 1.5, y + 1);
+    ctx.quadraticCurveTo(x + w - 2, y + h - 1.5, cx, y + h - 1);
+    ctx.stroke();
+    
+    // 은은한 하이라이트
+    ctx.strokeStyle = lighter;
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath();
+    ctx.moveTo(x + 2, y + 2);
+    ctx.lineTo(x + 3, y + 4);
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  } else {
+    // 가로 융기 모양 (가터/안뜨기)
+    ctx.fillStyle = darker;
+    ctx.fillRect(x, y + h - 2, w, 2);
+    ctx.fillStyle = lighter;
+    ctx.fillRect(x, y, w, 1.5);
+  }
+}
+
+// 노르딕 눈꽃 패턴 (16x16)
+const NORDIC_PATTERN = [
+  [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+  [0,0,1,0,0,1,1,0,0,1,1,0,0,1,0,0],
+  [0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0],
+  [0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,0],
+  [0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0],
+  [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0],
+  [1,1,0,0,1,1,0,0,0,0,1,1,0,0,1,1],
+  [1,1,0,0,1,1,0,0,0,0,1,1,0,0,1,1],
+  [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0],
+  [0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0],
+  [0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,0],
+  [0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0],
+  [0,0,1,0,0,1,1,0,0,1,1,0,0,1,0,0],
+  [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0]
+];
+
 function renderTexture(canvas, colors, texture, stripeRows) {
   if (!canvas || !colors || colors.length === 0) return;
   const ctx = canvas.getContext('2d');
@@ -209,129 +269,72 @@ function renderTexture(canvas, colors, texture, stripeRows) {
   const n = colors.length;
   const colorAt = i => colors[((i % n) + n) % n];
 
+  const cellW = 12, cellH = 10;
+  const cols = Math.ceil(W / cellW);
+  const rows = Math.ceil(H / cellH);
+
   if (texture === 'stockinette') {
-    const cellW = 10, cellH = 8;
-    const cols = Math.ceil(W / cellW);
-    const rows = Math.ceil(H / cellH);
-    for (let row = 0; row < rows; row++) {
-      const bg = colorAt(row);
-      const darker = shadeHex(bg, -30);
-      for (let col = 0; col < cols; col++) {
-        const x = col * cellW;
-        const y = row * cellH;
-        ctx.fillStyle = bg;
-        ctx.fillRect(x, y, cellW, cellH);
-        // V shape stitch
-        ctx.strokeStyle = darker;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        const cx = x + cellW / 2;
-        const top = y + 1;
-        const mid = y + cellH - 2;
-        ctx.moveTo(x + 2, top);
-        ctx.lineTo(cx, mid);
-        ctx.lineTo(x + cellW - 2, top);
-        ctx.stroke();
+    for (let r = 0; r < rows; r++) {
+      const c = colorAt(r);
+      for (let l = 0; l < cols; l++) {
+        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
     }
   } else if (texture === 'garter') {
-    const ridgeH = 8;
-    const rows = Math.ceil(H / ridgeH);
-    for (let row = 0; row < rows; row++) {
-      const base = colorAt(row);
-      const lighter = shadeHex(base, 25);
-      const darker  = shadeHex(base, -25);
-      const y = row * ridgeH;
-      // Main fill
-      ctx.fillStyle = base;
-      ctx.fillRect(0, y, W, ridgeH);
-      // Top highlight
-      ctx.fillStyle = lighter;
-      ctx.fillRect(0, y, W, 2);
-      // Bottom shadow
-      ctx.fillStyle = darker;
-      ctx.fillRect(0, y + ridgeH - 2, W, 2);
+    for (let r = 0; r < rows; r++) {
+      const c = colorAt(r);
+      const isPurl = r % 2 === 1;
+      for (let l = 0; l < cols; l++) {
+        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c, isPurl);
+      }
     }
   } else if (texture === 'stripes') {
     renderStripePreview(canvas, colors, stripeRows);
   } else if (texture === 'fairisle') {
-    const pattern = [
-      [0,0,1,0,0,0,1,0],
-      [0,1,1,1,0,1,1,1],
-      [1,1,0,1,1,1,0,1],
-      [0,1,1,1,0,1,1,1],
-      [0,0,1,0,0,0,1,0],
-      [1,1,0,1,1,1,0,1],
-      [0,1,1,1,0,1,1,1],
-      [1,0,0,0,1,0,0,0],
-    ];
-    const tileSize = 8;
-    const tilesX = Math.ceil(W / tileSize);
-    const tilesY = Math.ceil(H / tileSize);
-    // pattern color cycles through colors[1..n-1]
-    let patColorIdx = 0;
-    for (let ty = 0; ty < tilesY; ty++) {
-      for (let tx = 0; tx < tilesX; tx++) {
-        for (let py = 0; py < tileSize; py++) {
-          for (let px = 0; px < tileSize; px++) {
-            const cell = pattern[py][px];
-            let c;
-            if (cell === 0) {
-              c = colors[0];
-            } else {
-              // cycle through colors[1..] per pattern row
-              const patIdx = n > 1 ? 1 + (py % (n - 1)) : 0;
-              c = colors[patIdx];
-            }
-            ctx.fillStyle = c;
-            ctx.fillRect(tx * tileSize + px, ty * tileSize + py, 1, 1);
-          }
+    const patSize = 16;
+    for (let r = 0; r < rows; r++) {
+      for (let l = 0; l < cols; l++) {
+        const py = r % patSize;
+        const px = l % patSize;
+        const isPattern = NORDIC_PATTERN[py][px] === 1;
+        
+        let c;
+        if (isPattern) {
+          // 무늬색은 슬롯 2부터 순환
+          const patIdx = n > 1 ? 1 + (Math.floor(r / patSize) % (n - 1)) : 0;
+          c = colors[patIdx];
+        } else {
+          // 배경색은 슬롯 1 고정
+          c = colors[0];
         }
+        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
     }
   } else if (texture === 'intarsia') {
-    if (n === 1) {
-      ctx.fillStyle = colors[0];
-      ctx.fillRect(0, 0, W, H);
-    } else if (n === 2) {
-      ctx.fillStyle = colors[0];
-      ctx.fillRect(0, 0, W / 2, H);
-      ctx.fillStyle = colors[1];
-      ctx.fillRect(W / 2, 0, W / 2, H);
-    } else if (n === 3) {
-      const w3 = W / 3;
-      for (let i = 0; i < 3; i++) {
-        ctx.fillStyle = colors[i];
-        ctx.fillRect(i * w3, 0, w3, H);
-      }
-    } else {
-      // 2x2 grid (or more)
-      const cols2 = 2;
-      const rows2 = Math.ceil(n / 2);
-      const bw = W / cols2;
-      const bh = H / rows2;
-      for (let i = 0; i < n; i++) {
-        const col2 = i % cols2;
-        const row2 = Math.floor(i / cols2);
-        ctx.fillStyle = colors[i];
-        ctx.fillRect(col2 * bw, row2 * bh, bw, bh);
-      }
-    }
-    // Border between blocks
-    ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 1;
-    if (n === 2) {
-      ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
-    } else if (n === 3) {
-      for (let i = 1; i < 3; i++) {
-        ctx.beginPath(); ctx.moveTo(i*W/3, 0); ctx.lineTo(i*W/3, H); ctx.stroke();
-      }
-    } else if (n >= 4) {
-      ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
-      const rows2 = Math.ceil(n / 2);
-      for (let r = 1; r < rows2; r++) {
-        const y = r * (H / rows2);
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    // 인타샤: 대담한 블록 분할 (다이아몬드/사선 느낌)
+    for (let r = 0; r < rows; r++) {
+      for (let l = 0; l < cols; l++) {
+        let c;
+        if (n === 1) {
+          c = colors[0];
+        } else if (n === 2) {
+          // 사선 분할
+          c = (l / cols + r / rows > 1) ? colors[1] : colors[0];
+        } else if (n === 3) {
+          // 중앙 다이아몬드형
+          const dx = Math.abs(l / cols - 0.5);
+          const dy = Math.abs(r / rows - 0.5);
+          if (dx + dy < 0.3) c = colors[1];
+          else if (l / cols < 0.5) c = colors[0];
+          else c = colors[2];
+        } else {
+          // 2x2 또는 체커보드형 큰 블록
+          const blockX = Math.floor((l / cols) * 2);
+          const blockY = Math.floor((r / rows) * 2);
+          const idx = (blockX + blockY * 2) % n;
+          c = colors[idx];
+        }
+        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
     }
   }
@@ -350,14 +353,24 @@ function renderStripePreview(canvas, colors, rowCounts) {
   const totalRows = counts.reduce((a, b) => a + b, 0);
   if (totalRows === 0) return;
 
-  let y = 0;
+  const cellW = 12, cellH = 10;
+  const cols = Math.ceil(W / cellW);
+  const rows = Math.ceil(H / cellH);
+
+  let currentRow = 0;
   for (let i = 0; i < colors.length; i++) {
-    const blockH = (counts[i] / totalRows) * H;
-    ctx.fillStyle = colors[i];
-    ctx.fillRect(0, Math.round(y), W, Math.round(blockH));
-    y += blockH;
+    const colorRows = Math.round((counts[i] / totalRows) * rows);
+    const c = colors[i];
+    for (let r = 0; r < colorRows; r++) {
+      if (currentRow + r >= rows) break;
+      for (let l = 0; l < cols; l++) {
+        drawStitch(ctx, l * cellW, (currentRow + r) * cellH, cellW, cellH, c);
+      }
+    }
+    currentRow += colorRows;
   }
 }
+
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
