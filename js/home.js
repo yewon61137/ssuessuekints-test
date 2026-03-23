@@ -138,17 +138,25 @@ function loadProjects(isLoggedIn = false) {
     }).join('');
 }
 
+// ── Community panel title ─────────────────────────────────────
+const T_COMM = {
+    latest: { ko: '최신 게시글', en: 'Latest Posts', ja: '最新の投稿' },
+    mine:   { ko: '최근 완성작', en: 'My Recent Work', ja: '最近の完成作品' }
+};
+
+function updateCommunityTitle(uid, lang) {
+    const l = ['ko', 'en', 'ja'].includes(lang) ? lang : 'ko';
+    const ttlEl = document.querySelector('.home-panel:first-child .home-panel-ttl');
+    if (ttlEl) ttlEl.textContent = uid ? T_COMM.mine[l] : T_COMM.latest[l];
+}
+
 // ── Community posts (Firestore) ───────────────────────────────
 async function loadCommunityPosts(uid = null) {
     const el = document.getElementById('communityGrid');
-    const ttlEl = document.querySelector('.home-panel:first-child .home-panel-ttl');
     if (!el) return;
 
     const lang = document.documentElement.lang || 'ko';
-    const T_COMM = {
-        latest: { ko: '최신 게시글', en: 'Latest Posts', ja: '最新の投稿' },
-        mine: { ko: '최근 완성작', en: 'My Recent Work', ja: '最近の完成作品' }
-    };
+    updateCommunityTitle(uid, lang);
 
     try {
         let q;
@@ -161,7 +169,6 @@ async function loadCommunityPosts(uid = null) {
                 orderBy('createdAt', 'desc'),
                 limit(3)
             );
-            if (ttlEl) ttlEl.textContent = T_COMM.mine[lang];
         } else {
             // 비로그인 상태: 전체 최신글 3개
             q = query(
@@ -169,7 +176,6 @@ async function loadCommunityPosts(uid = null) {
                 orderBy('createdAt', 'desc'),
                 limit(3)
             );
-            if (ttlEl) ttlEl.textContent = T_COMM.latest[lang];
         }
 
         const snap = await getDocs(q);
@@ -233,6 +239,7 @@ function syncLangSelect(lang) {
 
 // ── Init ──────────────────────────────────────────────────────
 let _currentNickname = '';
+let _currentUser = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
@@ -243,15 +250,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const lang = document.documentElement.lang || 'ko';
     renderMagazine(lang);
-    loadCommunityPosts();
-    loadProjects();
+    // auth 확정 전까지 초기 렌더 생략 — onAuthStateChanged에서 처리
     updateGreeting('');
 
     wireRowCounterToggles();
     syncLangSelect(lang);
 
-    // Auth state → greeting + saved count
+    // Auth state → 분기 렌더링
     onAuthStateChanged(auth, async user => {
+        _currentUser = user || null;
         if (user) {
             try {
                 const { getUserProfile } = await import('./auth.js');
@@ -261,14 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 _currentNickname = '';
             }
             updateGreeting(_currentNickname);
-            loadSavedCount(user.uid);
             loadCommunityPosts(user.uid); // 내 완성작 로드
             loadProjects(true);           // 내 프로젝트 로드
         } else {
             _currentNickname = '';
             updateGreeting('');
-            const el = document.getElementById('savedCount');
-            if (el) el.textContent = '0';
             loadCommunityPosts(null);     // 전체 최신글 로드
             loadProjects(false);          // 비로그인 CTA 로드
         }
@@ -278,7 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('langChange', e => {
         const lang = e.detail?.lang || document.documentElement.lang || 'ko';
         renderMagazine(lang);
-        loadProjects(); // re-render empty state message in new lang
+        loadProjects(!!_currentUser);        // 현재 auth 상태 유지
+        updateCommunityTitle(_currentUser?.uid || null, lang); // 타이틀만 갱신
         updateGreeting(_currentNickname);
         syncLangSelect(lang);
     });
