@@ -531,7 +531,26 @@ function renderSlots() {
 
 function updateAddBtn() {
   const btn = document.getElementById('simAddColorBtn');
-  if (btn) btn.disabled = slots.length >= 6;
+  const notice = document.getElementById('fairisleNotice');
+  const isFairisle = currentTexture === 'fairisle';
+  const maxSlots = isFairisle ? 2 : 6;
+
+  if (btn) btn.disabled = slots.length >= maxSlots;
+
+  if (notice) {
+    if (isFairisle && slots.length >= 2) {
+      const lang = localStorage.getItem('lang') || 'ko';
+      const msgs = {
+        ko: '페어아일은 2가지 색상 사용을 권장합니다.',
+        en: 'Fair Isle recommends using 2 colors.',
+        ja: 'フェアアイルには2色を推奨します。'
+      };
+      notice.textContent = msgs[lang] || msgs.ko;
+      notice.style.display = 'block';
+    } else {
+      notice.style.display = 'none';
+    }
+  }
 }
 
 function sendToSimulator(colors) {
@@ -654,6 +673,7 @@ document.querySelectorAll('.cp-texture-btn').forEach(btn => {
     
     renderStripeSliders();
     redrawPreview();
+    updateAddBtn();
   });
 });
 
