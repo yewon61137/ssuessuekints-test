@@ -370,25 +370,27 @@ function renderStripePreview(canvas, colors, rowCounts) {
   const counts = rowCounts && rowCounts.length === colors.length
     ? rowCounts
     : colors.map(() => 1);
-  const totalRows = counts.reduce((a, b) => a + b, 0);
-  if (totalRows === 0) return;
+  const patternRows = counts.reduce((a, b) => a + b, 0);
+  if (patternRows === 0) return;
 
   const cellW = 12;
-  let cellH = 10;
-  if (totalRows * cellH > H) {
-    cellH = H / totalRows;
-  }
+  const cellH = 10; // Fixed height per row — pattern repeats to fill canvas
   const cols = Math.ceil(W / cellW);
 
   let currentY = 0;
-  for (let i = 0; i < colors.length; i++) {
-    const colorRows = counts[i];
-    const c = colors[i];
-    for (let r = 0; r < colorRows; r++) {
-      for (let l = 0; l < cols; l++) {
-        drawStitch(ctx, l * cellW, currentY, cellW, cellH + 0.5, c); // +0.5 prevents float gaps
+  // Keep repeating the stripe pattern until the canvas is filled
+  while (currentY < H) {
+    for (let i = 0; i < colors.length; i++) {
+      const colorRows = counts[i];
+      const c = colors[i];
+      for (let r = 0; r < colorRows; r++) {
+        if (currentY >= H) break;
+        for (let l = 0; l < cols; l++) {
+          drawStitch(ctx, l * cellW, currentY, cellW, cellH + 0.5, c);
+        }
+        currentY += cellH;
       }
-      currentY += cellH;
+      if (currentY >= H) break;
     }
   }
 }
