@@ -73,7 +73,7 @@ const pageT = {
 };
 
 function tr(key) {
-  const lang = localStorage.getItem('lang') || 'ko';
+  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
   const entry = pageT[key];
   if (!entry) return key;
   return entry[lang] || entry.ko || key;
@@ -728,18 +728,22 @@ async function savePalette(colors, name, technique = '', season = '', mood = '')
     return;
   }
   try {
-    await addDoc(collection(db, `users/${user.uid}/palettes`), {
+    const paletteData = {
       name,
       colors,
       technique,
       season,
       mood,
+      isPublic: false, // 기본적으로 비공개
       createdAt: serverTimestamp(),
-    });
+    };
+    await addDoc(collection(db, `users/${user.uid}/palettes`), paletteData);
     showToast(tr('cp_saved'));
   } catch (e) {
     console.error('savePalette error:', e);
-    showToast(tr('cp_save_error'));
+    // 더 구체적인 에러 메시지 표시
+    const errMsg = e.message ? `: ${e.message}` : '';
+    showToast(tr('cp_save_error') + errMsg);
   }
 }
 
@@ -842,6 +846,7 @@ document.getElementById('simAddColorBtn')?.addEventListener('click', () => {
 document.getElementById('simSaveBtn')?.addEventListener('click', async () => {
   const name = prompt(tr('cp_palette_name_prompt'), '내 팔레트');
   if (!name) return;
-  await savePalette(slots.map(s => s.hex), name);
+  // 현재 선택된 기법(currentTexture)도 함께 저장
+  await savePalette(slots.map(s => s.hex), name, currentTexture);
 });
 
