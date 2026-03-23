@@ -25,14 +25,16 @@
         // 결과를 부모 창에 전달하는 헬퍼
         // postMessage(opener 살아있는 경우) + localStorage(폴백) 모두 시도
         function sendResult(data) {
-            const isPopup = !!(window.opener && !window.opener.closed);
-            if (isPopup) {
-                window.opener.postMessage(data, window.location.origin);
-                window.close();
-            } else {
-                // opener가 null이거나 팝업이 아닌 경우: localStorage를 통해 부모 창에 전달
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage(data, '*');
+                }
+            } catch (e) {
+                console.warn('postMessage failed:', e);
+            }
+
+            try {
                 localStorage.setItem('naver_auth_result', JSON.stringify(data));
-                // 리다이렉트 폴백이 설정된 경우 (팝업 차단 등) sessionStorage 플래그 세팅 후 이동
                 if (localStorage.getItem('naver_redirect_fallback') === '1') {
                     localStorage.removeItem('naver_redirect_fallback');
                     if (data.success) {
@@ -40,41 +42,58 @@
                         if (data.setupNeeded) sessionStorage.setItem('naver_setup_needed', '1');
                     }
                     window.location.href = '/';
+                    return; // 리다이렉트 시 종료
                 }
-                // opener가 살아있지 않으면 storage 이벤트로 부모가 처리
+            } catch (e) {
+                console.warn('localStorage fallback failed:', e);
             }
+
+            // 폴백 리다이렉트가 아니면 항상 팝업 닫기 시도
+            try {
+                window.close();
+            } catch (e) {}
         }
 
         async function handleCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-            const error = urlParams.get('error');
-
-            if (error) {
-                sendResult({ type: 'naver_auth_complete', success: false, error: '네이버 인증 실패: ' + error });
-                return;
-            }
-
-            // CSRF 방지: state 검증 (localStorage — cross-origin 팝업에서도 접근 가능)
-            const savedState = localStorage.getItem('naver_oauth_state');
-            localStorage.removeItem('naver_oauth_state');
-            if (!state || state !== savedState) {
-                sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 다시 로그인해주세요.' });
-                return;
-            }
-
-            if (!code) {
-                sendResult({ type: 'naver_auth_complete', success: false, error: '인증 코드가 없습니다.' });
-                return;
-            }
-
             try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const state = urlParams.get('state');
+                const error = urlParams.get('error');
+
+                if (error) {
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '네이버 인증 실패: ' + error });
+                    return;
+                }
+
+                // CSRF 방지: state 검증
+                let savedState = null;
+                try {
+                    savedState = localStorage.getItem('naver_oauth_state');
+                    localStorage.removeItem('naver_oauth_state');
+                } catch (e) {
+                    console.warn('localStorage access error', e);
+                }
+
+                if (!state || (savedState && state !== savedState)) {
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 로그인 창을 닫고 다시 시도해주세요.' });
+                    return;
+                }
+
+                if (!code) {
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '인증 코드가 없습니다.' });
+                    return;
+                }
+
                 // 1. 백엔드 API 호출
                 const response = await fetch(`/api/naver?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || '서버 응답 오류');
+                    let errorMessage = `서버 응답 오류 (${response.status})`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (e) {}
+                    throw new Error(errorMessage);
                 }
 
                 const data = await response.json();
@@ -116,8 +135,8 @@
                 });
 
             } catch (e) {
-                console.error('Auth error:', e);
-                sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 처리 중 오류: ' + e.message });
+                console.error('Auth traceback:', e);
+                sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 처리 중 오류가 발생했습니다: ' + e.message });
             }
         }
 

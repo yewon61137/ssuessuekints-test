@@ -545,7 +545,7 @@ export function initAuth() {
 
             // postMessage 수신 (window.opener가 살아있는 경우)
             function onNaverAuthMsg(e) {
-                if (e.origin !== window.location.origin) return;
+                if (window.location.protocol !== 'file:' && e.origin !== window.location.origin) return;
                 if (!e.data || e.data.type !== 'naver_auth_complete') return;
                 window.removeEventListener('message', onNaverAuthMsg);
                 window.removeEventListener('storage', onNaverStorage);
