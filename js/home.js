@@ -55,22 +55,129 @@ function renderMagazine(lang) {
         </a>`).join('');
 }
 
-// ── Community posts (Firestore) ───────────────────────────────
-async function loadCommunityPosts() {
-    const el = document.getElementById('communityGrid');
-    if (!el) return;
+// ── Projects (localStorage row counters) ─────────────────────
+const PROJ_EMPTY = {
+    ko: '단수 카운터에서 프로젝트를 추가해보세요',
+    en: 'Add projects in the row counter',
+    ja: '段数カウンターでプロジェクトを追加',
+};
+
+const PROJ_CTA = {
+    title: {
+        ko: '지금 뜨고 있는 작품이 있나요?',
+        en: 'Are you knitting something right now?',
+        ja: '今編んでいる作品はありますか？'
+    },
+    desc: {
+        ko: '단수 카운터로 진행상황을 추적해보세요',
+        en: 'Track your progress with the Row Counter',
+        ja: '段数カウンターで進捗을 관리합시다'
+    },
+    btn: {
+        ko: '단수 카운터 시작하기 →',
+        en: 'Start Row Counter →',
+        ja: '段数カウンターを始める →'
+    }
+};
+
+function loadProjects(isLoggedIn = false) {
+    const listEl = document.getElementById('projectList');
+    const cntEl = document.getElementById('projectCount');
+    if (!listEl) return;
+
+    const lang = document.documentElement.lang || 'ko';
+
+    // 비로그인 상태 CTA 표시
+    if (!isLoggedIn) {
+        listEl.innerHTML = `
+            <div class="home-empty" style="padding: 1.5rem 1rem; background: #fdfaf5; border: 1.5px solid #000; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                <div style="font-size: 0.9rem; font-weight: 800; font-family: 'GmarketSans', sans-serif;">${PROJ_CTA.title[lang]}</div>
+                <div style="font-size: 0.75rem; color: #666; line-height: 1.4;">${PROJ_CTA.desc[lang]}</div>
+                <button class="primary-btn small-btn" style="width: auto; margin-top: 0.2rem; font-size: 0.75rem; padding: 0.6rem 1.2rem;" 
+                        onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;">
+                    ${PROJ_CTA.btn[lang]}
+                </button>
+            </div>`;
+        if (cntEl) cntEl.textContent = '0';
+        return;
+    }
+
+    let counters = [];
     try {
-        const q = query(
-            collection(db, 'posts'),
-            where('tags', 'array-contains', 'finished'),
-            orderBy('createdAt', 'desc'),
-            limit(3)
-        );
+        const raw = localStorage.getItem('ssuessue_row_counters');
+        if (raw) counters = JSON.parse(raw);
+        if (!Array.isArray(counters)) counters = [];
+    } catch (e) { counters = []; }
+
+    if (cntEl) cntEl.textContent = counters.length;
+
+    if (counters.length === 0) {
+        const msg = PROJ_EMPTY[lang] || PROJ_EMPTY.ko;
+        listEl.innerHTML = `
+            <div class="home-empty">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span>${msg}</span>
+            </div>`;
+        return;
+    }
+
+    listEl.innerHTML = counters.map(c => {
+        const name = c.name ? String(c.name).substring(0, 30) : 'Project';
+        const count = Number(c.count) || 0;
+        const goal = Number(c.goalRows) || 0;
+        const pct = goal > 0 ? Math.min(100, Math.round(count / goal * 100)) : 0;
+        return `
+            <div class="proj-item">
+                <div class="proj-info">
+                    <div class="proj-name">${name}</div>
+                    <div class="proj-rows">${count}${goal ? ' / ' + goal : ''} rows</div>
+                    ${goal > 0 ? `<div class="proj-bar-wrap"><div class="proj-bar-fill" style="width:${pct}%;"></div></div>` : ''}
+                </div>
+                <div class="proj-count">${count}</div>
+            </div>`;
+    }).join('');
+}
+
+// ── Community posts (Firestore) ───────────────────────────────
+async function loadCommunityPosts(uid = null) {
+    const el = document.getElementById('communityGrid');
+    const ttlEl = document.querySelector('.home-panel:first-child .home-panel-ttl');
+    if (!el) return;
+
+    const lang = document.documentElement.lang || 'ko';
+    const T_COMM = {
+        latest: { ko: '최신 게시글', en: 'Latest Posts', ja: '最新の投稿' },
+        mine: { ko: '최근 완성작', en: 'My Recent Work', ja: '最近の完成作品' }
+    };
+
+    try {
+        let q;
+        if (uid) {
+            // 로그인 상태: 내 완성작 (태그가 finished인 내 글)
+            q = query(
+                collection(db, 'posts'),
+                where('userId', '==', uid),
+                where('tags', 'array-contains', 'finished'),
+                orderBy('createdAt', 'desc'),
+                limit(3)
+            );
+            if (ttlEl) ttlEl.textContent = T_COMM.mine[lang];
+        } else {
+            // 비로그인 상태: 전체 최신글 3개
+            q = query(
+                collection(db, 'posts'),
+                orderBy('createdAt', 'desc'),
+                limit(3)
+            );
+            if (ttlEl) ttlEl.textContent = T_COMM.latest[lang];
+        }
+
         const snap = await getDocs(q);
         if (snap.empty) {
-            // keep placeholder skeleton
+            el.innerHTML = `<div class="home-empty" style="grid-column: span 3; color:#bbb; font-size:0.7rem; padding: 2rem 0;">${lang === 'ko' ? '게시글이 없습니다.' : lang === 'ja' ? '投稿がありません。' : 'No posts found.'}</div>`;
             return;
         }
+
         const items = [];
         snap.forEach(doc => {
             const d = doc.data();
@@ -83,77 +190,15 @@ async function loadCommunityPosts() {
             <a class="cg-item" href="/post.html?id=${encodeURIComponent(p.id)}">
                 <div class="cg-thumb">
                     ${p.imgUrl
-                        ? `<img src="${p.imgUrl}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
+                        ? `<img src="${p.imgUrl}" alt="" loading="lazy">`
                         : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
                 </div>
                 <div class="cg-name">${p.title}</div>
                 <div class="cg-meta">${p.nick}</div>
             </a>`).join('');
     } catch (e) {
-        // Firestore unavailable (e.g. local dev without config) — silently keep placeholder
         console.warn('loadCommunityPosts:', e.message);
     }
-}
-
-// ── Saved count (Firestore) ───────────────────────────────────
-async function loadSavedCount(uid) {
-    const el = document.getElementById('savedCount');
-    if (!el) return;
-    try {
-        const snap = await getDocs(collection(db, 'users', uid, 'patterns'));
-        el.textContent = snap.size;
-    } catch (e) {
-        // ignore
-    }
-}
-
-// ── Projects (localStorage row counters) ─────────────────────
-const PROJ_EMPTY = {
-    ko: '단수 카운터에서 프로젝트를 추가해보세요',
-    en: 'Add projects in the row counter',
-    ja: '段数カウンターでプロジェクトを追加',
-};
-
-function loadProjects() {
-    const listEl = document.getElementById('projectList');
-    const cntEl = document.getElementById('projectCount');
-    if (!listEl) return;
-
-    let counters = [];
-    try {
-        const raw = localStorage.getItem('ssuessue_row_counters');
-        if (raw) counters = JSON.parse(raw);
-        if (!Array.isArray(counters)) counters = [];
-    } catch (e) { counters = []; }
-
-    if (cntEl) cntEl.textContent = counters.length;
-
-    if (counters.length === 0) {
-        const lang = document.documentElement.lang || 'ko';
-        const msg = PROJ_EMPTY[lang] || PROJ_EMPTY.ko;
-        listEl.innerHTML = `
-            <div class="empty-state">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                <span>${msg}</span>
-            </div>`;
-        return;
-    }
-
-    listEl.innerHTML = counters.map(c => {
-        const name = c.name ? String(c.name).substring(0, 30) : 'Project';
-        const count = Number(c.count) || 0;
-        const goal = Number(c.goalRows) || 0;
-        const pct = goal > 0 ? Math.min(100, Math.round(count / goal * 100)) : 0;
-        return `
-            <div class="proj-item" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e9e5dd;">
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:.85rem;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
-                    <div style="font-size:.75rem;color:#999;margin-top:2px;">${count}${goal ? ' / ' + goal : ''} rows</div>
-                    ${goal > 0 ? `<div style="height:3px;background:#e9e5dd;border-radius:2px;margin-top:4px;"><div style="height:3px;background:#1a1a1a;border-radius:2px;width:${pct}%;"></div></div>` : ''}
-                </div>
-                <div style="font-size:1rem;font-weight:700;color:#1a1a1a;flex-shrink:0;">${count}</div>
-            </div>`;
-    }).join('');
 }
 
 // ── Greeting ──────────────────────────────────────────────────
@@ -217,11 +262,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             updateGreeting(_currentNickname);
             loadSavedCount(user.uid);
+            loadCommunityPosts(user.uid); // 내 완성작 로드
+            loadProjects(true);           // 내 프로젝트 로드
         } else {
             _currentNickname = '';
             updateGreeting('');
             const el = document.getElementById('savedCount');
             if (el) el.textContent = '0';
+            loadCommunityPosts(null);     // 전체 최신글 로드
+            loadProjects(false);          // 비로그인 CTA 로드
         }
     });
 
