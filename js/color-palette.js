@@ -460,6 +460,103 @@ function renderStripeSliders() {
   });
 }
 
+// ─── DRAG-AND-DROP SLOT REORDERING ───────────────────────────────────────────
+
+let dragSrcIndex = null;
+
+function makeTouchDraggable(handle, row, getIndex) {
+  let longPressTimer = null;
+  let ghostEl = null;
+  let isDragging = false;
+  let startX, startY;
+
+  handle.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+
+    longPressTimer = setTimeout(() => {
+      isDragging = true;
+      dragSrcIndex = getIndex();
+
+      ghostEl = row.cloneNode(true);
+      ghostEl.style.cssText = `
+        position: fixed; opacity: 0.85; pointer-events: none; z-index: 9999;
+        width: ${row.offsetWidth}px; background: #fff;
+        border: 2px dashed #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+      `;
+      ghostEl.style.left = `${touch.clientX - row.offsetWidth / 2}px`;
+      ghostEl.style.top  = `${touch.clientY - row.offsetHeight / 2}px`;
+      document.body.appendChild(ghostEl);
+      row.style.opacity = '0.4';
+    }, 500); // 500ms long press
+  }, { passive: true });
+
+  handle.addEventListener('touchmove', e => {
+    // Cancel long press if finger moved before 500ms
+    if (!isDragging && longPressTimer) {
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - startX);
+      const dy = Math.abs(touch.clientY - startY);
+      if (dx > 10 || dy > 10) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+      return;
+    }
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (ghostEl) {
+      ghostEl.style.left = `${touch.clientX - ghostEl.offsetWidth / 2}px`;
+      ghostEl.style.top  = `${touch.clientY - ghostEl.offsetHeight / 2}px`;
+    }
+
+    // Highlight drop target
+    document.querySelectorAll('.cp-slot-row').forEach(r => r.classList.remove('cp-slot-drag-over'));
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    el?.closest('.cp-slot-row')?.classList.add('cp-slot-drag-over');
+  }, { passive: false });
+
+  const endTouch = e => {
+    clearTimeout(longPressTimer);
+    if (!isDragging) { isDragging = false; return; }
+    isDragging = false;
+
+    if (ghostEl) { ghostEl.remove(); ghostEl = null; }
+    row.style.opacity = '';
+
+    const touch = (e.changedTouches || e.touches)[0];
+    if (!touch) return;
+
+    document.querySelectorAll('.cp-slot-row').forEach(r => r.classList.remove('cp-slot-drag-over'));
+
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.cp-slot-row');
+    if (!targetEl) return;
+    const rows = [...document.querySelectorAll('.cp-slot-row')];
+    const targetIdx = rows.indexOf(targetEl);
+    if (targetIdx === -1 || targetIdx === dragSrcIndex) return;
+
+    reorderSlots(dragSrcIndex, targetIdx);
+    dragSrcIndex = null;
+  };
+
+  handle.addEventListener('touchend', endTouch, { passive: true });
+  handle.addEventListener('touchcancel', endTouch, { passive: true });
+}
+
+function reorderSlots(from, to) {
+  if (from === to || from < 0 || to < 0) return;
+  const [movedSlot] = slots.splice(from, 1);
+  slots.splice(to, 0, movedSlot);
+  const [movedRow] = stripeRows.splice(from, 1);
+  stripeRows.splice(to, 0, movedRow);
+  renderSlots();
+  redrawPreview();
+  updateContrast();
+  renderStripeSliders();
+}
+
 function renderSlots() {
   const container = document.getElementById('simSlots');
   if (!container) return;
@@ -468,6 +565,42 @@ function renderSlots() {
   slots.forEach((slot, i) => {
     const row = document.createElement('div');
     row.className = 'cp-slot-row';
+    row.draggable = true;
+
+    // Drag handle
+    const handle = document.createElement('span');
+    handle.className = 'cp-drag-handle';
+    handle.textContent = '⠿';
+    handle.title = 'Drag to reorder';
+
+    // HTML5 DnD (desktop)
+    row.addEventListener('dragstart', e => {
+      dragSrcIndex = i;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => row.style.opacity = '0.4', 0);
+    });
+    row.addEventListener('dragend', () => {
+      row.style.opacity = '';
+      document.querySelectorAll('.cp-slot-row').forEach(r => r.classList.remove('cp-slot-drag-over'));
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.cp-slot-row').forEach(r => r.classList.remove('cp-slot-drag-over'));
+      row.classList.add('cp-slot-drag-over');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('cp-slot-drag-over'));
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      row.classList.remove('cp-slot-drag-over');
+      if (dragSrcIndex !== null && dragSrcIndex !== i) {
+        reorderSlots(dragSrcIndex, i);
+        dragSrcIndex = null;
+      }
+    });
+
+    // Touch DnD (mobile long press)
+    makeTouchDraggable(handle, row, () => i);
 
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
@@ -520,6 +653,7 @@ function renderSlots() {
       updateAddBtn();
     });
 
+    row.appendChild(handle);
     row.appendChild(colorInput);
     row.appendChild(hexInput);
     row.appendChild(removeBtn);
@@ -528,6 +662,7 @@ function renderSlots() {
 
   updateAddBtn();
 }
+
 
 function updateAddBtn() {
   const btn = document.getElementById('simAddColorBtn');
