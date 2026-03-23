@@ -11,19 +11,67 @@
     </style>
 </head>
 <body>
-    <div class="loader"></div>
+    <div class="loader-wrap" style="text-align: center;">
+        <div class="loader"></div>
+        <div id="statusMessage" style="margin-top: 15px; font-size: 14px; color: #666;">인증 센터 연결 중...</div>
+    </div>
+
+    <!-- 글로벌 에러 핸들러: 비동기 모듈 로딩 전 발생 에러(구문 에러 등) 포착 시도 -->
+    <script>
+        window._sendFailure = function(msg) {
+            console.error('Final failure:', msg);
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({ type: 'naver_auth_complete', success: false, error: msg }, '*');
+                }
+                localStorage.setItem('naver_auth_result', JSON.stringify({ type: 'naver_auth_complete', success: false, error: msg }));
+            } catch (e) {}
+            setTimeout(() => { try { window.close(); } catch (e) {} }, 3000); // 3초 후 닫기
+        };
+
+        window.onerror = function(msg, url, line) {
+            document.getElementById('statusMessage').textContent = '오류 발생: ' + msg;
+            window._sendFailure('전기적 오류 (' + line + '): ' + msg);
+        };
+        window.onunhandledrejection = function(e) {
+            document.getElementById('statusMessage').textContent = '인증 중단됨: ' + e.reason;
+            window._sendFailure('비동기 오류: ' + e.reason);
+        };
+
+        // 30초 타임아웃
+        setTimeout(() => {
+            if (document.getElementById('statusMessage').textContent !== '완료') {
+                document.getElementById('statusMessage').textContent = '요청 시간 초과';
+                window._sendFailure('인증 요청 시간이 초과되었습니다. 다시 시도해주세요.');
+            }
+        }, 30000);
+    </script>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
         import { getAuth, signInWithCustomToken, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-        import { firebaseConfig } from './js/firebase-config.js';
+        
+        let firebaseConfig = null;
+        try {
+            // firebase-config.js import (상대 경로 주의)
+            const configModule = await import('./js/firebase-config.js');
+            firebaseConfig = configModule.firebaseConfig;
+        } catch (e) {
+            console.error('Config load failed:', e);
+            throw new Error('설정 파일을 불러오지 못했습니다. (CORS 또는 파일 누락)');
+        }
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        const statusEl = document.getElementById('statusMessage');
+        function updateStatus(msg) {
+            if (statusEl) statusEl.textContent = msg;
+        }
+
         // 결과를 부모 창에 전달하는 헬퍼
-        // postMessage(opener 살아있는 경우) + localStorage(폴백) 모두 시도
         function sendResult(data) {
             try {
                 if (window.opener && !window.opener.closed) {
@@ -42,13 +90,12 @@
                         if (data.setupNeeded) sessionStorage.setItem('naver_setup_needed', '1');
                     }
                     window.location.href = '/';
-                    return; // 리다이렉트 시 종료
+                    return; 
                 }
             } catch (e) {
                 console.warn('localStorage fallback failed:', e);
             }
 
-            // 폴백 리다이렉트가 아니면 항상 팝업 닫기 시도
             try {
                 window.close();
             } catch (e) {}
@@ -56,6 +103,7 @@
 
         async function handleCallback() {
             try {
+                updateStatus('인증 토큰 확인 중...');
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
@@ -71,12 +119,10 @@
                 try {
                     savedState = localStorage.getItem('naver_oauth_state');
                     localStorage.removeItem('naver_oauth_state');
-                } catch (e) {
-                    console.warn('localStorage access error', e);
-                }
+                } catch (e) {}
 
                 if (!state || (savedState && state !== savedState)) {
-                    sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 로그인 창을 닫고 다시 시도해주세요.' });
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 다시 시도해주세요.' });
                     return;
                 }
 
@@ -85,6 +131,7 @@
                     return;
                 }
 
+                updateStatus('서버에 인증 요청 중...');
                 // 1. 백엔드 API 호출
                 const response = await fetch(`/api/naver?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
                 if (!response.ok) {
@@ -97,16 +144,17 @@
                 }
 
                 const data = await response.json();
-
                 if (!data.firebaseToken) throw new Error('인증 토큰이 유효하지 않습니다.');
 
+                updateStatus('Firebase 로그인 중...');
                 // 2. Firebase 커스텀 토큰으로 로그인 (자동 로그인 권한 적용)
                 const rm = localStorage.getItem('naver_remember_me') === '1';
                 await setPersistence(auth, rm ? browserLocalPersistence : browserSessionPersistence);
                 const result = await signInWithCustomToken(auth, data.firebaseToken);
                 const user = result.user;
 
-                // 3. Firebase Auth 프로필 업데이트 (displayName, photoURL)
+                updateStatus('프로필 정보 동기화 중...');
+                // 3. Firebase Auth 프로필 업데이트
                 if (data.naverUser) {
                     const { nickname, profilePhotoURL } = data.naverUser;
                     if (nickname || profilePhotoURL) {
@@ -126,6 +174,7 @@
                     setupNeeded = true;
                 }
 
+                updateStatus('완료');
                 // 5. 결과 전달
                 sendResult({
                     type: 'naver_auth_complete',
@@ -136,7 +185,8 @@
 
             } catch (e) {
                 console.error('Auth traceback:', e);
-                sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 처리 중 오류가 발생했습니다: ' + e.message });
+                updateStatus('오류: ' + e.message);
+                sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 오류: ' + e.message });
             }
         }
 
