@@ -8,7 +8,7 @@ export async function onRequestGet(context) {
     const clientSecret = env.NAVER_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-        return new Response(JSON.stringify({ error: 'Server configuration error' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Server configuration error: NAVER_CLIENT_ID or NAVER_CLIENT_SECRET is missing.' }), { status: 500 });
     }
 
     if (!code) {
@@ -21,7 +21,7 @@ export async function onRequestGet(context) {
         const tokenData = await tokenResponse.json();
 
         if (tokenData.error) {
-            return new Response(JSON.stringify({ error: tokenData.error_description }), { status: 400 });
+            return new Response(JSON.stringify({ error: 'Token exchange failed: ' + tokenData.error_description }), { status: 400 });
         }
 
         const accessToken = tokenData.access_token;
@@ -33,15 +33,21 @@ export async function onRequestGet(context) {
         const profileData = await profileResponse.json();
 
         if (profileData.resultcode !== '00') {
-            return new Response(JSON.stringify({ error: 'Failed to fetch profile' }), { status: 400 });
+            return new Response(JSON.stringify({ error: 'Failed to fetch profile: ' + profileData.message }), { status: 400 });
         }
 
         const naverUser = profileData.response;
 
         // 3. Firebase Auth에 유저 생성/업데이트 (email 포함) — Firebase console 식별자 표시용
-        const privateKey = env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+        const privateKeyRaw = env.FIREBASE_PRIVATE_KEY;
         const clientEmail = env.FIREBASE_SERVICE_ACCOUNT_EMAIL;
         const projectId = env.FIREBASE_PROJECT_ID;
+
+        if (!privateKeyRaw || !clientEmail || !projectId) {
+            return new Response(JSON.stringify({ error: 'Server configuration error: Firebase credentials missing.' }), { status: 500 });
+        }
+
+        const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
 
         try {
             const adminToken = await getAdminAccessToken(clientEmail, privateKey);

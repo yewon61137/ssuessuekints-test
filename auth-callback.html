@@ -54,12 +54,15 @@
         
         let firebaseConfig = null;
         try {
+            updateStatus('설정 로드 중...');
             // firebase-config.js import (상대 경로 주의)
-            const configModule = await import('./js/firebase-config.js');
+            // 브라우저 캐시 방지를 위해 쿼리 스트링 추가 고려 가능
+            const configModule = await import('/js/firebase-config.js');
             firebaseConfig = configModule.firebaseConfig;
         } catch (e) {
             console.error('Config load failed:', e);
-            throw new Error('설정 파일을 불러오지 못했습니다. (CORS 또는 파일 누락)');
+            updateStatus('설정 파일 로드 실패');
+            throw new Error('설정 파일을 불러오지 못했습니다. 서버 구성을 확인해주세요. (' + e.message + ')');
         }
 
         const app = initializeApp(firebaseConfig);
