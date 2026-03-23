@@ -293,26 +293,26 @@ function renderTexture(canvas, colors, texture, stripeRows) {
     renderStripePreview(canvas, colors, stripeRows);
   } else if (texture === 'fairisle') {
     const patSize = 24; 
-    // 정중앙 배치를 위한 오프셋 계산
-    const offsetX = Math.floor((cols % patSize) / 2);
-    const offsetY = Math.floor((rows % patSize) / 2);
+    const midCol = cols / 2;
+    const midRow = rows / 2;
 
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
-        // 오프셋을 적용하여 타일링 시작 위치 조정
-        const py = ((r - offsetY) % patSize + patSize) % patSize;
-        const px = ((l - offsetX) % patSize + patSize) % patSize;
+        // 화면 정중앙(midCol, midRow)이 무늬의 중심(12, 12)이 되도록 좌표 계산
+        const px = Math.floor(((l - midCol + 12) % patSize + patSize) % patSize);
+        const py = Math.floor(((r - midRow + 12) % patSize + patSize) % patSize);
         
         const dx = Math.abs(px - 12);
         const dy = Math.abs(py - 12);
         let isPattern = false;
         
-        // 정교한 대칭 눈꽃 (정중앙 12,12 기준)
+        // 정교한 대칭 눈꽃 무늬 로직
         if ((dx === 0 && dy < 9) || (dy === 0 && dx < 9)) isPattern = true;
         if (dx === dy && dx < 6) isPattern = true;
         if (dx + dy === 8) isPattern = true;
 
         let c = isPattern && n > 1 ? colors[1] : colors[0];
+        // 3색 이상일 때 정중앙 포인트
         if (isPattern && n > 2 && dx === 0 && dy === 0) c = colors[2];
 
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
