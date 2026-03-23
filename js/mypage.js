@@ -593,11 +593,14 @@ function buildPatternCard(uid, patternId, data) {
 // ── 내 프로젝트 ───────────────────────────────────────────────────────────────
 
 async function loadProjects(uid) {
-    // localStorage 우선, 로그인 시 Firestore도 확인
+    // localStorage는 같은 계정의 데이터인 경우에만 사용
     let counters = [];
     try {
-        const local = localStorage.getItem('ssuessue_row_counters');
-        if (local) counters = JSON.parse(local);
+        const storedUid = localStorage.getItem('ssuessue_rc_uid');
+        if (storedUid === uid) {
+            const local = localStorage.getItem('ssuessue_row_counters');
+            if (local) counters = JSON.parse(local);
+        }
     } catch {}
 
     // Firestore 데이터 병합 (더 최신인 것 사용)

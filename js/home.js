@@ -80,7 +80,7 @@ const PROJ_CTA = {
     }
 };
 
-function loadProjects(isLoggedIn = false) {
+function loadProjects(isLoggedIn = false, uid = null) {
     const listEl = document.getElementById('projectList');
     const cntEl = document.getElementById('projectCount');
     if (!listEl) return;
@@ -104,9 +104,13 @@ function loadProjects(isLoggedIn = false) {
 
     let counters = [];
     try {
-        const raw = localStorage.getItem('ssuessue_row_counters');
-        if (raw) counters = JSON.parse(raw);
-        if (!Array.isArray(counters)) counters = [];
+        // 같은 계정의 데이터인 경우에만 로컬스토리지 사용
+        const storedUid = localStorage.getItem('ssuessue_rc_uid');
+        if (!uid || storedUid === uid) {
+            const raw = localStorage.getItem('ssuessue_row_counters');
+            if (raw) counters = JSON.parse(raw);
+            if (!Array.isArray(counters)) counters = [];
+        }
     } catch (e) { counters = []; }
 
     if (cntEl) cntEl.textContent = counters.length;
@@ -268,8 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 _currentNickname = '';
             }
             updateGreeting(_currentNickname);
-            loadCommunityPosts(user.uid); // 내 완성작 로드
-            loadProjects(true);           // 내 프로젝트 로드
+            loadCommunityPosts(user.uid);        // 내 완성작 로드
+            loadProjects(true, user.uid);        // 내 프로젝트 로드
         } else {
             _currentNickname = '';
             updateGreeting('');
@@ -282,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('langChange', e => {
         const lang = e.detail?.lang || document.documentElement.lang || 'ko';
         renderMagazine(lang);
-        loadProjects(!!_currentUser);        // 현재 auth 상태 유지
+        loadProjects(!!_currentUser, _currentUser?.uid || null); // 현재 auth 상태 유지
         updateCommunityTitle(_currentUser?.uid || null, lang); // 타이틀만 갱신
         updateGreeting(_currentNickname);
         syncLangSelect(lang);

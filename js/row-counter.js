@@ -8,6 +8,7 @@ import {
 
 const STORAGE_KEY = 'ssuessue_row_counters';
 const DRAWER_KEY  = 'ssuessue_rc_open';
+const UID_KEY     = 'ssuessue_rc_uid';   // 로컬 데이터 소유자 추적
 const SYNC_DELAY  = 2000; // ms debounce for Firestore sync
 
 class RowCounter extends HTMLElement {
@@ -37,10 +38,18 @@ class RowCounter extends HTMLElement {
             this.toggleDrawer();
         });
 
-        // Firestore sync: load saved state on sign-in
+        // Firestore sync: 로그인 시 로드, 로그아웃 시 로컬 데이터 초기화
         try {
             auth.onAuthStateChanged(user => {
-                if (user) this._loadFromFirestore(user.uid);
+                if (user) {
+                    this._loadFromFirestore(user.uid);
+                } else {
+                    // 로그아웃: 다음 계정이 이전 데이터를 보지 않도록 초기화
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(UID_KEY);
+                    this.counters = [this._newCounter()];
+                    this.render();
+                }
             });
         } catch(e) {}
     }
@@ -103,6 +112,14 @@ class RowCounter extends HTMLElement {
 
     async _loadFromFirestore(uid) {
         try {
+            // 다른 계정의 로컬 데이터가 남아있으면 제거
+            const storedUid = localStorage.getItem(UID_KEY);
+            if (storedUid && storedUid !== uid) {
+                localStorage.removeItem(STORAGE_KEY);
+                this.counters = [this._newCounter()];
+            }
+            localStorage.setItem(UID_KEY, uid);
+
             const snap = await getDoc(doc(db, 'users', uid, 'rowCounters', 'main'));
             let fsCounters = [];
             if (snap.exists()) {
@@ -111,26 +128,24 @@ class RowCounter extends HTMLElement {
             }
 
             const localCounters = this.counters || [];
-            
-            // 만약 서버도 비었고 로컬도 기본값 1개(비어있음)이면 무시
+
+            // 둘 다 비어있으면 무시
             if (fsCounters.length === 0 && localCounters.length === 1 && localCounters[0].count === 0 && localCounters[0].name === '' && localCounters[0].goalRows === 0) {
                 return;
             }
 
             const mergedMap = new Map();
 
-            // 1. 서버 데이터를 기준으로 먼저 맵 세팅
+            // 1. Firestore 데이터를 기준으로 먼저 맵 세팅
             fsCounters.forEach(c => {
                 mergedMap.set(c.id, { ...this._newCounter(), ...c });
             });
 
-            // 2. 로컬 데이터를 병합 (서버에 없는 아이디면 추가)
+            // 2. 같은 계정의 로컬 데이터만 병합 (오프라인 중 추가된 카운터)
             localCounters.forEach(c => {
                 const isEmpty = (c.count === 0 && !c.name && c.goalRows === 0);
-                if (!isEmpty) {
-                    if (!mergedMap.has(c.id)) {
-                        mergedMap.set(c.id, c);
-                    }
+                if (!isEmpty && !mergedMap.has(c.id)) {
+                    mergedMap.set(c.id, c);
                 }
             });
 
@@ -139,7 +154,6 @@ class RowCounter extends HTMLElement {
                 this.counters = mergedArr;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(this.counters));
                 this.render();
-                // 오프라인이던 로컬 데이터를 병합했으므로 서버로 다시 동기화
                 this._scheduleFirestoreSync();
             }
         } catch(e) { console.error('RowCounter sync error:', e); }
