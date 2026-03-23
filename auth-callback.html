@@ -52,11 +52,14 @@
         import { getAuth, signInWithCustomToken, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
         
+        const statusEl = document.getElementById('statusMessage');
+        function updateStatus(msg) {
+            if (statusEl) statusEl.textContent = msg;
+        }
+
         let firebaseConfig = null;
         try {
             updateStatus('설정 로드 중...');
-            // firebase-config.js import (상대 경로 주의)
-            // 브라우저 캐시 방지를 위해 쿼리 스트링 추가 고려 가능
             const configModule = await import('/js/firebase-config.js');
             firebaseConfig = configModule.firebaseConfig;
         } catch (e) {
@@ -68,11 +71,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        const statusEl = document.getElementById('statusMessage');
-        function updateStatus(msg) {
-            if (statusEl) statusEl.textContent = msg;
-        }
 
         // 결과를 부모 창에 전달하는 헬퍼
         function sendResult(data) {
