@@ -48,29 +48,10 @@
     </script>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, signInWithCustomToken, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-        
         const statusEl = document.getElementById('statusMessage');
         function updateStatus(msg) {
             if (statusEl) statusEl.textContent = msg;
         }
-
-        let firebaseConfig = null;
-        try {
-            updateStatus('설정 로드 중...');
-            const configModule = await import('/js/firebase-config.js');
-            firebaseConfig = configModule.firebaseConfig;
-        } catch (e) {
-            console.error('Config load failed:', e);
-            updateStatus('설정 파일 로드 실패');
-            throw new Error('설정 파일을 불러오지 못했습니다. 서버 구성을 확인해주세요. (' + e.message + ')');
-        }
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
 
         // 결과를 부모 창에 전달하는 헬퍼
         function sendResult(data) {
@@ -86,25 +67,19 @@
                 localStorage.setItem('naver_auth_result', JSON.stringify(data));
                 if (localStorage.getItem('naver_redirect_fallback') === '1') {
                     localStorage.removeItem('naver_redirect_fallback');
-                    if (data.success) {
-                        if (data.naverEmail) sessionStorage.setItem('naver_pending_email', data.naverEmail);
-                        if (data.setupNeeded) sessionStorage.setItem('naver_setup_needed', '1');
-                    }
                     window.location.href = '/';
-                    return; 
+                    return;
                 }
             } catch (e) {
                 console.warn('localStorage fallback failed:', e);
             }
 
-            try {
-                window.close();
-            } catch (e) {}
+            try { window.close(); } catch (e) {}
         }
 
         async function handleCallback() {
             try {
-                updateStatus('인증 토큰 확인 중...');
+                updateStatus('인증 코드 확인 중...');
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
@@ -133,7 +108,6 @@
                 }
 
                 updateStatus('서버에 인증 요청 중...');
-                // 1. 백엔드 API 호출
                 const response = await fetch(`/api/naver?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
                 if (!response.ok) {
                     let errorMessage = `서버 응답 오류 (${response.status})`;
@@ -147,40 +121,13 @@
                 const data = await response.json();
                 if (!data.firebaseToken) throw new Error('인증 토큰이 유효하지 않습니다.');
 
-                updateStatus('Firebase 로그인 중...');
-                // 2. Firebase 커스텀 토큰으로 로그인 (자동 로그인 권한 적용)
-                const rm = localStorage.getItem('naver_remember_me') === '1';
-                await setPersistence(auth, rm ? browserLocalPersistence : browserSessionPersistence);
-                const result = await signInWithCustomToken(auth, data.firebaseToken);
-                const user = result.user;
-
-                updateStatus('프로필 정보 동기화 중...');
-                // 3. Firebase Auth 프로필 업데이트
-                if (data.naverUser) {
-                    const { nickname, profilePhotoURL } = data.naverUser;
-                    if (nickname || profilePhotoURL) {
-                        await updateProfile(user, {
-                            displayName: nickname || user.displayName || '',
-                            photoURL: profilePhotoURL || user.photoURL || ''
-                        });
-                    }
-                }
-
-                // 4. Firestore 프로필 완성 여부 확인
-                let setupNeeded = false;
-                try {
-                    const snap = await getDoc(doc(db, 'users', user.uid));
-                    if (!snap.exists() || !snap.data().profileCompleted) setupNeeded = true;
-                } catch {
-                    setupNeeded = true;
-                }
-
                 updateStatus('완료');
-                // 5. 결과 전달
+                // 토큰과 사용자 정보를 부모 창으로 전달 — Firebase 로그인은 메인 창에서 처리
                 sendResult({
                     type: 'naver_auth_complete',
                     success: true,
-                    setupNeeded,
+                    firebaseToken: data.firebaseToken,
+                    naverUser: data.naverUser || null,
                     naverEmail: data.naverUser?.email || null
                 });
 

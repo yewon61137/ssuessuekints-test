@@ -8,6 +8,7 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithCustomToken,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile,
@@ -498,14 +499,60 @@ export function initAuth() {
         }
     });
 
-    // 네이버 로그인 (팝업 방식)
+    // 네이버 로그인: 팝업에서 받은 토큰으로 메인 창에서 직접 Firebase 로그인 처리
+    async function handleNaverResult(data) {
+        if (!data.success) {
+            showModalError(data.error || '네이버 로그인에 실패했습니다.');
+            return;
+        }
+        try {
+            if (data.naverEmail) sessionStorage.setItem('naver_pending_email', data.naverEmail);
+            await applyAuthPersistence();
+            const result = await signInWithCustomToken(auth, data.firebaseToken);
+            const user = result.user;
+            // Firebase Auth 프로필 업데이트
+            if (data.naverUser) {
+                const { nickname, profilePhotoURL } = data.naverUser;
+                if (nickname || profilePhotoURL) {
+                    await updateProfile(user, {
+                        displayName: nickname || user.displayName || '',
+                        photoURL: profilePhotoURL || user.photoURL || ''
+                    });
+                }
+            }
+            // 프로필 완성 여부 확인 후 처리
+            const complete = await isProfileComplete(user.uid);
+            if (!complete) {
+                showProfileSetup(user);
+            } else {
+                modal.style.display = 'none';
+                callOnAuthComplete();
+            }
+        } catch (e) {
+            showModalError('로그인 오류: ' + e.message);
+        }
+    }
+
+    // 리다이렉트 폴백: 팝업 차단 후 페이지 리로드로 돌아온 경우
+    const storedNaverResult = localStorage.getItem('naver_auth_result');
+    if (storedNaverResult) {
+        localStorage.removeItem('naver_auth_result');
+        try {
+            const parsed = JSON.parse(storedNaverResult);
+            if (parsed.type === 'naver_auth_complete') {
+                modal.style.display = 'flex';
+                handleNaverResult(parsed);
+            }
+        } catch (e) {}
+    }
+
+    // 네이버 로그인 버튼 (팝업 방식)
     const naverBtn = document.getElementById('naverSignInBtn');
     if (naverBtn) {
         naverBtn.addEventListener('click', () => {
             const clientId = 'Fe19uUByKG1KyTLtsg67';
             const redirectUri = encodeURIComponent(window.location.origin + '/auth-callback.html');
             const state = Math.random().toString(36).substring(2, 15);
-            // localStorage 사용: 팝업이 cross-origin 이동 후 돌아와도 접근 가능
             localStorage.setItem('naver_oauth_state', state);
             const rm = document.getElementById('rememberMeCheck');
             localStorage.setItem('naver_remember_me', (rm && rm.checked) ? '1' : '0');
@@ -517,30 +564,9 @@ export function initAuth() {
             const popup = window.open(naverAuthUrl, 'naver_auth', `width=${pw},height=${ph},left=${pl},top=${pt}`);
 
             if (!popup || popup.closed) {
-                // 팝업 차단 시 리다이렉트 폴백
                 localStorage.setItem('naver_redirect_fallback', '1');
                 window.location.href = naverAuthUrl;
                 return;
-            }
-
-            function handleNaverResult(data) {
-                if (data.success) {
-                    if (data.naverEmail) sessionStorage.setItem('naver_pending_email', data.naverEmail);
-                    if (data.setupNeeded) {
-                        sessionStorage.setItem('naver_setup_needed', '1');
-                    } else {
-                        const tryClose = setInterval(() => {
-                            if (auth.currentUser) {
-                                clearInterval(tryClose);
-                                modal.style.display = 'none';
-                                callOnAuthComplete();
-                            }
-                        }, 200);
-                        setTimeout(() => clearInterval(tryClose), 5000);
-                    }
-                } else {
-                    showModalError(data.error || '네이버 로그인에 실패했습니다.');
-                }
             }
 
             // postMessage 수신 (window.opener가 살아있는 경우)
