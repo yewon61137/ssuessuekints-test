@@ -174,7 +174,7 @@ function updateGreeting(nickname) {
 // ── Row counter toggle wiring ─────────────────────────────────
 function wireRowCounterToggles() {
     const toggle = () => document.querySelector('knitting-row-counter')?.toggleDrawer();
-    ['counterToggle', 'sbRowCounter', 'heroRowCounter', 'toolCounterCard'].forEach(id => {
+    ['counterToggle', 'sbRowCounter', 'heroRowCounter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('click', e => { e.preventDefault(); toggle(); });
     });
