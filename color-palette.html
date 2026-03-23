@@ -90,15 +90,7 @@
     <p class="cp-subtitle i18n" data-ko="색상 조합을 시뮬레이션하고 나만의 팔레트를 저장해보세요" data-en="Simulate color combinations and save your own palettes" data-ja="配色をシミュレーションして、自分だけのパレットを保存しよう">색상 조합을 시뮬레이션하고 나만의 팔레트를 저장해보세요</p>
   </div>
 
-  <!-- 탭 네비게이션 -->
-  <div class="cp-tabs">
-    <button class="cp-tab active" data-tab="simulator" data-i18n="cp_tab_simulator">배색 시뮬레이터</button>
-    <button class="cp-tab" data-tab="stripe" data-i18n="cp_tab_stripe">줄무늬 계산기</button>
-  </div>
-
-  <!-- TAB 1: 배색 시뮬레이터 -->
-  <div class="cp-panel active" id="panelSimulator">
-    <div class="cp-sim-layout">
+  <div class="cp-sim-layout" style="margin-top: 1.5rem;">
       <!-- 왼쪽: 기법(텍스처) 선택 + 색상 슬롯 -->
       <div class="cp-sim-left">
         <div class="cp-section-label">
@@ -147,81 +139,6 @@
         <canvas id="simCanvas" class="cp-preview-canvas" width="420" height="300"></canvas>
       </div>
     </div>
-  </div>
-
-
-
-  <!-- TAB 3: 줄무늬 배분 계산기 -->
-  <div class="cp-panel" id="panelStripe">
-    <div class="cp-stripe-calc-layout">
-      <div class="cp-stripe-calc-left">
-        <div class="cp-stripe-intro" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.03); border-radius: 8px; font-size: 0.95rem; line-height: 1.5; color: #444;">
-          <strong style="display:block; margin-bottom: 0.5rem; color: #000;">줄무늬 계산기란?</strong>
-          <span class="i18n" data-ko="원하는 총 단수 안에서 여러 색상을 배치할 때, 황금비나 피보나치 같은 수학적 비율을 활용해 '가장 조화롭고 예쁜 두께 비율'을 자동으로 계산해 주는 기능입니다." data-en="Calculates the most natural and beautiful number of rows for each color using mathematical ratios like Golden Ratio or Fibonacci based on total rows." data-ja="総段数内で複数の色を配置する際、黄金比やフィボナッチなどの数学的比率を活用して、調和のとれた美しい段数を自動計算する機能です。">원하는 총 단수 안에서 여러 색상을 배치할 때, 황금비나 피보나치 같은 수학적 비율을 활용해 '가장 조화롭고 예쁜 두께 비율'을 자동으로 계산해 주는 기능입니다.</span>
-        </div>
-
-        <div class="cp-rec-row">
-          <div class="cp-rec-field">
-            <label class="cp-section-label i18n" data-ko="총 단수" data-en="Total Rows" data-ja="総段数">총 단수</label>
-            <input type="number" id="stripeCalcTotalRows" class="cp-number-input" value="100" min="1" max="9999">
-          </div>
-          <div class="cp-rec-field">
-            <label class="cp-section-label i18n" data-ko="색상 수" data-en="Colors" data-ja="色数">색상 수</label>
-            <select id="stripeCalcColorCount" class="cp-select">
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="stripeCalcColors" class="cp-color-slots" style="margin-bottom:1rem;"></div>
-
-        <div class="cp-rec-field" style="margin-bottom:1rem;">
-          <label class="cp-section-label i18n" data-ko="배분 방식" data-en="Distribution" data-ja="配分方式">배분 방식</label>
-          <div class="cp-filter-btns">
-            <button class="cp-filter-btn active" data-dist="equal" data-i18n="cp_dist_equal">균등</button>
-            <button class="cp-filter-btn" data-dist="golden" data-i18n="cp_dist_golden">황금비</button>
-            <button class="cp-filter-btn" data-dist="fibonacci" data-i18n="cp_dist_fib">피보나치</button>
-            <button class="cp-filter-btn" data-dist="custom" data-i18n="cp_dist_custom">직접 입력</button>
-          </div>
-          <div id="stripeDistDesc" style="margin-top: 0.75rem; font-size: 0.85rem; color: #666; padding-left: 0.2rem; line-height: 1.4; word-break: keep-all;">
-            전체 단수를 색상 수에 맞춰 같은 두께로 균등하게 나눕니다. (가장 기본적인 규칙적인 줄무늬)
-          </div>
-        </div>
-
-        <div id="stripeCustomInputs" style="display:none;"></div>
-
-        <button class="primary-btn" id="stripeCalcBtn" data-i18n="cp_calculate">계산하기</button>
-      </div>
-
-      <div class="cp-stripe-calc-right">
-        <div id="stripeCalcResult" style="display:none;">
-          <div class="cp-section-label i18n" data-ko="배분 결과" data-en="Distribution Result" data-ja="配分結果">배분 결과</div>
-          <table class="cp-stripe-table" id="stripeCalcTable">
-            <thead>
-              <tr>
-                <th data-i18n="cp_color">색상</th>
-                <th data-i18n="cp_rows">단수</th>
-                <th data-i18n="cp_ratio">비율</th>
-              </tr>
-            </thead>
-            <tbody id="stripeCalcTableBody"></tbody>
-          </table>
-          <canvas id="stripeCalcCanvas" class="cp-preview-canvas" width="420" height="180" style="margin-top:1rem;"></canvas>
-          <div class="cp-slot-actions" style="margin-top:1rem;gap:0.5rem;">
-            <button class="secondary-btn small-btn" id="stripeToSimBtn" data-i18n="cp_to_simulator">시뮬레이터로 보기</button>
-            <button class="primary-btn small-btn" id="stripeCalcSaveBtn" data-i18n="cp_save_palette">내 팔레트에 저장</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
   <!-- 토스트 -->
   <div id="cpToast" class="cp-toast" style="display:none;"></div>
 </main>
