@@ -292,72 +292,42 @@ function renderTexture(canvas, colors, texture, stripeRows) {
   } else if (texture === 'stripes') {
     renderStripePreview(canvas, colors, stripeRows);
   } else if (texture === 'fairisle') {
+    // Fair Isle: colors[0] = background, colors[1..] cycle as pattern colors
     const patSize = 16;
     const midCol = Math.floor(cols / 2);
     const midRow = Math.floor(rows / 2);
-
-    let bgColors = [colors[0]];
-    let patColors = n > 1 ? [colors[1]] : [colors[0]];
-    if (n === 3) { patColors = [colors[1], colors[2]]; }
-    if (n === 4) { bgColors = [colors[0], colors[1]]; patColors = [colors[2], colors[3]]; }
-    if (n === 5) { bgColors = [colors[0], colors[1]]; patColors = [colors[2], colors[3], colors[4]]; }
-    if (n >= 6) { bgColors = [colors[0], colors[1], colors[2]]; patColors = [colors[3], colors[4], colors[5]]; }
+    const patColors = n > 1 ? colors.slice(1) : [colors[0]];
 
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
         const px = ((l - midCol + 8) % patSize + patSize) % patSize;
         const py = ((r - midRow + 8) % patSize + patSize) % patSize;
-        
         const isPattern = NORDIC_PATTERN[py] && NORDIC_PATTERN[py][px] === 1;
 
         let curColor;
         if (!isPattern) {
-            const bgIdx = Math.floor(r / 16) % bgColors.length;
-            curColor = bgColors[bgIdx];
+          curColor = colors[0]; // background always color[0]
         } else {
-            const rowPat = Math.floor(r / patSize);
-            const patIdx = (rowPat + Math.floor(l / patSize)) % patColors.length;
-            curColor = patColors[patIdx];
+          // Cycle through pattern colors per pattern repeat block
+          const blockX = Math.floor(l / patSize);
+          const blockY = Math.floor(r / patSize);
+          const patIdx = (blockX + blockY) % patColors.length;
+          curColor = patColors[patIdx];
         }
-
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, curColor);
       }
     }
   } else if (texture === 'intarsia') {
+    // Intarsia: divide canvas into equal vertical columns, one per color
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
-        const nx = (l + 0.5) / cols;
-        const ny = (r + 0.5) / rows;
-        let c = colors[0];
-
-        if (n === 1) {
-           c = colors[0];
-        } else if (n === 2) {
-           if (nx + ny > 1) c = colors[1];
-        } else if (n === 3) {
-           if (nx < 0.33) c = colors[0];
-           else if (nx < 0.66) c = colors[1];
-           else c = colors[2];
-        } else if (n === 4) {
-           if (nx < 0.5 && ny < 0.5) c = colors[0];
-           else if (nx >= 0.5 && ny < 0.5) c = colors[1];
-           else if (nx < 0.5 && ny >= 0.5) c = colors[2];
-           else c = colors[3];
-        } else if (n === 5) {
-           if (Math.abs(nx-0.5) + Math.abs(ny-0.5) < 0.3) c = colors[4];
-           else if (nx < 0.5 && ny < 0.5) c = colors[0];
-           else if (nx >= 0.5 && ny < 0.5) c = colors[1];
-           else if (nx < 0.5 && ny >= 0.5) c = colors[2];
-           else c = colors[3];
-        } else if (n >= 6) {
-           const gx = Math.floor(nx * 3);
-           const gy = Math.floor(ny * 2);
-           c = colors[Math.min(5, gy * 3 + gx)];
-        }
+        const colIdx = Math.floor((l / cols) * n);
+        const c = colors[Math.min(colIdx, n - 1)];
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
     }
   }
+
 }
 
 function renderStripePreview(canvas, colors, rowCounts) {
