@@ -294,7 +294,9 @@
           <div class="gnb-sub">
             <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
             <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
-            <a href="#" class="gnb-sub-link gnb-counter-btn i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+            <a href="#" class="gnb-sub-link gnb-counter-btn i18n" 
+               onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;"
+               data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
             <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
           </div>
         </div>
@@ -377,19 +379,24 @@
           </div>
           <div class="htc-link i18n" data-ko="계산하기 →" data-en="Calculate →" data-ja="計算する →">계산하기 →</div>
         </a>
-        <a class="home-tool-card" href="#" id="toolCounterCard">
+        <a class="home-tool-card" href="/color-palette.html">
           <div class="htc-top">
-            <div class="htc-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <div class="htc-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.6 1.5-1.5 0-.4-.1-.8-.4-1.1-.3-.3-.4-.8-.4-1.3 0-1.1.9-2 2-2H17c2.8 0 5-2.2 5-5 0-4.7-4.5-8.5-10-8.5z"/>
+              </svg>
+            </div>
             <span class="htc-tag">New</span>
           </div>
-          <div class="htc-name i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</div>
+          <div class="htc-name i18n" data-ko="배색 도우미" data-en="Color Palette Assistant" data-ja="配色アシスタント">배색 도우미</div>
           <div class="htc-desc i18n"
-               data-ko="멀티 프로젝트 · X단마다 알림 · 목표 단수 진행 바."
-               data-en="Multi-project · repeat alerts · goal row progress bar."
-               data-ja="マルチプロジェクト・繰り返しアラート・目標段数バー。">
-            멀티 프로젝트 · X단마다 알림 · 목표 단수 진행 바.
+               data-ko="색상 조합 시뮬레이션 · 배색 추천 · 팔레트 저장"
+               data-en="Color combination simulation · Color recommendations · Save palette"
+               data-ja="配色シミュレーション・おすすめ配色・パレット保存">
+            색상 조합 시뮬레이션 · 배색 추천 · 팔레트 저장
           </div>
-          <div class="htc-link i18n" data-ko="카운터 열기 →" data-en="Open Counter →" data-ja="カウンターを開く →">카운터 열기 →</div>
+          <div class="htc-link i18n" data-ko="이동하기 →" data-en="Go to Palette →" data-ja="移動する →">이동하기 →</div>
         </a>
       </div>
 
@@ -573,7 +580,9 @@
       <div class="mobile-menu-section-title mobile-i18n" data-ko="도구" data-en="Tools" data-ja="ツール">도구</div>
       <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
       <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
-      <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+      <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" 
+         onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;"
+         data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
       <a href="/color-palette.html" class="mobile-menu-link mobile-i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
       <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
       <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
