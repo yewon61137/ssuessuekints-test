@@ -104,14 +104,45 @@ class RowCounter extends HTMLElement {
     async _loadFromFirestore(uid) {
         try {
             const snap = await getDoc(doc(db, 'users', uid, 'rowCounters', 'main'));
-            if (!snap.exists()) return;
-            const data = snap.data();
-            if (Array.isArray(data.counters) && data.counters.length) {
-                this.counters = data.counters.map(c => ({ ...this._newCounter(), ...c }));
+            let fsCounters = [];
+            if (snap.exists()) {
+                const data = snap.data();
+                if (Array.isArray(data.counters)) fsCounters = data.counters;
+            }
+
+            const localCounters = this.counters || [];
+            
+            // 만약 서버도 비었고 로컬도 기본값 1개(비어있음)이면 무시
+            if (fsCounters.length === 0 && localCounters.length === 1 && localCounters[0].count === 0 && localCounters[0].name === '' && localCounters[0].goalRows === 0) {
+                return;
+            }
+
+            const mergedMap = new Map();
+
+            // 1. 서버 데이터를 기준으로 먼저 맵 세팅
+            fsCounters.forEach(c => {
+                mergedMap.set(c.id, { ...this._newCounter(), ...c });
+            });
+
+            // 2. 로컬 데이터를 병합 (서버에 없는 아이디면 추가)
+            localCounters.forEach(c => {
+                const isEmpty = (c.count === 0 && !c.name && c.goalRows === 0);
+                if (!isEmpty) {
+                    if (!mergedMap.has(c.id)) {
+                        mergedMap.set(c.id, c);
+                    }
+                }
+            });
+
+            const mergedArr = Array.from(mergedMap.values());
+            if (mergedArr.length > 0) {
+                this.counters = mergedArr;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(this.counters));
                 this.render();
+                // 오프라인이던 로컬 데이터를 병합했으므로 서버로 다시 동기화
+                this._scheduleFirestoreSync();
             }
-        } catch(e) {}
+        } catch(e) { console.error('RowCounter sync error:', e); }
     }
 
     // ── Drawer ────────────────────────────────────────────────────────────────

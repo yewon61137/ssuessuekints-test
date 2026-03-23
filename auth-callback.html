@@ -14,7 +14,7 @@
     <div class="loader"></div>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, signInWithCustomToken, updateProfile } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getAuth, signInWithCustomToken, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
         import { firebaseConfig } from './firebase-config.js';
 
@@ -81,7 +81,9 @@
 
                 if (!data.firebaseToken) throw new Error('인증 토큰이 유효하지 않습니다.');
 
-                // 2. Firebase 커스텀 토큰으로 로그인
+                // 2. Firebase 커스텀 토큰으로 로그인 (자동 로그인 권한 적용)
+                const rm = localStorage.getItem('naver_remember_me') === '1';
+                await setPersistence(auth, rm ? browserLocalPersistence : browserSessionPersistence);
                 const result = await signInWithCustomToken(auth, data.firebaseToken);
                 const user = result.user;
 

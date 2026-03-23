@@ -13,7 +13,10 @@ import {
     updateProfile,
     sendEmailVerification,
     applyActionCode,
-    deleteUser
+    deleteUser,
+    setPersistence,
+    browserSessionPersistence,
+    browserLocalPersistence
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     getFirestore,
@@ -41,6 +44,13 @@ import { firebaseConfig } from './firebase-config.js';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+setPersistence(auth, browserSessionPersistence).catch(() => {});
+
+export async function applyAuthPersistence() {
+    const rm = document.getElementById('rememberMeCheck');
+    const type = (rm && rm.checked) ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(auth, type);
+}
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
@@ -471,6 +481,7 @@ export function initAuth() {
     document.getElementById('googleSignInBtn').addEventListener('click', async () => {
         clearModalError();
         try {
+            await applyAuthPersistence();
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
@@ -496,6 +507,8 @@ export function initAuth() {
             const state = Math.random().toString(36).substring(2, 15);
             // localStorage 사용: 팝업이 cross-origin 이동 후 돌아와도 접근 가능
             localStorage.setItem('naver_oauth_state', state);
+            const rm = document.getElementById('rememberMeCheck');
+            localStorage.setItem('naver_remember_me', (rm && rm.checked) ? '1' : '0');
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
             const pw = 500, ph = 700;
@@ -563,6 +576,7 @@ export function initAuth() {
         const email = document.getElementById('signinEmail').value;
         const password = document.getElementById('signinPassword').value;
         try {
+            await applyAuthPersistence();
             const result = await signInWithEmailAndPassword(auth, email, password);
             const user = result.user;
 
@@ -597,6 +611,7 @@ export function initAuth() {
             return;
         }
         try {
+            await applyAuthPersistence();
             const result = await createUserWithEmailAndPassword(auth, email, password);
             const user = result.user;
             

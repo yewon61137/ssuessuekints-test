@@ -269,7 +269,8 @@ function renderTexture(canvas, colors, texture, stripeRows) {
   const n = colors.length;
   const colorAt = i => colors[((i % n) + n) % n];
 
-  const cellW = 12, cellH = 10;
+  // 스티치 크기를 키워 더 잘 보이게 함 (12->16, 10->14)
+  const cellW = 16, cellH = 14;
   const cols = Math.ceil(W / cellW);
   const rows = Math.ceil(H / cellH);
 
@@ -291,48 +292,63 @@ function renderTexture(canvas, colors, texture, stripeRows) {
   } else if (texture === 'stripes') {
     renderStripePreview(canvas, colors, stripeRows);
   } else if (texture === 'fairisle') {
-    const patSize = 16;
+    // 무늬 스케일을 키우고 여백을 줌 (24x24 그리드로 확장된 느낌)
+    const patSize = 24; 
+    // 중앙 집중형 눈꽃 무늬 (24x24 중 중심부만 사용)
+    const bigStar = [
+      [11,12],[12,12],
+      [10,11],[11,11],[12,11],[13,11],
+      [9,10],[10,10],[14,10],[15,10],
+      [11,9],[12,9],
+      [11,13],[12,13],
+      [8,12],[9,12],[14,12],[15,12],
+      [10,13],[13,13],[10,11],[13,11]
+    ]; // 간단한 예시 좌표 (실제는 더 정교하게 그림)
+
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
         const py = r % patSize;
         const px = l % patSize;
-        const isPattern = NORDIC_PATTERN[py][px] === 1;
         
-        let c;
-        if (isPattern) {
-          // 무늬색은 슬롯 2부터 순환
-          const patIdx = n > 1 ? 1 + (Math.floor(r / patSize) % (n - 1)) : 0;
-          c = colors[patIdx];
-        } else {
-          // 배경색은 슬롯 1 고정
-          c = colors[0];
-        }
+        // 정교한 눈꽃 무늬 로직 (중심 12,12 기준)
+        const dx = Math.abs(px - 12);
+        const dy = Math.abs(py - 12);
+        let isPattern = false;
+        
+        // 십자 + 대각선 + 마름모꼴 눈꽃
+        if ((dx === 0 && dy < 9) || (dy === 0 && dx < 9)) isPattern = true;
+        if (dx === dy && dx < 6) isPattern = true;
+        if (dx + dy === 8) isPattern = true;
+
+        let c = isPattern && n > 1 ? colors[1] : colors[0];
+        // 3색 이상일 때 추가 포인트
+        if (isPattern && n > 2 && dx === 0 && dy === 0) c = colors[2];
+
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
     }
   } else if (texture === 'intarsia') {
-    // 인타샤: 대담한 블록 분할 (다이아몬드/사선 느낌)
+    // 인타샤: 더 구체적인 디자인 (중앙 다이아몬드/하트)
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
-        let c;
-        if (n === 1) {
-          c = colors[0];
-        } else if (n === 2) {
-          // 사선 분할
-          c = (l / cols + r / rows > 1) ? colors[1] : colors[0];
+        const nx = l / cols;
+        const ny = r / rows;
+        let c = colors[0];
+
+        if (n === 2) {
+          // 커다란 다이아몬드 무늬
+          if (Math.abs(nx - 0.5) + Math.abs(ny - 0.5) < 0.4) c = colors[1];
         } else if (n === 3) {
-          // 중앙 다이아몬드형
-          const dx = Math.abs(l / cols - 0.5);
-          const dy = Math.abs(r / rows - 0.5);
-          if (dx + dy < 0.3) c = colors[1];
-          else if (l / cols < 0.5) c = colors[0];
+          // V자형 배색 (쉐브론)
+          if (ny > Math.abs(nx - 0.5) * 1.5 + 0.2) c = colors[1];
+          else if (ny < 0.3) c = colors[2];
+        } else if (n >= 4) {
+          // 4분할 + 중앙 원형 포인트
+          const dist = Math.sqrt(Math.pow(nx-0.5, 2) + Math.pow(ny-0.5, 2));
+          if (dist < 0.25) c = colors[3];
+          else if (nx < 0.5 && ny < 0.5) c = colors[0];
+          else if (nx >= 0.5 && ny < 0.5) c = colors[1];
           else c = colors[2];
-        } else {
-          // 2x2 또는 체커보드형 큰 블록
-          const blockX = Math.floor((l / cols) * 2);
-          const blockY = Math.floor((r / rows) * 2);
-          const idx = (blockX + blockY * 2) % n;
-          c = colors[idx];
         }
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
