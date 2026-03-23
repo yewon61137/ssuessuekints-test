@@ -52,49 +52,7 @@
   <link href='/style.css?v=3' rel='stylesheet'>
 </head>
 <body>
-      <header>
-    <div class="hdr-inner">
-      <a href="/" class="hdr-logo">SSUESSUE KNITS<span class="hdr-logo-kr">쓔쓔닛츠</span></a>
-      <nav class="gnb">
-        <div class="gnb-item gnb-has-sub">
-          <a class="gnb-link" href="#">
-            <span class="i18n" data-ko="도구" data-en="Tools" data-ja="ツール">Tools</span>
-            <svg class="gnb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </a>
-          <div class="gnb-sub">
-            <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
-            <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
-            <a href="#" class="gnb-sub-link gnb-counter-btn i18n" onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
-            <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
-          </div>
-        </div>
-        <a class="gnb-item gnb-link i18n" href="/community.html" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">Community</a>
-        <a class="gnb-item gnb-link i18n" href="/magazine.html" data-ko="매거진" data-en="Magazine" data-ja="マガジン">Magazine</a>
-      </nav>
-      <div class="hdr-right">
-        <div class="lang-selector">
-          <button class="lang-globe-btn" id="langGlobeBtn" aria-label="언어 선택">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          </button>
-          <div class="lang-dropdown" id="langDropdown">
-            <button class="lang-btn active" data-lang="ko">한국어</button>
-            <button class="lang-btn" data-lang="en">English</button>
-            <button class="lang-btn" data-lang="ja">日本語</button>
-          </div>
-        </div>
-        <button class="hdr-icon-btn" id="counterToggle" aria-label="단수 카운터">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </button>
-        <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
-        <div class="auth-user" id="authUserArea" style="display:none;">
-          <span style="display:none;" id="authUserEmail"></span>
-          <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
-          <button class="lang-btn" id="authSignOutBtn" data-i18n="btn_signout">로그아웃</button>
-        </div>
-      </div>
-      <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴"><span></span><span></span><span></span></button>
-    </div>
-  </header>
+  <script type="module" src="/js/header.js"></script>
 
   <main class="container">
     <section class="step-section">
@@ -399,33 +357,8 @@
     </div>
   </div>
   <script type="module">import { initAuth } from './auth.js?v=5'; initAuth();</script>
-    <!-- 모바일 메뉴 -->
-  <div class="mobile-overlay" id="mobileOverlay"></div>
-  <div class="mobile-menu" id="mobileMenu">
-    <button class="mobile-menu-close" id="mobileMenuClose">&#x2715;</button>
-    <button class="mobile-signin-btn mobile-i18n" id="mobileSignInBtn" data-ko="로그인" data-en="Sign In" data-ja="ログイン">로그인</button>
-    <div class="mobile-user-area" id="mobileUserArea" style="display:none;">
-      <span class="mobile-nickname" id="mobileNickname"></span>
-      <a href="/mypage.html" class="mobile-mypage-btn mobile-i18n" data-ko="마이페이지" data-en="My Page" data-ja="マイページ">마이페이지</a>
-      <button class="mobile-signout-btn mobile-i18n" id="mobileSignOutBtn" data-ko="로그아웃" data-en="Sign Out" data-ja="ログアウト">로그아웃</button>
-    </div>
-    <hr class="mobile-menu-divider">
-    <nav class="mobile-menu-nav">
-      <div class="mobile-menu-section-title mobile-i18n" data-ko="도구" data-en="Tools" data-ja="ツール">도구</div>
-      <a href="/pattern.html" class="mobile-menu-link mobile-i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
-      <a href="/toolkit.html" class="mobile-menu-link mobile-i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
-      <a href="#" class="mobile-menu-link mobile-counter-btn mobile-i18n" onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
-      <a href="/color-palette.html" class="mobile-menu-link mobile-i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
-      <a href="/community.html" class="mobile-menu-link mobile-i18n" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">커뮤니티</a>
-      <a href="/magazine.html" class="mobile-menu-link mobile-i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</a>
-      <a href="/about.html" class="mobile-menu-link mobile-i18n" data-ko="소개" data-en="About" data-ja="紹介">소개</a>
-      <a href="/notice.html" class="mobile-menu-link mobile-i18n" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">공지사항</a>
-      <a href="/guide.html" class="mobile-menu-link mobile-i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
-    </nav>
-  </div>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
-  <script src="/js/hamburger.js"></script>
   <script src="/js/cookie-consent.js"></script>
   <script src="/js/scroll-top.js"></script>
 </body>
