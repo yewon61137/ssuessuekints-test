@@ -99,16 +99,10 @@
   <!-- TAB 1: 배색 시뮬레이터 -->
   <div class="cp-panel active" id="panelSimulator">
     <div class="cp-sim-layout">
-      <!-- 왼쪽: 색상 슬롯 + 설정 -->
+      <!-- 왼쪽: 기법(텍스처) 선택 + 색상 슬롯 -->
       <div class="cp-sim-left">
-        <div class="cp-section-label i18n" data-ko="색상 슬롯" data-en="Color Slots" data-ja="カラースロット">색상 슬롯</div>
-        <div id="simSlots" class="cp-color-slots"></div>
-        <div class="cp-slot-actions">
-          <button class="secondary-btn small-btn" id="simAddColorBtn" data-i18n="cp_add_color">+ 색상 추가</button>
-        </div>
-
-        <div class="cp-section-label" style="margin-top:1.5rem;">
-          <span class="i18n" data-ko="텍스처" data-en="Texture" data-ja="テクスチャ">텍스처</span>
+        <div class="cp-section-label">
+          <span class="i18n" data-ko="기법 (Texture)" data-en="Technique (Texture)" data-ja="技法 (Texture)">기법 (Texture)</span>
         </div>
         <div class="cp-texture-tabs" id="textureTabs">
           <button class="cp-texture-btn active" data-texture="stockinette" data-i18n="cp_tex_stk">메리야스</button>
@@ -116,6 +110,12 @@
           <button class="cp-texture-btn" data-texture="stripes" data-i18n="cp_tex_str">줄무늬</button>
           <button class="cp-texture-btn" data-texture="fairisle" data-i18n="cp_tex_fi">페어아일</button>
           <button class="cp-texture-btn" data-texture="intarsia" data-i18n="cp_tex_int">인타샤</button>
+        </div>
+
+        <div class="cp-section-label i18n" data-ko="색상 슬롯" data-en="Color Slots" data-ja="カラースロット" style="margin-top:1.5rem;">색상 슬롯</div>
+        <div id="simSlots" class="cp-color-slots"></div>
+        <div class="cp-slot-actions">
+          <button class="secondary-btn small-btn" id="simAddColorBtn" data-i18n="cp_add_color">+ 색상 추가</button>
         </div>
 
         <!-- 줄무늬 단수 슬라이더 (texture=stripes일때만 표시) -->
@@ -155,6 +155,11 @@
   <div class="cp-panel" id="panelStripe">
     <div class="cp-stripe-calc-layout">
       <div class="cp-stripe-calc-left">
+        <div class="cp-stripe-intro" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.03); border-radius: 8px; font-size: 0.95rem; line-height: 1.5; color: #444;">
+          <strong style="display:block; margin-bottom: 0.5rem; color: #000;">줄무늬 계산기란?</strong>
+          <span class="i18n" data-ko="원하는 총 단수 안에서 여러 색상을 배치할 때, 황금비나 피보나치 같은 수학적 비율을 활용해 '가장 조화롭고 예쁜 두께 비율'을 자동으로 계산해 주는 기능입니다." data-en="Calculates the most natural and beautiful number of rows for each color using mathematical ratios like Golden Ratio or Fibonacci based on total rows." data-ja="総段数内で複数の色を配置する際、黄金比やフィボナッチなどの数学的比率を活用して、調和のとれた美しい段数を自動計算する機能です。">원하는 총 단수 안에서 여러 색상을 배치할 때, 황금비나 피보나치 같은 수학적 비율을 활용해 '가장 조화롭고 예쁜 두께 비율'을 자동으로 계산해 주는 기능입니다.</span>
+        </div>
+
         <div class="cp-rec-row">
           <div class="cp-rec-field">
             <label class="cp-section-label i18n" data-ko="총 단수" data-en="Total Rows" data-ja="総段数">총 단수</label>
@@ -181,6 +186,9 @@
             <button class="cp-filter-btn" data-dist="golden" data-i18n="cp_dist_golden">황금비</button>
             <button class="cp-filter-btn" data-dist="fibonacci" data-i18n="cp_dist_fib">피보나치</button>
             <button class="cp-filter-btn" data-dist="custom" data-i18n="cp_dist_custom">직접 입력</button>
+          </div>
+          <div id="stripeDistDesc" style="margin-top: 0.75rem; font-size: 0.85rem; color: #666; padding-left: 0.2rem; line-height: 1.4; word-break: keep-all;">
+            전체 단수를 색상 수에 맞춰 같은 두께로 균등하게 나눕니다. (가장 기본적인 규칙적인 줄무늬)
           </div>
         </div>
 

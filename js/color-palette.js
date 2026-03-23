@@ -680,7 +680,7 @@ function distributeRows(n, totalRows, dist) {
   if (dist === 'equal') weights = Array(n).fill(1);
   else if (dist === 'golden') weights = Array.from({length:n}, (_,i)=>Math.pow(1.618, i));
   else if (dist === 'fibonacci') {
-    const fibs = [1,1,2,3,5,8];
+    const fibs = [1,2,3,5,8,13]; // Make progression visibly distinct from golden ratio
     weights = Array.from({length:n}, (_,i) => fibs[i % fibs.length]);
   }
 
@@ -946,11 +946,26 @@ document.getElementById('stripeCalcColorCount')?.addEventListener('change', () =
 });
 
 // Stripe calculator: distribution buttons
+const distDescs = {
+  equal: { ko: '전체 단수를 색상 수에 맞춰 같은 두께로 균등하게 나눕니다. (가장 기본적인 규칙적인 줄무늬)', en: 'Divides the total rows equally among the colors.', ja: '総段数を色数に合わせて均等に分けます。' },
+  golden: { ko: '점점 1.618배씩 넓어지는 자연의 생장 비율입니다. 세련되고 역동적인 느낌을 줍니다.', en: 'Natural growth ratio (1.618x), giving a sophisticated and dynamic look.', ja: '1.618倍ずつ広がる自然の成長比率です。洗練されたダイナミックな印象を与えます。' },
+  fibonacci: { ko: '1, 2, 3, 5, 8... 앞의 두 수의 합으로 이루어지는 정수 수열로, 랜덤하면서도 안정적인 느낌을 줍니다.', en: '1, 2, 3, 5, 8... A stable yet organic look.', ja: '1, 2, 3, 5, 8... ランダムで安定した印象を与えます。' },
+  custom: { ko: '각 색상별로 원하는 단수를 직접 입력합니다.', en: 'Manually enter the desired rows for each color.', ja: '各色ごとに希望の段数を直接入力します。' }
+};
+
 document.querySelectorAll('[data-dist]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-dist]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentDist = btn.dataset.dist;
+    
+    // Update description text dynamically
+    const descEl = document.getElementById('stripeDistDesc');
+    if (descEl) {
+      const lang = localStorage.getItem('lang') || 'ko';
+      descEl.textContent = distDescs[currentDist][lang] || distDescs[currentDist].ko;
+    }
+
     if (currentDist === 'custom') showCustomInputs();
     else hideCustomInputs();
   });
