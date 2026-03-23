@@ -93,9 +93,7 @@
   <!-- 탭 네비게이션 -->
   <div class="cp-tabs">
     <button class="cp-tab active" data-tab="simulator" data-i18n="cp_tab_simulator">배색 시뮬레이터</button>
-    <button class="cp-tab" data-tab="recommend" data-i18n="cp_tab_recommend">조합 추천</button>
     <button class="cp-tab" data-tab="stripe" data-i18n="cp_tab_stripe">줄무늬 계산기</button>
-    <button class="cp-tab" data-tab="curation" data-i18n="cp_tab_curation">팔레트 큐레이션</button>
   </div>
 
   <!-- TAB 1: 배색 시뮬레이터 -->
@@ -151,57 +149,7 @@
     </div>
   </div>
 
-  <!-- TAB 2: 조합 추천 -->
-  <div class="cp-panel" id="panelRecommend">
-    <div class="cp-rec-controls">
-      <div class="cp-rec-row">
-        <div class="cp-rec-field">
-          <label class="cp-section-label i18n" data-ko="기준색" data-en="Base Color" data-ja="基準色">기준색</label>
-          <div class="cp-slot-row">
-            <input type="color" id="recBaseColor" value="#C07A7A" class="cp-color-input">
-            <input type="text" id="recBaseHex" value="#C07A7A" class="cp-hex-input" maxlength="7">
-          </div>
-        </div>
-        <div class="cp-rec-field">
-          <label class="cp-section-label i18n" data-ko="기법" data-en="Technique" data-ja="技法">기법</label>
-          <select id="recTechnique" class="cp-select">
-            <option value="all" data-i18n="cp_all">전체</option>
-            <option value="stripes" data-i18n="cp_tex_str">줄무늬</option>
-            <option value="fairisle" data-i18n="cp_tex_fi">페어아일</option>
-            <option value="intarsia" data-i18n="cp_tex_int">인타샤</option>
-            <option value="colorwork" data-i18n="cp_colorwork">배색뜨기</option>
-            <option value="accent" data-i18n="cp_accent">단색포인트</option>
-          </select>
-        </div>
-      </div>
-      <div class="cp-rec-row">
-        <div class="cp-rec-field">
-          <label class="cp-section-label i18n" data-ko="시즌" data-en="Season" data-ja="シーズン">시즌</label>
-          <div class="cp-filter-btns" id="recSeasonFilter">
-            <button class="cp-filter-btn active" data-val="all" data-i18n="cp_all">전체</button>
-            <button class="cp-filter-btn" data-val="spring" data-i18n="cp_spring">봄</button>
-            <button class="cp-filter-btn" data-val="summer" data-i18n="cp_summer">여름</button>
-            <button class="cp-filter-btn" data-val="autumn" data-i18n="cp_autumn">가을</button>
-            <button class="cp-filter-btn" data-val="winter" data-i18n="cp_winter">겨울</button>
-          </div>
-        </div>
-        <div class="cp-rec-field">
-          <label class="cp-section-label i18n" data-ko="무드" data-en="Mood" data-ja="ムード">무드</label>
-          <div class="cp-filter-btns" id="recMoodFilter">
-            <button class="cp-filter-btn active" data-val="all" data-i18n="cp_all">전체</button>
-            <button class="cp-filter-btn" data-val="warm" data-i18n="cp_warm">따뜻한</button>
-            <button class="cp-filter-btn" data-val="cool" data-i18n="cp_cool">차가운</button>
-            <button class="cp-filter-btn" data-val="vintage" data-i18n="cp_vintage">빈티지</button>
-            <button class="cp-filter-btn" data-val="modern" data-i18n="cp_modern">모던</button>
-            <button class="cp-filter-btn" data-val="pastel" data-i18n="cp_pastel">파스텔</button>
-            <button class="cp-filter-btn" data-val="natural" data-i18n="cp_natural">내추럴</button>
-          </div>
-        </div>
-      </div>
-      <button class="primary-btn" id="recGenerateBtn" data-i18n="cp_generate">추천 생성</button>
-    </div>
-    <div id="recResults" class="cp-palette-grid"></div>
-  </div>
+
 
   <!-- TAB 3: 줄무늬 배분 계산기 -->
   <div class="cp-panel" id="panelStripe">
@@ -264,23 +212,7 @@
     </div>
   </div>
 
-  <!-- TAB 4: 팔레트 큐레이션 -->
-  <div class="cp-panel" id="panelCuration">
-    <div class="cp-cur-filters">
-      <div class="cp-filter-btns" id="curFilter">
-        <button class="cp-filter-btn active" data-filter="all" data-i18n="cp_all">전체</button>
-        <button class="cp-filter-btn" data-filter="spring" data-i18n="cp_spring">봄</button>
-        <button class="cp-filter-btn" data-filter="summer" data-i18n="cp_summer">여름</button>
-        <button class="cp-filter-btn" data-filter="autumn" data-i18n="cp_autumn">가을</button>
-        <button class="cp-filter-btn" data-filter="winter" data-i18n="cp_winter">겨울</button>
-        <button class="cp-filter-btn" data-filter="vintage" data-i18n="cp_vintage">빈티지</button>
-        <button class="cp-filter-btn" data-filter="modern" data-i18n="cp_modern">모던</button>
-        <button class="cp-filter-btn" data-filter="pastel" data-i18n="cp_pastel">파스텔</button>
-        <button class="cp-filter-btn" data-filter="natural" data-i18n="cp_natural">내추럴</button>
-      </div>
-    </div>
-    <div id="curGrid" class="cp-palette-grid"></div>
-  </div>
+
 
   <!-- 토스트 -->
   <div id="cpToast" class="cp-toast" style="display:none;"></div>

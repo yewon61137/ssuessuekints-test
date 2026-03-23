@@ -10,9 +10,7 @@ import {
 
 const pageT = {
   cp_tab_simulator: { ko: '색상 시뮬레이터', en: 'Color Simulator', ja: 'カラーシミュレーター' },
-  cp_tab_recommend: { ko: '팔레트 추천', en: 'Palette Recommendation', ja: 'パレット推薦' },
   cp_tab_stripe:    { ko: '줄무늬 계산기', en: 'Stripe Calculator', ja: 'ストライプ計算機' },
-  cp_tab_curation:  { ko: '큐레이션', en: 'Curation', ja: 'キュレーション' },
 
   cp_add_color:   { ko: '색상 추가', en: 'Add Color', ja: '色を追加' },
   cp_remove:      { ko: '제거', en: 'Remove', ja: '削除' },
@@ -575,159 +573,7 @@ function sendToSimulator(colors) {
   if (tab) tab.click();
 }
 
-// ─── PALETTE RECOMMENDATION (TAB 2) ──────────────────────────────────────────
 
-function clampHsl(h, s, l) {
-  return {
-    h: ((h % 360) + 360) % 360,
-    s: Math.max(0, Math.min(100, s)),
-    l: Math.max(0, Math.min(100, l)),
-  };
-}
-
-function generatePalettes() {
-  const baseInput = document.getElementById('recBaseColor');
-  const techEl   = document.getElementById('recTechnique');
-  const container = document.getElementById('recResults');
-  if (!baseInput || !container) return;
-
-  const baseHex = baseInput.value;
-  const season  = document.querySelector('#recSeasonFilter .cp-filter-btn.active')?.dataset.val || 'all';
-  const mood    = document.querySelector('#recMoodFilter .cp-filter-btn.active')?.dataset.val || 'all';
-  const tech    = techEl ? techEl.value : 'default';
-  const { h, s, l } = hexToHsl(baseHex);
-
-  // Determine color count range based on technique
-  let minColors = 2, maxColors = 4;
-  if (tech === 'stripes')    { minColors = 2; maxColors = 5; }
-  else if (tech === 'fairisle')  { minColors = 2; maxColors = 4; }
-  else if (tech === 'intarsia')  { minColors = 2; maxColors = 6; }
-
-  // Generate base harmony sets
-  const harmonySchemes = [
-    { name_ko: '유사색 #1',  name_en: 'Analogous #1',  name_ja: '類似色 #1',  hues: [h, h+15, h+30] },
-    { name_ko: '유사색 #2',  name_en: 'Analogous #2',  name_ja: '類似色 #2',  hues: [h, h-15, h-30] },
-    { name_ko: '보색',       name_en: 'Complementary', name_ja: '補色',       hues: [h, h+180] },
-    { name_ko: '분보색 #1',  name_en: 'Split Comp #1', name_ja: '分補色 #1', hues: [h, h+150, h+210] },
-    { name_ko: '분보색 #2',  name_en: 'Split Comp #2', name_ja: '分補色 #2', hues: [h, h-150, h-210] },
-    { name_ko: '삼색배색',   name_en: 'Triadic',       name_ja: '三色配色',   hues: [h, h+120, h+240] },
-    { name_ko: '사각배색',   name_en: 'Tetradic',      name_ja: '四角配色',  hues: [h, h+90, h+180, h+270] },
-    { name_ko: '유사색 #3',  name_en: 'Analogous #3',  name_ja: '類似色 #3',  hues: [h, h+20, h+40, h+60] },
-    { name_ko: '보완색',     name_en: 'Complement+',   name_ja: '補完色',    hues: [h, h+30, h+180, h+210] },
-    { name_ko: '모노크롬 #1',name_en: 'Monochrome #1', name_ja: 'モノクロ #1', hues: [h, h, h, h] },
-    { name_ko: '모노크롬 #2',name_en: 'Monochrome #2', name_ja: 'モノクロ #2', hues: [h, h, h] },
-    { name_ko: '오각배색',   name_en: 'Pentadic',      name_ja: '五角配色',  hues: [h, h+72, h+144, h+216, h+288] },
-  ];
-
-  // Season/mood adjustments
-  const applyMoodToColor = (hue, idx, total) => {
-    let ns = s, nl = l;
-    if (season === 'spring') { ns = Math.max(40, Math.min(70, s + (idx%2===0?5:-5))); nl = Math.max(55, Math.min(80, l + (idx%2===0?10:-5))); }
-    else if (season === 'summer') { ns = Math.max(50, Math.min(80, s)); nl = Math.max(45, Math.min(75, l)); }
-    else if (season === 'autumn') { ns = Math.max(50, Math.min(80, s)); nl = Math.max(30, Math.min(60, l)); }
-    else if (season === 'winter') {
-      ns = Math.max(30, Math.min(60, s));
-      nl = idx % 2 === 0 ? Math.max(80, Math.min(95, l + 30)) : Math.max(20, Math.min(50, l - 20));
-    }
-    if (mood === 'warm') { ns = Math.max(50, Math.min(80, s)); nl = Math.max(45, Math.min(75, l)); }
-    else if (mood === 'cool') { ns = Math.max(40, Math.min(70, s)); nl = Math.max(40, Math.min(70, l)); }
-    else if (mood === 'pastel') { ns = Math.max(30, Math.min(50, s)); nl = Math.max(70, Math.min(85, l)); }
-    else if (mood === 'vintage') { ns = Math.max(30, Math.min(55, s)); nl = Math.max(40, Math.min(65, l)); }
-    else if (mood === 'natural') { ns = Math.max(20, Math.min(50, s)); nl = Math.max(50, Math.min(75, l)); }
-    else if (mood === 'modern') {
-      if (idx === 0) { ns = 0; nl = 10; }
-      else if (idx === total - 1) { ns = 0; nl = 95; }
-    }
-    return clampHsl(hue, ns, nl);
-  };
-
-  container.innerHTML = '';
-  const lang = localStorage.getItem('lang') || 'ko';
-
-  harmonySchemes.forEach((scheme, si) => {
-    let colorCount = Math.min(maxColors, Math.max(minColors, scheme.hues.length));
-    if (scheme.name_en.startsWith('Monochrome')) {
-      colorCount = scheme.name_en.includes('#2') ? 3 : 4;
-    }
-
-    const colors = scheme.hues.slice(0, colorCount).map((hue, idx) => {
-      if (scheme.name_en.startsWith('Monochrome')) {
-        // vary lightness
-        const lightnesses = [l - 25, l, l + 25, l + 45];
-        const c = clampHsl(hue, s * 0.7, lightnesses[idx] || l);
-        return hslToHex(c.h, c.s, c.l);
-      }
-      const c = applyMoodToColor(hue, idx, colorCount);
-      return hslToHex(c.h, c.s, c.l);
-    });
-
-    const name = scheme[`name_${lang}`] || scheme.name_ko;
-    const techLabel = tech !== 'default' ? tr(`cp_tex_${tech === 'stockinette' ? 'stk' : tech === 'garter' ? 'gtr' : tech === 'stripes' ? 'str' : tech === 'fairisle' ? 'fi' : 'int'}`) : '';
-
-    const card = document.createElement('div');
-    card.className = 'cp-palette-card';
-
-    const swatches = document.createElement('div');
-    swatches.className = 'cp-palette-swatches';
-    colors.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'cp-palette-swatch';
-      sw.style.background = c;
-      sw.title = c;
-      swatches.appendChild(sw);
-    });
-
-    const nameEl = document.createElement('div');
-    nameEl.className = 'cp-palette-name';
-    nameEl.textContent = name;
-
-    const tags = document.createElement('div');
-    tags.className = 'cp-palette-tags';
-    if (season && season !== 'all') {
-      const t = document.createElement('span');
-      t.className = 'post-card-tag';
-      t.textContent = tr(`cp_${season}`);
-      tags.appendChild(t);
-    }
-    if (mood && mood !== 'all') {
-      const t = document.createElement('span');
-      t.className = 'post-card-tag';
-      t.textContent = tr(`cp_${mood}`);
-      tags.appendChild(t);
-    }
-    if (techLabel) {
-      const t = document.createElement('span');
-      t.className = 'post-card-tag';
-      t.textContent = techLabel;
-      tags.appendChild(t);
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'cp-palette-actions';
-
-    const simBtn = document.createElement('button');
-    simBtn.className = 'secondary-btn small-btn cp-to-sim-btn';
-    simBtn.textContent = tr('cp_view_sim');
-    simBtn.addEventListener('click', () => sendToSimulator(colors));
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'secondary-btn small-btn cp-save-btn-card';
-    saveBtn.textContent = tr('cp_save_palette');
-    saveBtn.addEventListener('click', async () => {
-      const palName = prompt(tr('cp_palette_name_prompt'), name);
-      if (!palName) return;
-      await savePalette(colors, palName, tech !== 'default' ? tech : '', season !== 'all' ? season : '', mood !== 'all' ? mood : '');
-    });
-
-    actions.appendChild(simBtn);
-    actions.appendChild(saveBtn);
-    card.appendChild(swatches);
-    card.appendChild(nameEl);
-    card.appendChild(tags);
-    card.appendChild(actions);
-    container.appendChild(card);
-  });
-}
 
 // ─── STRIPE CALCULATOR (TAB 3) ───────────────────────────────────────────────
 
@@ -938,99 +784,7 @@ function stripeToSim() {
   document.querySelector('.cp-tab[data-tab="simulator"]')?.click();
 }
 
-// ─── CURATION (TAB 4) ────────────────────────────────────────────────────────
 
-const CURATED_PALETTES = [
-  { id: 'spring-floral',   name: { ko: '봄 플로럴',      en: 'Spring Floral',   ja: '春フローラル'         }, colors: ['#F4B8C0','#B2DFCD','#D4C1E8','#FFF5E0'], tags: ['spring','pastel'],   technique: { ko: '페어아일',  en: 'Fair Isle',   ja: 'フェアアイル'    } },
-  { id: 'summer-beach',    name: { ko: '여름 비치',       en: 'Summer Beach',    ja: '夏ビーチ'              }, colors: ['#E8734A','#1A3A5C','#F7F5F0','#F5C842'], tags: ['summer','warm'],    technique: { ko: '줄무늬',    en: 'Stripes',     ja: '縞模様'          } },
-  { id: 'autumn-harvest',  name: { ko: '가을 하베스트',   en: 'Autumn Harvest',  ja: '秋ハーベスト'          }, colors: ['#D4A017','#C05A3E','#6B3A2A','#E8D5B0'], tags: ['autumn','vintage'], technique: { ko: '인타샤',    en: 'Intarsia',    ja: 'インタルシア'    } },
-  { id: 'winter-frost',    name: { ko: '겨울 프로스트',   en: 'Winter Frost',    ja: '冬フロスト'            }, colors: ['#F5F5F0','#8C9BAB','#1E3A4A','#8B1A2F'], tags: ['winter','cool'],    technique: { ko: '배색뜨기',  en: 'Colorwork',   ja: '配色編み'        } },
-  { id: 'vintage-garden',  name: { ko: '빈티지 가든',     en: 'Vintage Garden',  ja: 'ヴィンテージガーデン'  }, colors: ['#C4899A','#8BA888','#F2EBD9','#C05A3E'], tags: ['vintage','natural'],technique: { ko: '페어아일',  en: 'Fair Isle',   ja: 'フェアアイル'    } },
-  { id: 'modern-mono',     name: { ko: '모던 모노',       en: 'Modern Mono',     ja: 'モダンモノ'            }, colors: ['#1A1A1A','#F5F5F5','#808080','#E8734A'], tags: ['modern'],           technique: { ko: '인타샤',    en: 'Intarsia',    ja: 'インタルシア'    } },
-  { id: 'pastel-dream',    name: { ko: '파스텔 드림',     en: 'Pastel Dream',    ja: 'パステルドリーム'      }, colors: ['#FFD1DC','#AEE1E1','#D4B8E0','#FFFACD'], tags: ['pastel','spring'],  technique: { ko: '줄무늬',    en: 'Stripes',     ja: '縞模様'          } },
-  { id: 'natural-earth',   name: { ko: '내추럴 어스',     en: 'Natural Earth',   ja: 'ナチュラルアース'      }, colors: ['#EDE0D4','#C4A882','#8B6940','#F5F0E8'], tags: ['natural','autumn'], technique: { ko: '메리야스',  en: 'Stockinette', ja: 'メリヤス'        } },
-  { id: 'spring-meadow',   name: { ko: '봄 초원',         en: 'Spring Meadow',   ja: '春の草原'              }, colors: ['#A8D8A8','#FFE8B5','#FFB3C6','#B5EAD7'], tags: ['spring','warm'],   technique: { ko: '줄무늬',    en: 'Stripes',     ja: '縞模様'          } },
-  { id: 'summer-sunset',   name: { ko: '여름 선셋',       en: 'Summer Sunset',   ja: '夏サンセット'          }, colors: ['#FF6B6B','#FFD93D','#FF8C42','#F5F5F5'], tags: ['summer','warm'],   technique: { ko: '페어아일',  en: 'Fair Isle',   ja: 'フェアアイル'    } },
-  { id: 'autumn-forest',   name: { ko: '가을 숲',         en: 'Autumn Forest',   ja: '秋の森'                }, colors: ['#4A5240','#8B7355','#D4A574','#2C3E1A'], tags: ['autumn','natural'], technique: { ko: '인타샤',   en: 'Intarsia',    ja: 'インタルシア'    } },
-  { id: 'winter-cozy',     name: { ko: '겨울 코지',       en: 'Winter Cozy',     ja: '冬コージー'            }, colors: ['#F0E6D3','#8B4513','#2F4F4F','#DC143C'], tags: ['winter','vintage'], technique: { ko: '배색뜨기',  en: 'Colorwork',   ja: '配色編み'        } },
-];
-
-function renderCuration(filter) {
-  const container = document.getElementById('curGrid');
-  if (!container) return;
-  const lang = localStorage.getItem('lang') || 'ko';
-
-  const filtered = filter === 'all'
-    ? CURATED_PALETTES
-    : CURATED_PALETTES.filter(p => p.tags.includes(filter));
-
-  container.innerHTML = '';
-  filtered.forEach(palette => {
-    const card = document.createElement('div');
-    card.className = 'cp-palette-card';
-
-    const swatches = document.createElement('div');
-    swatches.className = 'cp-palette-swatches';
-    palette.colors.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'cp-palette-swatch';
-      sw.style.background = c;
-      sw.title = c;
-      swatches.appendChild(sw);
-    });
-
-    const nameEl = document.createElement('div');
-    nameEl.className = 'cp-palette-name';
-    nameEl.textContent = palette.name[lang] || palette.name.ko;
-
-    const tags = document.createElement('div');
-    tags.className = 'cp-palette-tags';
-    palette.tags.forEach(tag => {
-      const t = document.createElement('span');
-      t.className = 'post-card-tag';
-      const keyMap = { spring:'cp_spring', summer:'cp_summer', autumn:'cp_autumn', winter:'cp_winter', warm:'cp_warm', cool:'cp_cool', vintage:'cp_vintage', modern:'cp_modern', pastel:'cp_pastel', natural:'cp_natural' };
-      t.textContent = keyMap[tag] ? tr(keyMap[tag]) : tag;
-      tags.appendChild(t);
-    });
-    const techTag = document.createElement('span');
-    techTag.className = 'post-card-tag';
-    techTag.textContent = palette.technique[lang] || palette.technique.ko;
-    tags.appendChild(techTag);
-
-    const actions = document.createElement('div');
-    actions.className = 'cp-palette-actions';
-
-    const simBtn = document.createElement('button');
-    simBtn.className = 'secondary-btn small-btn cp-to-sim-btn';
-    simBtn.textContent = tr('cp_view_sim');
-    simBtn.addEventListener('click', () => sendToSimulator(palette.colors));
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'secondary-btn small-btn cp-save-btn-card';
-    saveBtn.textContent = tr('cp_save_palette');
-    saveBtn.addEventListener('click', async () => {
-      const palName = prompt(tr('cp_palette_name_prompt'), palette.name[lang] || palette.name.ko);
-      if (!palName) return;
-      
-      let techCode = '';
-      if (palette.technique.en === 'Fair Isle') techCode = 'fairisle';
-      else if (palette.technique.en === 'Stripes') techCode = 'stripes';
-      else if (palette.technique.en === 'Intarsia') techCode = 'intarsia';
-      else if (palette.technique.en === 'Colorwork') techCode = 'colorwork';
-      else if (palette.technique.en === 'Stockinette') techCode = 'stockinette';
-
-      await savePalette(palette.colors, palName, techCode, palette.tags[0] || '', palette.tags[1] || '');
-    });
-
-    actions.appendChild(simBtn);
-    actions.appendChild(saveBtn);
-    card.appendChild(swatches);
-    card.appendChild(nameEl);
-    card.appendChild(tags);
-    card.appendChild(actions);
-    container.appendChild(card);
-  });
-}
 
 // ─── PALETTE SAVE ─────────────────────────────────────────────────────────────
 
@@ -1139,7 +893,6 @@ renderSlots();
 redrawPreview();
 updateContrast();
 renderStripeCalcInputs();
-renderCuration('all');
 initTabs();
 
 // Simulator: texture buttons
@@ -1186,9 +939,6 @@ document.getElementById('simSaveBtn')?.addEventListener('click', async () => {
   await savePalette(slots.map(s => s.hex), name);
 });
 
-// Recommendation: Generate button
-document.getElementById('recGenerateBtn')?.addEventListener('click', generatePalettes);
-
 // Stripe calculator: color count change
 document.getElementById('stripeCalcColorCount')?.addEventListener('change', () => {
   renderStripeCalcInputs();
@@ -1220,32 +970,4 @@ document.getElementById('stripeCalcSaveBtn')?.addEventListener('click', async ()
   await savePalette(colors, name, 'stripes');
 });
 
-// Curation: filter buttons
-document.querySelectorAll('#curFilter .cp-filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#curFilter .cp-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCuration(btn.dataset.filter);
-  });
-});
 
-// 조합 추천 — 시즌/무드 필터 버튼 토글
-['recSeasonFilter', 'recMoodFilter'].forEach(containerId => {
-  document.querySelectorAll(`#${containerId} .cp-filter-btn`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll(`#${containerId} .cp-filter-btn`).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
-});
-
-// 조합 추천 — 기준색 헥스 입력 동기화
-(function initRecBaseColor() {
-  const colorInput = document.getElementById('recBaseColor');
-  const hexInput   = document.getElementById('recBaseHex');
-  if (!colorInput || !hexInput) return;
-  colorInput.addEventListener('input', () => { hexInput.value = colorInput.value; });
-  hexInput.addEventListener('input', () => {
-    if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value)) colorInput.value = hexInput.value;
-  });
-})();
