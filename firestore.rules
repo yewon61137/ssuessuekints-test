@@ -40,7 +40,7 @@ service cloud.firestore {
     // 게시글
     match /posts/{postId} {
       allow read: if true;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.uid ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'scrapCount', 'commentCount'])
@@ -50,14 +50,14 @@ service cloud.firestore {
       // 댓글
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if request.auth != null;
+        allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
         allow update: if request.auth != null && request.auth.uid == resource.data.uid;
         allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
 
         // 답글
         match /replies/{replyId} {
           allow read: if true;
-          allow create: if request.auth != null;
+          allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
           allow update: if request.auth != null && request.auth.uid == resource.data.uid;
           allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
         }
@@ -86,13 +86,13 @@ service cloud.firestore {
 
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if request.auth != null;
+        allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
         allow update: if request.auth != null && request.auth.uid == resource.data.uid;
         allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
 
         match /replies/{replyId} {
           allow read: if true;
-          allow create: if request.auth != null;
+          allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
           allow update: if request.auth != null && request.auth.uid == resource.data.uid;
           allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
         }
@@ -102,7 +102,7 @@ service cloud.firestore {
     // 닉네임 예약
     match /usernames/{username} {
       allow read: if true;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }

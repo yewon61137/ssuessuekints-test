@@ -705,8 +705,8 @@ export async function deleteUserAccount(user) {
     const profile = await getUserProfile(uid);
     const nickname = profile?.nickname;
 
-    // 2. Firestore 서브컬렉션 삭제 (patterns, likes, scraps)
-    for (const sub of ['patterns', 'likes', 'scraps']) {
+    // 2. Firestore 서브컬렉션 삭제 (patterns, likes, scraps, rowCounters, palettes)
+    for (const sub of ['patterns', 'likes', 'scraps', 'rowCounters', 'palettes']) {
         const snap = await getDocs(collection(db, 'users', uid, sub));
         await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     }

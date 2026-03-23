@@ -286,6 +286,12 @@ const tMap = {
 
 ---
 
+## 4. 정직성 — 필수
+
+- **모르면 모른다고 말하기**: 확실하지 않은 내용이나 코드에 대해 추측하여 답변하거나 코드를 임의로 지어내지 말 것. 모르는 부분은 명확하게 "모른다"고 말할 것.
+
+---
+
 ## 주요 파일 구조
 ```
 auth.js          — Firebase 초기화, exports: auth, db, storage, initAuth(), getCurrentUser()

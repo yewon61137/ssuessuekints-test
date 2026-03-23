@@ -4,7 +4,7 @@ import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './au
 import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-    collection, query, orderBy, limit, getDocs, addDoc,
+    collection, query, orderBy, limit, getDocs, addDoc, setDoc,
     serverTimestamp, where, startAfter, doc, getDoc
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {
@@ -223,18 +223,20 @@ document.getElementById('writeForm').addEventListener('submit', async e => {
         const content = document.getElementById('writeContent').value.trim();
         const tags = Array.from(document.querySelectorAll('input[name="writeTag"]:checked')).map(cb => cb.value);
 
-        // 이미지 업로드
-        const postId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        // 새 게시글의 Firestore 참조 및 ID 생성
+        const newPostRef = doc(collection(db, 'posts'));
+        const postId = newPostRef.id;
+
         const uploadedURLs = [];
         for (let i = 0; i < 4; i++) {
             if (imageFiles[i]) {
                 const imgRef = ref(storage, `posts/${postId}/images/${i}.jpg`);
-                await uploadBytes(imgRef, imageFiles[i]);
+                await uploadBytes(imgRef, imageFiles[i], { customMetadata: { ownerUid: user.uid } });
                 uploadedURLs.push(await getDownloadURL(imgRef));
             }
         }
 
-        await addDoc(collection(db, 'posts'), {
+        await setDoc(newPostRef, {
             uid: user.uid,
             nickname: profile?.nickname || user.displayName || '',
             profilePhotoURL: profile?.profilePhotoURL || null,

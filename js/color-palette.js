@@ -60,6 +60,7 @@ const pageT = {
   cp_calculate:  { ko: '계산하기', en: 'Calculate', ja: '計算する' },
   cp_color:      { ko: '색상', en: 'Color', ja: '色' },
   cp_rows:       { ko: '단 수', en: 'Rows', ja: '段数' },
+  cp_rows_per_color: { ko: '색상별 단수', en: 'Rows per color', ja: '色ご둔の段数' },
   cp_ratio:      { ko: '비율', en: 'Ratio', ja: '割合' },
   cp_to_simulator: { ko: '시뮬레이터로 보기', en: 'View in Simulator', ja: 'シミュレーターで見る' },
 
@@ -74,7 +75,7 @@ const pageT = {
 };
 
 function tr(key) {
-  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+  const lang = localStorage.getItem('lang') || 'ko';
   const entry = pageT[key];
   if (!entry) return key;
   return entry[lang] || entry.ko || key;
@@ -593,7 +594,7 @@ function generatePalettes() {
   };
 
   container.innerHTML = '';
-  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+  const lang = localStorage.getItem('lang') || 'ko';
 
   harmonySchemes.forEach((scheme, si) => {
     let colorCount = Math.min(maxColors, Math.max(minColors, scheme.hues.length));
@@ -867,7 +868,7 @@ const CURATED_PALETTES = [
 function renderCuration(filter) {
   const container = document.getElementById('curGrid');
   if (!container) return;
-  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+  const lang = localStorage.getItem('lang') || 'ko';
 
   const filtered = filter === 'all'
     ? CURATED_PALETTES

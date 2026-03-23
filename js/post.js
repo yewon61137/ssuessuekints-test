@@ -430,9 +430,13 @@ async function deletePost(pid, imageURLs) {
             await Promise.allSettled(list.items.map(item => deleteObject(item)));
         } catch (e) { /* Storage 삭제 실패는 무시 */ }
 
-        // 댓글 서브컬렉션 삭제
+        // 댓글 및 대댓글 서브컬렉션 삭제
         const commentsSnap = await getDocs(collection(db, `posts/${pid}/comments`));
-        await Promise.allSettled(commentsSnap.docs.map(d => deleteDoc(d.ref)));
+        for (const commentDoc of commentsSnap.docs) {
+            const repliesSnap = await getDocs(collection(db, `posts/${pid}/comments/${commentDoc.id}/replies`));
+            await Promise.allSettled(repliesSnap.docs.map(r => deleteDoc(r.ref)));
+            await deleteDoc(commentDoc.ref);
+        }
 
         // 게시글 Firestore 문서 삭제
         await deleteDoc(doc(db, 'posts', pid));

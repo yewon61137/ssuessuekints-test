@@ -1,0 +1,17 @@
+{
+  "name": "SSUESSUE KNITS",
+  "short_name": "쓔쓔닛츠",
+  "description": "뜨개인을 위한 올인원 플랫폼",
+  "start_url": "/?pwa=1",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#f5f0e8",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
