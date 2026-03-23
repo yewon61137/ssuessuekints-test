@@ -208,34 +208,36 @@ function drawStitch(ctx, x, y, w, h, color, isPurl = false) {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, w, h);
 
-  if (!isPurl) {
-    // V자 모양 (메리야스)
-    ctx.strokeStyle = darker;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    const cx = x + w / 2;
-    // 왼쪽 날개
-    ctx.moveTo(x + 1.5, y + 1);
-    ctx.quadraticCurveTo(x + 2, y + h - 1.5, cx, y + h - 1);
-    // 오른쪽 날개
-    ctx.moveTo(x + w - 1.5, y + 1);
-    ctx.quadraticCurveTo(x + w - 2, y + h - 1.5, cx, y + h - 1);
-    ctx.stroke();
-    
-    // 은은한 하이라이트
-    ctx.strokeStyle = lighter;
-    ctx.globalAlpha = 0.3;
-    ctx.beginPath();
-    ctx.moveTo(x + 2, y + 2);
-    ctx.lineTo(x + 3, y + 4);
-    ctx.stroke();
-    ctx.globalAlpha = 1.0;
-  } else {
-    // 가로 융기 모양 (가터/안뜨기)
-    ctx.fillStyle = darker;
-    ctx.fillRect(x, y + h - 2, w, 2);
-    ctx.fillStyle = lighter;
-    ctx.fillRect(x, y, w, 1.5);
+  if (h >= 4) {
+    if (!isPurl) {
+      // V자 모양 (메리야스)
+      ctx.strokeStyle = darker;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      const cx = x + w / 2;
+      // 왼쪽 날개
+      ctx.moveTo(x + 1.5, y + 1);
+      ctx.quadraticCurveTo(x + 2, y + h - 1.5, cx, y + h - 1);
+      // 오른쪽 날개
+      ctx.moveTo(x + w - 1.5, y + 1);
+      ctx.quadraticCurveTo(x + w - 2, y + h - 1.5, cx, y + h - 1);
+      ctx.stroke();
+      
+      // 은은한 하이라이트
+      ctx.strokeStyle = lighter;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(x + 2, y + 2);
+      ctx.lineTo(x + 3, y + 4);
+      ctx.stroke();
+      ctx.globalAlpha = 1.0;
+    } else {
+      // 가로 융기 모양 (가터/안뜨기)
+      ctx.fillStyle = darker;
+      ctx.fillRect(x, y + h - Math.max(1, h*0.2), w, Math.max(1, h*0.2));
+      ctx.fillStyle = lighter;
+      ctx.fillRect(x, y, w, Math.max(1, h*0.2));
+    }
   }
 }
 
@@ -292,55 +294,67 @@ function renderTexture(canvas, colors, texture, stripeRows) {
   } else if (texture === 'stripes') {
     renderStripePreview(canvas, colors, stripeRows);
   } else if (texture === 'fairisle') {
-    const patSize = 24; 
-    const midCol = cols / 2;
-    const midRow = rows / 2;
+    const patSize = 16;
+    const midCol = Math.floor(cols / 2);
+    const midRow = Math.floor(rows / 2);
+
+    let bgColors = [colors[0]];
+    let patColors = n > 1 ? [colors[1]] : [colors[0]];
+    if (n === 3) { patColors = [colors[1], colors[2]]; }
+    if (n === 4) { bgColors = [colors[0], colors[1]]; patColors = [colors[2], colors[3]]; }
+    if (n === 5) { bgColors = [colors[0], colors[1]]; patColors = [colors[2], colors[3], colors[4]]; }
+    if (n >= 6) { bgColors = [colors[0], colors[1], colors[2]]; patColors = [colors[3], colors[4], colors[5]]; }
 
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
-        // 화면 정중앙(midCol, midRow)이 무늬의 중심(12, 12)이 되도록 좌표 계산
-        const px = Math.floor(((l - midCol + 12) % patSize + patSize) % patSize);
-        const py = Math.floor(((r - midRow + 12) % patSize + patSize) % patSize);
+        const px = ((l - midCol + 8) % patSize + patSize) % patSize;
+        const py = ((r - midRow + 8) % patSize + patSize) % patSize;
         
-        const dx = Math.abs(px - 12);
-        const dy = Math.abs(py - 12);
-        let isPattern = false;
-        
-        // 정교한 대칭 눈꽃 무늬 로직
-        if ((dx === 0 && dy < 9) || (dy === 0 && dx < 9)) isPattern = true;
-        if (dx === dy && dx < 6) isPattern = true;
-        if (dx + dy === 8) isPattern = true;
+        const isPattern = NORDIC_PATTERN[py] && NORDIC_PATTERN[py][px] === 1;
 
-        let c = isPattern && n > 1 ? colors[1] : colors[0];
-        // 3색 이상일 때 정중앙 포인트
-        if (isPattern && n > 2 && dx === 0 && dy === 0) c = colors[2];
+        let curColor;
+        if (!isPattern) {
+            const bgIdx = Math.floor(r / 16) % bgColors.length;
+            curColor = bgColors[bgIdx];
+        } else {
+            const rowPat = Math.floor(r / patSize);
+            const patIdx = (rowPat + Math.floor(l / patSize)) % patColors.length;
+            curColor = patColors[patIdx];
+        }
 
-        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
+        drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, curColor);
       }
     }
   } else if (texture === 'intarsia') {
-    // 인타샤: 정중앙 기준 완벽 대칭 레이아웃
     for (let r = 0; r < rows; r++) {
       for (let l = 0; l < cols; l++) {
-        const nx = (l + 0.5) / cols; // 중심 좌표 기준
+        const nx = (l + 0.5) / cols;
         const ny = (r + 0.5) / rows;
         let c = colors[0];
 
-        if (n === 2) {
-          // 중앙 다이아몬드 (완벽 대칭)
-          if (Math.abs(nx - 0.5) + Math.abs(ny - 0.5) < 0.4) c = colors[1];
+        if (n === 1) {
+           c = colors[0];
+        } else if (n === 2) {
+           if (nx + ny > 1) c = colors[1];
         } else if (n === 3) {
-          // 중앙 V자형 쉐브론 배색
-          const dist = Math.abs(nx - 0.5) * 1.4;
-          if (ny > dist + 0.25) c = colors[1];
-          else if (ny < 0.3) c = colors[2];
-        } else if (n >= 4) {
-          // 사분면 + 중앙 마름모 포인트
-          const dist = Math.abs(nx - 0.5) + Math.abs(ny - 0.5);
-          if (dist < 0.25) c = colors[3];
-          else if (nx < 0.5 && ny < 0.5) c = colors[0];
-          else if (nx >= 0.5 && ny < 0.5) c = colors[1];
-          else c = colors[2];
+           if (nx < 0.33) c = colors[0];
+           else if (nx < 0.66) c = colors[1];
+           else c = colors[2];
+        } else if (n === 4) {
+           if (nx < 0.5 && ny < 0.5) c = colors[0];
+           else if (nx >= 0.5 && ny < 0.5) c = colors[1];
+           else if (nx < 0.5 && ny >= 0.5) c = colors[2];
+           else c = colors[3];
+        } else if (n === 5) {
+           if (Math.abs(nx-0.5) + Math.abs(ny-0.5) < 0.3) c = colors[4];
+           else if (nx < 0.5 && ny < 0.5) c = colors[0];
+           else if (nx >= 0.5 && ny < 0.5) c = colors[1];
+           else if (nx < 0.5 && ny >= 0.5) c = colors[2];
+           else c = colors[3];
+        } else if (n >= 6) {
+           const gx = Math.floor(nx * 3);
+           const gy = Math.floor(ny * 2);
+           c = colors[Math.min(5, gy * 3 + gx)];
         }
         drawStitch(ctx, l * cellW, r * cellH, cellW, cellH, c);
       }
@@ -361,21 +375,23 @@ function renderStripePreview(canvas, colors, rowCounts) {
   const totalRows = counts.reduce((a, b) => a + b, 0);
   if (totalRows === 0) return;
 
-  const cellW = 12, cellH = 10;
+  const cellW = 12;
+  let cellH = 10;
+  if (totalRows * cellH > H) {
+    cellH = H / totalRows;
+  }
   const cols = Math.ceil(W / cellW);
-  const rows = Math.ceil(H / cellH);
 
-  let currentRow = 0;
+  let currentY = 0;
   for (let i = 0; i < colors.length; i++) {
-    const colorRows = Math.round((counts[i] / totalRows) * rows);
+    const colorRows = counts[i];
     const c = colors[i];
     for (let r = 0; r < colorRows; r++) {
-      if (currentRow + r >= rows) break;
       for (let l = 0; l < cols; l++) {
-        drawStitch(ctx, l * cellW, (currentRow + r) * cellH, cellW, cellH, c);
+        drawStitch(ctx, l * cellW, currentY, cellW, cellH + 0.5, c); // +0.5 prevents float gaps
       }
+      currentY += cellH;
     }
-    currentRow += colorRows;
   }
 }
 
@@ -388,6 +404,7 @@ let stripeRows = [4, 4];
 let cvdMode = 'normal';
 let currentDist = 'equal';
 let stripeCalcResult = null;
+let customRowsCache = {};
 
 // ─── SIMULATOR (TAB 1) ───────────────────────────────────────────────────────
 
@@ -409,7 +426,14 @@ function updateContrast() {
     el.className = 'cp-contrast';
     return;
   }
-  const ratio = contrastRatio(slots[0].hex, slots[1].hex);
+  let minRatio = Infinity;
+  for (let i = 0; i < slots.length; i++) {
+    for (let j = i + 1; j < slots.length; j++) {
+      const ratio = contrastRatio(slots[i].hex, slots[j].hex);
+      if (ratio < minRatio) minRatio = ratio;
+    }
+  }
+  const ratio = minRatio;
   let msg, cls;
   if (ratio >= 7) {
     msg = tr('cp_contrast_good');
@@ -418,12 +442,15 @@ function updateContrast() {
     msg = tr('cp_contrast_ok');
     cls = 'cp-contrast cp-contrast-ok';
   } else if (ratio >= 3) {
-    msg = `AA Large — ${tr('cp_contrast_ok').split('—')[1] || '대비가 약간 부족해요'}`;
+    msg = tr('cp_contrast_ok').split('—')[0] + ' — 대비가 약간 부족해요';
     cls = 'cp-contrast cp-contrast-warning';
   } else {
     msg = tr('cp_contrast_poor');
     cls = 'cp-contrast cp-contrast-poor';
   }
+  // Change label if > 2 colors
+  const labelEl = document.querySelector('.cp-contrast-box .cp-contrast-label');
+  if (labelEl) labelEl.textContent = slots.length > 2 ? '최저 대비비 (모든 색상 간)' : (tr('cp_contrast_label') || '대비비 (첫 두 색상)');
   el.textContent = `${ratio.toFixed(2)}:1  ${msg}`;
   el.className = cls;
 }
@@ -740,8 +767,21 @@ function showCustomInputs() {
   const container = document.getElementById('stripeCustomInputs');
   if (!container) return;
   container.style.display = '';
+  const totalInp = document.getElementById('stripeCalcTotalRows');
+  if (totalInp) {
+    totalInp.disabled = true;
+    totalInp.style.opacity = '0.7';
+  }
+
   const colors = getStripeCalcColors();
   container.innerHTML = '';
+
+  const updateTotal = () => {
+    let sum = 0;
+    document.querySelectorAll('.cp-custom-rows-input').forEach(inp => sum += (parseInt(inp.value)||0));
+    if (totalInp) totalInp.value = sum;
+  };
+
   colors.forEach((c, i) => {
     const row = document.createElement('div');
     row.className = 'cp-stripe-custom-row';
@@ -754,9 +794,15 @@ function showCustomInputs() {
     numIn.type = 'number';
     numIn.min = 1;
     numIn.max = 200;
-    numIn.value = 4;
+    numIn.value = customRowsCache[i] || 4;
     numIn.className = 'cp-custom-rows-input';
     numIn.dataset.idx = i;
+    
+    numIn.addEventListener('input', () => {
+      customRowsCache[numIn.dataset.idx] = parseInt(numIn.value) || 0;
+      updateTotal();
+    });
+
     const unitSpan = document.createElement('span');
     unitSpan.textContent = ' 단';
     row.appendChild(swatch);
@@ -765,43 +811,62 @@ function showCustomInputs() {
     row.appendChild(unitSpan);
     container.appendChild(row);
   });
+  updateTotal();
 }
 
 function hideCustomInputs() {
   const container = document.getElementById('stripeCustomInputs');
   if (container) container.style.display = 'none';
+  const totalInp = document.getElementById('stripeCalcTotalRows');
+  if (totalInp) {
+    totalInp.disabled = false;
+    totalInp.style.opacity = '1';
+  }
 }
 
 function distributeRows(n, totalRows, dist) {
-  if (dist === 'equal') {
-    const base = Math.floor(totalRows / n);
-    const result = Array(n).fill(base);
-    result[n - 1] += totalRows - base * n;
-    return result;
-  }
-  if (dist === 'golden') {
-    const ratios = Array.from({ length: n }, (_, i) => Math.pow(1.618, i));
-    const sum = ratios.reduce((a, b) => a + b, 0);
-    const rows = ratios.map(r => Math.max(1, Math.round((r / sum) * totalRows)));
-    // Fix rounding
-    const diff = totalRows - rows.reduce((a, b) => a + b, 0);
-    rows[rows.length - 1] += diff;
-    return rows;
-  }
-  if (dist === 'fibonacci') {
-    const fibs = [1,1,2,3,5,8,13,21,34,55,89];
-    const seq = Array.from({ length: n }, (_, i) => fibs[i % fibs.length]);
-    const sum = seq.reduce((a, b) => a + b, 0);
-    const rows = seq.map(r => Math.max(1, Math.round((r / sum) * totalRows)));
-    const diff = totalRows - rows.reduce((a, b) => a + b, 0);
-    rows[rows.length - 1] += diff;
-    return rows;
-  }
   if (dist === 'custom') {
     const inputs = document.querySelectorAll('.cp-custom-rows-input');
     return Array.from(inputs).map(inp => Math.max(1, parseInt(inp.value) || 4));
   }
-  return Array(n).fill(Math.floor(totalRows / n));
+  
+  let weights;
+  if (dist === 'equal') weights = Array(n).fill(1);
+  else if (dist === 'golden') weights = Array.from({length:n}, (_,i)=>Math.pow(1.618, i));
+  else if (dist === 'fibonacci') {
+    const fibs = [1,1,2,3,5,8];
+    weights = Array.from({length:n}, (_,i) => fibs[i % fibs.length]);
+  }
+
+  const sumW = weights.reduce((a,b) => a+b, 0);
+  let rows = weights.map(w => Math.round((w/sumW) * totalRows));
+
+  for (let i = 0; i < n; i++) {
+    if (rows[i] < 1) rows[i] = 1;
+  }
+
+  let currentSum = rows.reduce((a,b) => a+b, 0);
+  
+  while (currentSum < totalRows) {
+    let maxWIdx = n - 1; 
+    let maxW = 0;
+    for (let i = 0; i < n; i++) { if (weights[i] > maxW) { maxW = weights[i]; maxWIdx = i; } }
+    rows[maxWIdx]++;
+    currentSum++;
+  }
+  
+  while (currentSum > totalRows) {
+    let maxRIdx = -1;
+    let maxR = 1; // must be > 1 to decrement
+    for (let i = 0; i < n; i++) {
+      if (rows[i] > maxR) { maxR = rows[i]; maxRIdx = i; }
+    }
+    if (maxRIdx === -1) break; 
+    rows[maxRIdx]--;
+    currentSum--;
+  }
+
+  return rows;
 }
 
 function calculateStripes() {
@@ -810,9 +875,13 @@ function calculateStripes() {
   const previewCanvas = document.getElementById('stripeCalcCanvas');
   if (!totalRowsEl || !container) return;
 
-  const totalRows = parseInt(totalRowsEl.value) || 20;
+  let totalRows = parseInt(totalRowsEl.value) || 20;
   const colors = getStripeCalcColors();
   const n = colors.length;
+  if (currentDist !== 'custom' && totalRows < n) {
+      totalRows = n;
+      totalRowsEl.value = n;
+  }
   const rowDist = distributeRows(n, totalRows, currentDist);
 
   stripeCalcResult = { colors, rowDist };
@@ -942,7 +1011,15 @@ function renderCuration(filter) {
     saveBtn.addEventListener('click', async () => {
       const palName = prompt(tr('cp_palette_name_prompt'), palette.name[lang] || palette.name.ko);
       if (!palName) return;
-      await savePalette(palette.colors, palName, '', palette.tags[0] || '', palette.tags[1] || '');
+      
+      let techCode = '';
+      if (palette.technique.en === 'Fair Isle') techCode = 'fairisle';
+      else if (palette.technique.en === 'Stripes') techCode = 'stripes';
+      else if (palette.technique.en === 'Intarsia') techCode = 'intarsia';
+      else if (palette.technique.en === 'Colorwork') techCode = 'colorwork';
+      else if (palette.technique.en === 'Stockinette') techCode = 'stockinette';
+
+      await savePalette(palette.colors, palName, techCode, palette.tags[0] || '', palette.tags[1] || '');
     });
 
     actions.appendChild(simBtn);
