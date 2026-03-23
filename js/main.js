@@ -6,7 +6,7 @@ import { t as sharedT } from './i18n.js';
 
 // --- 상태 관리 ---
 let originalImage = null;
-let patternHistory = []; // { dataURL, legendHTML, infoText, id }
+let patternHistory = []; // { dataURL, palette, infoText, id }
 let isPreviewMode = false;
 let seedColors = [];
 
@@ -575,7 +575,7 @@ generateBtn.addEventListener('click', async () => {
             downloadPdfBtn.disabled = false;
             saveToCloudBtn.disabled = false;
             saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '내 도안에 저장';
-            saveToHistory(canvas.toDataURL('image/png'), colorLegend.innerHTML, patternInfo.textContent);
+            saveToHistory(canvas.toDataURL('image/png'), palette, patternInfo.textContent);
 
             resultPanel.scrollIntoView({ behavior: 'smooth' });
             
@@ -627,9 +627,9 @@ function updateLegend(palette) {
     });
 }
 
-function saveToHistory(dataURL, legendHTML, infoText) {
+function saveToHistory(dataURL, palette, infoText) {
     const id = Date.now();
-    patternHistory.push({ id, dataURL, legendHTML, infoText });
+    patternHistory.push({ id, dataURL, palette, infoText });
     if (patternHistory.length > 5) patternHistory.shift();
     renderHistory();
 }
@@ -650,7 +650,7 @@ function renderHistory() {
                 ctx.drawImage(tempImg, 0, 0);
             };
             tempImg.src = item.dataURL;
-            colorLegend.innerHTML = item.legendHTML;
+            updateLegend(item.palette);
             patternInfo.textContent = item.infoText;
             document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
             img.classList.add('active');

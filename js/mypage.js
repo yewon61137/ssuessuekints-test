@@ -500,10 +500,10 @@ function buildPatternCard(uid, patternId, data) {
             if (data.legendHTML) {
                 pdf.addPage();
                 pdf.setFontSize(12); pdf.text('Color Legend', margin, margin + 5);
-                const tmpDiv = document.createElement('div');
-                tmpDiv.innerHTML = data.legendHTML;
+                // DOMParser로 파싱 — 삽입되지 않는 별도 document이므로 스크립트 실행 없음
+                const parsedDoc = new DOMParser().parseFromString(data.legendHTML, 'text/html');
                 let y = margin + 15;
-                tmpDiv.querySelectorAll('.color-item').forEach(item => {
+                parsedDoc.querySelectorAll('.color-item').forEach(item => {
                     const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
                     if (rgbMatch) {
                         pdf.setFillColor(+rgbMatch[0], +rgbMatch[1], +rgbMatch[2]);
