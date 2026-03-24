@@ -2856,19 +2856,6 @@ header {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MOBILE MENU — add Tools section title
-═══════════════════════════════════════════════════════════════ */
-.mobile-menu-section-title {
-  font-family: 'GmarketSans', sans-serif;
-  font-size: 0.62rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #999;
-  padding: 1rem 1.5rem 0.3rem;
-}
-
-/* ═══════════════════════════════════════════════════════════════
    SCROLL-TO-TOP BUTTON
 ═══════════════════════════════════════════════════════════════ */
 .scroll-top-btn {
@@ -2941,8 +2928,6 @@ header {
   
   .hdr-icon-btn { display: flex !important; }
   .hdr-right .lang-selector { display: block !important; }
-  .hdr-right #authSignInBtn,
-  .hdr-right #authUserArea { display: flex !important; }
 }
 
 /* 2. Mobile header padding 리셋 (old 4rem 룰 덮어쓰기) */
