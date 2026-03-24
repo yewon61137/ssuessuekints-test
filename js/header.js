@@ -12,7 +12,7 @@
           <div class="gnb-sub">
             <a href="/pattern.html" class="gnb-sub-link i18n" data-ko="도안 생성기" data-en="Pattern Generator" data-ja="編み図ジェネレーター">도안 생성기</a>
             <a href="/toolkit.html" class="gnb-sub-link i18n" data-ko="게이지 계산기" data-en="Gauge Calculator" data-ja="ゲージ計算機">게이지 계산기</a>
-            <a href="#" class="gnb-sub-link gnb-counter-btn i18n" onclick="document.querySelector('knitting-row-counter')?.toggleDrawer(); return false;" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
+            <a href="/projects.html" class="gnb-sub-link i18n" data-ko="단수 카운터" data-en="Row Counter" data-ja="段数カウンター">단수 카운터</a>
             <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
           </div>
         </div>

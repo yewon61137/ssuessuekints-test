@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls /c/Users/leah6/ssuessuekints-test/update_headers*)",
+      "Bash(git -C /c/Users/leah6/ssuessuekints-test diff HEAD -- index.html)",
+      "Bash(git -C /c/Users/leah6/ssuessuekints-test diff HEAD -- js/auth.js)",
+      "Bash(git:*)",
+      "Bash(grep -rn \"auth-user\\\\|authUserArea\\\\|mobile-auth\\\\|mobile-nav\\\\|mobileMenu\\\\|hamburger\" /c/Users/leah6/ssuessuekints-test/*.html)",
+      "Bash(grep -rn \"sbAuthUser\\\\|sbNickname\\\\|sb-auth\\\\|sidebar.*auth\\\\|auth.*sidebar\\\\|nav-sidebar\\\\|mobile-bottom\" /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js --include=*.css)",
+      "Bash(grep -rn \"sbRowCounter\\\\|heroRowCounter\\\\|sbUserNickname\\\\|sb-user\" /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
+      "Bash(grep -rn \"mobile-user-area\\\\|mobile-nickname\\\\|mobile-mypage\\\\|mobile-signout\\\\|mobile-menu\\\\|mobile-overlay\" /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
+      "Bash(ls /c/Users/leah6/ssuessuekints-test/*.html)",
+      "Bash(ls /c/Users/leah6/ssuessuekints-test/magazine/*.html)",
+      "Bash(grep -rn header-bar /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
+      "Bash(grep -rn \"auth-area\\\\|auth_area\" /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
+      "Bash(firebase deploy:*)"
+    ]
+  }
+}
