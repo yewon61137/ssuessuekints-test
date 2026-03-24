@@ -246,6 +246,7 @@
         <div class="view-header">
           <button class="btn-back" id="btn-back-to-detail">←</button>
           <h2 id="part-detail-title"></h2>
+          <button class="part-action-btn btn-primary"  id="btn-view-pdf-part" style="display:none;">📖 <span data-i18n="pdf_view">도안 보기</span></button>
           <button class="part-action-btn btn-secondary" id="btn-edit-part" data-i18n="proj_edit">수정</button>
           <button class="part-action-btn btn-danger"    id="btn-delete-part" data-i18n="part_delete">삭제</button>
         </div>
@@ -303,6 +304,17 @@
       </div>
 
       <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
+
+      <!-- PDF 뷰어 모달 -->
+      <div id="pdf-viewer-modal" class="proj-modal-overlay" style="padding:0;">
+        <div class="proj-modal-box" style="width:95%; max-width:1000px; height:90vh; display:flex; flex-direction:column; padding:1rem; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <h3 style="margin:0; font-size:1rem;">도안 보기</h3>
+            <button class="btn-back" onclick="document.getElementById('pdf-viewer-modal').style.display='none'">닫기 ✕</button>
+          </div>
+          <iframe id="pdf-iframe" style="flex:1; border:1px solid #ddd; border-radius:8px; background:#f0f0f0;"></iframe>
+        </div>
+      </div>
     </div><!-- /logged-in-view -->
   </main>
 

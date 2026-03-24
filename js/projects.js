@@ -149,10 +149,10 @@ function renderProjectDetail(project, parts) {
     if (pdfSection) {
         if (project.patternPdfURL) {
             pdfSection.innerHTML = `
-              <a href="${esc(project.patternPdfURL)}" target="_blank" rel="noopener noreferrer"
-                 class="part-action-btn btn-primary" id="btn-view-pdf">${esc(T2.pdf_view)}</a>
+              <button class="part-action-btn btn-primary" id="btn-view-pdf">${esc(T2.pdf_view)}</button>
               <button class="part-action-btn btn-secondary" id="btn-replace-pdf">${esc(T2.pdf_replace)}</button>
               <button class="part-action-btn btn-danger"    id="btn-delete-pdf">${esc(T2.pdf_delete)}</button>`;
+            $('btn-view-pdf')?.addEventListener('click', () => openPdfViewer(project.patternPdfURL));
             $('btn-replace-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
             $('btn-delete-pdf')?.addEventListener('click', () => deletePdf(project));
         } else {
@@ -253,6 +253,23 @@ function renderPartDetail(part) {
     if (modeRepeat)  modeRepeat.classList.toggle('active', activeCounter.mode === 'repeat');
     if (repeatUnitInput) repeatUnitInput.value = activeCounter.repeatUnit;
     if (repeatUnitRow) repeatUnitRow.style.display = activeCounter.mode === 'repeat' ? '' : 'none';
+
+    // 카운터 화면 도안 보기 버튼 설정
+    const pdfBtn = $('btn-view-pdf-part');
+    if (pdfBtn) {
+        pdfBtn.style.display = 'none'; // 기본 숨김
+        // 프로젝트 데이터에서 PDF URL 확인
+        getDocs(query(collection(db, 'users', currentUser.uid, 'projects'))).then(snap => {
+            const proj = snap.docs.find(d => d.id === currentProjectId)?.data();
+            if (proj && proj.patternPdfURL) {
+                pdfBtn.style.display = '';
+                // 기존 리스너 제거 위해 클론 후 교체 (심플한 방법)
+                const newBtn = pdfBtn.cloneNode(true);
+                pdfBtn.parentNode.replaceChild(newBtn, pdfBtn);
+                newBtn.addEventListener('click', () => openPdfViewer(proj.patternPdfURL));
+            }
+        });
+    }
 }
 
 function updateCounterDisplay(partId) {
@@ -433,6 +450,15 @@ async function deletePdf(project) {
         );
         renderProjectDetail(project, partsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (e) { alert('삭제 실패: ' + e.message); }
+}
+
+function openPdfViewer(url) {
+    const modal = $('pdf-viewer-modal');
+    const iframe = $('pdf-iframe');
+    if (modal && iframe) {
+        iframe.src = url;
+        modal.style.display = 'flex';
+    }
 }
 
 // ── 모달 헬퍼 ─────────────────────────────────────────────────────────────────
