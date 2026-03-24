@@ -147,17 +147,22 @@ async function loadProjects(isLoggedIn = false, uid = null) {
                 : p._status === 'inProgress'
                 ? (lang === 'ko' ? '진행중' : lang === 'ja' ? '進行中' : 'In Progress')
                 : (lang === 'ko' ? '시작전' : lang === 'ja' ? '未開始' : 'Planned');
-            const statusClass = p._status === 'done' ? 'color:#2e7d32'
-                : p._status === 'inProgress' ? 'color:#1a73e8' : 'color:#888';
+            const statusClass = p._status === 'done' ? 'status-done'
+                : p._status === 'inProgress' ? 'status-in-progress' : 'status-pending';
             const projUrl = `/projects.html?id=${encodeURIComponent(p.id)}`;
+            const partsLabel = p._totalParts > 0
+                ? (lang === 'ko' ? `${p._doneParts} / ${p._totalParts} 파트 완료`
+                   : lang === 'ja' ? `${p._doneParts} / ${p._totalParts} パート完了`
+                   : `${p._doneParts} / ${p._totalParts} parts done`)
+                : '';
             return `
-            <div class="proj-item" onclick="location.href='${projUrl}'" style="cursor:pointer;">
+            <div class="proj-item" onclick="location.href='${projUrl}'">
                 <div class="proj-info">
                     <div class="proj-name">${String(p.title || '').substring(0, 30)}</div>
-                    ${p._currentPart ? `<div class="proj-rows" style="font-size:0.72rem;color:#888;">${p._currentPart}</div>` : ''}
                     ${p._totalParts > 0 ? `<div class="proj-bar-wrap"><div class="proj-bar-fill" style="width:${p._pct}%;"></div></div>` : ''}
+                    ${partsLabel ? `<div class="proj-parts-label">${partsLabel}</div>` : ''}
                 </div>
-                <div class="proj-count" style="${statusClass};font-size:0.7rem;font-weight:800;">${statusLabel}</div>
+                <div class="proj-count ${statusClass}">${statusLabel}</div>
             </div>`;
         }).join('');
 
