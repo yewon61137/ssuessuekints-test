@@ -593,94 +593,93 @@ function buildPatternCard(uid, patternId, data) {
 // ── 내 프로젝트 ───────────────────────────────────────────────────────────────
 
 async function loadProjects(uid) {
-    // localStorage는 같은 계정의 데이터인 경우에만 사용
-    let counters = [];
-    try {
-        const storedUid = localStorage.getItem('ssuessue_rc_uid');
-        if (storedUid === uid) {
-            const local = localStorage.getItem('ssuessue_row_counters');
-            if (local) counters = JSON.parse(local);
-        }
-    } catch {}
-
-    // Firestore 데이터 병합 (더 최신인 것 사용)
-    if (uid) {
-        try {
-            const snap = await getDoc(doc(db, 'users', uid, 'rowCounters', 'main'));
-            if (snap.exists()) {
-                const fsData = snap.data();
-                if (Array.isArray(fsData.counters) && fsData.counters.length) {
-                    const fsTime = fsData.updatedAt || 0;
-                    try {
-                        const lsRaw = localStorage.getItem('ssuessue_row_counters');
-                        const lsArr = lsRaw ? JSON.parse(lsRaw) : [];
-                        // 어느 쪽이 더 최신인지 id의 timestamp로 비교는 어려우므로 Firestore를 우선
-                        if (fsData.counters.length >= lsArr.length) counters = fsData.counters;
-                    } catch { counters = fsData.counters; }
-                }
-            }
-        } catch {}
-    }
-
-    const activeEl = document.getElementById('projectsActive');
-    const doneEl   = document.getElementById('projectsDone');
-    const doneWrap = document.getElementById('projectsDoneWrap');
-    const emptyEl  = document.getElementById('projectsEmpty');
+    const activeEl  = document.getElementById('projectsActive');
+    const doneEl    = document.getElementById('projectsDone');
+    const doneWrap  = document.getElementById('projectsDoneWrap');
+    const emptyEl   = document.getElementById('projectsEmpty');
     const titleDone = document.getElementById('titleDoneProjects');
     if (titleDone) titleDone.textContent = tr('done_projects');
+    if (!activeEl) return;
 
     activeEl.innerHTML = '';
     doneEl.innerHTML   = '';
 
-    const active = counters.filter(c => !(c.goalRows > 0 && c.count >= c.goalRows));
-    const done   = counters.filter(c =>   c.goalRows > 0 && c.count >= c.goalRows);
+    try {
+        const projSnap = await getDocs(
+            query(collection(db, 'users', uid, 'projects'), orderBy('createdAt', 'desc'))
+        );
 
-    if (active.length === 0 && done.length === 0) {
+        const projects = await Promise.all(projSnap.docs.map(async d => {
+            const proj = { id: d.id, ...d.data() };
+            try {
+                const partsSnap = await getDocs(
+                    collection(db, 'users', uid, 'projects', d.id, 'parts')
+                );
+                const parts = partsSnap.docs.map(pd => pd.data());
+                proj._parts     = parts;
+                proj._done      = parts.filter(p => p.status === 'done').length;
+                proj._total     = parts.length;
+                proj._pct       = parts.length > 0 ? Math.round(proj._done / proj._total * 100) : 0;
+                if (parts.length > 0 && parts.every(p => p.status === 'done')) proj._status = 'done';
+                else if (parts.some(p => p.status === 'inProgress'))             proj._status = 'inProgress';
+                else                                                               proj._status = 'pending';
+            } catch {
+                proj._parts = []; proj._done = 0; proj._total = 0; proj._pct = 0; proj._status = 'pending';
+            }
+            return proj;
+        }));
+
+        const active = projects.filter(p => p._status !== 'done');
+        const done   = projects.filter(p => p._status === 'done');
+
+        if (active.length === 0 && done.length === 0) {
+            emptyEl.style.display = 'block';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        active.forEach(p => activeEl.appendChild(buildProjectCard(p, false)));
+        if (done.length > 0) {
+            doneWrap.style.display = '';
+            done.forEach(p => doneEl.appendChild(buildProjectCard(p, true)));
+        }
+    } catch (e) {
+        console.error('loadProjects error:', e);
         emptyEl.style.display = 'block';
-        return;
-    }
-    emptyEl.style.display = 'none';
-
-    active.forEach(c => activeEl.appendChild(buildProjectCard(c)));
-    if (done.length > 0) {
-        doneWrap.style.display = '';
-        done.forEach(c => doneEl.appendChild(buildProjectCard(c, true)));
     }
 }
 
-function buildProjectCard(c, isDone = false) {
+function buildProjectCard(proj, isDone = false) {
     const card = document.createElement('div');
     card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => { location.href = '/projects.html'; });
 
-    const pct = c.goalRows > 0 ? Math.min(100, Math.round(c.count / c.goalRows * 100)) : null;
-    const name = escHtml(c.name || ('Project #' + c.id));
-    const rowLabel = tr('row_label');
-    const goalStr  = c.goalRows > 0
-        ? `${c.count} / ${c.goalRows} ${rowLabel}`
-        : `${c.count} ${rowLabel} · ${tr('no_goal')}`;
-
-    const progressHtml = pct !== null ? `
+    const statusLabel = proj._status === 'done'     ? tr('done_badge')
+                      : proj._status === 'inProgress' ? '진행중'
+                      : '시작전';
+    const pct = proj._pct ?? 0;
+    const progressHtml = proj._total > 0 ? `
         <div class="mp-progress-bar-wrap">
             <div class="mp-progress-bar" style="width:${pct}%"></div>
         </div>
-        <span class="mp-progress-pct">${pct}${tr('progress_done')}</span>
-    ` : '';
+        <span class="mp-progress-pct">${proj._done} / ${proj._total}${tr('progress_done')}</span>` : '';
 
     card.innerHTML = `
         <div class="mp-project-header">
-            <span class="mp-project-name">${name}</span>
-            ${isDone ? `<span class="mp-project-badge">${escHtml(tr('done_badge'))}</span>` : ''}
+            <span class="mp-project-name">${escHtml(proj.title || 'Project')}</span>
+            ${isDone ? `<span class="mp-project-badge">${escHtml(statusLabel)}</span>` : ''}
         </div>
-        <div class="mp-project-meta">${escHtml(goalStr)}</div>
+        ${proj.yarn   ? `<div class="mp-project-meta">🧶 ${escHtml(proj.yarn)}</div>` : ''}
+        ${proj.needle ? `<div class="mp-project-meta">🪡 ${escHtml(proj.needle)}</div>` : ''}
         ${progressHtml}
         <div class="mp-project-actions">
-            <button class="secondary-btn small-btn mp-open-counter-btn">${escHtml(tr('open_counter'))}</button>
-        </div>
-    `;
+            <button class="secondary-btn small-btn mp-open-proj-btn">자세히 보기 →</button>
+        </div>`;
 
-    card.querySelector('.mp-open-counter-btn').addEventListener('click', () => {
-        const rc = document.querySelector('knitting-row-counter');
-        if (rc) rc.toggleDrawer();
+    card.querySelector('.mp-open-proj-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        location.href = '/projects.html';
     });
 
     return card;
