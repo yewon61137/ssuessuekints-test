@@ -21,6 +21,7 @@ let currentProjectId = null;
 let currentPartId = null;
 let currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
 let projectsUnsubscribe = null;
+let projectUnsubscribe = null;
 let partsUnsubscribe = null;
 
 // 단수 카운터 디바운스 타이머
@@ -121,7 +122,7 @@ function renderProjectList(projects) {
     // 클릭 → 상세 화면
     container.querySelectorAll('.proj-card').forEach(card => {
         card.addEventListener('click', () => {
-            openProjectDetail(card.dataset.id, projects);
+            openProjectDetail(card.dataset.id);
         });
     });
 }
@@ -289,20 +290,27 @@ function updateCounterDisplay(partId) {
 }
 
 // ── 네비게이션 ────────────────────────────────────────────────────────────────
-async function openProjectDetail(projectId, projects) {
+async function openProjectDetail(projectId) {
     currentProjectId = projectId;
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-
     showView('view-detail');
 
-    // 파트 목록 실시간 리스너
+    if (projectUnsubscribe) projectUnsubscribe();
     if (partsUnsubscribe) partsUnsubscribe();
-    const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
-    const partsQuery = query(partsRef, orderBy('createdAt', 'asc'));
-    partsUnsubscribe = onSnapshot(partsQuery, snap => {
-        const parts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderProjectDetail(project, parts);
+
+    // 프로젝트 문서 실시간 리스너
+    projectUnsubscribe = onSnapshot(doc(db, 'users', currentUser.uid, 'projects', projectId), docSnap => {
+        if (!docSnap.exists()) return;
+        const project = { id: docSnap.id, ...docSnap.data() };
+        
+        // 파트 목록 실시간 리스너 (한 번만 설정)
+        const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
+        const partsQuery = query(partsRef, orderBy('createdAt', 'asc'));
+        
+        if (partsUnsubscribe) partsUnsubscribe();
+        partsUnsubscribe = onSnapshot(partsQuery, partsSnap => {
+            const parts = partsSnap.docs.map(pd => ({ id: pd.id, ...pd.data() }));
+            renderProjectDetail(project, parts);
+        });
     });
 }
 
@@ -318,8 +326,10 @@ async function saveProject(data, projectId = null) {
     const ref = collection(db, 'users', currentUser.uid, 'projects');
     if (projectId) {
         await updateDoc(doc(db, 'users', currentUser.uid, 'projects', projectId), data);
+        return projectId;
     } else {
-        await addDoc(ref, { ...data, createdAt: serverTimestamp() });
+        const docRef = await addDoc(ref, { ...data, createdAt: serverTimestamp() });
+        return docRef.id;
     }
 }
 
@@ -451,15 +461,27 @@ function attachEvents() {
             targetDate: $('input-target-date')?.value || '',
         };
         const editId = $('project-form-id')?.value || null;
+        const pdfFile = $('input-proj-pdf')?.files?.[0];
+
         try {
-            await saveProject(data, editId || null);
+            const savedId = await saveProject(data, editId || null);
+            
+            // PDF 파일이 있으면 업로드
+            if (pdfFile) {
+                currentProjectId = savedId; // 업로드용 상태 동기화
+                const project = { id: savedId, ...data };
+                await uploadPdf(pdfFile, project);
+            }
+            
             closeModal('project-modal');
+            $('input-proj-pdf').value = ''; // 초기화
         } catch (e) { alert('저장 실패: ' + e.message); }
     });
     $('btn-proj-modal-cancel')?.addEventListener('click', () => closeModal('project-modal'));
 
     // ── 상세 화면 ──
     $('btn-back-to-list')?.addEventListener('click', () => {
+        if (projectUnsubscribe) { projectUnsubscribe(); projectUnsubscribe = null; }
         if (partsUnsubscribe) { partsUnsubscribe(); partsUnsubscribe = null; }
         currentProjectId = null;
         showView('view-list');
