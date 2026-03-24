@@ -653,7 +653,8 @@ function buildProjectCard(proj, isDone = false) {
     const card = document.createElement('div');
     card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
     card.style.cursor = 'pointer';
-    card.addEventListener('click', () => { location.href = '/projects.html'; });
+    const projUrl = `/projects.html?id=${encodeURIComponent(proj.id)}`;
+    card.addEventListener('click', () => { location.href = projUrl; });
 
     const statusLabel = proj._status === 'done'     ? tr('done_badge')
                       : proj._status === 'inProgress' ? '진행중'
@@ -665,6 +666,8 @@ function buildProjectCard(proj, isDone = false) {
         </div>
         <span class="mp-progress-pct">${proj._done} / ${proj._total}${tr('progress_done')}</span>` : '';
 
+    const shareBtn = isDone ? `<button class="secondary-btn small-btn mp-share-proj-btn">${tr('go_community')}</button>` : '';
+
     card.innerHTML = `
         <div class="mp-project-header">
             <span class="mp-project-name">${escHtml(proj.title || 'Project')}</span>
@@ -675,11 +678,17 @@ function buildProjectCard(proj, isDone = false) {
         ${progressHtml}
         <div class="mp-project-actions">
             <button class="secondary-btn small-btn mp-open-proj-btn">자세히 보기 →</button>
+            ${shareBtn}
         </div>`;
 
     card.querySelector('.mp-open-proj-btn').addEventListener('click', e => {
         e.stopPropagation();
-        location.href = '/projects.html';
+        location.href = projUrl;
+    });
+
+    card.querySelector('.mp-share-proj-btn')?.addEventListener('click', e => {
+        e.stopPropagation();
+        location.href = '/community.html';
     });
 
     return card;

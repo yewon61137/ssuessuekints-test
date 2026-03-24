@@ -149,8 +149,9 @@ async function loadProjects(isLoggedIn = false, uid = null) {
                 : (lang === 'ko' ? '시작전' : lang === 'ja' ? '未開始' : 'Planned');
             const statusClass = p._status === 'done' ? 'color:#2e7d32'
                 : p._status === 'inProgress' ? 'color:#1a73e8' : 'color:#888';
+            const projUrl = `/projects.html?id=${encodeURIComponent(p.id)}`;
             return `
-            <div class="proj-item" onclick="location.href='/projects.html'" style="cursor:pointer;">
+            <div class="proj-item" onclick="location.href='${projUrl}'" style="cursor:pointer;">
                 <div class="proj-info">
                     <div class="proj-name">${String(p.title || '').substring(0, 30)}</div>
                     ${p._currentPart ? `<div class="proj-rows" style="font-size:0.72rem;color:#888;">${p._currentPart}</div>` : ''}

@@ -304,6 +304,21 @@ function updateCounterDisplay(partId) {
             progressWrap.style.display = 'none';
         }
     }
+
+    // 목표 단수에 따른 "파트 완료" 버튼 활성화
+    const doneBtn = $('btn-mark-done');
+    if (doneBtn && doneBtn.style.display !== 'none') {
+        if (c.targetRows > 0) {
+            const reached = c.count >= c.targetRows;
+            doneBtn.disabled = !reached;
+            doneBtn.style.opacity = reached ? '' : '0.5';
+            doneBtn.title = reached ? '' : `목표 ${c.targetRows}단에 도달하면 활성화됩니다`;
+        } else {
+            doneBtn.disabled = false;
+            doneBtn.style.opacity = '';
+            doneBtn.title = '';
+        }
+    }
 }
 
 // ── 네비게이션 ────────────────────────────────────────────────────────────────
@@ -800,8 +815,14 @@ export function init() {
         if (user) {
             currentUser = user;
             showLoggedIn();
-            showView('view-list');
-            loadProjects(user.uid);
+            // URL ?id=projId → 해당 프로젝트 상세 바로 열기
+            const urlProjectId = new URLSearchParams(location.search).get('id');
+            if (urlProjectId) {
+                openProjectDetail(urlProjectId);
+            } else {
+                showView('view-list');
+                loadProjects(user.uid);
+            }
         } else {
             currentUser = null;
             showGuest();
