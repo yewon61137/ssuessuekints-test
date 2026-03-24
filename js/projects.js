@@ -8,6 +8,12 @@ import {
     getDocs, onSnapshot, serverTimestamp, query, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {
+    getStorage, ref as storageRef, uploadBytesResumable,
+    getDownloadURL, deleteObject
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+
+const storage = getStorage();
 
 // ── 상태 ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -134,6 +140,25 @@ function renderProjectDetail(project, parts) {
             project.startDate  ? `<span>📅 ${esc(project.startDate)}</span>` : '',
             project.targetDate ? `<span>🎯 ${esc(project.targetDate)}</span>` : '',
         ].join('');
+    }
+
+    // PDF 버튼 업데이트
+    const pdfSection = $('pdf-section');
+    const T2 = tr();
+    if (pdfSection) {
+        if (project.patternPdfURL) {
+            pdfSection.innerHTML = `
+              <a href="${esc(project.patternPdfURL)}" target="_blank" rel="noopener noreferrer"
+                 class="part-action-btn btn-primary" id="btn-view-pdf">${esc(T2.pdf_view)}</a>
+              <button class="part-action-btn btn-secondary" id="btn-replace-pdf">${esc(T2.pdf_replace)}</button>
+              <button class="part-action-btn btn-danger"    id="btn-delete-pdf">${esc(T2.pdf_delete)}</button>`;
+            $('btn-replace-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
+            $('btn-delete-pdf')?.addEventListener('click', () => deletePdf(project));
+        } else {
+            pdfSection.innerHTML = `
+              <button class="part-action-btn btn-secondary" id="btn-upload-pdf">${esc(T2.pdf_upload)}</button>`;
+            $('btn-upload-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
+        }
     }
 
     const container = $('parts-container');
@@ -299,6 +324,11 @@ async function saveProject(data, projectId = null) {
 }
 
 async function deleteProject(projectId) {
+    // Storage PDF 먼저 삭제 시도
+    try {
+        const pdfRef = storageRef(storage, `users/${currentUser.uid}/projects/${projectId}/pattern.pdf`);
+        await deleteObject(pdfRef);
+    } catch { /* 파일 없으면 무시 */ }
     // 파트 먼저 삭제
     const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
     const partsSnap = await getDocs(partsRef);
@@ -338,6 +368,61 @@ function scheduleCounterSave(partId) {
             );
         } catch (e) { console.error('Counter sync error:', e); }
     }, 1000);
+}
+
+// ── PDF 업로드 / 삭제 ─────────────────────────────────────────────────────────
+async function uploadPdf(file, project) {
+    const T = tr();
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        alert(T.pdf_error_type); return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+        alert(T.pdf_error_size); return;
+    }
+    const path = `users/${currentUser.uid}/projects/${currentProjectId}/pattern.pdf`;
+    const fileRef = storageRef(storage, path);
+    const pdfSection = $('pdf-section');
+    if (pdfSection) pdfSection.innerHTML = `<span style="font-size:0.82rem;color:#888;">${esc(T.pdf_uploading)} 0%</span>`;
+
+    const task = uploadBytesResumable(fileRef, file, { contentType: 'application/pdf' });
+    task.on('state_changed',
+        snapshot => {
+            const pct = Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 100);
+            if (pdfSection) pdfSection.innerHTML = `<span style="font-size:0.82rem;color:#888;">${esc(T.pdf_uploading)} ${pct}%</span>`;
+        },
+        err => alert('업로드 오류: ' + err.message),
+        async () => {
+            const url = await getDownloadURL(fileRef);
+            await updateDoc(
+                doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+                { patternPdfURL: url, patternPdfPath: path }
+            );
+            project.patternPdfURL = url;
+            project.patternPdfPath = path;
+            const partsSnap = await getDocs(
+                query(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
+            );
+            renderProjectDetail(project, partsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+    );
+}
+
+async function deletePdf(project) {
+    if (!confirm(tr().pdf_delete_confirm)) return;
+    try {
+        const path = project.patternPdfPath || `users/${currentUser.uid}/projects/${currentProjectId}/pattern.pdf`;
+        await deleteObject(storageRef(storage, path));
+        await updateDoc(
+            doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+            { patternPdfURL: null, patternPdfPath: null }
+        );
+        project.patternPdfURL = null;
+        project.patternPdfPath = null;
+        const partsSnap = await getDocs(
+            query(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
+        );
+        renderProjectDetail(project, partsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 
 // ── 모달 헬퍼 ─────────────────────────────────────────────────────────────────
@@ -588,6 +673,18 @@ function attachEvents() {
         $(id)?.addEventListener('click', e => {
             if (e.target === $(id)) closeModal(id);
         });
+    });
+
+    // ── PDF 파일 input (숨김) ──
+    $('pdf-file-input')?.addEventListener('change', async e => {
+        const file = e.target.files?.[0];
+        if (!file || !currentProjectId || !currentUser) return;
+        // 현재 프로젝트 데이터 가져오기
+        const projSnap = await getDocs(collection(db, 'users', currentUser.uid, 'projects'));
+        const projDoc  = projSnap.docs.find(d => d.id === currentProjectId);
+        const project  = projDoc ? { id: projDoc.id, ...projDoc.data() } : {};
+        await uploadPdf(file, project);
+        e.target.value = ''; // 같은 파일 재선택 허용
     });
 }
 

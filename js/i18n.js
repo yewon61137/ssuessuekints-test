@@ -74,6 +74,17 @@ export const t = {
         part_mark_in_progress: '진행중으로 변경',
         part_open_counter: '단수 카운터 열기',
         part_repeat_unit: '반복 단위',
+        // 도안 PDF
+        pdf_upload: '도안 PDF 업로드',
+        pdf_uploading: '업로드 중...',
+        pdf_view: '도안 보기',
+        pdf_delete: 'PDF 삭제',
+        pdf_delete_confirm: '도안 PDF를 삭제하시겠습니까?',
+        pdf_replace: 'PDF 교체',
+        pdf_error_type: 'PDF 파일만 업로드 가능합니다.',
+        pdf_error_size: '파일 크기는 20MB 이하여야 합니다.',
+        pdf_upload_done: 'PDF 업로드 완료!',
+        pdf_upload_select: 'PDF 파일 선택',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -144,6 +155,17 @@ export const t = {
         part_mark_in_progress: 'Set In Progress',
         part_open_counter: 'Open Row Counter',
         part_repeat_unit: 'Repeat Unit',
+        // Pattern PDF
+        pdf_upload: 'Upload Pattern PDF',
+        pdf_uploading: 'Uploading...',
+        pdf_view: 'View Pattern',
+        pdf_delete: 'Delete PDF',
+        pdf_delete_confirm: 'Delete the pattern PDF?',
+        pdf_replace: 'Replace PDF',
+        pdf_error_type: 'Only PDF files are allowed.',
+        pdf_error_size: 'File must be 20MB or smaller.',
+        pdf_upload_done: 'PDF uploaded!',
+        pdf_upload_select: 'Select PDF file',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
@@ -214,6 +236,17 @@ export const t = {
         part_mark_in_progress: '進行中に変更',
         part_open_counter: '段数カウンターを開く',
         part_repeat_unit: '繰り返し単位',
+        // 編み図PDF
+        pdf_upload: '編み図PDFをアップロード',
+        pdf_uploading: 'アップロード中...',
+        pdf_view: '編み図を見る',
+        pdf_delete: 'PDFを削除',
+        pdf_delete_confirm: '編み図PDFを削除しますか？',
+        pdf_replace: 'PDFを入れ替え',
+        pdf_error_type: 'PDFファイルのみアップロードできます。',
+        pdf_error_size: 'ファイルサイズは20MB以下である必要があります。',
+        pdf_upload_done: 'PDFアップロード完了！',
+        pdf_upload_select: 'PDFファイルを選択',
     }
 };
 
