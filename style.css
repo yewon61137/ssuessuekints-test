@@ -1598,13 +1598,128 @@ canvas {
 }
 
 .file-name-display {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
   color: var(--secondary-color);
+  word-break: break-all;
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Yarn Stash Styles ── */
+.yarn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.yarn-item {
+  border: 2px solid #000;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.yarn-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.yarn-item-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #eee;
+  overflow: hidden;
+}
+
+.yarn-item-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.yarn-item-photo svg {
+  color: #ccc;
+}
+
+.yarn-item-content {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yarn-item-brand {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.yarn-item-name {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.yarn-item-meta {
+  font-size: 0.8rem;
+  color: #333;
+}
+
+.yarn-item-qty {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+}
+
+.yarn-item-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: none;
+  gap: 0.4rem;
+}
+
+.yarn-item:hover .yarn-item-actions {
+  display: flex;
+}
+
+.yarn-action-btn {
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.yarn-action-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+.yarn-action-btn.del:hover {
+  background: #dc3545;
+  border-color: #dc3545;
 }
 
 @media (prefers-color-scheme: dark) {

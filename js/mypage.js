@@ -5,9 +5,9 @@ import { t as sharedT, initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection, collectionGroup, query, orderBy, limit, getDocs,
-    doc, getDoc, deleteDoc, updateDoc, where
+    doc, getDoc, deleteDoc, updateDoc, where, onSnapshot, addDoc, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject, getBlob } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+import { ref, deleteObject, getBlob, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 
@@ -49,6 +49,8 @@ const pageT = {
         palette_make_public: '공개로 전환', palette_make_private: '비공개로 전환',
         tab_other_posts: '게시글', user_not_found: '존재하지 않는 사용자예요.',
         bio_more: '더 보기', bio_less: '접기',
+        tab_stash: '내 실 창고', title_stash: '내 실 창고',
+        empty_stash: '창고에 등록된 실이 없어요.',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -87,6 +89,8 @@ const pageT = {
         palette_make_public: 'Make Public', palette_make_private: 'Make Private',
         tab_other_posts: 'Posts', user_not_found: 'This user does not exist.',
         bio_more: 'More', bio_less: 'Less',
+        tab_stash: 'My Yarn Stash', title_stash: 'My Yarn Stash',
+        empty_stash: 'No yarns in your stash.',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -125,6 +129,8 @@ const pageT = {
         palette_make_public: '公開にする', palette_make_private: '非公開にする',
         tab_other_posts: '投稿', user_not_found: 'このユーザーは存在しません。',
         bio_more: 'もっと見る', bio_less: '閉じる',
+        tab_stash: 'マイ毛糸倉庫', title_stash: 'マイ毛糸倉庫',
+        empty_stash: '倉庫に登録された毛糸がありません。',
     }
 };
 
@@ -138,6 +144,8 @@ let   viewMode = urlUid ? 'other' : 'mine'; // 'mine' | 'other'
 let currentUid = null;
 let currentPanel = urlUid ? 'posts' : 'profile'; // 타인 프로필은 글 목록부터 (도안은 본인 전용)
 const panelLoaded = {};
+let stashUnsub = null;
+let yarnPhotoFile = null;
 
 // ── 언어 적용 ─────────────────────────────────────────────────────────────────
 // initLang이 langChange를 발행하므로 여기서는 langChange만 수신해 placeholder 등 보조 처리만.
@@ -180,6 +188,7 @@ function switchPanel(name) {
     else if (name === 'scraps')          loadScraps(currentUid);
     else if (name === 'palettes')        loadPalettes(currentUid);
     else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
+    else if (name === 'stash')           initStash(currentUid);
 }
 
 document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
@@ -1059,6 +1068,185 @@ function buildPostCard(postId, data, opts = {}) {
     return card;
 }
 
+// ── 실 재고 관리 (Yarn Stash) ──────────────────────────────────────────────────
+function initStash(uid) {
+    const btnNew = document.getElementById('btn-new-yarn');
+    const modal = document.getElementById('yarnModal');
+    const cancelBtn = document.getElementById('btn-yarn-modal-cancel');
+    const form = document.getElementById('yarnForm');
+    const photoInput = document.getElementById('yarnPhotoInput');
+    const photoPreview = document.getElementById('yarnPhotoPreview');
+
+    if (btnNew) btnNew.onclick = () => showYarnModal();
+    if (cancelBtn) cancelBtn.onclick = () => closeYarnModal();
+    if (photoInput) {
+        photoInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                yarnPhotoFile = file;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    photoPreview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    }
+
+    if (form) {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await handleYarnSubmit(e, uid);
+        };
+    }
+
+    loadStash(uid);
+}
+
+function loadStash(uid) {
+    if (stashUnsub) stashUnsub();
+    const q = query(collection(db, `users/${uid}/yarns`), orderBy('createdAt', 'desc'));
+    stashUnsub = onSnapshot(q, (snapshot) => {
+        const yarns = [];
+        snapshot.forEach(doc => yarns.push({ id: doc.id, ...doc.data() }));
+        renderStash(yarns);
+        const loadingEl = document.getElementById('stashLoading');
+        const emptyEl = document.getElementById('stashEmpty');
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = yarns.length === 0 ? 'block' : 'none';
+    });
+}
+
+function renderStash(yarns) {
+    const grid = document.getElementById('yarnGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    yarns.forEach(y => {
+        const item = document.createElement('div');
+        item.className = 'yarn-item';
+        const photoHtml = y.photoURL 
+            ? `<img src="${y.photoURL}" alt="${y.name}">`
+            : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>`;
+        
+        const qtyBall = y.quantityBall || 0;
+        const qtyGram = y.quantityGram ? `(${y.quantityGram}g)` : '';
+        const unit = currentLang === 'ko' ? '볼' : (currentLang === 'ja' ? '玉' : 'balls');
+
+        item.innerHTML = `
+            <div class="yarn-item-photo">${photoHtml}</div>
+            <div class="yarn-item-content">
+                <div class="yarn-item-brand">${escHtml(y.brand)}</div>
+                <div class="yarn-item-name">${escHtml(y.name)}</div>
+                <div class="yarn-item-meta">${escHtml(y.color || '')}</div>
+                <div class="yarn-item-meta">${escHtml(y.needleSize || '')}</div>
+                <div class="yarn-item-qty">${qtyBall} ${unit} ${qtyGram}</div>
+            </div>
+            <div class="yarn-item-actions">
+                <button class="yarn-action-btn edit" title="수정">✎</button>
+                <button class="yarn-action-btn del" title="삭제">✕</button>
+            </div>
+        `;
+        
+        item.querySelector('.edit').onclick = () => showYarnModal(y);
+        item.querySelector('.del').onclick = () => deleteYarn(y.id, y.photoURL);
+        grid.appendChild(item);
+    });
+}
+
+async function handleYarnSubmit(e, uid) {
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = tr('profile_saving');
+
+    const yarnId = document.getElementById('yarn-form-id').value;
+    const brand = document.getElementById('input-yarn-brand').value;
+    const name = document.getElementById('input-yarn-name').value;
+    const color = document.getElementById('input-yarn-color').value;
+    const qtyBall = parseFloat(document.getElementById('input-yarn-qty-ball').value) || 0;
+    const qtyGram = parseInt(document.getElementById('input-yarn-qty-gram').value) || 0;
+    const needle = document.getElementById('input-yarn-needle').value;
+    const notes = document.getElementById('input-yarn-notes').value;
+
+    try {
+        let photoURL = null;
+        if (yarnPhotoFile) {
+            const fileName = `yarn_${Date.now()}`;
+            const fileRef = ref(storage, `users/${uid}/yarns/${fileName}`);
+            await uploadBytes(fileRef, yarnPhotoFile);
+            photoURL = await getDownloadURL(fileRef);
+        }
+
+        const yarnData = {
+            brand, name, color, 
+            quantityBall: qtyBall, 
+            quantityGram: qtyGram,
+            needleSize: needle,
+            notes,
+            updatedAt: serverTimestamp()
+        };
+        if (photoURL) yarnData.photoURL = photoURL;
+
+        if (yarnId) {
+            await updateDoc(doc(db, `users/${uid}/yarns/${yarnId}`), yarnData);
+        } else {
+            yarnData.createdAt = serverTimestamp();
+            await addDoc(collection(db, `users/${uid}/yarns`), yarnData);
+        }
+        closeYarnModal();
+    } catch (err) {
+        console.error(err);
+        alert(tr('profile_edit_error'));
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+}
+
+async function deleteYarn(yarnId, photoURL) {
+    if (!confirm(tr('yarn_delete_confirm'))) return;
+    try {
+        await deleteDoc(doc(db, `users/${auth.currentUser.uid}/yarns/${yarnId}`));
+        // Storage 삭제는 필요 시 추가 (참조가 복잡할 수 있음)
+    } catch (err) { console.error(err); }
+}
+
+function showYarnModal(y = null) {
+    const modal = document.getElementById('yarnModal');
+    const form = document.getElementById('yarnForm');
+    const title = document.getElementById('yarnModalTitle');
+    const photoPreview = document.getElementById('yarnPhotoPreview');
+    
+    form.reset();
+    yarnPhotoFile = null;
+    document.getElementById('yarn-form-id').value = y ? y.id : '';
+    title.textContent = y ? tr('yarn_modal_title') : tr('yarn_new');
+    
+    if (y) {
+        document.getElementById('input-yarn-brand').value = y.brand || '';
+        document.getElementById('input-yarn-name').value = y.name || '';
+        document.getElementById('input-yarn-color').value = y.color || '';
+        document.getElementById('input-yarn-qty-ball').value = y.quantityBall || 0;
+        document.getElementById('input-yarn-qty-gram').value = y.quantityGram || '';
+        document.getElementById('input-yarn-needle').value = y.needleSize || '';
+        document.getElementById('input-yarn-notes').value = y.notes || '';
+        if (y.photoURL) {
+            photoPreview.innerHTML = `<img src="${y.photoURL}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+            photoPreview.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>`;
+        }
+    } else {
+        photoPreview.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>`;
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeYarnModal() {
+    document.getElementById('yarnModal').style.display = 'none';
+}
+
 // ── 회원 탈퇴 ─────────────────────────────────────────────────────────────────
 
 (function initWithdrawal() {
@@ -1135,7 +1323,7 @@ function resetPageState() {
 
     // 패널 콘텐츠 초기화
     ['patternsGrid', 'projectsActive', 'projectsDone', 'scrapsGrid',
-     'palettesGrid', 'publicPalettesGrid'].forEach(id => {
+     'palettesGrid', 'publicPalettesGrid', 'yarnGrid'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
     });
