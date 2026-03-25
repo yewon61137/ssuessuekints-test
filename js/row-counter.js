@@ -3,14 +3,13 @@
 import { t } from './i18n.js';
 import { db, auth } from './auth.js';
 import {
-    doc, setDoc, getDoc, collection, getDocs, query, orderBy
+    doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const STORAGE_KEY  = 'ssuessue_row_counters';
 const DRAWER_KEY   = 'ssuessue_rc_open';
 const TAB_KEY      = 'ssuessue_rc_tab';
 const UID_KEY      = 'ssuessue_rc_uid';
-const PROJ_PFX     = 'ssuessue_rc_proj_';
 const SYNC_DELAY   = 2000;
 
 class RowCounter extends HTMLElement {
@@ -172,20 +171,10 @@ class RowCounter extends HTMLElement {
         } catch(e) { console.error('RowCounter sync error:', e); }
     }
 
-    // ── Project counter storage ───────────────────────────────────────────────
-
-    _loadProjectCounters(projectId) {
-        try {
-            const saved = localStorage.getItem(PROJ_PFX + projectId);
-            const arr   = saved ? JSON.parse(saved) : [this._newCounter()];
-            return arr.map(c => ({ ...this._newCounter(), ...c }));
-        } catch(e) { return [this._newCounter()]; }
-    }
+    // ── Project counter storage (reads/writes parts subcollection) ───────────
 
     _saveProjectCounters() {
         if (!this.selectedProject) return;
-        localStorage.setItem(PROJ_PFX + this.selectedProject.id,
-            JSON.stringify(this.projCounters));
         this._scheduleProjectSync();
     }
 
@@ -196,26 +185,66 @@ class RowCounter extends HTMLElement {
 
     async _syncProjectToFirestore() {
         if (!this.currentUser || !this.selectedProject) return;
+        const uid = this.currentUser.uid;
+        const pid = this.selectedProject.id;
         try {
-            await setDoc(
-                doc(db, 'users', this.currentUser.uid, 'rowCounters', 'proj_' + this.selectedProject.id),
-                { counters: this.projCounters, updatedAt: Date.now() }
-            );
-        } catch(e) {}
+            await Promise.all(this.projCounters.map(c =>
+                updateDoc(
+                    doc(db, 'users', uid, 'projects', pid, 'parts', c.id),
+                    {
+                        currentRows:   c.count,
+                        currentRepeat: c.currentRepeat,
+                        currentStep:   c.currentStep,
+                        mode:          c.mode,
+                        repeatUnit:    c.repeatRows,
+                        targetRows:    c.goalRows,
+                        alarmRow:      c.alertRow,
+                        memo:          c.memo,
+                        status: c.count > 0 ? 'inProgress' : 'pending',
+                    }
+                )
+            ));
+        } catch(e) { console.error('_syncProjectToFirestore error:', e); }
     }
 
-    async _loadProjectCountersFromFirestore(projectId) {
+    async _loadProjectParts(projectId) {
         if (!this.currentUser) return;
+        this.projectsLoading = true;
+        this.render();
         try {
-            const snap = await getDoc(
-                doc(db, 'users', this.currentUser.uid, 'rowCounters', 'proj_' + projectId));
-            if (snap.exists() && Array.isArray(snap.data().counters) &&
-                snap.data().counters.length > 0) {
-                this.projCounters = snap.data().counters.map(c => ({ ...this._newCounter(), ...c }));
-                localStorage.setItem(PROJ_PFX + projectId, JSON.stringify(this.projCounters));
-                this.render();
+            const snap = await getDocs(
+                query(
+                    collection(db, 'users', this.currentUser.uid, 'projects', projectId, 'parts'),
+                    orderBy('createdAt', 'asc')
+                )
+            );
+            if (snap.docs.length > 0) {
+                this.projCounters = snap.docs.map(d => {
+                    const p = d.data();
+                    const mode = p.mode || 'normal';
+                    return {
+                        ...this._newCounter(),
+                        id:            d.id,
+                        name:          p.title || '',
+                        count:         p.currentRows || 0,
+                        currentRepeat: p.currentRepeat || 1,
+                        currentStep:   p.currentStep || (mode === 'repeat' ? 1 : 0),
+                        mode,
+                        repeatRows:    p.repeatUnit || 1,
+                        goalRows:      p.targetRows || 0,
+                        alertRow:      p.alarmRow || 0,
+                        memo:          p.memo || '',
+                    };
+                });
+            } else {
+                this.projCounters = [];
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error('_loadProjectParts error:', e);
+            this.projCounters = [];
+        }
+        this.projectsLoading = false;
+        this.render();
     }
 
     // ── Project list ──────────────────────────────────────────────────────────
@@ -236,9 +265,8 @@ class RowCounter extends HTMLElement {
 
     _selectProject(proj) {
         this.selectedProject = proj;
-        this.projCounters    = this._loadProjectCounters(proj.id);
-        this.render();
-        this._loadProjectCountersFromFirestore(proj.id);
+        this.projCounters    = [];
+        this._loadProjectParts(proj.id);
     }
 
     // ── Drawer ────────────────────────────────────────────────────────────────
@@ -528,6 +556,7 @@ class RowCounter extends HTMLElement {
           flex:1; padding:3px 0; min-width:0; transition:border-color 0.2s;
         }
         .counter-name:focus { outline:none; border-bottom-color:var(--primary); }
+        .counter-name.proj-part-name { cursor:default; opacity:0.75; }
         .delete-btn {
           background:none; border:none; color:#e05555; cursor:pointer;
           padding:4px; opacity:0.3; transition:opacity 0.2s; flex-shrink:0;
@@ -672,16 +701,18 @@ class RowCounter extends HTMLElement {
         }
 
         if (this.selectedProject) {
+            const partHtml = this.projectsLoading
+                ? `<div class="status-msg"><div>${tr.rc_proj_loading}</div></div>`
+                : this.projCounters.length === 0
+                    ? `<div class="status-msg"><div>${tr.rc_parts_empty}</div></div>`
+                    : this.projCounters.map(c => this._renderCounter(c, tr, true)).join('');
             return `
           <div class="proj-header">
             <button class="back-btn" id="backToProjects">← ${tr.rc_proj_back}</button>
             <span class="proj-name-label">${this._esc(this.selectedProject.title || '')}</span>
           </div>
           <div class="drawer-content">
-            ${this.projCounters.map(c => this._renderCounter(c, tr)).join('')}
-          </div>
-          <div class="drawer-footer">
-            <button class="add-btn" id="addBtn">${tr.add_counter}</button>
+            ${partHtml}
           </div>`;
         }
 
@@ -713,7 +744,7 @@ class RowCounter extends HTMLElement {
       </div>`;
     }
 
-    _renderCounter(c, tr) {
+    _renderCounter(c, tr, isProjectPart = false) {
         const totalRows = c.count;
         const goalPct   = c.goalRows > 0 ? Math.min(100, totalRows / c.goalRows * 100) : 0;
         const lang      = this.lang;
@@ -736,16 +767,17 @@ class RowCounter extends HTMLElement {
             <button class="mode-btn ${c.mode === 'repeat' ? 'active' : ''}"
                     data-id="${id}" data-mode="repeat">${tr.btn_mode_repeat}</button>
           </div>
-          <input type="text" class="counter-name"
+          <input type="text" class="counter-name${isProjectPart ? ' proj-part-name' : ''}"
                  placeholder="${tr.placeholder_project_name}"
-                 value="${this._esc(c.name)}" data-id="${id}">
+                 value="${this._esc(c.name)}" data-id="${id}"${isProjectPart ? ' readonly' : ''}>
+          ${isProjectPart ? '' : `
           <button class="delete-btn" data-id="${id}" title="delete">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>
-          </button>
+          </button>`}
         </div>
 
         <div class="counter-controls">

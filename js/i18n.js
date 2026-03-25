@@ -42,6 +42,7 @@ export const t = {
         rc_login_required: '로그인 후 이용 가능합니다.',
         rc_proj_loading: '불러오는 중...', rc_proj_empty: '진행 중인 프로젝트가 없습니다.',
         rc_proj_back: '목록으로', rc_proj_create: '새 프로젝트 만들기',
+        rc_parts_empty: '등록된 파트가 없습니다.',
         // 프로젝트
         proj_title: '내 프로젝트',
         proj_new: '새 프로젝트',
@@ -127,6 +128,7 @@ export const t = {
         rc_login_required: 'Sign in to use this feature.',
         rc_proj_loading: 'Loading...', rc_proj_empty: 'No active projects.',
         rc_proj_back: 'Back to list', rc_proj_create: 'Create new project',
+        rc_parts_empty: 'No parts found.',
         // Projects
         proj_title: 'My Projects',
         proj_new: 'New Project',
@@ -212,6 +214,7 @@ export const t = {
         rc_login_required: 'ログイン後にご利用いただけます。',
         rc_proj_loading: '読み込み中...', rc_proj_empty: '進行中のプロジェクトがありません。',
         rc_proj_back: '一覧へ', rc_proj_create: '新しいプロジェクトを作成',
+        rc_parts_empty: 'パートが登録されていません。',
         // プロジェクト
         proj_title: '自分のプロジェクト',
         proj_new: '新しいプロジェクト',
