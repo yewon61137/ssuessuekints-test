@@ -218,8 +218,9 @@ class RowCounter extends HTMLElement {
                     orderBy('createdAt', 'asc')
                 )
             );
-            if (snap.docs.length > 0) {
-                this.projCounters = snap.docs.map(d => {
+            this.projCounters = snap.docs
+                .filter(d => d.data().status !== 'done')
+                .map(d => {
                     const p = d.data();
                     const mode = p.mode || 'normal';
                     return {
@@ -236,9 +237,6 @@ class RowCounter extends HTMLElement {
                         memo:          p.memo || '',
                     };
                 });
-            } else {
-                this.projCounters = [];
-            }
         } catch(e) {
             console.error('_loadProjectParts error:', e);
             this.projCounters = [];
