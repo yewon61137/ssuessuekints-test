@@ -67,7 +67,10 @@
                 localStorage.setItem('naver_auth_result', JSON.stringify(data));
                 if (localStorage.getItem('naver_redirect_fallback') === '1') {
                     localStorage.removeItem('naver_redirect_fallback');
-                    window.location.href = '/';
+                    // 로그인 시작 전 저장해둔 원래 페이지로 복귀 (없으면 홈)
+                    const returnPath = localStorage.getItem('naver_return_path') || '/';
+                    localStorage.removeItem('naver_return_path');
+                    window.location.href = returnPath;
                     return;
                 }
             } catch (e) {

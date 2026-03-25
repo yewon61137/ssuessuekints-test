@@ -546,7 +546,7 @@ export function initAuth() {
         } catch (e) {}
     }
 
-    // 네이버 로그인 버튼 (팝업 방식)
+    // 네이버 로그인 버튼 (PC: 팝업 / 모바일: 리다이렉트)
     const naverBtn = document.getElementById('naverSignInBtn');
     if (naverBtn) {
         naverBtn.addEventListener('click', () => {
@@ -558,12 +558,27 @@ export function initAuth() {
             localStorage.setItem('naver_remember_me', (rm && rm.checked) ? '1' : '0');
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
+            // 모바일 감지: window.open() 팝업은 네이버가 인앱 브라우저로 감지해 차단(error 207)
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
+                          || window.innerWidth <= 768;
+
+            if (isMobile) {
+                // 모바일: 현재 페이지 경로 저장 후 현재 탭에서 직접 이동
+                localStorage.setItem('naver_return_path', window.location.pathname + window.location.search);
+                localStorage.setItem('naver_redirect_fallback', '1');
+                window.location.href = naverAuthUrl;
+                return;
+            }
+
+            // PC: 팝업 방식 유지
             const pw = 500, ph = 700;
             const pl = Math.round(screen.width / 2 - pw / 2);
             const pt = Math.round(screen.height / 2 - ph / 2);
             const popup = window.open(naverAuthUrl, 'naver_auth', `width=${pw},height=${ph},left=${pl},top=${pt}`);
 
             if (!popup || popup.closed) {
+                // 팝업 차단된 경우에도 원래 경로 저장 후 리다이렉트
+                localStorage.setItem('naver_return_path', window.location.pathname + window.location.search);
                 localStorage.setItem('naver_redirect_fallback', '1');
                 window.location.href = naverAuthUrl;
                 return;
