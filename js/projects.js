@@ -1,6 +1,10 @@
 // projects.js — 프로젝트 기반 단수 카운터 관리
 // localStorage 사용 금지: 모든 데이터는 Firestore에만 저장
 
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+
 import { auth, db, initAuth, openAuthModal } from './auth.js';
 import { t, initLang, applyLang } from './i18n.js';
 import {
@@ -467,12 +471,101 @@ async function deletePdf(project) {
     } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 
+let _pdfLoadingTask = null;
+let _pdfObserver    = null;
+
 function openPdfViewer(url) {
     const modal = $('pdf-viewer-modal');
-    const iframe = $('pdf-iframe');
-    if (modal && iframe) {
-        iframe.src = url;
-        modal.style.display = 'flex';
+    if (!modal) return;
+
+    // body 스크롤 잠금 (iOS: position:fixed 방식)
+    document.body.dataset.pdfScrollY = window.scrollY;
+    document.body.classList.add('pdf-modal-open');
+    document.body.style.top = `-${window.scrollY}px`;
+
+    modal.style.display = 'flex';
+    _renderPdf(url);
+}
+
+async function _renderPdf(url) {
+    const container = $('pdf-pages-container');
+    const wrap      = $('pdf-scroll-wrap');
+    if (!container) return;
+
+    // 이전 렌더링 취소
+    if (_pdfObserver)    { _pdfObserver.disconnect(); _pdfObserver = null; }
+    if (_pdfLoadingTask) { _pdfLoadingTask.destroy().catch(() => {}); _pdfLoadingTask = null; }
+
+    container.innerHTML = `<div class="pdf-status-msg">불러오는 중…</div>`;
+    if (wrap) wrap.scrollTop = 0;
+
+    let pdf;
+    try {
+        _pdfLoadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
+        pdf = await _pdfLoadingTask.promise;
+    } catch (e) {
+        container.innerHTML = `<div class="pdf-status-msg">PDF를 불러올 수 없습니다.</div>`;
+        return;
+    }
+
+    container.innerHTML = '';
+    const numPages     = pdf.numPages;
+    const wrapWidth    = (wrap || container).clientWidth || window.innerWidth;
+    const contentWidth = Math.max(wrapWidth - 16, 100); // 좌우 padding 8px 제외
+
+    // 1페이지 기준으로 scale 계산
+    const firstPage     = await pdf.getPage(1);
+    const baseViewport  = firstPage.getViewport({ scale: 1 });
+    const scale         = contentWidth / baseViewport.width;
+    const pageHeight    = Math.round(baseViewport.height * scale);
+
+    // 페이지 플레이스홀더 생성
+    const wrappers = [];
+    for (let i = 1; i <= numPages; i++) {
+        const div = document.createElement('div');
+        div.className     = 'pdf-page-wrap';
+        div.dataset.page  = i;
+        div.dataset.ready = 'false';
+        div.style.height  = pageHeight + 'px';
+        div.style.width   = contentWidth + 'px';
+        container.appendChild(div);
+        wrappers.push(div);
+    }
+
+    // 스크롤 기반 지연 렌더링
+    const rendered = new Set();
+
+    async function renderPage(div, pageNum) {
+        if (rendered.has(pageNum)) return;
+        rendered.add(pageNum);
+        try {
+            const page     = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = Math.round(viewport.width);
+            canvas.height  = Math.round(viewport.height);
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            div.innerHTML = '';
+            div.style.height = 'auto';
+            div.appendChild(canvas);
+        } catch (e) { /* 개별 페이지 오류 무시 */ }
+    }
+
+    // 첫 페이지 즉시 렌더
+    renderPage(wrappers[0], 1);
+
+    // 나머지는 IntersectionObserver로 지연 렌더
+    if (numPages > 1) {
+        _pdfObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const pn = parseInt(entry.target.dataset.page);
+                    renderPage(entry.target, pn);
+                }
+            });
+        }, { root: wrap || null, rootMargin: '300px 0px' });
+
+        wrappers.slice(1).forEach(w => _pdfObserver.observe(w));
     }
 }
 
