@@ -3,7 +3,7 @@
 import { t } from './i18n.js';
 import { db, auth } from './auth.js';
 import {
-    doc, setDoc, getDoc, collection, getDocs
+    doc, setDoc, getDoc, collection, getDocs, query, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const STORAGE_KEY  = 'ssuessue_row_counters';
@@ -226,10 +226,9 @@ class RowCounter extends HTMLElement {
         this.render();
         try {
             const snap = await getDocs(
-                collection(db, 'users', this.currentUser.uid, 'projects'));
-            this.projects = snap.docs
-                .map(d => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+                query(collection(db, 'users', this.currentUser.uid, 'projects'),
+                      orderBy('createdAt', 'desc')));
+            this.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch(e) { this.projects = []; }
         this.projectsLoading = false;
         this.render();
@@ -486,7 +485,16 @@ class RowCounter extends HTMLElement {
         .status-msg {
           text-align:center; padding:2rem 1rem; font-size:0.85rem;
           color:var(--text); opacity:0.5; font-weight:600;
+          display:flex; flex-direction:column; align-items:center; gap:10px;
         }
+        .proj-create-link {
+          display:inline-block; font-size:0.8rem; font-weight:700;
+          color:var(--primary); opacity:1;
+          border:1.5px solid var(--primary); border-radius:8px;
+          padding:6px 14px; text-decoration:none;
+          transition:background 0.15s, color 0.15s;
+        }
+        .proj-create-link:hover { background:var(--primary); color:var(--bg); }
 
         /* Counter items */
         .counter-item {
@@ -667,7 +675,7 @@ class RowCounter extends HTMLElement {
             return `
           <div class="proj-header">
             <button class="back-btn" id="backToProjects">← ${tr.rc_proj_back}</button>
-            <span class="proj-name-label">${this._esc(this.selectedProject.name || '')}</span>
+            <span class="proj-name-label">${this._esc(this.selectedProject.title || '')}</span>
           </div>
           <div class="drawer-content">
             ${this.projCounters.map(c => this._renderCounter(c, tr)).join('')}
@@ -685,7 +693,10 @@ class RowCounter extends HTMLElement {
 
         if (this.projects.length === 0) {
             return `<div class="drawer-content">
-              <div class="status-msg">${tr.rc_proj_empty}</div>
+              <div class="status-msg">
+                <div>${tr.rc_proj_empty}</div>
+                <a href="/projects.html" class="proj-create-link">${tr.rc_proj_create}</a>
+              </div>
             </div>`;
         }
 
@@ -694,8 +705,8 @@ class RowCounter extends HTMLElement {
         ${this.projects.map(p => `
           <button class="proj-card"
                   data-proj-id="${this._esc(p.id)}"
-                  data-proj-name="${this._esc(p.name || '')}">
-            <span class="proj-card-name">${this._esc(p.name || '—')}</span>
+                  data-proj-title="${this._esc(p.title || '')}">
+            <span class="proj-card-name">${this._esc(p.title || '—')}</span>
             <span class="proj-card-arrow">→</span>
           </button>
         `).join('')}
@@ -832,8 +843,8 @@ class RowCounter extends HTMLElement {
         // Project card selection
         r.querySelectorAll('.proj-card').forEach(card =>
             card.addEventListener('click', () => this._selectProject({
-                id:   card.dataset.projId,
-                name: card.dataset.projName,
+                id:    card.dataset.projId,
+                title: card.dataset.projTitle,
             })));
 
         // Counter controls
