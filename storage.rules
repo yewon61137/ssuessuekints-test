@@ -26,5 +26,12 @@ service firebase.storage {
       allow read, write: if request.auth != null
         && request.auth.uid == userId;
     }
+
+    // 프로젝트 진행 사진: 본인만 읽고 쓰기 가능
+    match /users/{userId}/projects/{projectId}/photos/{filename} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && (request.method == 'GET' || request.resource.contentType.matches('image/.*'));
+    }
   }
 }

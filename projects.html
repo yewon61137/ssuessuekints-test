@@ -265,6 +265,104 @@
       .pdf-viewer-main { flex-direction: column; }
       .pdf-iframe-wrap { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
     }
+
+    /* ── 타이머 스타일 ── */
+    .timer-container {
+      background: #000;
+      color: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .timer-display {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .timer-btn {
+      padding: 0.5rem 1.25rem;
+      border: 2px solid #fff;
+      background: transparent;
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .timer-btn:hover { background: #fff; color: #000; }
+    .timer-btn.active { background: #fff; color: #000; border-color: #fff; }
+
+    /* ── 진행 사진 갤러리 ── */
+    .detail-photos-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #eee;
+    }
+    .photos-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border: 1px solid #ddd;
+      overflow: hidden;
+      background: #f9f9f9;
+    }
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .photo-item:hover img { transform: scale(1.05); }
+    .photo-delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 0, 0, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .photo-item:hover .photo-delete-btn { display: flex; }
+    .photo-upload-label {
+      border: 2px dashed #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #666;
+      transition: border-color 0.2s;
+      aspect-ratio: 1;
+    }
+    .photo-upload-label:hover { border-color: #000; color: #000; }
   </style>
 </head>
 <body>
@@ -304,6 +402,18 @@
           <button class="primary-btn" id="btn-new-part" data-i18n="part_new" style="font-size:0.82rem; padding:7px 14px;">파트 추가</button>
         </div>
         <div id="parts-container"></div>
+
+        <!-- 진행 사진 섹션 -->
+        <div class="detail-photos-section">
+          <div class="photos-header">
+            <h3 data-i18n="proj_photos_title">진행 사진</h3>
+            <label for="photo-upload-input" class="primary-btn" style="font-size:0.8rem; cursor:pointer;" data-i18n="photo_upload">사진 추가</label>
+            <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
+          </div>
+          <div id="photos-grid" class="photos-grid">
+            <!-- 사진 아이템들이 여기에 동적으로 추가됨 -->
+          </div>
+        </div>
       </div>
 
       <!-- ── 파트 상세 (카운터) ── -->
@@ -331,6 +441,18 @@
               <div class="counter-sub"  id="counter-sub-count" style="display:none;"></div>
             </div>
             <button class="counter-btn" id="btn-count-plus">+</button>
+          </div>
+
+          <!-- 타이머 섹션 -->
+          <div class="timer-container" id="timer-container">
+            <div class="timer-display" id="timer-display">00:00:00</div>
+            <div class="timer-controls">
+              <button id="btn-timer-start" class="timer-btn" data-i18n="timer_start">시작</button>
+              <button id="btn-timer-pause" class="timer-btn" data-i18n="timer_pause" style="display:none;">일시정지</button>
+            </div>
+            <div style="font-size:0.75rem; color:#888; margin-top:0.25rem;">
+              <span data-i18n="total_time_spent">누적 시간</span>: <span id="accumulated-time">00:00:00</span>
+            </div>
           </div>
 
           <!-- 진행률 -->

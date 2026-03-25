@@ -23,6 +23,7 @@ let currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
 let projectsUnsubscribe = null;
 let projectUnsubscribe = null;
 let partsUnsubscribe = null;
+let photosUnsubscribe = null;
 
 // 단수 카운터 디바운스 타이머
 let counterDebounceTimer = null;
@@ -36,6 +37,11 @@ let activeCounter = {
     repeatUnit: 1,
 };
 
+// 타이머 런타임 상태
+let timerInterval = null;
+let timerSeconds = 0; // 이번 세션 소요 시간(초)
+let baseSeconds = 0;  // 이전까지의 총 누적 시간(초)
+
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const tr = () => t[currentLang] || t.ko;
@@ -46,6 +52,13 @@ function esc(str) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+function formatTime(totalSeconds) {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    return [hrs, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
 }
 
 function showView(viewId) {
@@ -129,6 +142,7 @@ function renderProjectList(projects) {
 
 // ── 화면 렌더: 프로젝트 상세 ──────────────────────────────────────────────────
 function renderProjectDetail(project, parts) {
+    subscribePhotos(project.id);
     const T = tr();
     const titleEl = $('detail-title');
     if (titleEl) titleEl.textContent = project.title || '';
@@ -231,6 +245,21 @@ function renderPartDetail(part) {
 
     updateCounterDisplay(part.id);
 
+    // 타이머 초기화
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    timerSeconds = 0;
+    baseSeconds = part.totalSeconds || 0;
+    currentPartId = part.id;
+    updateTimerDisplay();
+    $('btn-timer-start').style.display = '';
+    $('btn-timer-pause').style.display = 'none';
+
+    // 타이머 버튼 리스너 (기존 리스너 제거 위해 클론 교체 권장되나 여기서는 단순 등록)
+    // 실제로는 init 시점에 한 번만 등록하는 것이 좋음. 이벤트 버블링이나 전역 등록 고려.
+
     // 완료 버튼 상태
     const doneBtn = $('btn-mark-done');
     const progressBtn = $('btn-mark-in-progress');
@@ -270,6 +299,51 @@ function renderPartDetail(part) {
             }
         });
     }
+}
+
+// ── 타이머 로직 ──────────────────────────────────────────────────────────────
+function updateTimerDisplay() {
+    const display = $('timer-display');
+    const accum   = $('accumulated-time');
+    if (display) display.textContent = formatTime(timerSeconds);
+    if (accum)   accum.textContent   = formatTime(baseSeconds + timerSeconds);
+}
+
+function startTimer() {
+    if (timerInterval) return;
+    $('btn-timer-start').style.display = 'none';
+    $('btn-timer-pause').style.display = '';
+    
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function pauseTimer() {
+    if (!timerInterval) return;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    $('btn-timer-start').style.display = '';
+    $('btn-timer-pause').style.display = 'none';
+    
+    saveTimer();
+}
+
+async function saveTimer() {
+    if (!currentUser || !currentProjectId || !currentPartId) return;
+    if (timerSeconds === 0) return;
+    
+    const total = baseSeconds + timerSeconds;
+    try {
+        await updateDoc(
+            doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
+            { totalSeconds: total }
+        );
+        baseSeconds = total;
+        timerSeconds = 0;
+        updateTimerDisplay();
+    } catch (e) { console.error('Timer save error:', e); }
 }
 
 function updateCounterDisplay(partId) {
@@ -482,6 +556,76 @@ function openPdfViewer(url) {
     }
 }
 
+// ── 진행 사진 로드 ────────────────────────────────────────────────────────────
+function subscribePhotos(projectId) {
+    if (photosUnsubscribe) { photosUnsubscribe(); photosUnsubscribe = null; }
+    const ref = query(
+        collection(db, 'users', currentUser.uid, 'projects', projectId, 'photos'),
+        orderBy('timestamp', 'desc')
+    );
+    photosUnsubscribe = onSnapshot(ref, snap => {
+        const photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderProgressPhotos(photos);
+    });
+}
+
+function renderProgressPhotos(photos) {
+    const grid = $('photos-grid');
+    if (!grid) return;
+    const T = tr();
+
+    grid.innerHTML = photos.map(photo => `
+        <div class="photo-item" data-id="${esc(photo.id)}">
+            <img src="${photo.url}" alt="Progress Photo" loading="lazy">
+            <button class="photo-delete-btn" data-id="${esc(photo.id)}" data-path="${esc(photo.path)}">✕</button>
+        </div>
+    `).join('');
+
+    grid.querySelectorAll('.photo-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm(T.photo_delete_confirm)) return;
+            await deleteProgressPhoto(btn.dataset.id, btn.dataset.path);
+        });
+    });
+}
+
+async function uploadProgressPhoto(file) {
+    const T = tr();
+    if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드 가능합니다.'); return;
+    }
+    const filename = `${Date.now()}_${file.name}`;
+    const path = `users/${currentUser.uid}/projects/${currentProjectId}/photos/${filename}`;
+    const fileRef = storageRef(storage, path);
+    const grid = $('photos-grid');
+    
+    // 임시 업로드 중 표시
+    const loader = document.createElement('div');
+    loader.className = 'photo-item photo-upload-label';
+    loader.innerHTML = `<span>${esc(T.photo_uploading)}</span>`;
+    grid?.prepend(loader);
+
+    try {
+        const snap = await uploadBytesResumable(fileRef, file);
+        const url = await getDownloadURL(snap.ref);
+        await addDoc(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'photos'), {
+            url, path, timestamp: serverTimestamp()
+        });
+    } catch (e) {
+        alert('사진 업로드 실패: ' + e.message);
+    }
+}
+
+async function deleteProgressPhoto(id, path) {
+    try {
+        await deleteObject(storageRef(storage, path));
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'photos', id));
+    } catch (e) {
+        alert('사진 삭제 실패: ' + e.message);
+    }
+}
+
 // ── 모달 헬퍼 ─────────────────────────────────────────────────────────────────
 function openModal(modalId) { const m = $(modalId); if (m) m.style.display = 'flex'; }
 function closeModal(modalId) { const m = $(modalId); if (m) m.style.display = 'none'; }
@@ -534,8 +678,14 @@ function attachEvents() {
     });
     $('btn-proj-modal-cancel')?.addEventListener('click', () => closeModal('project-modal'));
 
+    // ── 타이머 컨트롤 ──
+    $('btn-timer-start')?.addEventListener('click', startTimer);
+    $('btn-timer-pause')?.addEventListener('click', pauseTimer);
+
     // ── 상세 화면 ──
     $('btn-back-to-list')?.addEventListener('click', () => {
+        pauseTimer();
+        if (photosUnsubscribe) { photosUnsubscribe(); photosUnsubscribe = null; }
         if (projectUnsubscribe) { projectUnsubscribe(); projectUnsubscribe = null; }
         if (partsUnsubscribe) { partsUnsubscribe(); partsUnsubscribe = null; }
         currentProjectId = null;
@@ -592,6 +742,7 @@ function attachEvents() {
 
     // ── 파트 상세 화면 ──
     $('btn-back-to-detail')?.addEventListener('click', () => {
+        pauseTimer();
         currentPartId = null;
         showView('view-detail');
     });
@@ -763,6 +914,14 @@ function attachEvents() {
         await uploadPdf(file, project);
         e.target.value = ''; // 같은 파일 재선택 허용
     });
+
+    // ── 진행 사진 파일 input ──
+    $('photo-upload-input')?.addEventListener('change', async e => {
+        const file = e.target.files?.[0];
+        if (!file || !currentProjectId || !currentUser) return;
+        await uploadProgressPhoto(file);
+        e.target.value = '';
+    });
 }
 
 function flashAlert(cls) {
@@ -824,6 +983,11 @@ export function init() {
 
     attachEvents();
     initAuth();
+
+    // 탭/창을 닫을 때 타이머 자동 저장
+    window.addEventListener('beforeunload', () => {
+        saveTimer();
+    });
 
     onAuthStateChanged(auth, user => {
         if (user) {

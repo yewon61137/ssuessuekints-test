@@ -90,6 +90,15 @@ export const t = {
         pdf_error_size: '파일 크기는 20MB 이하여야 합니다.',
         pdf_upload_done: 'PDF 업로드 완료!',
         pdf_upload_select: 'PDF 파일 선택',
+        // 진행 사진 & 타이머
+        proj_photos_title: '진행 사진',
+        photo_upload: '사진 추가',
+        photo_delete_confirm: '이 사진을 삭제하시겠습니까?',
+        photo_uploading: '사진 업로드 중...',
+        photo_upload_done: '사진 업로드 완료!',
+        timer_start: '시작',
+        timer_pause: '일시정지',
+        total_time_spent: '누적 시간',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -176,6 +185,15 @@ export const t = {
         pdf_error_size: 'File must be 20MB or smaller.',
         pdf_upload_done: 'PDF uploaded!',
         pdf_upload_select: 'Select PDF file',
+        // Progress Photos & Timer
+        proj_photos_title: 'Progress Photos',
+        photo_upload: 'Add Photo',
+        photo_delete_confirm: 'Delete this photo?',
+        photo_uploading: 'Uploading photo...',
+        photo_upload_done: 'Photo uploaded!',
+        timer_start: 'Start',
+        timer_pause: 'Pause',
+        total_time_spent: 'Total Time',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',

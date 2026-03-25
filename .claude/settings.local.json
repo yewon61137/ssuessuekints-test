@@ -16,7 +16,16 @@
       "Bash(ls /c/Users/leah6/ssuessuekints-test/magazine/*.html)",
       "Bash(grep -rn header-bar /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
       "Bash(grep -rn \"auth-area\\\\|auth_area\" /c/Users/leah6/ssuessuekints-test/ --include=*.html --include=*.js)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(grep -rl style.css?v=4 C:/Users/leah6/ssuessuekints-test)",
+      "Bash(xargs sed:*)",
+      "Bash(cd:*)",
+      "Bash(grep -c 제휴 C:/Users/leah6/ssuessuekints-test/*.html C:/Users/leah6/ssuessuekints-test/magazine/*.html)",
+      "Bash(grep -v \":0$\")",
+      "Bash(grep:*)",
+      "Bash(ls -la *.js)",
+      "Bash(ls C:/Users/leah6/ssuessuekints-test/*.toml C:/Users/leah6/ssuessuekints-test/*.json)",
+      "Bash(ls:*)"
     ]
   }
 }
