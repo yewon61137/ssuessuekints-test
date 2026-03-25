@@ -51,6 +51,12 @@ const pageT = {
         bio_more: '더 보기', bio_less: '접기',
         tab_stash: '내 실 창고', title_stash: '내 실 창고',
         empty_stash: '창고에 등록된 실이 없어요.',
+        yarn_new: '실 등록', yarn_modal_title: '실 정보 등록',
+        yarn_label_brand: '브랜드', yarn_label_name: '실 이름', yarn_label_color: '색상/로트',
+        yarn_label_quantity: '보유량 (볼/타래)', yarn_label_weight: '무게 (g)',
+        yarn_label_needle: '추천 바늘', yarn_label_notes: '메모',
+        yarn_delete_confirm: '이 실을 삭제하시겠습니까?',
+        yarn_upload_error: '사진 업로드 중 오류가 발생했습니다.',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -91,6 +97,12 @@ const pageT = {
         bio_more: 'More', bio_less: 'Less',
         tab_stash: 'My Yarn Stash', title_stash: 'My Yarn Stash',
         empty_stash: 'No yarns in your stash.',
+        yarn_new: 'Add Yarn', yarn_modal_title: 'Register Yarn Info',
+        yarn_label_brand: 'Brand', yarn_label_name: 'Yarn Name', yarn_label_color: 'Color/Lot',
+        yarn_label_quantity: 'Quantity (Balls)', yarn_label_weight: 'Weight (g)',
+        yarn_label_needle: 'Recommended Needle', yarn_label_notes: 'Notes',
+        yarn_delete_confirm: 'Delete this yarn?',
+        yarn_upload_error: 'Error uploading photo.',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -131,6 +143,12 @@ const pageT = {
         bio_more: 'もっと見る', bio_less: '閉じる',
         tab_stash: 'マイ毛糸倉庫', title_stash: 'マイ毛糸倉庫',
         empty_stash: '倉庫に登録された毛糸がありません。',
+        yarn_new: '毛糸を登録', yarn_modal_title: '毛糸情報の登録',
+        yarn_label_brand: 'ブランド', yarn_label_name: '毛糸名', yarn_label_color: '色/ロット',
+        yarn_label_quantity: '保有量 (玉)', yarn_label_weight: '重さ (g)',
+        yarn_label_needle: 'おすすめの針', yarn_label_notes: 'メモ',
+        yarn_delete_confirm: 'この毛糸を削除しますか？',
+        yarn_upload_error: '写真のアップロード中にエラーが発生しました。',
     }
 };
 
@@ -1386,8 +1404,8 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function setupOtherUserView() {
-    // 도안/프로필/프로젝트/스크랩/내 팔레트 탭 숨김
-    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes'].forEach(id => {
+    // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고 탭 숨김
+    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes', 'mpNavStash'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
