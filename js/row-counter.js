@@ -48,6 +48,26 @@ class RowCounter extends HTMLElement {
             this.toggleDrawer();
         });
 
+        // Open drawer on project PDF view and auto-select the project
+        window.addEventListener('rc-open-project', (e) => {
+            const { projectId } = e.detail || {};
+            if (!projectId) return;
+            if (!this.isOpen) {
+                this.isOpen = true;
+                localStorage.setItem(DRAWER_KEY, 'true');
+            }
+            this._switchTab('project');
+            if (this.projects) {
+                const proj = this.projects.find(p => p.id === projectId);
+                if (proj) this._selectProject(proj);
+            } else if (this.currentUser) {
+                this._pendingProjectId = projectId;
+                this._loadProjects();
+            }
+            this._applyBodyPush();
+            this.render();
+        });
+
         try {
             auth.onAuthStateChanged(user => {
                 this.currentUser = user;
@@ -258,6 +278,12 @@ class RowCounter extends HTMLElement {
             this.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch(e) { this.projects = []; }
         this.projectsLoading = false;
+        // Auto-select project if requested via rc-open-project event
+        if (this._pendingProjectId) {
+            const proj = this.projects.find(p => p.id === this._pendingProjectId);
+            this._pendingProjectId = null;
+            if (proj) this._selectProject(proj);
+        }
         this.render();
     }
 
@@ -450,7 +476,14 @@ class RowCounter extends HTMLElement {
           z-index:10001; display:flex; flex-direction:column;
           overscroll-behavior:contain;
         }
-        @media (max-width:639px) { .drawer { width:100%; } }
+        @media (max-width:639px) {
+          .drawer {
+            width:100%; height:85dvh; top:auto; bottom:0; right:0;
+            border-radius:20px 20px 0 0;
+            box-shadow:0 -6px 24px var(--shadow);
+            transform:translateY(${open ? '0' : '100%'});
+          }
+        }
 
         .drawer-header {
           padding:18px 20px; border-bottom:1px solid var(--border);

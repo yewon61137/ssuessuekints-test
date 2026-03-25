@@ -473,6 +473,12 @@ function openPdfViewer(url) {
     if (modal && iframe) {
         iframe.src = url;
         modal.style.display = 'flex';
+        // Open floating row counter and navigate to this project
+        if (currentProjectId) {
+            window.dispatchEvent(new CustomEvent('rc-open-project', {
+                detail: { projectId: currentProjectId }
+            }));
+        }
     }
 }
 
@@ -483,6 +489,14 @@ function closeModal(modalId) { const m = $(modalId); if (m) m.style.display = 'n
 // ── 이벤트 연결 ───────────────────────────────────────────────────────────────
 function attachEvents() {
     const T = tr();
+
+    // ── PDF 뷰어 닫기 ──
+    $('pdf-close-btn')?.addEventListener('click', () => {
+        const modal  = $('pdf-viewer-modal');
+        const iframe = $('pdf-iframe');
+        if (modal)  modal.style.display = 'none';
+        if (iframe) iframe.src = '';
+    });
 
     // ── 목록 화면 ──
     $('btn-new-project')?.addEventListener('click', () => {
