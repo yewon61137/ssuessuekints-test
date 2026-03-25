@@ -1,6 +1,10 @@
 // projects.js — 프로젝트 기반 단수 카운터 관리
 // localStorage 사용 금지: 모든 데이터는 Firestore에만 저장
 
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+
 import { auth, db, initAuth, openAuthModal } from './auth.js';
 import { t, initLang, applyLang } from './i18n.js';
 import {
@@ -467,10 +471,6 @@ async function deletePdf(project) {
     } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 
-const PDFJS_CDN    = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.mjs';
-const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.mjs';
-
-let _pdfjsLib       = null;
 let _pdfLoadingTask = null;
 let _pdfObserver    = null;
 
@@ -499,20 +499,9 @@ async function _renderPdf(url) {
     container.innerHTML = `<div class="pdf-status-msg">불러오는 중…</div>`;
     if (wrap) wrap.scrollTop = 0;
 
-    // PDF.js 동적 import (실패해도 페이지 전체에 영향 없음)
-    if (!_pdfjsLib) {
-        try {
-            _pdfjsLib = await import(PDFJS_CDN);
-            _pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-        } catch (e) {
-            container.innerHTML = `<div class="pdf-status-msg">PDF 뷰어를 불러올 수 없습니다.</div>`;
-            return;
-        }
-    }
-
     let pdf;
     try {
-        _pdfLoadingTask = _pdfjsLib.getDocument({ url, withCredentials: false });
+        _pdfLoadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
         pdf = await _pdfLoadingTask.promise;
     } catch (e) {
         container.innerHTML = `<div class="pdf-status-msg">PDF를 불러올 수 없습니다.</div>`;
