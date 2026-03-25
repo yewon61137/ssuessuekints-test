@@ -200,12 +200,6 @@
       .counter-mode-btn.active { background: #eee; color: #000; }
     }
 
-    /* PDF 모달 열릴 때 body 스크롤 잠금 */
-    body.pdf-modal-open {
-      overflow: hidden;
-      position: fixed;
-      width: 100%;
-    }
     /* ── PDF 뷰어 모달 (카운터 패널 포함) ── */
     .pdf-viewer-box {
       position: relative;
@@ -217,7 +211,7 @@
       background: #fff;
       border: 2px solid #000;
       border-radius: 12px;
-      overflow: clip; /* clip: 시각 클리핑 유지하되 스크롤 컨텍스트 미생성 */
+      overflow: hidden;
       box-sizing: border-box;
     }
     .pdf-viewer-topbar {
@@ -233,36 +227,25 @@
     .pdf-viewer-main {
       display: flex;
       flex: 1;
-      overflow: clip;
+      overflow: hidden;
       min-height: 0;
     }
-    /* PDF 페이지 래퍼 — 스크롤 컨테이너 */
+    /* PDF iframe 래퍼 — 모바일 스크롤 핵심 */
     .pdf-iframe-wrap {
       flex: 1;
-      overflow-y: scroll;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      touch-action: pan-y;
       min-width: 0;
       min-height: 0;
     }
-    /* PDF.js 캔버스 페이지 */
-    .pdf-pages-container {
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    .pdf-page-wrap {
-      margin: 0 auto 8px;
-      background: #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-      border-radius: 2px;
-      overflow: hidden;
-      line-height: 0;
-    }
-    .pdf-page-wrap canvas { display: block; width: 100%; }
-    .pdf-status-msg {
-      text-align: center; padding: 3rem 1rem;
-      font-size: 0.85rem; color: #888;
+    .pdf-iframe-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      touch-action: auto;
+      background: #f0f0f0;
     }
     /* 탭 핸들 버튼 */
     .pdf-panel-tab {
@@ -496,11 +479,7 @@
         border-top: none;
       }
       .pdf-viewer-main { flex-direction: column; }
-      .pdf-iframe-wrap {
-        flex: 1; min-height: 0;
-        overflow-y: scroll; -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-      }
+      .pdf-iframe-wrap { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
       .pdf-panel-tab {
         width: 100%;
         height: 36px;
@@ -639,9 +618,9 @@
           </div>
           <!-- 메인 영역 -->
           <div class="pdf-viewer-main">
-            <!-- PDF 캔버스 래퍼 (PDF.js 렌더링) -->
-            <div class="pdf-iframe-wrap" id="pdf-scroll-wrap">
-              <div id="pdf-pages-container" class="pdf-pages-container"></div>
+            <!-- PDF iframe 래퍼 (모바일 스크롤 지원) -->
+            <div class="pdf-iframe-wrap">
+              <iframe id="pdf-iframe" scrolling="yes" allowfullscreen></iframe>
             </div>
             <!-- 탭 핸들 -->
             <button class="pdf-panel-tab" id="pdf-panel-tab" aria-expanded="false">
@@ -948,15 +927,10 @@
       var closeBtn = document.getElementById('pdf-close-btn');
       if (closeBtn) {
         closeBtn.addEventListener('click', function () {
-          var modal     = document.getElementById('pdf-viewer-modal');
-          var container = document.getElementById('pdf-pages-container');
-          if (modal)     modal.style.display = 'none';
-          if (container) container.innerHTML = '';
-          // body 스크롤 잠금 해제 (iOS position:fixed 방식)
-          var savedScrollY = parseInt(document.body.dataset.pdfScrollY || '0');
-          document.body.style.top = '';
-          document.body.classList.remove('pdf-modal-open');
-          window.scrollTo(0, savedScrollY);
+          var modal  = document.getElementById('pdf-viewer-modal');
+          var iframe = document.getElementById('pdf-iframe');
+          if (modal)  modal.style.display = 'none';
+          if (iframe) iframe.src = '';
         });
       }
 
@@ -968,13 +942,12 @@
         });
       }
 
-      /* ── 모달 열릴 때 카운터 동기화 & body 스크롤 잠금 ── */
+      /* ── 모달 열릴 때 데이터 동기화 ── */
       var modal = document.getElementById('pdf-viewer-modal');
       if (modal) {
         new MutationObserver(function (mutations) {
           mutations.forEach(function (m) {
-            if (m.attributeName !== 'style') return;
-            if (modal.style.display === 'flex') {
+            if (m.attributeName === 'style' && modal.style.display === 'flex') {
               counters = load(); render();
             }
           });
