@@ -3212,11 +3212,11 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 .mp-stat {
   text-align: center;
   flex: 1;
-  padding: 0 0.25rem;
+  padding: 0.1rem 0.5rem;
 }
 
 .mp-stat + .mp-stat {
-  border-left: 1px solid #e8e8e8;
+  border-left: 1px solid #ccc;
 }
 
 .mp-stat-val { display: block; font-weight: 800; font-size: 1.1rem; line-height: 1.15; }
