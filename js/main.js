@@ -16,7 +16,7 @@ const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 const resultPlaceholder = document.getElementById('resultPlaceholder');
 const previewArea = document.getElementById('previewArea');
 const previewCanvas = document.getElementById('previewCanvas');
-const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
+const previewCtx = previewCanvas ? previewCanvas.getContext('2d', { willReadFrequently: true }) : null;
 const settingsArea = document.getElementById('settingsArea');
 const techniqueRatioSelect = document.getElementById('techniqueRatio');
 const yarnUnitRadios = document.getElementsByName('yarnUnit');
@@ -36,13 +36,15 @@ const statusMessage = document.getElementById('statusMessage');
 const resultPanel = document.getElementById('resultPanel');
 const patternInfo = document.getElementById('patternInfo');
 const canvas = document.getElementById('patternCanvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
 const magnifierCanvas = document.getElementById('magnifierCanvas');
-const magnifierCtx = magnifierCanvas.getContext('2d');
+const magnifierCtx = magnifierCanvas ? magnifierCanvas.getContext('2d') : null;
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
 const langBtns = document.querySelectorAll('.lang-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
 
 // --- 번역 데이터 (i18n) ---
 const translations = {

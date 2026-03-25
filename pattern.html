@@ -86,149 +86,248 @@
 
   <main class="container">
     
-    <!-- 1단계: 이미지 업로드 -->
-    <section class="step-section upload-section">
-      <div class="control-group">
-        <label for="imageUpload" class="main-label" data-i18n="upload_label">1. 도안으로 만들 이미지를 업로드하세요</label>
-        <div class="input-desc">JPG, PNG (Max 10MB)</div>
-        <div class="file-upload-wrapper">
-          <label for="imageUpload" class="file-upload-btn" data-i18n="btn_select_file">파일 선택</label>
-          <span id="fileNameDisplay" class="file-name-display" data-i18n="no_file_selected">선택된 파일 없음</span>
-          <input type="file" id="imageUpload" accept="image/jpeg, image/png" style="display:none;" aria-label="이미지 파일 선택">
-        </div>
-        <div class="copyright-notice" data-i18n="copyright_notice">
-          ⚠️ 타인의 사진·캐릭터·예술 작품으로 생성한 도안을 상업적으로 이용할 경우 저작권법 위반의 책임은 전적으로 이용자 본인에게 있습니다. <a href="/privacy.html#disclaimer" aria-label="저작권 면책 고지 자세히 보기">자세히 보기</a>
-        </div>
-      </div>
-    </section>
+    <!-- 탭 내비게이션 -->
+    <div class="tab-container">
+      <button class="tab-btn active" data-tab="pixel" data-i18n="tab_pixel">픽셀 도안</button>
+      <button class="tab-btn" data-tab="filet" data-i18n="tab_filet">방안뜨기 (모눈)</button>
+    </div>
+    <script>
+      // 탭 전환 로직 (모듈 의존성 없이 즉시 실행)
+      document.addEventListener('DOMContentLoaded', () => {
+        const btns = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+        btns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+            btns.forEach(b => b.classList.toggle('active', b === btn));
+            panels.forEach(p => p.classList.toggle('active', p.id === target + 'Tab'));
+            
+            // 방안뜨기 탭 클릭 시 에디터 초기화
+            if (target === 'filet' && window.initFiletEditor) {
+              window.initFiletEditor();
+            }
+          });
+        });
+      });
+    </script>
 
-    <!-- 2단계: 원본 이미지 미리보기 및 필수 색상 선택 -->
-    <section id="previewArea" class="step-section preview-section">
-      <div class="section-title">
-        <h2 data-i18n="preview_title">2. 원본 이미지 확인 및 필수 색상 선택</h2>
-        <p class="instruction" data-i18n="preview_desc">이미지를 업로드하면 여기에 나타납니다. 사진에서 <b>살리고 싶은 중요한 색상</b>을 선택하세요.</p>
-      </div>
-      
-      <div class="canvas-wrapper original-wrapper">
-        <div id="uploadPlaceholder" class="placeholder-msg" data-i18n="upload_placeholder">이미지를 업로드해주세요.</div>
-        <canvas id="previewCanvas" style="display: none;"></canvas>
-        <canvas id="magnifierCanvas" class="magnifier-canvas"></canvas>
-      </div>
-
-      <div class="seed-colors-area">
-        <h3 data-i18n="selected_colors">선택된 필수 색상</h3>
-        <ul id="seedColorList" class="color-list">
-          <li class="empty-msg" data-i18n="no_colors_selected">아직 선택된 색상이 없습니다.</li>
-        </ul>
-        <button id="clearSeedsBtn" class="secondary-btn small-btn" style="display: none;" data-i18n="clear_selection">선택 초기화</button>
-      </div>
-    </section>
-
-    <!-- 3단계: 세부 설정 -->
-    <section id="settingsArea" class="step-section settings-section">
-      <div class="section-title">
-        <h2 data-i18n="settings_title">3. 도안 세부 설정</h2>
-      </div>
-      
-      <div class="settings-grid">
-        <!-- Row 1 -->
+    <!-- 픽셀 도안 탭 패널 -->
+    <div id="pixelTab" class="tab-panel active">
+      <!-- 1단계: 이미지 업로드 -->
+      <section class="step-section upload-section">
         <div class="control-group">
-          <label for="techniqueRatio" data-i18n="label_technique">뜨개 기법 (코:단 비율)</label>
-          <select id="techniqueRatio">
-            <option value="1" data-i18n="opt_ratio_1">코바늘 / 십자수 (1:1)</option>
-            <option value="1.4" data-i18n="opt_ratio_2">대바늘 인물 사진 (5:7)</option>
-            <option value="0.714" data-i18n="opt_ratio_3">대바늘 풍경 사진 (7:5)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label data-i18n="label_yarn_unit">실 굵기 입력 방식</label>
-          <div class="unit-toggle">
-            <label><input type="radio" name="yarnUnit" value="name" checked> <span data-i18n="unit_standard">표준 규격</span></label>
-            <label><input type="radio" name="yarnUnit" value="mm"> <span data-i18n="unit_mm">직경 (mm)</span></label>
+          <label for="imageUpload" class="main-label" data-i18n="upload_label">1. 도안으로 만들 이미지를 업로드하세요</label>
+          <div class="input-desc">JPG, PNG (Max 10MB)</div>
+          <div class="file-upload-wrapper">
+            <label for="imageUpload" class="file-upload-btn" data-i18n="btn_select_file">파일 선택</label>
+            <span id="fileNameDisplay" class="file-name-display" data-i18n="no_file_selected">선택된 파일 없음</span>
+            <input type="file" id="imageUpload" accept="image/jpeg, image/png" style="display:none;" aria-label="이미지 파일 선택">
+          </div>
+          <div class="copyright-notice" data-i18n="copyright_notice">
+            ⚠️ 타인의 사진·캐릭터·예술 작품으로 생성한 도안을 상업적으로 이용할 경우 저작권법 위반의 책임은 전적으로 이용자 본인에게 있습니다. <a href="/privacy.html#disclaimer" aria-label="저작권 면책 고지 자세히 보기">자세히 보기</a>
           </div>
         </div>
+      </section>
 
-        <div id="yarnInputArea">
-          <div class="control-group" id="yarnNameGroup">
-            <label for="yarnWeight" data-i18n="label_yarn_name">실 굵기 (표준)</label>
-            <select id="yarnWeight">
-              <option value="lace">Lace (approx. 32sts)</option>
-              <option value="fingering">Fingering (approx. 28sts)</option>
-              <option value="dk" selected>DK / 8-ply (approx. 22sts)</option>
-              <option value="aran">Aran / Worsted (approx. 18sts)</option>
-              <option value="chunky">Chunky (approx. 14sts)</option>
-              <option value="super_bulky">Super Bulky (approx. 10sts)</option>
+      <!-- 2단계: 원본 이미지 미리보기 및 필수 색상 선택 -->
+      <section id="previewArea" class="step-section preview-section">
+        <div class="section-title">
+          <h2 data-i18n="preview_title">2. 원본 이미지 확인 및 필수 색상 선택</h2>
+          <p class="instruction" data-i18n="preview_desc">이미지를 업로드하면 여기에 나타납니다. 사진에서 <b>살리고 싶은 중요한 색상</b>을 선택하세요.</p>
+        </div>
+        
+        <div class="canvas-wrapper original-wrapper">
+          <div id="uploadPlaceholder" class="placeholder-msg" data-i18n="upload_placeholder">이미지를 업로드해주세요.</div>
+          <canvas id="previewCanvas" style="display: none;"></canvas>
+          <canvas id="magnifierCanvas" class="magnifier-canvas"></canvas>
+        </div>
+
+        <div class="seed-colors-area">
+          <h3 data-i18n="selected_colors">선택된 필수 색상</h3>
+          <ul id="seedColorList" class="color-list">
+            <li class="empty-msg" data-i18n="no_colors_selected">아직 선택된 색상이 없습니다.</li>
+          </ul>
+          <button id="clearSeedsBtn" class="secondary-btn small-btn" style="display: none;" data-i18n="clear_selection">선택 초기화</button>
+        </div>
+      </section>
+
+      <!-- 3단계: 세부 설정 -->
+      <section id="settingsArea" class="step-section settings-section">
+        <div class="section-title">
+          <h2 data-i18n="settings_title">3. 도안 세부 설정</h2>
+        </div>
+        
+        <div class="settings-grid">
+          <!-- Row 1 -->
+          <div class="control-group">
+            <label for="techniqueRatio" data-i18n="label_technique">뜨개 기법 (코:단 비율)</label>
+            <select id="techniqueRatio">
+              <option value="1" data-i18n="opt_ratio_1">코바늘 / 십자수 (1:1)</option>
+              <option value="1.4" data-i18n="opt_ratio_2">대바늘 인물 사진 (5:7)</option>
+              <option value="0.714" data-i18n="opt_ratio_3">대바늘 풍경 사진 (7:5)</option>
             </select>
           </div>
 
-          <div class="control-group" id="yarnMmGroup" style="display: none;">
-            <label for="yarnMm" data-i18n="label_yarn_mm">실 굵기 (mm)</label>
-            <div class="input-with-hint">
-              <input type="number" id="yarnMm" value="4.0" step="0.5" min="0.5" max="20">
-              <span class="hint">mm</span>
+          <div class="control-group">
+            <label data-i18n="label_yarn_unit">실 굵기 입력 방식</label>
+            <div class="unit-toggle">
+              <label><input type="radio" name="yarnUnit" value="name" checked> <span data-i18n="unit_standard">표준 규격</span></label>
+              <label><input type="radio" name="yarnUnit" value="mm"> <span data-i18n="unit_mm">직경 (mm)</span></label>
             </div>
           </div>
-        </div>
 
-        <!-- Row 2 -->
-        <div class="control-group">
-          <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
-          <div class="input-with-hint">
-            <input type="number" id="colorCount" value="15" min="2" max="40">
-            <span class="hint" data-i18n="unit_colors">색</span>
+          <div id="yarnInputArea">
+            <div class="control-group" id="yarnNameGroup">
+              <label for="yarnWeight" data-i18n="label_yarn_name">실 굵기 (표준)</label>
+              <select id="yarnWeight">
+                <option value="lace">Lace (approx. 32sts)</option>
+                <option value="fingering">Fingering (approx. 28sts)</option>
+                <option value="dk" selected>DK / 8-ply (approx. 22sts)</option>
+                <option value="aran">Aran / Worsted (approx. 18sts)</option>
+                <option value="chunky">Chunky (approx. 14sts)</option>
+                <option value="super_bulky">Super Bulky (approx. 10sts)</option>
+              </select>
+            </div>
+
+            <div class="control-group" id="yarnMmGroup" style="display: none;">
+              <label for="yarnMm" data-i18n="label_yarn_mm">실 굵기 (mm)</label>
+              <div class="input-with-hint">
+                <input type="number" id="yarnMm" value="4.0" step="0.5" min="0.5" max="20">
+                <span class="hint">mm</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="control-group">
+            <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
+            <div class="input-with-hint">
+              <input type="number" id="colorCount" value="15" min="2" max="40">
+              <span class="hint" data-i18n="unit_colors">색</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label data-i18n="label_width">원하는 편물의 가로 크기</label>
+            <div class="input-with-hint">
+                <input type="number" id="targetWidth" value="50" min="10" max="300">
+                <span class="hint">cm</span>
+            </div>
+          </div>
+
+          <div class="control-group checkbox-group">
+            <input type="checkbox" id="showGrid" checked>
+            <label for="showGrid" data-i18n="label_grid">10단위 그리드 및 좌표 표시</label>
           </div>
         </div>
 
+        <div class="action-buttons">
+          <div class="generator-hint" data-i18n="regen_hint">
+            💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.
+          </div>
+          <button id="generateBtn" class="primary-btn" disabled data-i18n="btn_generate">도안 생성하기</button>
+          <button id="downloadPdfBtn" class="secondary-btn" disabled data-i18n="btn_download">PDF 다운로드</button>
+          <button id="saveToCloudBtn" class="secondary-btn" disabled data-i18n="btn_save_cloud">내 도안에 저장</button>
+          <div id="statusMessage" class="status-msg"></div>
+        </div>
+      </section>
+
+      <!-- 4단계: 결과 도안 -->
+      <section id="resultPanel" class="step-section result-panel">
+        <div class="section-title">
+          <h2 data-i18n="result_title">4. 생성된 도안</h2>
+        </div>
+
+        <!-- 생성 기록 (최근 5개) -->
+        <div class="history-panel" id="historyPanel" style="display: none;">
+          <h3 data-i18n="history_title">최근 생성 기록 <small>(클릭하여 비교)</small></h3>
+          <div class="history-thumbnails" id="historyThumbnails"></div>
+        </div>
+
+        <div class="canvas-wrapper pattern-wrapper">
+          <div id="resultPlaceholder" class="placeholder-msg" data-i18n="result_placeholder">도안을 생성하면 여기에 표시됩니다.</div>
+          <canvas id="patternCanvas" style="display: none;"></canvas>
+        </div>
+        
+        <div class="legend-panel">
+          <h3 data-i18n="legend_title">사용된 색상표 (실 번호)</h3>
+          <p id="patternInfo" class="pattern-info-text"></p>
+          <ul id="colorLegend" class="color-list">
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- 방안뜨기 탭 패널 -->
+    <div id="filetTab" class="tab-panel">
+      <!-- 1단계: 이미지 업로드 (선택) -->
+      <section class="step-section upload-section">
         <div class="control-group">
-          <label data-i18n="label_width">원하는 편물의 가로 크기</label>
-          <div class="input-with-hint">
-              <input type="number" id="targetWidth" value="50" min="10" max="300">
-              <span class="hint">cm</span>
+          <label for="filetImageUpload" class="main-label" data-i18n="filet_upload_label">1. 밑그림 이미지를 업로드하세요 (선택)</label>
+          <div class="file-upload-wrapper">
+            <label for="filetImageUpload" class="file-upload-btn" data-i18n="btn_select_file">파일 선택</label>
+            <span id="filetFileNameDisplay" class="file-name-display" data-i18n="no_file_selected">선택된 파일 없음</span>
+            <input type="file" id="filetImageUpload" accept="image/jpeg, image/png" style="display:none;">
+          </div>
+        </div>
+      </section>
+
+      <!-- 2단계: 에디터 및 설정 -->
+      <section class="step-section filet-editor-section">
+        <div class="section-title">
+          <h2 data-i18n="filet_settings_title">2. 방안뜨기 도안 설정</h2>
+        </div>
+
+        <div class="settings-grid">
+          <div class="control-group">
+            <label data-i18n="label_grid_size">격자 크기 (가로 × 세로)</label>
+            <div class="input-with-hint dual-input">
+              <input type="number" id="filetGridW" value="30" min="5" max="150">
+              <span>×</span>
+              <input type="number" id="filetGridH" value="30" min="5" max="150">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="filetThreshold" data-i18n="label_threshold">이미지 변환 임계값</label>
+            <input type="range" id="filetThreshold" min="0" max="255" value="128">
+          </div>
+
+          <div class="control-group">
+             <label data-i18n="label_filet_gauge">게이지 (10x10cm 기준)</label>
+             <div class="gauge-input-row">
+               <div class="input-with-hint">
+                 <input type="number" id="filetSts10" value="22" min="5" max="100">
+                 <span class="hint" data-i18n="label_filet_sts">가로 코수</span>
+               </div>
+               <div class="input-with-hint">
+                 <input type="number" id="filetRows10" value="22" min="5" max="100">
+                 <span class="hint" data-i18n="label_filet_rows">세로 단수</span>
+               </div>
+             </div>
+          </div>
+
+          <div class="control-group">
+            <label data-i18n="filet_result_size">완성 예상 크기</label>
+            <div id="filetResultSize" class="result-size-box">0cm × 0cm</div>
           </div>
         </div>
 
-        <div class="control-group checkbox-group">
-          <input type="checkbox" id="showGrid" checked>
-          <label for="showGrid" data-i18n="label_grid">10단위 그리드 및 좌표 표시</label>
+        <div class="action-buttons">
+          <button id="filetConvertBtn" class="primary-btn small-btn" data-i18n="btn_convert_filet">이미지를 격자로 변환</button>
+          <button id="filetClearBtn" class="secondary-btn small-btn" data-i18n="btn_clear_grid">격자 초기화</button>
+          <button id="filetDownloadBtn" class="primary-btn" data-i18n="btn_download">PDF 다운로드</button>
         </div>
-      </div>
 
-      <div class="action-buttons">
-        <div class="generator-hint" data-i18n="regen_hint">
-          💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.
+        <div class="canvas-wrapper filet-wrapper">
+          <canvas id="filetCanvas" class="filet-canvas"></canvas>
         </div>
-        <button id="generateBtn" class="primary-btn" disabled data-i18n="btn_generate">도안 생성하기</button>
-        <button id="downloadPdfBtn" class="secondary-btn" disabled data-i18n="btn_download">PDF 다운로드</button>
-        <button id="saveToCloudBtn" class="secondary-btn" disabled data-i18n="btn_save_cloud">내 도안에 저장</button>
-        <div id="statusMessage" class="status-msg"></div>
-      </div>
-    </section>
 
-    <!-- 4단계: 결과 도안 -->
-    <section id="resultPanel" class="step-section result-panel">
-      <div class="section-title">
-        <h2 data-i18n="result_title">4. 생성된 도안</h2>
-      </div>
-
-      <!-- 생성 기록 (최근 5개) -->
-      <div class="history-panel" id="historyPanel" style="display: none;">
-        <h3 data-i18n="history_title">최근 생성 기록 <small>(클릭하여 비교)</small></h3>
-        <div class="history-thumbnails" id="historyThumbnails"></div>
-      </div>
-
-      <div class="canvas-wrapper pattern-wrapper">
-        <div id="resultPlaceholder" class="placeholder-msg" data-i18n="result_placeholder">도안을 생성하면 여기에 표시됩니다.</div>
-        <canvas id="patternCanvas" style="display: none;"></canvas>
-      </div>
-      
-      <div class="legend-panel">
-        <h3 data-i18n="legend_title">사용된 색상표 (실 번호)</h3>
-        <p id="patternInfo" class="pattern-info-text"></p>
-        <ul id="colorLegend" class="color-list">
-        </ul>
-      </div>
-    </section>
+        <div class="legend-panel">
+          <p data-i18n="legend_filet">범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)</p>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -369,6 +468,7 @@
   </div>
 
   <script type="module" src="/js/main.js?v=3"></script>
+  <script type="module" src="/js/filet.js"></script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>

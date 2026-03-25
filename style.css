@@ -4051,3 +4051,75 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
     gap: 1rem;
   }
 }
+
+/* ── Pattern Generator Tabs ── */
+.tab-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 700;
+    color: var(--secondary-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+.tab-panel {
+    display: none !important;
+}
+.tab-panel.active {
+    display: block !important;
+}
+
+/* ── Filet Editor ── */
+.filet-editor-section {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.filet-canvas {
+    display: block;
+    margin: 2rem auto;
+    background: #fff;
+    image-rendering: pixelated;
+    max-width: 100%;
+    cursor: crosshair;
+    border: 1px solid #ccc;
+}
+.dual-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dual-input input {
+    width: 80px;
+}
+.gauge-input-row {
+    display: flex;
+    gap: 1rem;
+}
+.result-size-box {
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+}
+.filet-wrapper {
+    overflow: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f0f0f0;
+}
