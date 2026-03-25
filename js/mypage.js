@@ -1105,6 +1105,55 @@ function buildPostCard(postId, data, opts = {}) {
 initAuth();
 document.getElementById('gotoSignInBtn')?.addEventListener('click', openAuthModal);
 
+function resetPageState() {
+    // panelLoaded 캐시 완전 초기화
+    Object.keys(panelLoaded).forEach(k => delete panelLoaded[k]);
+
+    // 사이드바 초기화
+    const avatarEl = document.getElementById('mpAvatar');
+    if (avatarEl) {
+        avatarEl.style.backgroundImage = '';
+        avatarEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5" width="40" height="40">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>`;
+    }
+    const nickEl = document.getElementById('mpNickname');
+    if (nickEl) nickEl.textContent = '';
+    const joinEl = document.getElementById('mpJoined');
+    if (joinEl) joinEl.textContent = '';
+    const bioEl = document.getElementById('mpBio');
+    if (bioEl) { bioEl.textContent = ''; bioEl.style.display = 'none'; }
+    const bioToggle = document.getElementById('mpBioToggle');
+    if (bioToggle) bioToggle.remove();
+
+    // 통계 초기화
+    ['mpStatPatterns', 'mpStatPosts', 'mpStatScraps', 'mpStatLikes', 'mpStatPublicPalettes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '—';
+    });
+
+    // 패널 콘텐츠 초기화
+    ['patternsGrid', 'projectsActive', 'projectsDone', 'scrapsGrid',
+     'palettesGrid', 'publicPalettesGrid'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+    ['subPanelPosts', 'subPanelComments'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+
+    // user-specific localStorage 키 삭제
+    localStorage.removeItem('ssuessue_row_counters');
+    localStorage.removeItem('ssuessue_rc_uid');
+
+    // currentPanel 기본값으로 리셋
+    currentPanel = urlUid ? 'posts' : 'profile';
+}
+
+let _prevUid = null;
+
 onAuthStateChanged(auth, async user => {
     if (urlUid) {
         // 본인 uid로 접근 시 내 마이페이지로 리다이렉트
@@ -1123,6 +1172,11 @@ onAuthStateChanged(auth, async user => {
             setupOtherUserView();
         }
     } else if (user) {
+        // 유저가 바뀐 경우(다른 계정으로 재로그인) 상태 초기화
+        if (_prevUid !== null && _prevUid !== user.uid) {
+            resetPageState();
+        }
+        _prevUid   = user.uid;
         currentUid = user.uid;
         viewMode   = 'mine';
         document.getElementById('notLoggedIn').style.display = 'none';
@@ -1133,7 +1187,9 @@ onAuthStateChanged(auth, async user => {
             switchPanel(currentPanel);
         }
     } else {
+        _prevUid   = null;
         currentUid = null;
+        resetPageState();
         document.getElementById('notLoggedIn').style.display = '';
         document.getElementById('loggedIn').style.display    = 'none';
         // 비로그인이지만 타인 프로필이 없으면 로그인 유도
