@@ -32,7 +32,7 @@
             <button class="lang-btn" data-lang="ja">日本語</button>
           </div>
         </div>
-<button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
+        <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
         <div class="auth-user" id="authUserArea" style="display:none;">
           <span style="display:none;" id="authUserEmail"></span>
           <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>

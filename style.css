@@ -610,7 +610,8 @@ canvas {
   letter-spacing: 0;
 }
 
-.auth-area a.lang-btn {
+.auth-area a.lang-btn,
+.auth-user a.lang-btn {
   text-decoration: none;
   color: inherit;
   display: inline-block;
@@ -2903,7 +2904,7 @@ header {
 .hdr-right {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0.4rem;
   margin-left: auto;
   flex-shrink: 0;
 }
