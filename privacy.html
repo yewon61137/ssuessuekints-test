@@ -324,7 +324,7 @@
       <div id="authModalError" class="auth-error" style="display:none;"></div>
     </div>
   </div>
-  <script type="module">import { initAuth } from './auth.js?v=5'; initAuth();</script>
+  <script type="module">import { initAuth } from '/js/auth.js'; import { initLang } from '/js/i18n.js'; initAuth(); initLang();</script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>
