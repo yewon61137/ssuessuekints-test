@@ -38,6 +38,10 @@ export const t = {
         label_step_count: '현재 단',
         btn_mode_normal: '일반',
         btn_mode_repeat: '반복',
+        tab_general: '일반', tab_project: '프로젝트',
+        rc_login_required: '로그인 후 이용 가능합니다.',
+        rc_proj_loading: '불러오는 중...', rc_proj_empty: '프로젝트가 없습니다.',
+        rc_proj_back: '목록으로',
         // 프로젝트
         proj_title: '내 프로젝트',
         proj_new: '새 프로젝트',
@@ -119,6 +123,10 @@ export const t = {
         label_step_count: 'Row',
         btn_mode_normal: 'Normal',
         btn_mode_repeat: 'Repeat',
+        tab_general: 'General', tab_project: 'Projects',
+        rc_login_required: 'Sign in to use this feature.',
+        rc_proj_loading: 'Loading...', rc_proj_empty: 'No projects found.',
+        rc_proj_back: 'Back to list',
         // Projects
         proj_title: 'My Projects',
         proj_new: 'New Project',
@@ -200,6 +208,10 @@ export const t = {
         label_step_count: '現在の段',
         btn_mode_normal: '通常',
         btn_mode_repeat: '繰り返し',
+        tab_general: '通常', tab_project: 'プロジェクト',
+        rc_login_required: 'ログイン後にご利用いただけます。',
+        rc_proj_loading: '読み込み中...', rc_proj_empty: 'プロジェクトがありません。',
+        rc_proj_back: '一覧へ',
         // プロジェクト
         proj_title: '自分のプロジェクト',
         proj_new: '新しいプロジェクト',
