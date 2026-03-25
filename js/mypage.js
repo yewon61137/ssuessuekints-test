@@ -48,6 +48,7 @@ const pageT = {
         palette_public: '공개', palette_private: '비공개',
         palette_make_public: '공개로 전환', palette_make_private: '비공개로 전환',
         tab_other_posts: '게시글', user_not_found: '존재하지 않는 사용자예요.',
+        bio_more: '더 보기', bio_less: '접기',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -85,6 +86,7 @@ const pageT = {
         palette_public: 'Public', palette_private: 'Private',
         palette_make_public: 'Make Public', palette_make_private: 'Make Private',
         tab_other_posts: 'Posts', user_not_found: 'This user does not exist.',
+        bio_more: 'More', bio_less: 'Less',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -122,6 +124,7 @@ const pageT = {
         palette_public: '公開', palette_private: '非公開',
         palette_make_public: '公開にする', palette_make_private: '非公開にする',
         tab_other_posts: '投稿', user_not_found: 'このユーザーは存在しません。',
+        bio_more: 'もっと見る', bio_less: '閉じる',
     }
 };
 
@@ -238,11 +241,41 @@ async function fillSidebar(uid, readOnly = false) {
         joinEl.textContent = `${tr('joined')} ${d.toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US')}`;
     }
 
-    // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨기고 받은 좋아요 표시
+    // 자기소개
+    const bioEl = document.getElementById('mpBio');
+    const bioToggle = document.getElementById('mpBioToggle');
+    if (bioToggle) bioToggle.remove(); // reset
+    if (bioEl) {
+        const bioText = profile.bio || '';
+        if (bioText) {
+            bioEl.textContent = bioText;
+            bioEl.classList.remove('expanded');
+            bioEl.style.display = '';
+            // "더 보기" toggle — only if text overflows 3 lines
+            requestAnimationFrame(() => {
+                if (bioEl.scrollHeight > bioEl.clientHeight + 2) {
+                    const toggle = document.createElement('button');
+                    toggle.id = 'mpBioToggle';
+                    toggle.className = 'mp-bio-toggle';
+                    toggle.textContent = tr('bio_more') || '더 보기';
+                    toggle.addEventListener('click', () => {
+                        const expanded = bioEl.classList.toggle('expanded');
+                        toggle.textContent = expanded ? (tr('bio_less') || '접기') : (tr('bio_more') || '더 보기');
+                    });
+                    bioEl.insertAdjacentElement('afterend', toggle);
+                }
+            });
+        } else {
+            bioEl.style.display = 'none';
+        }
+    }
+
+    // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨기고 받은 좋아요 + 공개 팔레트 표시
     if (readOnly) {
         document.getElementById('mpStatPatterns')?.closest('.mp-stat')?.style.setProperty('display', 'none');
         document.getElementById('mpStatScraps')?.closest('.mp-stat')?.style.setProperty('display', 'none');
         document.getElementById('mpStatLikesWrap')?.style.setProperty('display', '');
+        document.getElementById('mpStatPublicPalettesWrap')?.style.setProperty('display', '');
     }
 
     // 통계 (병렬)
@@ -252,17 +285,21 @@ async function fillSidebar(uid, readOnly = false) {
     if (!readOnly) {
         statsQueries.push(getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))));
         statsQueries.push(getDocs(query(collection(db, `users/${uid}/scraps`), limit(500))));
+    } else {
+        statsQueries.push(getDocs(query(collection(db, `users/${uid}/palettes`), where('isPublic', '==', true), limit(500))));
     }
 
     Promise.all(statsQueries).then((results) => {
         if (readOnly) {
-            const [posts] = results;
+            const [posts, publicPalettes] = results;
             const poEl = document.getElementById('mpStatPosts');
             if (poEl) poEl.textContent = posts.size;
             let totalLikes = 0;
             posts.forEach(ds => { totalLikes += ds.data().likeCount || 0; });
             const likesEl = document.getElementById('mpStatLikes');
             if (likesEl) likesEl.textContent = totalLikes;
+            const ppEl = document.getElementById('mpStatPublicPalettes');
+            if (ppEl) ppEl.textContent = publicPalettes?.size ?? 0;
         } else {
             const [posts, patterns, scraps] = results;
             const pEl  = document.getElementById('mpStatPatterns');
@@ -975,9 +1012,11 @@ function buildPostCard(postId, data, opts = {}) {
     const date = data.createdAt
         ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('ko-KR')
         : '';
+    const categoryTag = (data.tags || []).length > 0
+        ? `<span class="post-card-thumb-tag">${escHtml(data.tags[0])}</span>` : '';
     const thumb = data.images?.[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
-        : '<div class="post-card-thumb post-card-thumb-empty"></div>';
+        : `<div class="post-card-thumb post-card-thumb-empty">${categoryTag}<span class="post-card-thumb-title">${escHtml(data.title || '')}</span></div>`;
     const tagsHtml = (data.tags || []).slice(0, 3).map(t => `<span class="post-card-tag">${escHtml(t)}</span>`).join('');
     const avatarStyle = data.profilePhotoURL ? `style="background-image:url(${escHtml(data.profilePhotoURL)})"` : '';
     const avatarInner = data.profilePhotoURL ? '' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';

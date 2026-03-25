@@ -60,6 +60,7 @@
               <div class="mp-joined" id="mpJoined"></div>
             </div>
           </div>
+          <div id="mpBio" class="mp-bio" style="display:none;"></div>
           <div class="mp-stats-row">
             <div class="mp-stat">
               <span class="mp-stat-val" id="mpStatPatterns">—</span>
@@ -76,6 +77,10 @@
             <div class="mp-stat" id="mpStatLikesWrap" style="display:none;">
               <span class="mp-stat-val" id="mpStatLikes">—</span>
               <span class="mp-stat-lbl i18n" data-ko="받은 좋아요" data-en="Likes" data-ja="いいね">받은 좋아요</span>
+            </div>
+            <div class="mp-stat" id="mpStatPublicPalettesWrap" style="display:none;">
+              <span class="mp-stat-val" id="mpStatPublicPalettes">—</span>
+              <span class="mp-stat-lbl i18n" data-ko="공개 팔레트" data-en="Palettes" data-ja="公開パレット">공개 팔레트</span>
             </div>
           </div>
           <nav class="mp-nav" id="mpNav">
@@ -97,11 +102,13 @@
             <h2 class="mp-panel-title" id="titleProfile" data-i18n="title_profile">프로필</h2>
             <div class="profile-edit-section">
               <div class="profile-edit-avatar-row">
-                <div class="profile-edit-avatar" id="editAvatarPreview"></div>
-                <div>
-                  <label for="editPhotoInput" class="secondary-btn small-btn" id="editPhotoLabel" data-i18n="photo_change">사진 변경</label>
-                  <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
+                <div class="profile-edit-avatar-wrap">
+                  <div class="profile-edit-avatar" id="editAvatarPreview"></div>
+                  <label for="editPhotoInput" class="profile-edit-avatar-cam" title="사진 변경">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </label>
                 </div>
+                <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
               </div>
               <form class="profile-edit-form" id="profileEditForm">
                 <div class="profile-edit-row">
