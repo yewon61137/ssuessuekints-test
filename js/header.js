@@ -32,10 +32,7 @@
             <button class="lang-btn" data-lang="ja">日本語</button>
           </div>
         </div>
-        <button class="hdr-icon-btn" id="counterToggle" aria-label="단수 카운터">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </button>
-        <button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
+<button class="lang-btn" id="authSignInBtn" data-i18n="btn_signin">로그인</button>
         <div class="auth-user" id="authUserArea" style="display:none;">
           <span style="display:none;" id="authUserEmail"></span>
           <a href="/mypage.html" class="lang-btn" data-i18n="btn_mypage">마이페이지</a>
@@ -88,10 +85,6 @@
     var rc = document.querySelector('knitting-row-counter');
     if (rc && typeof rc.toggleDrawer === 'function') rc.toggleDrawer();
   }
-
-  // Header icon button
-  var counterToggleBtn = document.getElementById('counterToggle');
-  if (counterToggleBtn) counterToggleBtn.addEventListener('click', toggleCounter);
 
   // GNB dropdown item
   document.querySelectorAll('.gnb-counter-btn').forEach(function (el) {
