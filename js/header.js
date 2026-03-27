@@ -16,6 +16,7 @@
             <a href="/color-palette.html" class="gnb-sub-link i18n" data-ko="배색 도우미" data-en="Color Palette" data-ja="配色アシスタント">배색 도우미</a>
           </div>
         </div>
+        <a class="gnb-item gnb-link i18n" href="/projects.html" data-ko="내 프로젝트" data-en="My Projects" data-ja="プロジェクト">My Projects</a>
         <a class="gnb-item gnb-link i18n" href="/community.html" data-ko="커뮤니티" data-en="Community" data-ja="コミュニティ">Community</a>
         <a class="gnb-item gnb-link i18n" href="/magazine.html" data-ko="매거진" data-en="Magazine" data-ja="マガジン">Magazine</a>
         <a class="gnb-item gnb-link i18n" href="/notice.html" data-ko="공지사항" data-en="Notice" data-ja="お知らせ">Notice</a>
