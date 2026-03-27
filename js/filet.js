@@ -55,29 +55,25 @@ window.initFiletEditor = initFiletEditor;
 // --- 렌더링 ---
 function render() {
     if (!ctx) return;
-    
+
     canvas.width = gridW * CELL_SIZE;
     canvas.height = gridH * CELL_SIZE;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 1. 기초 격자 및 비활성칸
+
+    // 1. 흰 배경
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. 비활성칸 (회색 fill)
+    ctx.fillStyle = '#f0f0f0';
     for (let y = 0; y < gridH; y++) {
         for (let x = 0; x < gridW; x++) {
-            const val = grid[y][x];
-            if (val === -1) {
-                // 비활성칸 (회색)
-                ctx.fillStyle = '#f0f0f0';
+            if (grid[y][x] === -1) {
                 ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
-            
-            ctx.strokeStyle = '#e0e0e0';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
     }
-    
-    // 2. 채워진 칸 (■)
+
+    // 3. 채워진 칸 (■)
     ctx.fillStyle = '#000';
     for (let y = 0; y < gridH; y++) {
         for (let x = 0; x < gridW; x++) {
@@ -86,6 +82,22 @@ function render() {
             }
         }
     }
+
+    // 4. 격자선 — 경계마다 한 번씩만 그림 (strokeRect 중복 제거), +0.5로 안티얼라이싱 없앰
+    ctx.beginPath();
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= gridW; x++) {
+        const px = x * CELL_SIZE + 0.5;
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px, canvas.height);
+    }
+    for (let y = 0; y <= gridH; y++) {
+        const py = y * CELL_SIZE + 0.5;
+        ctx.moveTo(0, py);
+        ctx.lineTo(canvas.width, py);
+    }
+    ctx.stroke();
 }
 
 // --- 크기 계산 및 표시 ---
@@ -195,12 +207,10 @@ if (convertBtn) {
         if (!bgImage) { alert('이미지를 업로드하세요.'); return; }
         const threshold = parseInt(inputThreshold.value);
         const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
         tempCanvas.width = gridW;
         tempCanvas.height = gridH;
-        tempCtx.imageSmoothingEnabled = true;
-        tempCtx.imageSmoothingQuality = 'high';
-        tempCtx.drawImage(bgImage, 0, 0, bgImage.naturalWidth, bgImage.naturalHeight, 0, 0, gridW, gridH);
+        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+        tempCtx.drawImage(bgImage, 0, 0, gridW, gridH);
         const imgData = tempCtx.getImageData(0, 0, gridW, gridH).data;
         for (let y = 0; y < gridH; y++) {
             for (let x = 0; x < gridW; x++) {
