@@ -107,17 +107,18 @@ function updateSizeInfo() {
     const sts10 = parseFloat(inputSts10.value) || 22;
     const rows10 = parseFloat(inputRows10.value) || 22;
     
-    // 시작코 = 칸수 * 3 + 1
-    const totalSts = gridW * 3 + 1;
-    const totalRows = gridH + 1; 
-    
-    const widthCm = (totalSts / sts10) * 10;
+    // 시작코 = 칸수 × 3 + 1
+    const chainSts = gridW * 3 + 1;
+    const totalRows = gridH;
+
+    const widthCm = (chainSts / sts10) * 10;
     const heightCm = (totalRows / rows10) * 10;
-    
+
     if (isNaN(widthCm) || isNaN(heightCm)) {
         resultSizeDisplay.textContent = '--- cm × --- cm';
     } else {
-        resultSizeDisplay.textContent = `${widthCm.toFixed(1)}cm × ${heightCm.toFixed(1)}cm (${totalSts} sts × ${totalRows} rows)`;
+        resultSizeDisplay.textContent =
+            `${gridW}칸 × ${gridH}단 | 시작코 ${chainSts}코 | ${widthCm.toFixed(1)}cm × ${heightCm.toFixed(1)}cm`;
     }
 }
 
@@ -209,20 +210,21 @@ if (convertBtn) {
         // 모듈 변수 아닌 input에서 직접 읽기
         const cols = parseInt(inputGridW.value) || 30;
         const rows = parseInt(inputGridH.value) || 30;
-        const offW = cols * CELL_SIZE;
-        const offH = rows * CELL_SIZE;
+        // canvas.width/height 기준으로 cellSize 계산 (고정 CELL_SIZE 상수 미사용)
+        const offW = canvas.width;
+        const offH = canvas.height;
+        const cellW = offW / cols;
+        const cellH = offH / rows;
         const offscreen = document.createElement('canvas');
         offscreen.width = offW;
         offscreen.height = offH;
         const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
         offCtx.drawImage(bgImage, 0, 0, offscreen.width, offscreen.height);
         const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
-        console.log('[filet convert] img:', bgImage.naturalWidth, 'x', bgImage.naturalHeight,
-            '| offscreen:', offW, 'x', offH, '| grid:', cols, 'x', rows);
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-                const sx = Math.floor((col + 0.5) * CELL_SIZE);
-                const sy = Math.floor((row + 0.5) * CELL_SIZE);
+                const sx = Math.floor((col + 0.5) * cellW);
+                const sy = Math.floor((row + 0.5) * cellH);
                 const idx = (sy * offW + sx) * 4;
                 const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2], a = imgData[idx+3];
                 const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
