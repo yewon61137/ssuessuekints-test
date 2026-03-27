@@ -83,25 +83,21 @@ function render() {
         }
     }
 
-    // 3. 가이드 격자선
+    // 3. 단일 격자선 (분할선 제거)
     ctx.beginPath();
+    ctx.strokeStyle = '#ddd';
     ctx.lineWidth = 1;
     for (let x = 0; x <= gridW; x++) {
         const px = x * cellSize + 0.5;
-        ctx.strokeStyle = (x % 10 === 0) ? '#666' : '#eee';
         ctx.moveTo(px, 0);
         ctx.lineTo(px, canvas.height);
-        ctx.stroke();
-        ctx.beginPath(); // 각 선마다 스타일 적용 위해 분리
     }
     for (let y = 0; y <= gridH; y++) {
         const py = y * cellSize + 0.5;
-        ctx.strokeStyle = (y % 10 === 0) ? '#666' : '#eee';
         ctx.moveTo(0, py);
         ctx.lineTo(canvas.width, py);
-        ctx.stroke();
-        ctx.beginPath();
     }
+    ctx.stroke();
 }
 
 // --- 유틸리티: 채도 및 밝기 ---
@@ -131,19 +127,9 @@ function convertImageToGrid() {
     offCtx.drawImage(bgImage, 0, 0, offscreen.width, offscreen.height);
     const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
     
-    // 3. 네 모서리 평균 밝기로 배경 체크
+    // 3. 채도 기준 변환
     const w = offscreen.width;
-    const h = offscreen.height;
-    const corners = [[0,0], [w-1, 0], [0, h-1], [w-1, h-1]];
-    let totalB = 0;
-    corners.forEach(([cx, cy]) => {
-        const i = (cy * w + cx) * 4;
-        totalB += getBrightness(imgData[i], imgData[i+1], imgData[i+2]);
-    });
-    const isDarkBg = (totalB / 4) < 128;
-    
-    // 4. 채도 기준 변환
-    const threshold = (parseInt(inputThreshold.value) || 25) / 100; // 25 -> 0.25
+    let actualThreshold = (parseInt(inputThreshold.value) || 25) / 100;
     
     for (let row = 0; row < gridH; row++) {
         for (let col = 0; col < gridW; col++) {
@@ -155,16 +141,7 @@ function convertImageToGrid() {
             const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2], a = imgData[idx+3];
             const sat = getSaturation(r, g, b);
             
-            // 임계값 처리: HTML 슬라이더가 0~255일 수도 있으므로 0.5 이상이면 비율로 변환
-            let actualThreshold = (parseInt(inputThreshold.value) || 25);
-            if (actualThreshold > 1) actualThreshold = actualThreshold / 255;
-            else actualThreshold = actualThreshold; // 이미 0~1 범위면 유지
-
             let isFilled = (a > 50 && sat >= actualThreshold);
-            
-            // 어두운 배경일 경우 로직 반전
-            if (isDarkBg) isFilled = !isFilled;
-            
             grid[row][col] = isFilled ? 1 : 0;
         }
     }
