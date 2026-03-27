@@ -685,7 +685,8 @@ function buildPatternCard(uid, patternId, data) {
         generatePatternPdf(data.patternImageURL, null);
     });
 
-    card.querySelector('.png-download-btn').addEventListener('click', async () => {
+    if (!isFilet) {
+        card.querySelector('.png-download-btn').addEventListener('click', async () => {
         const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
         const dl = url => {
             const a = document.createElement('a');
@@ -701,6 +702,7 @@ function buildPatternCard(uid, patternId, data) {
             const blob = await res.blob(); const u = URL.createObjectURL(blob); dl(u); setTimeout(() => URL.revokeObjectURL(u), 1000);
         } catch { window.open(data.patternImageURL, '_blank'); }
     });
+}
 
     card.querySelector('.rename-btn').addEventListener('click', async () => {
         const current = data.title || data.name || '';
