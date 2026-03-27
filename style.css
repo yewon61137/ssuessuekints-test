@@ -4089,6 +4089,10 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 }
 .filet-canvas {
     display: block;
+    max-width: none;
+    width: auto;
+    height: auto;
+    image-rendering: auto;
     background: #fff;
     cursor: crosshair;
     border: 1px solid #ccc;

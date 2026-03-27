@@ -206,28 +206,32 @@ if (convertBtn) {
     convertBtn.addEventListener('click', () => {
         if (!bgImage) { alert('이미지를 업로드하세요.'); return; }
         const threshold = parseInt(inputThreshold.value);
+        // 모듈 변수 아닌 input에서 직접 읽기
+        const cols = parseInt(inputGridW.value) || 30;
+        const rows = parseInt(inputGridH.value) || 30;
+        const offW = cols * CELL_SIZE;
+        const offH = rows * CELL_SIZE;
         const offscreen = document.createElement('canvas');
-        offscreen.width = gridW * CELL_SIZE;
-        offscreen.height = gridH * CELL_SIZE;
+        offscreen.width = offW;
+        offscreen.height = offH;
         const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
         offCtx.drawImage(bgImage, 0, 0, offscreen.width, offscreen.height);
         const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
-        // offscreen 전체를 cols×rows 격자로 균등 분할해 각 셀 중심 픽셀 샘플링
-        const stepX = offscreen.width / gridW;
-        const stepY = offscreen.height / gridH;
-        for (let row = 0; row < gridH; row++) {
-            for (let col = 0; col < gridW; col++) {
-                const px = Math.floor(col * stepX + stepX / 2);
-                const py = Math.floor(row * stepY + stepY / 2);
-                const idx = (py * offscreen.width + px) * 4;
-                const brightness = (0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2]);
-                const alpha = imgData[idx+3];
-                if (alpha < 50 || brightness >= 240) {
-                    grid[row][col] = -1; // 투명 or 흰색 배경 → 비활성
+        console.log('[filet convert] img:', bgImage.naturalWidth, 'x', bgImage.naturalHeight,
+            '| offscreen:', offW, 'x', offH, '| grid:', cols, 'x', rows);
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const sx = Math.floor((col + 0.5) * CELL_SIZE);
+                const sy = Math.floor((row + 0.5) * CELL_SIZE);
+                const idx = (sy * offW + sx) * 4;
+                const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2], a = imgData[idx+3];
+                const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                if (a < 50 || brightness >= 240) {
+                    grid[row][col] = -1;
                 } else if (brightness < threshold) {
-                    grid[row][col] = 0;  // 피사체 내 어두운 부분 → 빈칸
+                    grid[row][col] = 0;
                 } else {
-                    grid[row][col] = 1;  // 피사체 실루엣 → 채움칸
+                    grid[row][col] = 1;
                 }
             }
         }
