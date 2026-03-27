@@ -77,23 +77,7 @@ function render() {
         }
     }
     
-    // 2. 10단위 가이드라인
-    ctx.strokeStyle = '#999';
-    ctx.lineWidth = 2;
-    for (let x = 0; x <= gridW; x += 10) {
-        ctx.beginPath();
-        ctx.moveTo(x * CELL_SIZE, 0);
-        ctx.lineTo(x * CELL_SIZE, canvas.height);
-        ctx.stroke();
-    }
-    for (let y = 0; y <= gridH; y += 10) {
-        ctx.beginPath();
-        ctx.moveTo(0, y * CELL_SIZE);
-        ctx.lineTo(canvas.width, y * CELL_SIZE);
-        ctx.stroke();
-    }
-    
-    // 3. 채워진 칸 (■)
+    // 2. 채워진 칸 (■)
     ctx.fillStyle = '#000';
     for (let y = 0; y < gridH; y++) {
         for (let x = 0; x < gridW; x++) {
@@ -214,7 +198,9 @@ if (convertBtn) {
         const tempCtx = tempCanvas.getContext('2d');
         tempCanvas.width = gridW;
         tempCanvas.height = gridH;
-        tempCtx.drawImage(bgImage, 0, 0, gridW, gridH);
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = 'high';
+        tempCtx.drawImage(bgImage, 0, 0, bgImage.naturalWidth, bgImage.naturalHeight, 0, 0, gridW, gridH);
         const imgData = tempCtx.getImageData(0, 0, gridW, gridH).data;
         for (let y = 0; y < gridH; y++) {
             for (let x = 0; x < gridW; x++) {
