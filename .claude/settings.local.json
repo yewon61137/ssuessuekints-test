@@ -25,7 +25,8 @@
       "Bash(grep:*)",
       "Bash(ls -la *.js)",
       "Bash(ls C:/Users/leah6/ssuessuekints-test/*.toml C:/Users/leah6/ssuessuekints-test/*.json)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(시작코 91코)"
     ]
   }
 }

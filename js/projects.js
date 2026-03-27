@@ -520,11 +520,15 @@ function scheduleCounterSave(partId) {
 // ── PDF 업로드 / 삭제 ─────────────────────────────────────────────────────────
 async function uploadPdf(file, project) {
     const T = tr();
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        alert(T.pdf_error_type); return;
-    }
-    if (file.size > 20 * 1024 * 1024) {
-        alert(T.pdf_error_size); return;
+    const { validateFile } = await import('./auth.js');
+    const v = validateFile(file, { 
+        maxSizeMB: 10, 
+        allowedExtensions: ['pdf'], 
+        allowedMimetypes: ['application/pdf'] 
+    });
+    
+    if (!v.valid) {
+        alert(v.error); return;
     }
     const path = `users/${currentUser.uid}/projects/${currentProjectId}/pattern.pdf`;
     const fileRef = storageRef(storage, path);
@@ -623,8 +627,10 @@ function renderProgressPhotos(photos) {
 
 async function uploadProgressPhoto(file) {
     const T = tr();
-    if (!file.type.startsWith('image/')) {
-        alert('이미지 파일만 업로드 가능합니다.'); return;
+    const { validateFile } = await import('./auth.js');
+    const v = validateFile(file);
+    if (!v.valid) {
+        alert(v.error); return;
     }
     const filename = `${Date.now()}_${file.name}`;
     const path = `users/${currentUser.uid}/projects/${currentProjectId}/photos/${filename}`;

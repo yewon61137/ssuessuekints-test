@@ -392,9 +392,18 @@ async function loadProfilePanel(uid) {
         if (same) { editNicknameChecked = true; editNicknameAvailable = true; }
     });
 
-    photoInput?.addEventListener('change', () => {
+    photoInput?.addEventListener('change', async () => {
         const file = photoInput.files[0];
         if (!file) return;
+
+        const { validateFile } = await import('./auth.js');
+        const v = validateFile(file);
+        if (!v.valid) {
+            alert(v.error);
+            photoInput.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = e => {
             avatarEl.style.backgroundImage = `url(${e.target.result})`;
@@ -1098,9 +1107,17 @@ function initStash(uid) {
     if (btnNew) btnNew.onclick = () => showYarnModal();
     if (cancelBtn) cancelBtn.onclick = () => closeYarnModal();
     if (photoInput) {
-        photoInput.onchange = (e) => {
+        photoInput.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
+                const { validateFile } = await import('./auth.js');
+                const v = validateFile(file);
+                if (!v.valid) {
+                    alert(v.error);
+                    e.target.value = '';
+                    return;
+                }
+
                 yarnPhotoFile = file;
                 const reader = new FileReader();
                 reader.onload = (ev) => {

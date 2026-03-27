@@ -83,21 +83,25 @@ function render() {
         }
     }
 
-    // 4. 격자선 — 경계마다 한 번씩만 그림 (strokeRect 중복 제거), +0.5로 안티얼라이싱 없앰
-    ctx.beginPath();
-    ctx.strokeStyle = '#ccc';
-    ctx.lineWidth = 1;
+    // 4. 격자선
     for (let x = 0; x <= gridW; x++) {
         const px = x * CELL_SIZE + 0.5;
+        ctx.beginPath();
+        ctx.strokeStyle = (x % 10 === 0) ? '#666' : '#ccc';
+        ctx.lineWidth = (x % 10 === 0) ? 2 : 1;
         ctx.moveTo(px, 0);
         ctx.lineTo(px, canvas.height);
+        ctx.stroke();
     }
     for (let y = 0; y <= gridH; y++) {
         const py = y * CELL_SIZE + 0.5;
+        ctx.beginPath();
+        ctx.strokeStyle = (y % 10 === 0) ? '#666' : '#ccc';
+        ctx.lineWidth = (y % 10 === 0) ? 2 : 1;
         ctx.moveTo(0, py);
         ctx.lineTo(canvas.width, py);
+        ctx.stroke();
     }
-    ctx.stroke();
 }
 
 // --- 크기 계산 및 표시 ---
@@ -254,8 +258,8 @@ if (convertBtn) {
                 } else {
                     // 밝은 배경: 매우 밝은 픽셀 → 비활성, 어두운 픽셀 → 채움
                     if (brightness >= 240)         grid[row][col] = -1;
-                    else if (brightness < threshold) grid[row][col] = 0;
-                    else                           grid[row][col] = 1;
+                    else if (brightness < threshold) grid[row][col] = 1;
+                    else                           grid[row][col] = 0;
                 }
             }
         }

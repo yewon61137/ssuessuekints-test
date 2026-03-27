@@ -59,6 +59,40 @@ export function getCurrentUser() {
     return auth.currentUser;
 }
 
+/**
+ * 프로젝트 보안 규칙 준수를 위한 파일 검증 함수
+ * - 크기 제한: 10MB
+ * - 형식: MIME 타입 및 확장자 체크
+ */
+export function validateFile(file, options = {}) {
+    const { 
+        maxSizeMB = 10, 
+        allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+        allowedMimetypes = ['image/', 'application/pdf']
+    } = options;
+
+    if (!file) return { valid: false, error: '파일이 선택되지 않았습니다.' };
+    
+    // 1. 크기 검증 (10MB)
+    if (file.size > maxSizeMB * 1024 * 1024) {
+        return { valid: false, error: `파일 크기는 ${maxSizeMB}MB를 초과할 수 없습니다.` };
+    }
+    
+    // 2. MIME 타입 검증
+    const mimeValid = allowedMimetypes.some(m => file.type.startsWith(m) || file.type === m);
+    if (!mimeValid) {
+        return { valid: false, error: '지원하지 않는 파일 형식입니다.' };
+    }
+    
+    // 3. 확장자 검증
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+        return { valid: false, error: '지원하지 않는 파일 확장자입니다.' };
+    }
+    
+    return { valid: true };
+}
+
 // 사용자 프로필 조회
 export async function getUserProfile(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
@@ -76,6 +110,9 @@ export async function updateUserProfile(uid, { nickname, currentNickname, realNa
 
     // 새 사진 업로드
     if (photoFile) {
+        const v = validateFile(photoFile);
+        if (!v.valid) throw new Error(v.error);
+
         const photoRef = ref(storage, `users/${uid}/profile/avatar.jpg`);
         await uploadBytes(photoRef, photoFile);
         profilePhotoURL = await getDownloadURL(photoRef);
@@ -131,6 +168,9 @@ async function saveUserProfile(user, nickname, realName, photoFile) {
     // 1. 프로필 사진: 새 파일 업로드 또는 Google 사진 URL 사용
     let profilePhotoURL = user.photoURL || null;
     if (photoFile) {
+        const v = validateFile(photoFile);
+        if (!v.valid) throw new Error(v.error);
+
         const photoRef = ref(storage, `users/${user.uid}/profile/avatar.jpg`);
         await uploadBytes(photoRef, photoFile);
         profilePhotoURL = await getDownloadURL(photoRef);

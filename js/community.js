@@ -186,10 +186,20 @@ document.querySelectorAll('.img-file-input').forEach(input => {
     input.addEventListener('change', handleImageSelect);
 });
 
-function handleImageSelect(e) {
+async function handleImageSelect(e) {
     const idx = parseInt(e.target.getAttribute('data-idx'));
     const file = e.target.files[0];
     if (!file) return;
+
+    // 보안 규칙 준수: 이미지 파일 검증
+    const { validateFile } = await import('./auth.js');
+    const v = validateFile(file);
+    if (!v.valid) {
+        alert(v.error);
+        e.target.value = '';
+        return;
+    }
+
     imageFiles[idx] = file;
     const slot = document.getElementById(`imgSlot${idx}`);
     const url = URL.createObjectURL(file);
