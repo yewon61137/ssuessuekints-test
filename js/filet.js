@@ -25,6 +25,8 @@ const inputSts10 = document.getElementById('filetSts10');
 const inputRows10 = document.getElementById('filetRows10');
 const resultSizeDisplay = document.getElementById('filetResultSize');
 const uploadInput = document.getElementById('filetImageUpload');
+const uploadWrapper = document.querySelector('.file-upload-wrapper'); 
+const fileNameDisplay = document.getElementById('filetFileNameDisplay');
 const convertBtn = document.getElementById('filetConvertBtn');
 const clearBtn = document.getElementById('filetClearBtn');
 const downloadBtn = document.getElementById('filetDownloadBtn');
@@ -170,18 +172,54 @@ inputGridH.addEventListener('input', initFiletEditor);
 inputSts10.addEventListener('input', updateSizeInfo);
 inputRows10.addEventListener('input', updateSizeInfo);
 
-uploadInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+function handleFile(file) {
     if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드할 수 있습니다.');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = (event) => {
         const img = new Image();
-        img.onload = () => { bgImage = img; };
+        img.onload = () => { 
+            bgImage = img;
+            if (fileNameDisplay) fileNameDisplay.textContent = file.name;
+        };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-    document.getElementById('filetFileNameDisplay').textContent = file.name;
-});
+}
+
+if (uploadInput) {
+    uploadInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+    });
+}
+
+if (uploadWrapper) {
+    uploadWrapper.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadWrapper.classList.add('dragging');
+    });
+    uploadWrapper.addEventListener('dragleave', () => {
+        uploadWrapper.classList.remove('dragging');
+    });
+    uploadWrapper.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadWrapper.classList.remove('dragging');
+        handleFile(e.dataTransfer.files[0]);
+    });
+    // 배경 클릭 시에도 작동하도록 하되, 2중 트리거 방지
+    uploadWrapper.addEventListener('click', (e) => {
+        if (e.target.classList.contains('file-upload-btn') || e.target.tagName === 'LABEL') {
+            // Label의 for 속성이 이미 click을 트리거하므로 여기서는 아무것도 안함
+            return;
+        }
+        if (e.target !== uploadInput) {
+            uploadInput.click();
+        }
+    });
+}
 
 convertBtn.addEventListener('click', convertImageToGrid);
 clearBtn.addEventListener('click', () => {
