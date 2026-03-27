@@ -40,6 +40,9 @@ import {
     deleteObject
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
+// ⚠️ firebase-config.js 파일에서 설정을 수정하세요
+import { firebaseConfig } from './firebase-config.js';
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
