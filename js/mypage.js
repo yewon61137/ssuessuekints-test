@@ -529,7 +529,6 @@ function buildPatternCard(uid, patternId, data) {
             <button class="rename-btn">${tr('rename')}</button>
             ${isFilet ? '' : `<a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>`}
             <button class="pdf-btn">PDF</button>
-            ${isFilet ? '' : `<button class="png-download-btn">PNG</button>`}
             <button class="delete-btn">${tr('delete')}</button>
           </div>
         </div>
@@ -684,25 +683,6 @@ function buildPatternCard(uid, patternId, data) {
         } catch {}
         generatePatternPdf(data.patternImageURL, null);
     });
-
-    if (!isFilet) {
-        card.querySelector('.png-download-btn').addEventListener('click', async () => {
-        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-        const dl = url => {
-            const a = document.createElement('a');
-            a.href = url; a.download = `${safeName}.png`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        };
-        if (data.patternBase64) { dl(data.patternBase64); return; }
-        if (data.patternStoragePath) {
-            try { const blob = await getBlob(ref(storage, data.patternStoragePath)); const u = URL.createObjectURL(blob); dl(u); setTimeout(() => URL.revokeObjectURL(u), 1000); return; } catch {}
-        }
-        try {
-            const res = await fetch(data.patternImageURL); if (!res.ok) throw new Error();
-            const blob = await res.blob(); const u = URL.createObjectURL(blob); dl(u); setTimeout(() => URL.revokeObjectURL(u), 1000);
-        } catch { window.open(data.patternImageURL, '_blank'); }
-    });
-}
 
     card.querySelector('.rename-btn').addEventListener('click', async () => {
         const current = data.title || data.name || '';
