@@ -206,15 +206,20 @@ if (convertBtn) {
     convertBtn.addEventListener('click', () => {
         if (!bgImage) { alert('이미지를 업로드하세요.'); return; }
         const threshold = parseInt(inputThreshold.value);
+        const destW = gridW * CELL_SIZE;
+        const destH = gridH * CELL_SIZE;
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = gridW;
-        tempCanvas.height = gridH;
+        tempCanvas.width = destW;
+        tempCanvas.height = destH;
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-        tempCtx.drawImage(bgImage, 0, 0, gridW, gridH);
-        const imgData = tempCtx.getImageData(0, 0, gridW, gridH).data;
+        tempCtx.drawImage(bgImage, 0, 0, destW, destH);
+        const imgData = tempCtx.getImageData(0, 0, destW, destH).data;
+        const half = Math.floor(CELL_SIZE / 2);
         for (let y = 0; y < gridH; y++) {
             for (let x = 0; x < gridW; x++) {
-                const idx = (y * gridW + x) * 4;
+                const px = x * CELL_SIZE + half;
+                const py = y * CELL_SIZE + half;
+                const idx = (py * destW + px) * 4;
                 const brightness = (0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2]);
                 const alpha = imgData[idx+3];
                 if (alpha < 50 || brightness >= 240) {
