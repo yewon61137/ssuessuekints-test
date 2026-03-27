@@ -1,7 +1,7 @@
 // post.js — 게시글 상세 페이지
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
-import { initLang } from './i18n.js';
+import { initLang, formatDate } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     doc, getDoc, collection, query, orderBy, getDocs,
@@ -59,10 +59,7 @@ function renderPost(pid, data) {
         avatarEl.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
     document.getElementById('postAuthorName').textContent = data.nickname || '';
-    const date = data.createdAt
-        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-        : '';
-    document.getElementById('postDate').textContent = date;
+    document.getElementById('postDate').textContent = formatDate(data.createdAt);
     if (data.uid) {
         document.getElementById('postAuthorLink').href = `/mypage.html?uid=${data.uid}`;
     }
@@ -164,12 +161,7 @@ async function loadComments(pid) {
     } catch (e) { console.error('Comments load error:', e); }
 }
 
-function formatDate(ts) {
-    if (!ts) return '';
-    return new Date(ts.seconds * 1000).toLocaleString('ko-KR', {
-        year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-}
+// formatDate -> i18n.js의 formatDate 사용 (상단 import 추가됨)
 
 function makeAvatar(photoURL, size = 16) {
     return photoURL

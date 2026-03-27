@@ -1,7 +1,7 @@
 // community.js — 커뮤니티 피드
 
 import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
-import { initLang } from './i18n.js';
+import { initLang, formatDate } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
     collection, query, orderBy, limit, getDocs, addDoc, setDoc,
@@ -83,9 +83,7 @@ function renderPostCard(postId, data) {
     card.className = 'post-card';
     card.href = `/post.html?id=${postId}`;
 
-    const date = data.createdAt
-        ? new Date(data.createdAt.seconds * 1000).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-        : '';
+    const date = formatDate(data.createdAt);
     const thumb = data.images && data.images[0]
         ? `<div class="post-card-thumb" style="background-image:url(${escHtml(data.images[0])})"></div>`
         : '<div class="post-card-thumb post-card-thumb-empty"></div>';

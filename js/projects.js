@@ -2,10 +2,10 @@
 // localStorage 사용 금지: 모든 데이터는 Firestore에만 저장
 
 import { auth, db, initAuth, openAuthModal } from './auth.js';
-import { t, initLang, applyLang } from './i18n.js';
+import { t, initLang, applyLang, formatDate } from './i18n.js';
 import {
     collection, doc, addDoc, updateDoc, deleteDoc,
-    getDocs, onSnapshot, serverTimestamp, query, orderBy
+    getDocs, onSnapshot, serverTimestamp, query, orderBy, increment
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -41,6 +41,7 @@ let activeCounter = {
 let timerInterval = null;
 let timerSeconds = 0; // 이번 세션 소요 시간(초)
 let baseSeconds = 0;  // 이전까지의 총 누적 시간(초)
+let todaySeconds = 0; // "오늘"의 누적 시간(초)
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -252,6 +253,11 @@ function renderPartDetail(part) {
     }
     timerSeconds = 0;
     baseSeconds = part.totalSeconds || 0;
+    
+    // 오늘 자 기록 찾기
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    todaySeconds = (part.dailySeconds && part.dailySeconds[today]) || 0;
+
     currentPartId = part.id;
     updateTimerDisplay();
     $('btn-timer-start').style.display = '';
@@ -305,8 +311,11 @@ function renderPartDetail(part) {
 function updateTimerDisplay() {
     const display = $('timer-display');
     const accum   = $('accumulated-time');
+    const todayDisplay = $('today-time');
+
     if (display) display.textContent = formatTime(timerSeconds);
     if (accum)   accum.textContent   = formatTime(baseSeconds + timerSeconds);
+    if (todayDisplay) todayDisplay.textContent = formatTime(todaySeconds + timerSeconds);
 }
 
 function startTimer() {
@@ -335,12 +344,18 @@ async function saveTimer() {
     if (timerSeconds === 0) return;
     
     const total = baseSeconds + timerSeconds;
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    
     try {
         await updateDoc(
             doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
-            { totalSeconds: total }
+            { 
+                totalSeconds: total,
+                [`dailySeconds.${today}`]: increment(timerSeconds)
+            }
         );
         baseSeconds = total;
+        todaySeconds += timerSeconds;
         timerSeconds = 0;
         updateTimerDisplay();
     } catch (e) { console.error('Timer save error:', e); }

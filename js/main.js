@@ -206,7 +206,7 @@ const MAX_CANVAS_DIMENSION = 8000; // Browser safety limit
 
 function changeLanguage(lang) {
     currentLang = lang;
-    localStorage.setItem('lang', lang);
+    localStorage.setItem('ssuessue_lang', lang);
     document.documentElement.lang = lang;
     const merged = { ...sharedT[lang], ...translations[lang] };
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -238,7 +238,7 @@ langBtns.forEach(btn => {
 });
 
 // 저장된 언어로 초기화
-const savedLang = localStorage.getItem('lang');
+const savedLang = localStorage.getItem('ssuessue_lang');
 if (savedLang && savedLang !== 'ko') changeLanguage(savedLang);
 
 // --- 실 굵기 입력 방식 전환 ---

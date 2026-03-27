@@ -99,6 +99,7 @@ export const t = {
         timer_start: '시작',
         timer_pause: '일시정지',
         total_time_spent: '누적 시간',
+        today_time_spent: '오늘 뜬 시간',
         // 실 재고 (Yarn Stash)
         tab_stash: '내 실 창고',
         title_stash: '내 실 창고',
@@ -222,6 +223,7 @@ export const t = {
         timer_start: 'Start',
         timer_pause: 'Pause',
         total_time_spent: 'Total Time',
+        today_time_spent: "Today's Time",
         // Yarn Stash
         tab_stash: 'My Yarn Stash',
         title_stash: 'My Yarn Stash',
@@ -375,7 +377,7 @@ export const t = {
 export function applyLang(lang, opts = {}) {
     const { pageTitles, extra } = opts;
 
-    localStorage.setItem('lang', lang);
+    localStorage.setItem('ssuessue_lang', lang);
     document.documentElement.lang = lang;
 
     // 언어 버튼 활성화
@@ -424,7 +426,7 @@ export function initLang(opts = {}) {
     const handler = lang => applyLang(lang, opts);
     document.querySelectorAll('.lang-btn[data-lang]').forEach(btn =>
         btn.addEventListener('click', () => handler(btn.getAttribute('data-lang'))));
-    const saved = localStorage.getItem('lang');
+    const saved = localStorage.getItem('ssuessue_lang');
     if (saved) {
         handler(saved);
     } else {
@@ -435,4 +437,32 @@ export function initLang(opts = {}) {
                        : 'en'; // 그 외 모든 언어 → 영어
         handler(detected);
     }
+}
+
+/**
+ * 현재 설정된 언어를 반환합니다.
+ * @returns {string} 'ko' | 'en' | 'ja'
+ */
+export function getLang() {
+    return localStorage.getItem('ssuessue_lang') || 'ko';
+}
+
+/**
+ * Firestore 타임스탬프 또는 Date 객체를 현재 언어 로캘에 맞춰 포맷팅합니다.
+ * @param {object|Date} ts - Firestore Timestamp {seconds, nanoseconds} 또는 Date 객체
+ * @returns {string} 포맷팅된 날짜 문자열
+ */
+export function formatDate(ts) {
+    if (!ts) return '';
+    const date = ts instanceof Date ? ts : new Date(ts.seconds * 1000);
+    const lang = getLang();
+    const locale = lang === 'ko' ? 'ko-KR' : lang === 'ja' ? 'ja-JP' : 'en-US';
+    
+    return date.toLocaleString(locale, {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
