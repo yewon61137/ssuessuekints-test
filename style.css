@@ -4089,10 +4089,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 }
 .filet-canvas {
     display: block;
-    margin: 2rem auto;
     background: #fff;
-    image-rendering: pixelated;
-    max-width: 100%;
     cursor: crosshair;
     border: 1px solid #ccc;
 }
@@ -4118,6 +4115,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
     text-align: center;
 }
 .filet-wrapper {
+    display: block;
     overflow: auto;
     padding: 1rem;
     border-radius: 8px;

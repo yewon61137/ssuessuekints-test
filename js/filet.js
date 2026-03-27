@@ -221,8 +221,13 @@ if (convertBtn) {
                 const idx = (y * gridW + x) * 4;
                 const brightness = (0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2]);
                 const alpha = imgData[idx+3];
-                if (alpha < 50) grid[y][x] = -1; // 투명하면 비활성
-                else grid[y][x] = (brightness < threshold) ? 1 : 0;
+                if (alpha < 50 || brightness >= 240) {
+                    grid[y][x] = -1; // 투명 or 흰색 배경 → 비활성
+                } else if (brightness < threshold) {
+                    grid[y][x] = 0;  // 피사체 내 어두운 부분 → 빈칸
+                } else {
+                    grid[y][x] = 1;  // 피사체 실루엣 → 채움칸
+                }
             }
         }
         render();
