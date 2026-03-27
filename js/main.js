@@ -108,6 +108,12 @@ const translations = {
         btn_convert_filet: "이미지를 격자로 변환",
         btn_clear_grid: "격자 초기화",
         legend_filet: "범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)",
+        label_filet_yarn_type: "실 종류 (대략적인 굵기)",
+        preset_custom: "직접 입력 (게이지)",
+        preset_lace40: "극세 레이스사 (#40)",
+        preset_lace20: "일반 레이스사 (#20)",
+        preset_summer: "여름용 면사 (코바늘 0-2호)",
+        preset_winter: "일반 털실 (코바늘 3-5호)",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -169,6 +175,12 @@ const translations = {
         btn_convert_filet: "Convert Image to Grid",
         btn_clear_grid: "Clear Grid",
         legend_filet: "Legend: ■ Fill (DC block), □ Empty (Mesh space)",
+        label_filet_yarn_type: "Yarn Type (Approx. Weight)",
+        preset_custom: "Custom (Manual Gauge)",
+        preset_lace40: "Ultra Fine Lace (#40)",
+        preset_lace20: "Standard Lace (#20)",
+        preset_summer: "Summer Cotton (0-2 Hook)",
+        preset_winter: "Standard Wool (3-5 Hook)",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -230,6 +242,12 @@ const translations = {
         btn_convert_filet: "画像をグリッドに変換",
         btn_clear_grid: "グリッドを初期化",
         legend_filet: "凡例: ■ 埋め(長編み束), □ 空き(方眼)",
+        label_filet_yarn_type: "糸の種類 (おおよその太さ)",
+        preset_custom: "直接入力 (ゲージ)",
+        preset_lace40: "極細レース糸 (#40)",
+        preset_lace20: "レース糸 (#20)",
+        preset_summer: "夏用コットン (かぎ針 0-2号)",
+        preset_winter: "一般毛糸 (かぎ針 3-5号)",
     }
 };
 

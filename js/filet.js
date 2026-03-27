@@ -23,6 +23,7 @@ const inputGridH = document.getElementById('filetGridH');
 const inputThreshold = document.getElementById('filetThreshold'); // 여기서는 채도 임계값으로 사용 (0~100)
 const inputSts10 = document.getElementById('filetSts10');
 const inputRows10 = document.getElementById('filetRows10');
+const yarnPreset = document.getElementById('filetYarnPreset'); // 프리셋 드롭다운 추가
 const resultSizeDisplay = document.getElementById('filetResultSize');
 const uploadInput = document.getElementById('filetImageUpload');
 const uploadWrapper = document.querySelector('.file-upload-wrapper'); 
@@ -171,6 +172,23 @@ inputGridW.addEventListener('input', initFiletEditor);
 inputGridH.addEventListener('input', initFiletEditor);
 inputSts10.addEventListener('input', updateSizeInfo);
 inputRows10.addEventListener('input', updateSizeInfo);
+
+if (yarnPreset) {
+    const presets = {
+        lace40: { sts: 48, rows: 48 },
+        lace20: { sts: 38, rows: 38 },
+        summer: { sts: 30, rows: 30 },
+        winter: { sts: 22, rows: 22 }
+    };
+    yarnPreset.addEventListener('change', () => {
+        const val = yarnPreset.value;
+        if (val !== 'custom' && presets[val]) {
+            inputSts10.value = presets[val].sts;
+            inputRows10.value = presets[val].rows;
+            updateSizeInfo();
+        }
+    });
+}
 
 function handleFile(file) {
     if (!file) return;
