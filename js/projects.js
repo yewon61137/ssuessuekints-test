@@ -40,7 +40,8 @@ let activeCounter = {
 // 타이머 런타임 상태
 let timerInterval = null;
 let timerSeconds = 0; // 이번 세션 소요 시간(초)
-let baseSeconds = 0;  // 이전까지의 총 누적 시간(초)
+let baseSeconds = 0;  // 이전까지의 "파트" 누적 시간(초)
+let projectBaseSeconds = 0; // "프로젝트" 전체 누적 시간(초)
 let todaySeconds = 0; // "오늘"의 누적 시간(초)
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
@@ -311,10 +312,12 @@ function renderPartDetail(part) {
 function updateTimerDisplay() {
     const display = $('timer-display');
     const accum   = $('accumulated-time');
+    const partAccum = $('part-accumulated-time');
     const todayDisplay = $('today-time');
 
     if (display) display.textContent = formatTime(timerSeconds);
-    if (accum)   accum.textContent   = formatTime(baseSeconds + timerSeconds);
+    if (accum)   accum.textContent   = formatTime(projectBaseSeconds + timerSeconds);
+    if (partAccum) partAccum.textContent = formatTime(baseSeconds + timerSeconds);
     if (todayDisplay) todayDisplay.textContent = formatTime(todaySeconds + timerSeconds);
 }
 
@@ -343,18 +346,30 @@ async function saveTimer() {
     if (!currentUser || !currentProjectId || !currentPartId) return;
     if (timerSeconds === 0) return;
     
-    const total = baseSeconds + timerSeconds;
+    const partTotal = baseSeconds + timerSeconds;
+    const projTotal = projectBaseSeconds + timerSeconds;
     const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
     
     try {
-        await updateDoc(
+        const batch = [];
+        // 파트 업데이트
+        batch.push(updateDoc(
             doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
             { 
-                totalSeconds: total,
+                totalSeconds: increment(timerSeconds),
                 [`dailySeconds.${today}`]: increment(timerSeconds)
             }
-        );
-        baseSeconds = total;
+        ));
+        // 프로젝트 업데이트
+        batch.push(updateDoc(
+            doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+            { totalSeconds: increment(timerSeconds) }
+        ));
+
+        await Promise.all(batch);
+
+        baseSeconds = partTotal;
+        projectBaseSeconds = projTotal;
         todaySeconds += timerSeconds;
         timerSeconds = 0;
         updateTimerDisplay();
@@ -422,6 +437,7 @@ async function openProjectDetail(projectId) {
     projectUnsubscribe = onSnapshot(doc(db, 'users', currentUser.uid, 'projects', projectId), docSnap => {
         if (!docSnap.exists()) return;
         const project = { id: docSnap.id, ...docSnap.data() };
+        projectBaseSeconds = project.totalSeconds || 0;
         
         // 파트 목록 실시간 리스너 (한 번만 설정)
         const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
