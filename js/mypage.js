@@ -605,6 +605,66 @@ function buildPatternCard(uid, patternId, data) {
         pdf.save(`${(data.title || data.name || 'filet').replace(/\s+/g, '_')}.pdf`);
     }
 
+    function generatePatternPdf(imgSrc, cleanup) {
+        if (typeof window.jspdf === 'undefined') {
+            alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            if (cleanup) cleanup();
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+        const img = new Image();
+        img.onload = () => {
+            const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const pdfW = pdf.internal.pageSize.getWidth();
+            const pdfH = pdf.internal.pageSize.getHeight();
+            const margin = 15, maxW = pdfW - margin * 2, maxH = pdfH - margin * 2 - 35;
+            let finalW = maxW, finalH = (img.height / img.width) * finalW;
+            if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
+
+            const titleCanvas = document.createElement('canvas');
+            titleCanvas.width = 900; titleCanvas.height = 36;
+            const tCtx = titleCanvas.getContext('2d');
+            tCtx.font = '600 26px sans-serif'; tCtx.fillStyle = '#000000';
+            tCtx.fillText(data.title || data.name || 'Pattern', 0, 26);
+            pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
+
+            pdf.setFontSize(10);
+            const sizeStr = data.widthCm ? (data.heightCm ? `${data.widthCm}cm x ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
+            const infoLine = `${data.stitches || 0} Stitches x ${data.rows || 0} Rows`
+                + (sizeStr ? ` (${sizeStr})` : '')
+                + (data.yarnType ? ` · ${data.yarnType}` : (data.yarnMm ? ` · ${data.yarnMm}mm` : ''));
+            pdf.text(infoLine, margin, margin + 14);
+
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = img.width; tmpCanvas.height = img.height;
+            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
+            pdf.addImage(tmpCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin + 22, finalW, finalH);
+
+            if (data.legendHTML) {
+                pdf.addPage();
+                pdf.setFontSize(12); pdf.text('Color Legend', margin, margin + 5);
+                const parsedDoc = new DOMParser().parseFromString(data.legendHTML, 'text/html');
+                let y = margin + 15;
+                parsedDoc.querySelectorAll('.color-item').forEach(item => {
+                    const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
+                    if (rgbMatch) {
+                        pdf.setFillColor(+rgbMatch[0], +rgbMatch[1], +rgbMatch[2]);
+                        pdf.rect(margin, y, 8, 8, 'F');
+                        pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
+                        pdf.setFontSize(10); pdf.text(item.querySelector('span')?.textContent || '', margin + 13, y + 6);
+                        y += 13;
+                        if (y > pdfH - margin) y = margin;
+                    }
+                });
+            }
+            pdf.save(`${safeName}.pdf`);
+            if (cleanup) cleanup();
+        };
+        img.onerror = () => { if (cleanup) cleanup(); alert('이미지를 불러오지 못했습니다.'); };
+        img.src = imgSrc;
+    }
+
     card.querySelector('.pdf-btn').addEventListener('click', async () => {
         if (isFilet) { generateFiletPdf(); return; }
         if (data.patternBase64) { generatePatternPdf(data.patternBase64, null); return; }
