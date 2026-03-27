@@ -185,6 +185,9 @@ if (yarnPreset) {
         if (val !== 'custom' && presets[val]) {
             inputSts10.value = presets[val].sts;
             inputRows10.value = presets[val].rows;
+            // 수동으로 값을 넣었을 때는 input 이벤트가 발생하지 않으므로 강제 호출하거나 직접 계산 함수 실행
+            inputSts10.dispatchEvent(new Event('input'));
+            inputRows10.dispatchEvent(new Event('input'));
             updateSizeInfo();
         }
     });
