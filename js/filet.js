@@ -210,17 +210,32 @@ if (convertBtn) {
         // 모듈 변수 아닌 input에서 직접 읽기
         const cols = parseInt(inputGridW.value) || 30;
         const rows = parseInt(inputGridH.value) || 30;
-        // canvas.width/height 기준으로 cellSize 계산 (고정 CELL_SIZE 상수 미사용)
-        const offW = canvas.width;
-        const offH = canvas.height;
+
+        // 실제 CSS 렌더링 크기 × DPR 로 offscreen 크기 계산
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const cssW = rect.width > 0 ? rect.width : (canvas.offsetWidth || canvas.width);
+        const cssH = rect.height > 0 ? rect.height : (canvas.offsetHeight || canvas.height);
+        const offW = Math.max(Math.round(cssW * dpr), cols);
+        const offH = Math.max(Math.round(cssH * dpr), rows);
         const cellW = offW / cols;
         const cellH = offH / rows;
+
         const offscreen = document.createElement('canvas');
         offscreen.width = offW;
         offscreen.height = offH;
         const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
         offCtx.drawImage(bgImage, 0, 0, offscreen.width, offscreen.height);
         const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+
+        // 네 모서리 픽셀 평균 밝기로 배경색 판단
+        const cornerPx = [[0,0],[offW-1,0],[0,offH-1],[offW-1,offH-1]];
+        const bgBrightness = cornerPx.reduce((sum, [cx, cy]) => {
+            const i = (cy * offW + cx) * 4;
+            return sum + (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
+        }, 0) / 4;
+        const darkBg = bgBrightness < 128;
+
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const sx = Math.floor((col + 0.5) * cellW);
@@ -228,12 +243,19 @@ if (convertBtn) {
                 const idx = (sy * offW + sx) * 4;
                 const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2], a = imgData[idx+3];
                 const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-                if (a < 50 || brightness >= 240) {
-                    grid[row][col] = -1;
-                } else if (brightness < threshold) {
-                    grid[row][col] = 0;
+
+                if (a < 50) {
+                    grid[row][col] = -1; // 투명 → 비활성
+                } else if (darkBg) {
+                    // 어두운 배경: 매우 어두운 픽셀 → 비활성, 밝은 픽셀 → 채움
+                    if (brightness < 15)          grid[row][col] = -1;
+                    else if (brightness >= threshold) grid[row][col] = 1;
+                    else                           grid[row][col] = 0;
                 } else {
-                    grid[row][col] = 1;
+                    // 밝은 배경: 매우 밝은 픽셀 → 비활성, 어두운 픽셀 → 채움
+                    if (brightness >= 240)         grid[row][col] = -1;
+                    else if (brightness < threshold) grid[row][col] = 0;
+                    else                           grid[row][col] = 1;
                 }
             }
         }
