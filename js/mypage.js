@@ -517,7 +517,7 @@ function buildPatternCard(uid, patternId, data) {
     const settingsText = [yarnInfo, sizeInfo].filter(Boolean).join(' · ');
 
     const isFilet = data.type === 'filet';
-    const filetMeta = isFilet ? `${data.gridW} × ${data.gridH} | ${data.resultSizeText || ''}` : '';
+    const filetMeta = isFilet ? `${data.gridCols || data.gridW || 0} × ${data.gridRows || data.gridH || 0} | ${data.resultSizeText || ''}` : '';
 
     card.innerHTML = `
         <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${displayName}" loading="lazy" onerror="this.style.background='#eee'">
@@ -564,18 +564,19 @@ function buildPatternCard(uid, patternId, data) {
         const title = textToImg(data.title || data.name || '방안뜨기 도안', 18, true);
         pdf.addImage(title.src, 'PNG', margin, margin - 10, title.w, title.h);
 
-        const summary = textToImg(`그리드: ${data.gridW} x ${data.gridH} | ${data.resultSizeText || ''}`, 10);
+        const summary = textToImg(`그리드: ${data.gridCols || data.gridW || 0} x ${data.gridRows || data.gridH || 0} | ${data.resultSizeText || ''}`, 10);
         pdf.addImage(summary.src, 'PNG', margin, margin + 5, summary.w, summary.h);
 
         const legend = textToImg('범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)', 10);
         pdf.addImage(legend.src, 'PNG', margin, margin + 12, legend.w, legend.h);
 
-        const startChain = textToImg(`시작코: ${data.gridW * 3 + 1} 코`, 10);
+        const startChainValue = (data.gridCols || data.gridW || 0) * 3 + 1;
+        const startChain = textToImg(`시작코: ${startChainValue} 코`, 10);
         pdf.addImage(startChain.src, 'PNG', margin, margin + 19, startChain.w, startChain.h);
 
         const chartAreaW = pdfW - margin * 2;
         const chartAreaH = pdfH - margin * 2 - 30;
-        const gw = data.gridW, gh = data.gridH;
+        const gw = data.gridCols || data.gridW || 0, gh = data.gridRows || data.gridH || 0;
         
         // 1D 데이터를 2D로 복원
         const flatData = data.gridData || [];

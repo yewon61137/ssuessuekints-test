@@ -299,6 +299,8 @@ async function saveFiletToCloud() {
         return;
     }
 
+    const patternTitle = prompt('도안 이름을 입력하세요', '방안뜨기 도안') || '방안뜨기 도안';
+
     const saveBtnOriginalText = saveBtn.textContent;
     saveBtn.disabled = true;
     saveBtn.textContent = '저장 중...';
@@ -326,11 +328,11 @@ async function saveFiletToCloud() {
         const patternsRef = collection(db, `users/${user.uid}/patterns`);
         await addDoc(patternsRef, {
             type: 'filet',
-            title: '방안뜨기 도안',
-            name: '방안뜨기 도안',
+            title: patternTitle,
+            name: patternTitle,
             gridData: grid.flat(), // Firestore용 평탄화
-            gridW: gridW,
-            gridH: gridH,
+            gridCols: gridW,       // 필드명 변경: gridW -> gridCols
+            gridRows: gridH,       // 필드명 변경: gridH -> gridRows
             sts10: parseFloat(inputSts10.value) || 22,
             rows10: parseFloat(inputRows10.value) || 22,
             resultSizeText: resultSizeDisplay.textContent,
