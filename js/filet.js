@@ -206,28 +206,28 @@ if (convertBtn) {
     convertBtn.addEventListener('click', () => {
         if (!bgImage) { alert('이미지를 업로드하세요.'); return; }
         const threshold = parseInt(inputThreshold.value);
-        const destW = gridW * CELL_SIZE;
-        const destH = gridH * CELL_SIZE;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = destW;
-        tempCanvas.height = destH;
-        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-        tempCtx.drawImage(bgImage, 0, 0, destW, destH);
-        const imgData = tempCtx.getImageData(0, 0, destW, destH).data;
-        const half = Math.floor(CELL_SIZE / 2);
-        for (let y = 0; y < gridH; y++) {
-            for (let x = 0; x < gridW; x++) {
-                const px = x * CELL_SIZE + half;
-                const py = y * CELL_SIZE + half;
-                const idx = (py * destW + px) * 4;
+        const offscreen = document.createElement('canvas');
+        offscreen.width = gridW * CELL_SIZE;
+        offscreen.height = gridH * CELL_SIZE;
+        const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
+        offCtx.drawImage(bgImage, 0, 0, offscreen.width, offscreen.height);
+        const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+        // offscreen 전체를 cols×rows 격자로 균등 분할해 각 셀 중심 픽셀 샘플링
+        const stepX = offscreen.width / gridW;
+        const stepY = offscreen.height / gridH;
+        for (let row = 0; row < gridH; row++) {
+            for (let col = 0; col < gridW; col++) {
+                const px = Math.floor(col * stepX + stepX / 2);
+                const py = Math.floor(row * stepY + stepY / 2);
+                const idx = (py * offscreen.width + px) * 4;
                 const brightness = (0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2]);
                 const alpha = imgData[idx+3];
                 if (alpha < 50 || brightness >= 240) {
-                    grid[y][x] = -1; // 투명 or 흰색 배경 → 비활성
+                    grid[row][col] = -1; // 투명 or 흰색 배경 → 비활성
                 } else if (brightness < threshold) {
-                    grid[y][x] = 0;  // 피사체 내 어두운 부분 → 빈칸
+                    grid[row][col] = 0;  // 피사체 내 어두운 부분 → 빈칸
                 } else {
-                    grid[y][x] = 1;  // 피사체 실루엣 → 채움칸
+                    grid[row][col] = 1;  // 피사체 실루엣 → 채움칸
                 }
             }
         }
