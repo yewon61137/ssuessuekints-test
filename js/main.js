@@ -724,9 +724,24 @@ downloadPdfBtn.addEventListener('click', () => {
             return;
         }
         const { jsPDF } = window.jspdf;
-        const PDFDocument = jsPDF || window.jsPDF; 
-        const pdf = new PDFDocument({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        
+        // 고해상도 텍스트 렌더링 함수 (High-DPI)
+        const textToImg = (text, size, isBold = false) => {
+            const scale = 4;
+            const tCanvas = document.createElement('canvas');
+            const tCtx = tCanvas.getContext('2d');
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
+            const m = tCtx.measureText(text);
+            tCanvas.width = Math.ceil(m.width) + (20 * scale);
+            tCanvas.height = size * 8 * scale;
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
+            tCtx.fillStyle = '#000'; tCtx.textBaseline = 'middle';
+            tCtx.fillText(text, 10 * scale, tCanvas.height / 2);
+            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / (scale * 2.5), h: tCanvas.height / (scale * 2.5) };
+        };
+
+        const imgData = canvas.toDataURL('image/png'); // PNG로 선명도 유지
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
@@ -736,20 +751,22 @@ downloadPdfBtn.addEventListener('click', () => {
         let finalH = (canvas.height / canvas.width) * finalW;
         if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         
-        pdf.setFontSize(14);
-        pdf.text("Knitting Pattern", margin, margin + 5);
-        
-        pdf.setFontSize(10);
+        const lang = currentLang;
+        const titleText = (lang === 'ko' ? '픽셀 뜨개 도안' : (lang === 'ja' ? 'ピクセル編み図' : 'Knitting Pattern'));
+        const titleImg = textToImg(titleText, 18, true);
+        pdf.addImage(titleImg.src, 'PNG', margin, margin - 5, titleImg.w, titleImg.h);
+
         const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
-        let englishInfo = "";
+        let infoStr = "";
         if (numbers && numbers.length >= 4) {
-            englishInfo = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
+            infoStr = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
         } else {
-            englishInfo = "Knitting Pattern Details";
+            infoStr = patternInfo.textContent;
         }
-        pdf.text(englishInfo, margin, margin + 15);
+        const infoImg = textToImg(infoStr, 10);
+        pdf.addImage(infoImg.src, 'PNG', margin, margin + 8, infoImg.w, infoImg.h);
         
-        pdf.addImage(imgData, 'JPEG', margin, margin + 25, finalW, finalH);
+        pdf.addImage(imgData, 'PNG', margin, margin + 22, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
         let currentY = margin + 15;

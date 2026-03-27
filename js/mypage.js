@@ -547,17 +547,19 @@ function buildPatternCard(uid, patternId, data) {
         const pdfW = pdf.internal.pageSize.getWidth();
         const pdfH = pdf.internal.pageSize.getHeight();
 
+        // 고해상도 텍스트 렌더링 함수 (High-DPI)
         const textToImg = (text, size, isBold = false) => {
+            const scale = 4; // 4배 고해상도
             const tCanvas = document.createElement('canvas');
             const tCtx = tCanvas.getContext('2d');
-            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
             const m = tCtx.measureText(text);
-            tCanvas.width = Math.ceil(m.width) + 20;
-            tCanvas.height = size * 6;
-            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            tCanvas.width = Math.ceil(m.width) + (20 * scale);
+            tCanvas.height = size * 8 * scale;
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
             tCtx.fillStyle = '#000'; tCtx.textBaseline = 'middle';
-            tCtx.fillText(text, 10, tCanvas.height / 2);
-            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / 10, h: tCanvas.height / 10 };
+            tCtx.fillText(text, 10 * scale, tCanvas.height / 2);
+            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / (scale * 2.5), h: tCanvas.height / (scale * 2.5) };
         };
 
         const title = textToImg(data.title || data.name || '방안뜨기 도안', 18, true);
@@ -622,11 +624,12 @@ function buildPatternCard(uid, patternId, data) {
             if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
 
             const titleCanvas = document.createElement('canvas');
-            titleCanvas.width = 900; titleCanvas.height = 36;
+            const scale = 4;
+            titleCanvas.width = 1200 * scale; titleCanvas.height = 60 * scale;
             const tCtx = titleCanvas.getContext('2d');
-            tCtx.font = '600 26px sans-serif'; tCtx.fillStyle = '#000000';
-            tCtx.fillText(data.title || data.name || 'Pattern', 0, 26);
-            pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
+            tCtx.font = `600 ${32 * scale}px sans-serif`; tCtx.fillStyle = '#000000';
+            tCtx.fillText(data.title || data.name || 'Pattern', 20 * scale, 45 * scale);
+            pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 60 / 1200);
 
             pdf.setFontSize(10);
             const sizeStr = data.widthCm ? (data.heightCm ? `${data.widthCm}cm x ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
@@ -637,8 +640,10 @@ function buildPatternCard(uid, patternId, data) {
 
             const tmpCanvas = document.createElement('canvas');
             tmpCanvas.width = img.width; tmpCanvas.height = img.height;
-            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-            pdf.addImage(tmpCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin + 22, finalW, finalH);
+            const tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.imageSmoothingEnabled = false; // 픽셀 선명도 유지
+            tmpCtx.drawImage(img, 0, 0);
+            pdf.addImage(tmpCanvas.toDataURL('image/png'), 'PNG', margin, margin + 22, finalW, finalH);
 
             if (data.legendHTML) {
                 pdf.addPage();
