@@ -195,12 +195,32 @@ downloadBtn.addEventListener('click', () => {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
-        pdf.setFontSize(18);
-        pdf.text('Filet Crochet Pattern', margin, margin);
-        pdf.setFontSize(10);
-        pdf.text(`Grid: ${gridW} x ${gridH} | Size: ${resultSizeDisplay.textContent}`, margin, margin + 10);
-        pdf.text('■: 3 DC | □: 1 DC + 2 ch', margin, margin + 16);
-        pdf.text(`Start Chain: ${gridW * 3 + 1} sts`, margin, margin + 22);
+        // 텍스트를 이미지로 변환하는 헬퍼 (한글 깨짐 방지)
+        const textToImg = (text, size, isBold = false) => {
+            const tCanvas = document.createElement('canvas');
+            const tCtx = tCanvas.getContext('2d');
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            const m = tCtx.measureText(text);
+            tCanvas.width = Math.ceil(m.width) + 20;
+            tCanvas.height = size * 6;
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            tCtx.fillStyle = '#000';
+            tCtx.textBaseline = 'middle';
+            tCtx.fillText(text, 10, tCanvas.height / 2);
+            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / 10, h: tCanvas.height / 10 };
+        };
+
+        const title = textToImg('방안뜨기 도안', 18, true);
+        pdf.addImage(title.src, 'PNG', margin, margin - 10, title.w, title.h);
+
+        const summary = textToImg(`그리드: ${gridW} x ${gridH} | ${resultSizeDisplay.textContent}`, 10);
+        pdf.addImage(summary.src, 'PNG', margin, margin + 5, summary.w, summary.h);
+
+        const legend = textToImg('범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)', 10);
+        pdf.addImage(legend.src, 'PNG', margin, margin + 12, legend.w, legend.h);
+
+        const startChain = textToImg(`시작코: ${gridW * 3 + 1} 코`, 10);
+        pdf.addImage(startChain.src, 'PNG', margin, margin + 19, startChain.w, startChain.h);
         
         const chartAreaW = pdfWidth - margin * 2;
         const chartAreaH = pdfHeight - margin * 2 - 30;
@@ -217,19 +237,10 @@ downloadBtn.addEventListener('click', () => {
                     pdf.setFillColor(0);
                     pdf.rect(px, py, pdfCellSize, pdfCellSize, 'F');
                 } else if (val === 0) {
-                    pdf.setDrawColor(200);
+                    pdf.setDrawColor(220); // 격자선 색상 (연하게)
                     pdf.rect(px, py, pdfCellSize, pdfCellSize, 'S');
                 }
             }
-        }
-        
-        pdf.setDrawColor(100);
-        pdf.setLineWidth(0.3);
-        for (let x = 0; x <= gridW; x += 10) {
-            pdf.line(startX + x * pdfCellSize, startY, startX + x * pdfCellSize, startY + gridH * pdfCellSize);
-        }
-        for (let y = 0; y <= gridH; y += 10) {
-            pdf.line(startX, startY + y * pdfCellSize, startX + gridW * pdfCellSize, startY + y * pdfCellSize);
         }
         
         const filename = prompt('파일 이름을 입력하세요', `filet_pattern_${gridW}x${gridH}`);
