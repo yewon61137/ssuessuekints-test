@@ -40,20 +40,23 @@ import {
     deleteObject
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-// ⚠️ firebase-config.js 파일에서 설정을 수정하세요
-import { firebaseConfig } from './firebase-config.js';
-
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 setPersistence(auth, browserSessionPersistence).catch(() => {});
+
+export { 
+    collection, addDoc, serverTimestamp, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, 
+    query, where, orderBy, limit 
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+export { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 export async function applyAuthPersistence() {
     const rm = document.getElementById('rememberMeCheck');
     const type = (rm && rm.checked) ? browserLocalPersistence : browserSessionPersistence;
     await setPersistence(auth, type);
 }
-export const db = getFirestore(app);
-export const storage = getStorage(app);
 
 export function getCurrentUser() {
     return auth.currentUser;

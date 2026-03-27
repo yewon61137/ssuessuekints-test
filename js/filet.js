@@ -1,6 +1,9 @@
 // filet.js - 방안뜨기 도안 생성기 (전체 재작성)
 
-import { getCurrentUser, openAuthModal, setOnAuthComplete } from './auth.js';
+import { 
+    getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage,
+    collection, addDoc, serverTimestamp, ref, uploadBytes, getDownloadURL
+} from './auth.js';
 
 // --- 상태 관리 ---
 let grid = []; // 2D array (0: 빈칸, 1: 채움칸, -1: 비활성칸)
@@ -25,6 +28,7 @@ const uploadInput = document.getElementById('filetImageUpload');
 const convertBtn = document.getElementById('filetConvertBtn');
 const clearBtn = document.getElementById('filetClearBtn');
 const downloadBtn = document.getElementById('filetDownloadBtn');
+const saveBtn = document.getElementById('filetSaveBtn'); // 새로 추가할 버튼
 
 // --- 초기화 ---
 export function initFiletEditor() {
@@ -247,6 +251,66 @@ downloadBtn.addEventListener('click', () => {
         if (filename) pdf.save(`${filename}.pdf`);
     } catch (e) { console.error(e); alert('PDF 생성 오류'); }
 });
+
+// --- 클라우드 저장 ---
+async function saveFiletToCloud() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert('로그인이 필요합니다.');
+        openAuthModal();
+        return;
+    }
+
+    const saveBtnOriginalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '저장 중...';
+
+    try {
+        const patternId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const basePath = `users/${user.uid}/patterns/${patternId}`;
+
+        // 1. 썸네일 생성 및 업로드
+        const thumbCanvas = document.createElement('canvas');
+        const thumbScale = Math.min(1, 400 / Math.max(canvas.width, canvas.height));
+        thumbCanvas.width = canvas.width * thumbScale;
+        thumbCanvas.height = canvas.height * thumbScale;
+        const tCtx = thumbCanvas.getContext('2d');
+        tCtx.fillStyle = '#fff';
+        tCtx.fillRect(0, 0, thumbCanvas.width, thumbCanvas.height);
+        tCtx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+        
+        const thumbBlob = await new Promise(resolve => thumbCanvas.toBlob(resolve, 'image/jpeg', 0.8));
+        const thumbRef = ref(storage, `${basePath}/pattern.png`);
+        await uploadBytes(thumbRef, thumbBlob);
+        const patternImageURL = await getDownloadURL(thumbRef);
+
+        // 2. Firestore 저장
+        const patternsRef = collection(db, `users/${user.uid}/patterns`);
+        await addDoc(patternsRef, {
+            type: 'filet',
+            title: '방안뜨기 도안',
+            name: '방안뜨기 도안',
+            grid: grid,
+            gridW: gridW,
+            gridH: gridH,
+            sts10: parseFloat(inputSts10.value) || 22,
+            rows10: parseFloat(inputRows10.value) || 22,
+            resultSizeText: resultSizeDisplay.textContent,
+            patternImageURL: patternImageURL,
+            createdAt: serverTimestamp()
+        });
+
+        alert('저장되었습니다.');
+    } catch (e) {
+        console.error(e);
+        alert('저장 실패: ' + e.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = saveBtnOriginalText;
+    }
+}
+
+saveBtn.addEventListener('click', saveFiletToCloud);
 
 // 마우스 드로잉
 function getPos(e) {

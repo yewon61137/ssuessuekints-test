@@ -516,17 +516,20 @@ function buildPatternCard(uid, patternId, data) {
     const sizeInfo  = data.widthCm ? (data.heightCm ? `${data.widthCm}cm × ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
     const settingsText = [yarnInfo, sizeInfo].filter(Boolean).join(' · ');
 
+    const isFilet = data.type === 'filet';
+    const filetMeta = isFilet ? `${data.gridW} × ${data.gridH} | ${data.resultSizeText || ''}` : '';
+
     card.innerHTML = `
         <img class="pattern-card-thumb" src="${data.patternImageURL}" alt="${displayName}" loading="lazy" onerror="this.style.background='#eee'">
         <div class="pattern-card-body">
           <p class="pattern-card-name" title="${displayName}">${displayName}</p>
-          <p class="pattern-card-meta">${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText ? ' · ' + settingsText : ''}</p>
+          <p class="pattern-card-meta">${isFilet ? filetMeta : `${data.stitches}${tr('stitches')} × ${data.rows}${tr('rows')}${settingsText ? ' · ' + settingsText : ''}`}</p>
           <p class="pattern-card-meta" style="color:#aaa;">${date}</p>
           <div class="pattern-card-actions">
             <button class="rename-btn">${tr('rename')}</button>
-            <a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>
+            ${isFilet ? '' : `<a href="${data.originalImageURL}" target="_blank" rel="noopener">${tr('view_original')}</a>`}
             <button class="pdf-btn">PDF</button>
-            <button class="png-download-btn">PNG</button>
+            ${isFilet ? '' : `<button class="png-download-btn">PNG</button>`}
             <button class="delete-btn">${tr('delete')}</button>
           </div>
         </div>
@@ -534,68 +537,67 @@ function buildPatternCard(uid, patternId, data) {
 
     card.querySelector('.pattern-card-thumb').addEventListener('click', () => window.open(data.patternImageURL, '_blank'));
 
-    function generatePatternPdf(imgSrc, cleanup) {
+    function generateFiletPdf() {
         if (typeof window.jspdf === 'undefined') {
-            alert('PDF 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-            if (cleanup) cleanup();
+            alert('PDF 라이브러리를 불러오지 못했습니다.');
             return;
         }
         const { jsPDF } = window.jspdf;
-        const safeName = (data.title || data.name || 'pattern').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
-        const img = new Image();
-        img.onload = () => {
-            const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-            const pdfW = pdf.internal.pageSize.getWidth();
-            const pdfH = pdf.internal.pageSize.getHeight();
-            const margin = 15, maxW = pdfW - margin * 2, maxH = pdfH - margin * 2 - 35;
-            let finalW = maxW, finalH = (img.height / img.width) * finalW;
-            if (finalH > maxH) { finalH = maxH; finalW = (img.width / img.height) * finalH; }
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const margin = 20;
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
 
-            const titleCanvas = document.createElement('canvas');
-            titleCanvas.width = 900; titleCanvas.height = 36;
-            const tCtx = titleCanvas.getContext('2d');
-            tCtx.font = '600 26px sans-serif'; tCtx.fillStyle = '#000000';
-            tCtx.fillText(data.title || data.name || 'Pattern', 0, 26);
-            pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, maxW * 36 / 900);
-
-            pdf.setFontSize(10);
-            const sizeStr = data.widthCm ? (data.heightCm ? `${data.widthCm}cm x ${data.heightCm}cm` : `${data.widthCm}cm`) : '';
-            const infoLine = `${data.stitches || 0} Stitches x ${data.rows || 0} Rows`
-                + (sizeStr ? ` (${sizeStr})` : '')
-                + (data.yarnType ? ` · ${data.yarnType}` : (data.yarnMm ? ` · ${data.yarnMm}mm` : ''));
-            pdf.text(infoLine, margin, margin + 14);
-
-            const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = img.width; tmpCanvas.height = img.height;
-            tmpCanvas.getContext('2d').drawImage(img, 0, 0);
-            pdf.addImage(tmpCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin + 22, finalW, finalH);
-
-            if (data.legendHTML) {
-                pdf.addPage();
-                pdf.setFontSize(12); pdf.text('Color Legend', margin, margin + 5);
-                // DOMParser로 파싱 — 삽입되지 않는 별도 document이므로 스크립트 실행 없음
-                const parsedDoc = new DOMParser().parseFromString(data.legendHTML, 'text/html');
-                let y = margin + 15;
-                parsedDoc.querySelectorAll('.color-item').forEach(item => {
-                    const rgbMatch = item.querySelector('.color-box')?.style.backgroundColor.match(/\d+/g);
-                    if (rgbMatch) {
-                        pdf.setFillColor(+rgbMatch[0], +rgbMatch[1], +rgbMatch[2]);
-                        pdf.rect(margin, y, 8, 8, 'F');
-                        pdf.setDrawColor(0); pdf.rect(margin, y, 8, 8, 'S');
-                        pdf.setFontSize(10); pdf.text(item.querySelector('span')?.textContent || '', margin + 13, y + 6);
-                        y += 13;
-                        if (y > pdfH - margin) y = margin;
-                    }
-                });
-            }
-            pdf.save(`${safeName}.pdf`);
-            if (cleanup) cleanup();
+        const textToImg = (text, size, isBold = false) => {
+            const tCanvas = document.createElement('canvas');
+            const tCtx = tCanvas.getContext('2d');
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            const m = tCtx.measureText(text);
+            tCanvas.width = Math.ceil(m.width) + 20;
+            tCanvas.height = size * 6;
+            tCtx.font = `${isBold ? 'bold ' : ''}${size * 4}px sans-serif`;
+            tCtx.fillStyle = '#000'; tCtx.textBaseline = 'middle';
+            tCtx.fillText(text, 10, tCanvas.height / 2);
+            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / 10, h: tCanvas.height / 10 };
         };
-        img.onerror = () => { if (cleanup) cleanup(); alert('이미지를 불러오지 못했습니다.'); };
-        img.src = imgSrc;
+
+        const title = textToImg(data.title || data.name || '방안뜨기 도안', 18, true);
+        pdf.addImage(title.src, 'PNG', margin, margin - 10, title.w, title.h);
+
+        const summary = textToImg(`그리드: ${data.gridW} x ${data.gridH} | ${data.resultSizeText || ''}`, 10);
+        pdf.addImage(summary.src, 'PNG', margin, margin + 5, summary.w, summary.h);
+
+        const legend = textToImg('범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)', 10);
+        pdf.addImage(legend.src, 'PNG', margin, margin + 12, legend.w, legend.h);
+
+        const startChain = textToImg(`시작코: ${data.gridW * 3 + 1} 코`, 10);
+        pdf.addImage(startChain.src, 'PNG', margin, margin + 19, startChain.w, startChain.h);
+
+        const chartAreaW = pdfW - margin * 2;
+        const chartAreaH = pdfH - margin * 2 - 30;
+        const gw = data.gridW, gh = data.gridH;
+        let pdfCellSize = Math.min(chartAreaW / gw, chartAreaH / gh);
+        const startX = margin, startY = margin + 30;
+
+        for (let y = 0; y < gh; y++) {
+            for (let x = 0; x < gw; x++) {
+                const val = data.grid[y][x];
+                const px = startX + x * pdfCellSize;
+                const py = startY + y * pdfCellSize;
+                if (val === 1) {
+                    pdf.setFillColor(0);
+                    pdf.rect(px, py, pdfCellSize, pdfCellSize, 'F');
+                } else if (val === 0) {
+                    pdf.setDrawColor(220);
+                    pdf.rect(px, py, pdfCellSize, pdfCellSize, 'S');
+                }
+            }
+        }
+        pdf.save(`${(data.title || data.name || 'filet').replace(/\s+/g, '_')}.pdf`);
     }
 
     card.querySelector('.pdf-btn').addEventListener('click', async () => {
+        if (isFilet) { generateFiletPdf(); return; }
         if (data.patternBase64) { generatePatternPdf(data.patternBase64, null); return; }
         if (data.patternStoragePath) {
             try {
