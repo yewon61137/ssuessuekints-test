@@ -328,7 +328,7 @@ async function saveFiletToCloud() {
             type: 'filet',
             title: '방안뜨기 도안',
             name: '방안뜨기 도안',
-            grid: grid,
+            gridData: grid.flat(), // Firestore용 평탄화
             gridW: gridW,
             gridH: gridH,
             sts10: parseFloat(inputSts10.value) || 22,

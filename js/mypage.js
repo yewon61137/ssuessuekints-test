@@ -576,12 +576,20 @@ function buildPatternCard(uid, patternId, data) {
         const chartAreaW = pdfW - margin * 2;
         const chartAreaH = pdfH - margin * 2 - 30;
         const gw = data.gridW, gh = data.gridH;
+        
+        // 1D 데이터를 2D로 복원
+        const flatData = data.gridData || [];
+        const reconstructedGrid = [];
+        for (let i = 0; i < gh; i++) {
+            reconstructedGrid.push(flatData.slice(i * gw, (i + 1) * gw));
+        }
+
         let pdfCellSize = Math.min(chartAreaW / gw, chartAreaH / gh);
         const startX = margin, startY = margin + 30;
 
         for (let y = 0; y < gh; y++) {
             for (let x = 0; x < gw; x++) {
-                const val = data.grid[y][x];
+                const val = reconstructedGrid[y][x];
                 const px = startX + x * pdfCellSize;
                 const py = startY + y * pdfCellSize;
                 if (val === 1) {
