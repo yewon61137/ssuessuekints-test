@@ -33,7 +33,7 @@ export function initFiletEditor() {
     const newW = parseInt(inputGridW.value) || 30;
     const newH = parseInt(inputGridH.value) || 30;
     
-    if (newW !== gridW || newH !== gridH) {
+    if (newW !== gridW || newH !== gridH || grid.length === 0) {
         const newGrid = [];
         for (let y = 0; y < newH; y++) {
             newGrid[y] = [];

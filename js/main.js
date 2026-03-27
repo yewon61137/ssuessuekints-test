@@ -237,9 +237,9 @@ langBtns.forEach(btn => {
     });
 });
 
-// 저장된 언어로 초기화
+// 저장된 언어로 초기화 (기본값 한국어)
 const savedLang = localStorage.getItem('ssuessue_lang');
-if (savedLang && savedLang !== 'ko') changeLanguage(savedLang);
+changeLanguage(savedLang || 'ko');
 
 // --- 실 굵기 입력 방식 전환 ---
 yarnUnitRadios.forEach(radio => {
