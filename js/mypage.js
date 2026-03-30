@@ -1325,7 +1325,11 @@ function showYarnModal(y = null) {
         document.getElementById('input-yarn-needle').value = y.needleSize || '';
         document.getElementById('input-yarn-notes').value = y.notes || '';
         if (y.photoURL) {
-            photoPreview.innerHTML = `<img src="${y.photoURL}" style="width:100%;height:100%;object-fit:cover;">`;
+            photoPreview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = y.photoURL;
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+            photoPreview.appendChild(img);
         } else {
             photoPreview.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>`;
         }
