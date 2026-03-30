@@ -53,6 +53,12 @@
   var langDropdown = document.getElementById('langDropdown');
 
   if (langGlobeBtn && langDropdown) {
+    // Sync active button with stored language
+    var storedLang = localStorage.getItem('ssuessue_lang') || 'ko';
+    langDropdown.querySelectorAll('.lang-btn').forEach(function (btn) {
+      btn.classList.toggle('active', btn.dataset.lang === storedLang);
+    });
+
     langGlobeBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       langDropdown.classList.toggle('open');
