@@ -39,7 +39,17 @@
       "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/magazine/**)",
       "Bash(done)",
       "Bash(echo \"=== $f ===\")",
-      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test/magazine/**)"
+      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test/magazine/**)",
+      "Bash(find D:김예원⭐❤️🐸ssuessuekints-test/magazine -type f -name *.html)",
+      "Bash(while read:*)",
+      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/**)",
+      "Bash(do if:*)",
+      "Bash(then basename:*)",
+      "Bash(fi)",
+      "Bash(py --version)",
+      "Bash(python -c \":*)",
+      "Bash(python fix_magazine.py)",
+      "Bash(rm fix_magazine.py)"
     ]
   }
 }
