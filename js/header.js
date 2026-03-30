@@ -80,5 +80,62 @@
     el.addEventListener('click', function (e) { e.preventDefault(); });
   });
 
+  /* ── Breadcrumbs Generator ── */
+  const path = window.location.pathname;
+  if (path !== '/' && path !== '/index.html') {
+    const breadcrumbsContainer = document.createElement('ul');
+    breadcrumbsContainer.className = 'breadcrumbs';
+    
+    // Home
+    const homeLi = document.createElement('li');
+    homeLi.innerHTML = `<a href="/" class="i18n" data-ko="홈" data-en="Home" data-ja="ホーム">Home</a>`;
+    breadcrumbsContainer.appendChild(homeLi);
+
+    // Categories
+    const pathParts = path.split('/').filter(p => p);
+    let currentPath = '';
+
+    pathParts.forEach((part, index) => {
+      currentPath += '/' + part;
+      const isLast = index === pathParts.length - 1;
+      const li = document.createElement('li');
+      
+      let label = part.replace('.html', '').replace(/-/g, ' ');
+      // Simple mapping for common pages
+      const labels = {
+        'pattern': { ko: '도안 생성기', en: 'Pattern Generator', ja: '編み図ジェネレーター' },
+        'toolkit': { ko: '게이지 계산기', en: 'Gauge Calculator', ja: 'ゲージ計算機' },
+        'color-palette': { ko: '배색 도우미', en: 'Color Palette', ja: '配色アシスタント' },
+        'projects': { ko: '내 프로젝트', en: 'My Projects', ja: 'プロジェクト' },
+        'community': { ko: '커뮤니티', en: 'Community', ja: 'コミュニティ' },
+        'magazine': { ko: '매거진', en: 'Magazine', ja: 'マガジン' },
+        'notice': { ko: '공지사항', en: 'Notice', ja: 'お知らせ' },
+        'guide': { ko: '이용안내', en: 'Guide', ja: 'ご利用案内' },
+        'about': { ko: '소개', en: 'About', ja: '紹介' },
+        'terms': { ko: '이용약관', en: 'Terms', ja: '利用規約' },
+        'privacy': { ko: '개인정보처리방침', en: 'Privacy', ja: 'プライバシーポリシー' },
+        'mypage': { ko: '마이페이지', en: 'My Page', ja: 'マイページ' }
+      };
+
+      if (labels[label]) {
+        if (isLast) {
+          li.innerHTML = `<span class="current i18n" data-ko="${labels[label].ko}" data-en="${labels[label].en}" data-ja="${labels[label].ja}">${labels[label].en}</span>`;
+        } else {
+          li.innerHTML = `<a href="${currentPath}.html" class="i18n" data-ko="${labels[label].ko}" data-en="${labels[label].en}" data-ja="${labels[label].ja}">${labels[label].en}</a>`;
+        }
+      } else {
+        // Fallback for magazine articles or unknowns
+        label = label.charAt(0).toUpperCase() + label.slice(1);
+        if (isLast) {
+          li.innerHTML = `<span class="current">${label}</span>`;
+        } else {
+          li.innerHTML = `<a href="${currentPath}">${label}</a>`;
+        }
+      }
+      breadcrumbsContainer.appendChild(li);
+    });
+
+    document.querySelector('header').insertAdjacentElement('afterend', breadcrumbsContainer);
+  }
 
 })();

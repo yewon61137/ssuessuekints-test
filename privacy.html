@@ -38,156 +38,174 @@
   <main class="container">
     <section class="step-section">
       <div class="section-title">
-        <h2 id="privacyTitle">개인정보처리방침</h2>
+        <h2 id="privacyTitle" class="i18n" data-ko="개인정보처리방침" data-en="Privacy Policy" data-ja="プライバシーポリシー">개인정보처리방침</h2>
       </div>
       <div class="policy-content" id="policyContent">
 
+        <!-- KOREAN -->
         <div class="policy-block" data-lang="ko">
           <p class="policy-updated">최종 업데이트: 2026년 3월</p>
 
           <h3>1. 수집하는 정보</h3>
           <p>SSUESSUE KNITS(이하 "서비스")는 다음과 같은 정보를 수집합니다:</p>
           <ul>
-            <li><strong>계정 정보:</strong> 이메일 주소, 이름 (Google 로그인 시 Google 계정 정보, 네이버 로그인 시 네이버에서 제공하는 이름·이메일·프로필 사진 포함)</li>
+            <li><strong>계정 정보:</strong> 이메일 주소, 이름, 닉네임, 프로필 사진 (Google·네이버 로그인 시 제공받는 정보 포함)</li>
             <li><strong>업로드 이미지:</strong> 도안 생성을 위해 업로드한 이미지 (Firebase Storage에 저장)</li>
             <li><strong>생성된 도안:</strong> 저장을 선택한 경우 도안 이미지 및 설정값 (Firebase Firestore에 저장)</li>
-            <li><strong>사용 데이터:</strong> 서비스 이용 과정에서 자동으로 수집되는 로그 정보</li>
+            <li><strong>커뮤니티 활동:</strong> 게시글, 댓글, 좋아요, 스크랩 내역</li>
+            <li><strong>사용 데이터:</strong> 서비스 이용 과정에서 자동으로 수집되는 로그 정보, 기기 정보, 쿠키</li>
           </ul>
 
           <h3>2. 정보 이용 목적</h3>
           <ul>
             <li>도안 저장 및 My Patterns 페이지 제공</li>
             <li>계정 인증 및 보안</li>
-            <li>서비스 품질 개선</li>
+            <li>서비스 품질 개선 및 맞춤형 콘텐츠 제공</li>
           </ul>
 
           <h3>3. 제3자 서비스</h3>
           <p>본 서비스는 다음 제3자 서비스를 이용합니다:</p>
           <ul>
             <li><strong>Google Firebase</strong> (인증, 데이터베이스, 스토리지) — <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase 개인정보처리방침</a></li>
-            <li><strong>NAVER 로그인</strong> (소셜 인증) — 네이버 로그인 시 이름·이메일·프로필 사진을 제공받습니다. <a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">네이버 개인정보처리방침</a></li>
-            <li><strong>Google AdSense</strong> (광고) — 개인화 광고 제공을 위해 쿠키를 사용합니다. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a></li>
+            <li><strong>NAVER 로그인</strong> (소셜 인증) — <a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">네이버 개인정보처리방침</a></li>
+            <li><strong>Google AdSense</strong> (광고) — <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a></li>
             <li><strong>Cloudflare</strong> (호스팅) — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare 개인정보처리방침</a></li>
           </ul>
 
-          <h3>4. 쿠키</h3>
-          <p>본 서비스는 로그인 상태 유지 및 광고 제공을 위해 쿠키를 사용합니다. 브라우저 설정에서 쿠키를 비활성화할 수 있으나, 일부 기능이 제한될 수 있습니다.</p>
+          <h3>4. 쿠키 및 광고 (Cookies & Advertising)</h3>
+          <p>본 서비스는 로그인 상태 유지 및 맞춤형 광고 제공을 위해 쿠키를 사용합니다.</p>
+          <ul>
+            <li>Google을 포함한 제3자 판매자는 쿠키를 사용하여 사용자의 이전 웹사이트 방문 정보를 바탕으로 광고를 게재합니다.</li>
+            <li>Google의 광고 쿠키를 사용하여 Google과 파트너는 사용자의 본 사이트 및 기타 사이트 방문 정보를 바탕으로 사용자에게 적절한 광고를 게재할 수 있습니다.</li>
+            <li>사용자는 <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">광고 설정</a>을 통해 맞춤 설정된 광고를 게재하지 않도록 설정할 수 있습니다.</li>
+            <li>브라우저 설정에서 모든 쿠키를 거부할 수 있으나, 이 경우 서비스의 일부 기능이 정상적으로 작동하지 않을 수 있습니다.</li>
+          </ul>
 
           <h3>5. 데이터 보관 및 삭제</h3>
-          <p>저장된 도안은 My Patterns 페이지에서 언제든지 직접 삭제할 수 있습니다. 계정 삭제를 원하시면 아래 연락처로 문의해 주세요.</p>
+          <p>사용자는 My Patterns 페이지에서 저장된 도안을 직접 삭제할 수 있습니다. 계정 삭제(회원 탈퇴)를 원하실 경우 고객 지원 창구로 문의해 주시기 바랍니다.</p>
 
-          <h3>6. 미성년자</h3>
+          <h3>6. 미성년자 보호</h3>
           <p>본 서비스는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
 
-          <h3>7. 문의</h3>
+          <h3>7. 문의처</h3>
           <p>개인정보 관련 문의: <a href="mailto:yewon61137@gmail.com">yewon61137@gmail.com</a> 또는 <a href="/about.html">소개 페이지</a></p>
 
           <h3 id="disclaimer">8. 저작권 및 면책 고지</h3>
-          <p>본 서비스는 사용자가 업로드한 이미지를 뜨개 도안으로 변환하는 도구를 제공합니다. 이와 관련하여 다음 사항을 명확히 고지합니다.</p>
+          <p>본 서비스는 이용자가 업로드한 이미지를 뜨개 도안으로 변환하는 도구만을 제공합니다. 이용자는 다음 사항을 준수해야 합니다.</p>
           <ul>
-            <li><strong>저작권 책임:</strong> 타인의 사진, 캐릭터 이미지, 예술 작품, 유명인 사진 등 저작권이 있는 이미지를 업로드하여 생성한 도안을 상업적으로 이용하거나 제3자에게 배포·판매하는 행위로 인한 저작권 침해의 법적 책임은 전적으로 이용자 본인에게 있습니다.</li>
-            <li><strong>비상업적 개인 이용:</strong> 개인적·비상업적 목적의 이용은 각국 저작권법의 사적 이용 범위 내에서 허용될 수 있으나, 이 또한 이용자가 직접 확인할 책임이 있습니다.</li>
-            <li><strong>서비스 면책:</strong> SSUESSUE KNITS는 이용자가 업로드한 이미지의 저작권 보유 여부를 확인하지 않으며, 이용자의 저작권 침해 행위에 대해 어떠한 법적 책임도 지지 않습니다.</li>
-            <li><strong>권고사항:</strong> 본 서비스에서 생성된 도안을 커뮤니티 또는 외부 플랫폼에 공유하거나 상업적으로 이용하는 것은 허용되지 않습니다. 도안은 개인적 용도로만 사용하시기 바랍니다. 원본 이미지에 대한 적법한 권한 없이 생성된 도안을 무단으로 배포할 경우 저작권법에 따른 책임이 발생할 수 있습니다.</li>
+            <li><strong>저작권 책임:</strong> 타인의 저작권을 침해하는 이미지를 사용하여 발생한 모든 법적 책임은 이용자 본인에게 있습니다.</li>
+            <li><strong>상업적 이용 금지:</strong> 본 서비스에서 생성된 도안을 허가 없이 상업적으로 이용하거나 무단 배포하는 것을 금지합니다.</li>
+            <li><strong>서비스 면책:</strong> SSUESSUE KNITS는 이용자의 저작권 침해 행위에 대해 어떠한 보증이나 책임을 지지 않습니다.</li>
           </ul>
         </div>
 
+        <!-- ENGLISH -->
         <div class="policy-block" data-lang="en" style="display:none;">
           <p class="policy-updated">Last updated: March 2026</p>
 
           <h3>1. Information We Collect</h3>
           <p>SSUESSUE KNITS ("Service") collects the following information:</p>
           <ul>
-            <li><strong>Account information:</strong> Email address and name (including Google account info when signing in with Google, or name, email, and profile photo provided by Naver when signing in with Naver)</li>
+            <li><strong>Account information:</strong> Email address, name, nickname, profile photo (including info provided via Google/Naver login)</li>
             <li><strong>Uploaded images:</strong> Images uploaded for pattern generation (stored in Firebase Storage)</li>
-            <li><strong>Generated patterns:</strong> Pattern images and settings when you choose to save them (stored in Firebase Firestore)</li>
-            <li><strong>Usage data:</strong> Log information automatically collected during service use</li>
+            <li><strong>Generated patterns:</strong> Saved patterns and settings (stored in Firebase Firestore)</li>
+            <li><strong>Community activities:</strong> Posts, comments, likes, and scraps</li>
+            <li><strong>Usage data:</strong> Log information, device information, and cookies automatically collected</li>
           </ul>
 
           <h3>2. How We Use Your Information</h3>
           <ul>
-            <li>Saving patterns and providing the My Patterns page</li>
+            <li>Saving patterns and providing personalized services</li>
             <li>Account authentication and security</li>
-            <li>Improving service quality</li>
+            <li>Service analysis and quality improvement</li>
           </ul>
 
           <h3>3. Third-Party Services</h3>
-          <p>This service uses the following third-party services:</p>
           <ul>
             <li><strong>Google Firebase</strong> (auth, database, storage) — <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy Policy</a></li>
-            <li><strong>NAVER Login</strong> (social authentication) — When signing in with Naver, we receive your name, email, and profile photo from Naver. <a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">Naver Privacy Policy</a></li>
-            <li><strong>Google AdSense</strong> (advertising) — Uses cookies for personalized ads. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
+            <li><strong>NAVER Login</strong> (social authentication) — <a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">Naver Privacy Policy</a></li>
+            <li><strong>Google AdSense</strong> (advertising) — <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
             <li><strong>Cloudflare</strong> (hosting) — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Privacy Policy</a></li>
           </ul>
 
-          <h3>4. Cookies</h3>
-          <p>We use cookies for maintaining login sessions and serving ads. You may disable cookies in your browser settings, but some features may be limited.</p>
+          <h3>4. Cookies & Advertising</h3>
+          <p>We use cookies to maintain login sessions and serve personalized advertisements.</p>
+          <ul>
+            <li>Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to your website or other websites.</li>
+            <li>Google's use of advertising cookies enables it and its partners to serve ads to users based on their visit to your sites and/or other sites on the Internet.</li>
+            <li>Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Ads Settings</a>.</li>
+            <li>You may also disable cookies in your browser settings, though some features may not function properly as a result.</li>
+          </ul>
 
           <h3>5. Data Retention & Deletion</h3>
-          <p>You can delete your saved patterns at any time from the My Patterns page. To delete your account, please contact us via the link below.</p>
+          <p>Users can delete their patterns on the My Patterns page. For account deletion, please contact us via email.</p>
 
           <h3>6. Children</h3>
           <p>This service does not intentionally collect personal information from children under 14.</p>
 
           <h3>7. Contact</h3>
-          <p>For privacy-related inquiries, please visit our <a href="/about.html">About page</a>.</p>
+          <p>For inquiries, please visit our <a href="/about.html">About page</a> or email yewon61137@gmail.com.</p>
 
           <h3 id="disclaimer-en">8. Copyright & Disclaimer</h3>
-          <p>This service provides a tool that converts user-uploaded images into knitting patterns. Please note the following:</p>
           <ul>
-            <li><strong>Copyright responsibility:</strong> If you commercially use, distribute, or sell patterns generated from copyrighted images (including others' photos, character artwork, fine art, or celebrity images), you are solely and fully responsible for any resulting copyright infringement.</li>
-            <li><strong>Personal non-commercial use:</strong> Personal, non-commercial use may fall within fair use provisions depending on your country's copyright law, but you are responsible for verifying this yourself.</li>
-            <li><strong>Service disclaimer:</strong> SSUESSUE KNITS does not verify whether uploaded images are free of copyright claims and accepts no legal liability for any copyright infringement by users.</li>
-            <li><strong>Recommendation:</strong> Sharing or distributing patterns generated on this service via the community or external platforms is not permitted. Patterns are for personal use only. Distributing patterns created from images you do not own may constitute copyright infringement.</li>
+            <li><strong>Copyright responsibility:</strong> Users are solely responsible for any copyright infringement resulting from the images they upload.</li>
+            <li><strong>Commercial use:</strong> Unauthorized commercial use or distribution of generated patterns is prohibited.</li>
+            <li><strong>Service disclaimer:</strong> SSUESSUE KNITS accepts no legal liability for users' copyright violations.</li>
           </ul>
         </div>
 
+        <!-- JAPANESE -->
         <div class="policy-block" data-lang="ja" style="display:none;">
           <p class="policy-updated">最終更新: 2026年3月</p>
 
           <h3>1. 収集する情報</h3>
           <p>SSUESSUE KNITS（以下「サービス」）は以下の情報を収集します：</p>
           <ul>
-            <li><strong>アカウント情報：</strong> メールアドレス、お名前（Googleログイン時はGoogleアカウント情報、NAVERログイン時はNAVERが提供するお名前・メールアドレス・プロフィール写真を含む）</li>
+            <li><strong>アカウント情報：</strong> メールアドレス、お名前、ニックネーム、プロフィール写真（Google・NAVERログイン時に提供される情報を含む）</li>
             <li><strong>アップロード画像：</strong> 編み図生成のためにアップロードした画像（Firebase Storageに保存）</li>
             <li><strong>生成した編み図：</strong> 保存を選択した場合の編み図画像と設定値（Firebase Firestoreに保存）</li>
-            <li><strong>利用データ：</strong> サービス利用中に自動収集されるログ情報</li>
+            <li><strong>コミュニティ活動：</strong> 投稿、コメント、いいね、スクラップの履歴</li>
+            <li><strong>利用データ：</strong> サービス利用中に自動収集されるログ情報、デバイス情報、クッキー</li>
           </ul>
 
           <h3>2. 情報の利用目的</h3>
           <ul>
             <li>編み図の保存とマイ編み図ページの提供</li>
             <li>アカウント認証とセキュリティ</li>
-            <li>サービス品質の向上</li>
+            <li>サービス品質の向上およびパーソナライズされたコンテンツの提供</li>
           </ul>
 
           <h3>3. 第三者サービス</h3>
           <ul>
-            <li><strong>Google Firebase</strong>（認証・データベース・ストレージ） — <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebaseプライバシーポリシー</a></li>
-            <li><strong>NAVERログイン</strong>（ソーシャル認証） — NAVERでログインした場合、NAVERからお名前・メールアドレス・プロフィール写真の提供を受けます。<a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">NAVERプライバシーポリシー</a></li>
-            <li><strong>Google AdSense</strong>（広告） — パーソナライズ広告のためクッキーを使用。<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Googleプライバシーポリシー</a></li>
-            <li><strong>Cloudflare</strong>（ホスティング） — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflareプライバシーポリシー</a></li>
+            <li><strong>Google Firebase</strong> — <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebaseプライバシーポリシー</a></li>
+            <li><strong>NAVERログイン</strong> — <a href="https://policy.naver.com/policy/privacy.html" target="_blank" rel="noopener">NAVERプライバシーポリシー</a></li>
+            <li><strong>Google AdSense</strong> — <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Googleプライバシーポリシー</a></li>
+            <li><strong>Cloudflare</strong> — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflareプライバシーポリシー</a></li>
           </ul>
 
-          <h3>4. クッキー</h3>
-          <p>ログイン状態の維持と広告配信のためにクッキーを使用しています。ブラウザ設定で無効化できますが、一部機能が制限される場合があります。</p>
+          <h3>4. クッキーおよび広告 (Cookies & Advertising)</h3>
+          <p>本サービスはログイン状態の維持およびパーソナライズ広告の配信のためにクッキーを使用しています。</p>
+          <ul>
+            <li>Googleを含む第三者配信事業者は、クッキーを使用して、ユーザーが当サイトや他のウェブサイトに過去にアクセスした際の情報に基づいて広告を配信します。</li>
+            <li>Googleが広告クッキーを使用することにより、Googleやそのパートナーはアクセス情報に基づいて適切な広告を表示できます。</li>
+            <li>ユーザーは、<a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">広告設定</a>でパーソナライズ広告を無効にできます。</li>
+            <li>ブラウザの設定でクッキーを無効にできますが、サービスの一部の機能が正常に動作しない可能性があります。</li>
+          </ul>
 
-          <h3>5. データ保管と削除</h3>
-          <p>保存した編み図はマイ編み図ページからいつでも削除できます。アカウント削除は下記の連絡先までお問い合わせください。</p>
+          <h3>5. データの保管と削除</h3>
+          <p>保存した編み図はマイ編み図ページで削除できます。アカウント削除をご希望の場合は、お問い合わせ窓口までご連絡ください。</p>
 
-          <h3>6. 未成年者</h3>
-          <p>本サービスは14歳未満の子どものの個人情報を意図的に収集しません。</p>
+          <h3>6. 未成年者の保護</h3>
+          <p>本サービスは14歳未満の子供の個人情報を意図的に収集しません。</p>
 
           <h3>7. お問い合わせ</h3>
-          <p><a href="/about.html">紹介ページ</a>の連絡先からお問い合わせください。</p>
+          <p><a href="/about.html">紹介ページ</a>の連絡先またはメール（yewon61137@gmail.com）までお問い合わせください。</p>
 
           <h3 id="disclaimer-ja">8. 著作権および免責事項</h3>
-          <p>本サービスはユーザーがアップロードした画像を編み図に変換するツールを提供します。以下の事項をご確認ください。</p>
           <ul>
-            <li><strong>著作権の責任：</strong> 他者の写真、キャラクター画像、芸術作品、有名人の写真など著作権のある画像から生成した編み図を商業目的で利用・配布・販売した場合、著作権侵害に関するすべての法的責任は利用者本人にあります。</li>
-            <li><strong>個人・非商業的利用：</strong> 個人的・非商業的目的での利用は各国の著作権法における私的利用の範囲内で認められる場合がありますが、その確認は利用者自身の責任で行ってください。</li>
-            <li><strong>サービスの免責：</strong> SSUESSUE KNITSはアップロードされた画像の著作権の有無を確認せず、利用者による著作権侵害行為に対して一切の法的責任を負いません。</li>
-            <li><strong>推奨事項：</strong> 本サービスで生成した編み図をコミュニティや外部プラットフォームで共有・配布することは禁止されています。編み図は個人利用のみを目的としてください。権限のない画像から生成した編み図を無断で配布した場合、著作権法上の責任が生じる可能性があります。</li>
+            <li><strong>著作権の責任：</strong> アップロードした画像による著作権侵害の責任はすべて利用者にあります。</li>
+            <li><strong>商業利用の禁止：</strong> 生成された編み図の無断配布や商業利用を禁止します。</li>
+            <li><strong>免責事項：</strong> SSUESSUE KNITSは利用者の著作権侵害行為について一切の責任を負いません。</li>
           </ul>
         </div>
 
@@ -225,33 +243,11 @@
     </div>
   </footer>
 
-  <script>
-    const langBtns = document.querySelectorAll('.lang-btn[data-lang]');
-    const blocks = document.querySelectorAll('.policy-block');
-    const titles = {
-      ko: '개인정보처리방침',
-      en: 'Privacy Policy',
-      ja: 'プライバシーポリシー'
-    };
-    function applyLang(lang) {
-      localStorage.setItem('lang', lang);
-      document.documentElement.lang = lang;
-      langBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
-      blocks.forEach(b => b.style.display = b.getAttribute('data-lang') === lang ? 'block' : 'none');
-      
-      const titleText = titles[lang] || titles.ko;
-      document.title = titleText + ' | SSUESSUE KNITS';
-      const privacyTitle = document.getElementById('privacyTitle');
-      if (privacyTitle) privacyTitle.textContent = titleText;
-
-      document.querySelectorAll('.i18n').forEach(el => {
-        const val = el.getAttribute('data-' + lang);
-        if (val) el.textContent = val;
-      });
-    }
-    langBtns.forEach(btn => btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang'))));
-    const savedLang = localStorage.getItem('lang');
-    if (savedLang) applyLang(savedLang);
+  <script type="module">
+    import { initAuth } from '/js/auth.js';
+    import { initLang } from '/js/i18n.js';
+    initAuth();
+    initLang({ pageTitles: { ko: '개인정보처리방침', en: 'Privacy Policy', ja: 'プライバシーポリシー' } });
   </script>
   <div id="authModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
@@ -281,50 +277,15 @@
         </form>
       </div>
       <div id="profileSetupPanel" style="display:none;">
-        <div class="profile-setup-header">
-          <p class="profile-setup-title">프로필 설정</p>
-          <p class="profile-setup-desc">커뮤니티에서 사용할 닉네임을 설정해주세요.</p>
-        </div>
         <form id="profileSetupForm" class="auth-form">
-          <div class="profile-photo-upload-area">
-            <div class="profile-photo-preview" id="profilePhotoPreview">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            </div>
-            <label for="profilePhotoInput" class="secondary-btn small-btn">사진 선택 (선택)</label>
-            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
-          </div>
           <div class="nickname-input-group">
-            <div class="nickname-input-row">
-              <input type="text" id="profileNickname" placeholder="닉네임 (2~20자, 필수)" maxlength="20" required autocomplete="off">
-              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 확인</button>
-            </div>
-            <div id="nicknameStatus" class="nickname-status" style="display:none;"></div>
+            <input type="text" id="profileNickname" placeholder="닉네임 (2~20자)" maxlength="20" required>
           </div>
-          <input type="text" id="profileRealName" placeholder="실명 (선택)" maxlength="50" autocomplete="name">
-          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>완료</button>
+          <button type="submit" class="primary-btn auth-submit-btn">완료</button>
         </form>
       </div>
-      <div id="verificationSentPanel" style="display:none; text-align:center; padding: 1rem 0;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">✉️</div>
-        <h3 style="margin-bottom: 1rem; font-weight:800;">이메일 인증이 필요합니다</h3>
-        <p style="font-size: 0.9rem; line-height: 1.6; color: var(--secondary-color); margin-bottom: 1.5rem;">
-          <span id="sentEmailAddress" style="font-weight:700; color:var(--primary-color);"></span>(으)로 인증 메일을 보냈습니다.<br>
-          메일함의 링크를 클릭하면 이 화면이 자동으로 전환됩니다.
-        </p>
-        <p style="font-size: 0.8rem; color: #cc6600; margin-bottom: 1.5rem; background: #fff9f0; padding: 0.5rem 0.75rem; border: 1px solid #ffe0b3; text-align: left; line-height: 1.7;">
-          ⚠️ 메일이 오지 않았다면 <b>스팸함</b>을 꼭 확인해 주세요!<br>
-          📌 <b>네이버·카카오·다음 등 국내 메일</b>은 발신 서버 차단으로 수신이 안 될 수 있습니다.<br>
-          <b>Gmail</b> 주소로 가입하시면 안정적으로 받으실 수 있습니다.
-        </p>
-        <div style="display:flex; flex-direction:column; gap:0.75rem;">
-          <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">인증 완료 확인</button>
-          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%; max-width:none;">메일 다시 보내기</button>
-        </div>
-      </div>
-      <div id="authModalError" class="auth-error" style="display:none;"></div>
     </div>
   </div>
-  <script type="module">import { initAuth } from '/js/auth.js'; import { initLang } from '/js/i18n.js'; initAuth(); initLang();</script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>
