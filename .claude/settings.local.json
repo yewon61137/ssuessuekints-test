@@ -26,7 +26,20 @@
       "Bash(ls -la *.js)",
       "Bash(ls C:/Users/leah6/ssuessuekints-test/*.toml C:/Users/leah6/ssuessuekints-test/*.json)",
       "Bash(ls:*)",
-      "Bash(시작코 91코)"
+      "Bash(시작코 91코)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(__NEW_LINE_28e8c894d21ae0e4__ grep:*)",
+      "Bash(__NEW_LINE_28e8c894d21ae0e4__ done:*)",
+      "Bash(BASE=\"D:/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test\" for f in about guide community toolkit color-palette projects notice terms privacy magazine)",
+      "Bash(BASE=\"D:/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test\")",
+      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test/$BASE/**)",
+      "Bash(do)",
+      "Bash(echo \"=== $f.html ===\")",
+      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/magazine/**)",
+      "Bash(done)",
+      "Bash(echo \"=== $f ===\")",
+      "Read(//d/김예원⭐❤️🐸/ssuessuekints-test/ssuessuekints-test/magazine/**)"
     ]
   }
 }
