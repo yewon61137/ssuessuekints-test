@@ -2992,6 +2992,7 @@ header {
   box-shadow: 4px 4px 0 rgba(0,0,0,0.08);
 }
 .gnb-item:hover .gnb-sub { display: block; }
+.gnb-sub.open { display: block; }
 .gnb-sub-link {
   display: block;
   padding: 0.75rem 1.1rem;

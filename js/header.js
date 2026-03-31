@@ -5,8 +5,8 @@
       <a href="/" class="hdr-logo">SSUESSUE KNITS<span class="hdr-logo-kr">쓔쓔닛츠</span></a>
       <nav class="gnb">
         <div class="gnb-item gnb-has-sub">
-          <a class="gnb-link" href="#">
-            <span class="i18n" data-ko="도구" data-en="Tools" data-ja="ツール">Tools</span>
+          <a class="gnb-link" href="/tools.html">
+            <span class="i18n" data-ko="도구" data-en="Tools" data-ja="ツール">도구</span>
             <svg class="gnb-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </a>
           <div class="gnb-sub">
@@ -81,9 +81,25 @@
     });
   }
 
-  /* ── GNB dropdown parent — href="#" 방지 ── */
+  /* ── GNB dropdown parent — 꺽쇠 클릭만 드롭다운 / 텍스트 클릭은 페이지 이동 ── */
   document.querySelectorAll('.gnb-has-sub > .gnb-link').forEach(function (el) {
-    el.addEventListener('click', function (e) { e.preventDefault(); });
+    el.addEventListener('click', function (e) {
+      // 꺽쇠(chevron) SVG 또는 그 내부 클릭이면 드롭다운 토글
+      if (e.target.closest('.gnb-chevron')) {
+        e.preventDefault();
+        var sub = el.nextElementSibling;
+        if (sub) sub.classList.toggle('open');
+      }
+      // 텍스트 or 링크 자체 클릭이면 그대로 href 이동 (기본 동작 유지)
+    });
+  });
+  // 드롭다운 외부 클릭 시 닫기
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.gnb-has-sub')) {
+      document.querySelectorAll('.gnb-sub').forEach(function(sub) {
+        sub.classList.remove('open');
+      });
+    }
   });
 
   /* ── Breadcrumbs Generator ── */
@@ -112,6 +128,7 @@
         'pattern': { ko: '도안 생성기', en: 'Pattern Generator', ja: '編み図ジェネレーター' },
         'toolkit': { ko: '게이지 계산기', en: 'Gauge Calculator', ja: 'ゲージ計算機' },
         'color-palette': { ko: '배색 도우미', en: 'Color Palette', ja: '配色アシスタント' },
+        'tools': { ko: '뜨개 도구 모음', en: 'Knitting Tools', ja: '編み物ツール' },
         'projects': { ko: '내 프로젝트', en: 'My Projects', ja: 'プロジェクト' },
         'community': { ko: '커뮤니티', en: 'Community', ja: 'コミュニティ' },
         'magazine': { ko: '매거진', en: 'Magazine', ja: 'マガジン' },
