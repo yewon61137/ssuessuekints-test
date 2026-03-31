@@ -154,17 +154,64 @@ const tMap = {
 
 ---
 
+## 6. 매거진 아티클 추가 절차
+
+새 아티클을 `magazine/` 폴더에 추가할 때 반드시 아래 순서를 따른다.
+
+### 필수 체크리스트
+1. **HTML 파일 생성** — 기존 아티클(예: `knitting-history-spy.html`)을 템플릿으로 복사
+   - 본문은 `<div class="article-lang" data-lang="ko">` / `data-lang="en"` / `data-lang="ja"` 세 섹션으로 작성
+   - 이전/다음/목록 nav는 아래 빈 구조 사용 (스크립트가 자동 채움):
+     ```html
+     <nav class="article-nav">
+       <span class="article-nav-prev"></span>
+       <span class="article-nav-center"><a href="/magazine.html">목록으로</a></span>
+       <span class="article-nav-next"></span>
+     </nav>
+     ```
+   - `</body>` 직전에 반드시 포함:
+     ```html
+     <script src="/js/magazine-share.js"></script>
+     <script src="/js/magazine-lang.js"></script>
+     ```
+
+2. **`js/magazine-lang.js` — ARTICLES 배열 끝에 슬러그 추가** (날짜순 유지)
+   ```js
+   var ARTICLES = [
+     ...
+     'knitting-history-spy',   // 2026-03-30
+     'new-article-slug'        // YYYY-MM-DD  ← 여기에 추가
+   ];
+   ```
+   이것만 하면 이전/다음 링크는 자동으로 생성됨. 기존 아티클의 HTML을 건드릴 필요 없음.
+
+3. **`magazine.html` — 아티클 카드 추가** (최신순, 맨 위에 삽입)
+   - 카드에 ko/en/ja 텍스트 모두 포함 (`data-ko/en/ja` 인라인 방식)
+
+4. **언어**: 모든 텍스트를 ko / en / ja 세 언어로 작성 (섹션 누락 시 작업 미완성)
+
+### 언어 전환 동작 원리 (magazine-lang.js)
+- `localStorage('ssuessue_lang')` 값으로 초기 언어 결정
+- `.article-lang[data-lang="ko/en/ja"]` 섹션 show/hide
+- `[data-ko],[data-en],[data-ja]` 속성 요소 텍스트 교체
+- `ARTICLES` 배열에서 현재 URL 슬러그를 찾아 이전/다음 링크 자동 생성
+- 헤더 언어 버튼 클릭도 이벤트 위임으로 처리 (헤더 주입 타이밍 무관)
+
+---
+
 ## 주요 파일 구조
 ```
-auth.js          — Firebase 초기화, exports: auth, db, storage, initAuth(), getCurrentUser()
-main.js          — 도안 생성기 (index.html), translations 객체 포함
-community.js     — 커뮤니티 피드
-post.js          — 게시글 상세
-mypage.js        — 마이페이지 4탭
-style.css        — 전역 스타일
-firebase-config.js — gitignored, build.sh로 생성
-firestore.rules  — Firestore 보안 규칙
-storage.rules    — Storage 보안 규칙
+auth.js               — Firebase 초기화, exports: auth, db, storage, initAuth(), getCurrentUser()
+main.js               — 도안 생성기 (index.html), translations 객체 포함
+community.js          — 커뮤니티 피드
+post.js               — 게시글 상세
+mypage.js             — 마이페이지 4탭
+style.css             — 전역 스타일
+firebase-config.js    — gitignored, build.sh로 생성
+firestore.rules       — Firestore 보안 규칙
+storage.rules         — Storage 보안 규칙
+js/magazine-lang.js   — 매거진 아티클 언어 전환 + 이전/다음 nav 자동 생성
+magazine/*.html       — 개별 아티클 (14개)
 ```
 
 ## Firestore 컬렉션
