@@ -3,7 +3,7 @@ import { auth, db, initAuth } from './auth.js';
 import { initLang, applyLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-    collection, query, where, orderBy, limit, getDocs
+    collection, query, orderBy, limit, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 // ── Lang select helper (레거시, 기존 select 사용 페이지 호환) ──
@@ -176,13 +176,12 @@ async function loadProjects(isLoggedIn = false, uid = null) {
 // ── Community panel title ─────────────────────────────────────
 const T_COMM = {
     latest: { ko: '최신 게시글', en: 'Latest Posts', ja: '最新の投稿' },
-    mine:   { ko: '최근 완성작', en: 'My Recent Work', ja: '最近の完成作品' }
 };
 
 function updateCommunityTitle(uid, lang) {
     const l = ['ko', 'en', 'ja'].includes(lang) ? lang : 'ko';
     const ttlEl = document.querySelector('.home-panel:first-child .home-panel-ttl');
-    if (ttlEl) ttlEl.textContent = uid ? T_COMM.mine[l] : T_COMM.latest[l];
+    if (ttlEl) ttlEl.textContent = T_COMM.latest[l];
 }
 
 // ── Community posts (Firestore) ───────────────────────────────
@@ -194,24 +193,12 @@ async function loadCommunityPosts(uid = null) {
     updateCommunityTitle(uid, lang);
 
     try {
-        let q;
-        if (uid) {
-            // 로그인 상태: 내 완성작 (태그가 finished인 내 글)
-            q = query(
-                collection(db, 'posts'),
-                where('userId', '==', uid),
-                where('tags', 'array-contains', 'finished'),
-                orderBy('createdAt', 'desc'),
-                limit(3)
-            );
-        } else {
-            // 비로그인 상태: 전체 최신글 3개
-            q = query(
-                collection(db, 'posts'),
-                orderBy('createdAt', 'desc'),
-                limit(3)
-            );
-        }
+        // 로그인 여부 관계없이 전체 최신글 3개 표시
+        const q = query(
+            collection(db, 'posts'),
+            orderBy('createdAt', 'desc'),
+            limit(3)
+        );
 
         const snap = await getDocs(q);
         if (snap.empty) {
