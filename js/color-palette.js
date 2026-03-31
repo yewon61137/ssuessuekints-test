@@ -58,7 +58,8 @@ const pageT = {
   cp_calculate:  { ko: '계산하기', en: 'Calculate', ja: '計算する' },
   cp_color:      { ko: '색상', en: 'Color', ja: '色' },
   cp_rows:       { ko: '단 수', en: 'Rows', ja: '段数' },
-  cp_rows_per_color: { ko: '색상별 단수', en: 'Rows per color', ja: '色ご둔の段数' },
+  cp_rows_per_color: { ko: '색상별 단수', en: 'Rows per color', ja: '色ごとの段数' },
+  cp_rows_unit: { ko: '단', en: 'rows', ja: '段' },
   cp_ratio:      { ko: '비율', en: 'Ratio', ja: '割合' },
   cp_to_simulator: { ko: '시뮬레이터로 보기', en: 'View in Simulator', ja: 'シミュレーターで見る' },
 
@@ -412,8 +413,13 @@ function updateContrast() {
     msg = tr('cp_contrast_ok');
     cls = 'cp-contrast cp-contrast-ok';
   } else if (ratio >= 3) {
-    msg = tr('cp_contrast_ok').split('—')[0] + ' — 대비가 약간 부족해요';
+    const warnMsgs = { ko: '대비가 약간 부족해요 ⚠️', en: 'Contrast is slightly low ⚠️', ja: 'コントラストがやや不足しています ⚠️' };
+    const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+    msg = `${ratio.toFixed(2)}:1  ${warnMsgs[lang] || warnMsgs.ko}`;
     cls = 'cp-contrast cp-contrast-warning';
+    el.textContent = msg;
+    el.className = cls;
+    return;
   } else {
     msg = tr('cp_contrast_poor');
     cls = 'cp-contrast cp-contrast-poor';
@@ -447,12 +453,12 @@ function renderStripeSliders() {
     range.value = stripeRows[i] || 4;
     range.addEventListener('input', () => {
       stripeRows[i] = parseInt(range.value);
-      valEl.textContent = `${stripeRows[i]} 단`;
+      valEl.textContent = `${stripeRows[i]} ${tr('cp_rows_unit')}`;
       redrawPreview();
     });
     const valEl = document.createElement('span');
     valEl.className = 'cp-stripe-rows-val';
-    valEl.textContent = `${stripeRows[i] || 4} 단`;
+    valEl.textContent = `${stripeRows[i] || 4} ${tr('cp_rows_unit')}`;
     row.appendChild(swatch);
     row.appendChild(range);
     row.appendChild(valEl);
@@ -674,7 +680,7 @@ function updateAddBtn() {
 
   if (notice) {
     if (isFairisle && slots.length >= 2) {
-      const lang = localStorage.getItem('lang') || 'ko';
+      const lang = localStorage.getItem('ssuessue_lang') || 'ko';
       const msgs = {
         ko: '페어아일은 2가지 색상 사용을 권장합니다.',
         en: 'Fair Isle recommends using 2 colors.',
@@ -797,18 +803,20 @@ const textureDescs = {
 };
 
 // Simulator: texture buttons
+function updateTextureDesc() {
+  const descEl = document.getElementById('textureDesc');
+  if (!descEl) return;
+  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+  descEl.textContent = textureDescs[currentTexture][lang] || textureDescs[currentTexture].ko;
+}
+
 document.querySelectorAll('.cp-texture-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.cp-texture-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentTexture = btn.dataset.texture;
     
-    // Update description text dynamically
-    const descEl = document.getElementById('textureDesc');
-    if (descEl) {
-      const lang = localStorage.getItem('lang') || 'ko';
-      descEl.textContent = textureDescs[currentTexture][lang] || textureDescs[currentTexture].ko;
-    }
+    updateTextureDesc();
     
     renderStripeSliders();
     redrawPreview();
@@ -844,9 +852,17 @@ document.getElementById('simAddColorBtn')?.addEventListener('click', () => {
 
 // Simulator: Save button
 document.getElementById('simSaveBtn')?.addEventListener('click', async () => {
-  const name = prompt(tr('cp_palette_name_prompt'), '내 팔레트');
+  const name = prompt(tr('cp_palette_name_prompt'), tr('cp_palette_name') || '내 팔레트');
   if (!name) return;
   // 현재 선택된 기법(currentTexture)도 함께 저장
   await savePalette(slots.map(s => s.hex), name, currentTexture);
 });
 
+// 초기 로드 시 언어에 맞는 textureDesc 표시
+updateTextureDesc();
+
+// 언어 변경 시 textureDesc 및 stripeSliders 단위 갱신
+window.addEventListener('langChange', () => {
+  updateTextureDesc();
+  renderStripeSliders(); // 슬라이더 단위(단/rows/段) 갱신
+});
