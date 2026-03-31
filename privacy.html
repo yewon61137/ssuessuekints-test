@@ -325,8 +325,40 @@
   <script type="module">
     import { initAuth } from '/js/auth.js';
     import { initLang } from '/js/i18n.js';
+    
+    // Initialize authentication
     initAuth();
-    initLang({ pageTitles: { ko: '개인정보처리방침', en: 'Privacy Policy', ja: 'プライバシーポリシー' } });
+    
+    // Function to update visibility of policy blocks based on current language
+    function updatePolicyVisibility() {
+      const currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
+      const blocks = document.querySelectorAll('.policy-block');
+      blocks.forEach(block => {
+        if (block.getAttribute('data-lang') === currentLang) {
+          block.style.display = 'block';
+        } else {
+          block.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize language and setup titles
+    initLang({ 
+      pageTitles: { 
+        ko: '개인정보처리방침', 
+        en: 'Privacy Policy', 
+        ja: 'プライバシーポリシー' 
+      } 
+    });
+
+    // Update visibility initially and on storage change (language switch)
+    updatePolicyVisibility();
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'ssuessue_lang') updatePolicyVisibility();
+    });
+    
+    // Custom event listener for language change in the same tab
+    window.addEventListener('languageChanged', updatePolicyVisibility);
   </script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
