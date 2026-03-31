@@ -96,18 +96,28 @@
       document.addEventListener('DOMContentLoaded', () => {
         const btns = document.querySelectorAll('.tab-btn');
         const panels = document.querySelectorAll('.tab-panel');
+
+        function switchTab(targetTab) {
+          btns.forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === targetTab));
+          panels.forEach(p => p.classList.toggle('active', p.id === targetTab + 'Tab'));
+          if (targetTab === 'filet' && window.initFiletEditor) {
+            window.initFiletEditor();
+          }
+        }
+
         btns.forEach(btn => {
           btn.addEventListener('click', () => {
-            const target = btn.getAttribute('data-tab');
-            btns.forEach(b => b.classList.toggle('active', b === btn));
-            panels.forEach(p => p.classList.toggle('active', p.id === target + 'Tab'));
-            
-            // 방안뜨기 탭 클릭 시 에디터 초기화
-            if (target === 'filet' && window.initFiletEditor) {
-              window.initFiletEditor();
-            }
+            switchTab(btn.getAttribute('data-tab'));
           });
         });
+
+        // #filet 해시 또는 sessionStorage로 filet 탭 자동 활성화
+        const hash = window.location.hash;
+        const savedTab = sessionStorage.getItem('patternOpenTab');
+        if (hash === '#filet' || savedTab === 'filet') {
+          sessionStorage.removeItem('patternOpenTab');
+          switchTab('filet');
+        }
       });
     </script>
 
