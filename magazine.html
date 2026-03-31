@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
   <!-- Google tag (gtag.js) -->
@@ -36,12 +36,9 @@
     .magazine-intro p { margin: 0; font-size: 1rem; color: var(--secondary-color); line-height: 1.8; max-width: 700px; margin-inline: auto; word-break: keep-all; }
     
     .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; margin-bottom: 5rem; }
-    .article-card { border: 1px solid var(--border-color); border-radius: 24px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); background: #fff; }
-    .article-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-color); }
-    
-    .article-thumb { width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: #f8f8f8; }
-    .article-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-    .article-card:hover .article-thumb img { transform: scale(1.08); }
+    .article-card { border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); background: #fff; }
+    .article-card:hover { transform: translateY(-8px); box-shadow: 0 16px 32px rgba(0,0,0,0.06); border-color: var(--primary-color); }
+
     
     .article-content { padding: 1.75rem; flex: 1; display: flex; flex-direction: column; gap: 0.85rem; }
     .article-badge-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
@@ -83,7 +80,6 @@
 
         <!-- History -->
         <a href="/magazine/knitting-history-spy.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_history.png" alt="Knitting History" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-history i18n" data-ko="뜨개 역사" data-en="History" data-ja="歴史">뜨개 역사</span>
@@ -99,7 +95,6 @@
 
         <!-- Science -->
         <a href="/magazine/science-of-knitting-physics.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_science.png" alt="Knitting Science" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-science i18n" data-ko="뜨개 과학" data-en="Science" data-ja="科学">뜨개 과학</span>
@@ -115,7 +110,6 @@
 
         <!-- Lifestyle -->
         <a href="/magazine/knitting-mental-health.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Knitting Life" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-lifestyle i18n" data-ko="뜨개 라이프" data-en="Life" data-ja="ライフ">뜨개 라이프</span>
@@ -131,7 +125,6 @@
 
         <!-- Fashion -->
         <a href="/magazine/2026-crochet-fashion-trends.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_fashion.png" alt="Knitting Fashion" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-fashion i18n" data-ko="뜨개 패션" data-en="Fashion" data-ja="ファッション">뜨개 패션</span>
@@ -147,7 +140,6 @@
 
         <!-- Fashion 2 -->
         <a href="/magazine/sustainable-knitting-slow-fashion.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_fashion.png" alt="Slow Fashion" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-fashion i18n" data-ko="뜨개 패션" data-en="Fashion" data-ja="ファッション">뜨개 패션</span>
@@ -163,7 +155,6 @@
 
         <!-- History 2 -->
         <a href="/magazine/aran-knitting-symbols.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_history.png" alt="Aran Patterns" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-history i18n" data-ko="뜨개 역사" data-en="History" data-ja="歴史">뜨개 역사</span>
@@ -179,7 +170,6 @@
 
         <!-- Basics -->
         <a href="/magazine/crochet-basics.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Crochet Basics" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="코바늘 기법" data-en="Crochet" data-ja="かぎ針">코바늘 기법</span>
@@ -195,7 +185,6 @@
 
         <!-- Science 2 -->
         <a href="/magazine/gauge-swatch-guide.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_science.png" alt="Gauge Guide" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-science i18n" data-ko="기법 · 테크닉" data-en="Technique" data-ja="技術">기법 · 테크닉</span>
@@ -210,7 +199,6 @@
         </a>
         <!-- Basics 2 -->
         <a href="/magazine/amigurumi-beginners.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Amigurumi" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="코바늘 기법" data-en="Crochet" data-ja="かぎ針">코바늘 기법</span>
@@ -226,7 +214,6 @@
 
         <!-- Basics 3 -->
         <a href="/magazine/yarn-care-guide.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Yarn Care" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="실 & 관리" data-en="Yarn & Care" data-ja="糸・관리">실 & 관리</span>
@@ -242,7 +229,6 @@
 
         <!-- Fashion 3 -->
         <a href="/magazine/2026-knitting-trends.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_fashion.png" alt="Trends" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-fashion i18n" data-ko="트렌드" data-en="Trends" data-ja="トレンド">트렌드</span>
@@ -258,7 +244,6 @@
 
         <!-- Basics 4 -->
         <a href="/magazine/beginners-guide.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Beginners" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="입문 가이드" data-en="Beginner" data-ja="入門">입문 가이드</span>
@@ -274,7 +259,6 @@
 
         <!-- Basics 5 -->
         <a href="/magazine/crochet-vs-knitting.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Comparison" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="기법 비교" data-en="Comparison" data-ja="比較">기법 비교</span>
@@ -290,7 +274,6 @@
 
         <!-- Basics 6 -->
         <a href="/magazine/yarn-weight-guide.html" class="article-card">
-          <div class="article-thumb"><img src="/magazine/images/mag_basics.png" alt="Yarn Weight" loading="lazy"></div>
           <div class="article-content">
             <div class="article-badge-row">
               <span class="article-card-category cat-basics i18n" data-ko="실 & 도구" data-en="Yarn & Tools" data-ja="糸・道具">실 & 도구</span>
