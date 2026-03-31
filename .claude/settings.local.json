@@ -49,7 +49,8 @@
       "Bash(py --version)",
       "Bash(python -c \":*)",
       "Bash(python fix_magazine.py)",
-      "Bash(rm fix_magazine.py)"
+      "Bash(rm fix_magazine.py)",
+      "Bash(wc:*)"
     ]
   }
 }
