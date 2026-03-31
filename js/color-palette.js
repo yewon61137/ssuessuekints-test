@@ -1,4 +1,4 @@
-import { auth, db, initAuth, openAuthModal } from './auth.js';
+﻿import { auth, db, initAuth, openAuthModal } from './auth.js';
 import { initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -767,7 +767,14 @@ function showToast(msg, isInfo = false) {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
 initAuth();
-initLang({ extra: pageT });
+// pageT: { key: {ko,en,ja} } → initLang extra: { ko: {key:val}, en: ..., ja: ... }
+const extraByLang = ['ko', 'en', 'ja'].reduce((acc, lang) => {
+  acc[lang] = Object.fromEntries(
+    Object.entries(pageT).map(([k, v]) => [k, v[lang] || v.ko || k])
+  );
+  return acc;
+}, {});
+initLang({ extra: extraByLang });
 
 onAuthStateChanged(auth, user => {
   // Header UI is handled by initAuth
@@ -866,3 +873,4 @@ window.addEventListener('langChange', () => {
   updateTextureDesc();
   renderStripeSliders(); // 슬라이더 단위(단/rows/段) 갱신
 });
+
