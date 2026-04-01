@@ -220,11 +220,32 @@
           <div class="tip-box"><p>💡 <strong>棒針がおすすめ：</strong>ウェアを本格的に作りたい方、規則的なリズムの作業が好きな方。</p></div>
           <p>どちらが正解ということはありません。多くのニッターは最終的に両方習得します！まったくの初心者なら、まずかぎ針編みから始めるのがおすすめです。</p>
         </div><!-- /ja -->
-      <div class="mag-share-bar">
-        <button class="action-btn" id="shareBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          <span class="share-label i18n" data-ko="공유하기" data-en="Share" data-ja="シェア">공유하기</span>
+      <!-- 액션바 (좋아요/스크랩/공유) -->
+      <div class="post-action-bar mag-action-bar">
+        <button class="action-btn" id="likeBtn">
+          <span class="action-icon">♥</span>
+          <span id="likeBtnLabel">좋아요</span>
+          <span id="likeCount">0</span>
         </button>
+        <button class="action-btn" id="scrapBtn">
+          <span class="action-icon">★</span>
+          <span id="scrapBtnLabel">스크랩</span>
+          <span id="scrapCount">0</span>
+        </button>
+        <button class="action-btn" id="shareBtn" style="margin-left:auto;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span id="shareBtnLabel">공유</span>
+        </button>
+      </div>
+
+      <!-- 댓글 섹션 -->
+      <div class="comments-section">
+        <h3 class="comments-title"><span class="comments-title-text">댓글</span> <span id="commentCountDisplay">0</span></h3>
+        <div id="commentsList"></div>
+        <div class="comment-form">
+          <textarea id="commentInput" placeholder="댓글을 입력하세요..." maxlength="500" rows="2"></textarea>
+          <button class="primary-btn small-btn" id="commentSubmitBtn">등록</button>
+        </div>
       </div>
 
 
@@ -271,7 +292,10 @@
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>
   <script src="/js/scroll-top.js"></script>
-  <script src="/js/magazine-share.js"></script>
   <script src="/js/magazine-lang.js"></script>
+  <script type="module">
+    import { initMagazineArticle } from '/js/magazine-article.js';
+    initMagazineArticle('crochet-vs-knitting');
+  </script>
 </body>
 </html>
