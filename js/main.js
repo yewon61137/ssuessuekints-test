@@ -254,7 +254,7 @@ const translations = {
 
 let currentLang = 'ko';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_CANVAS_DIMENSION = 8000; // Browser safety limit
+const MAX_CANVAS_DIMENSION = 4000; // Safari/Mobile memory safety limit 
 
 function changeLanguage(lang) {
     currentLang = lang;
@@ -583,8 +583,8 @@ generateBtn.addEventListener('click', async () => {
     const imgRatio = originalImage.height / originalImage.width;
     const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
 
-    // Limit stitches/rows for browser canvas safety
-    if (targetStitches > 2000 || targetRows > 2000) {
+    // Limit stitches/rows for browser canvas safety (especially mobile iOS)
+    if (targetStitches > 1500 || targetRows > 1500) {
         showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
         generateBtn.disabled = false;
         return;

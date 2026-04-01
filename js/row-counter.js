@@ -334,9 +334,11 @@ class RowCounter extends HTMLElement {
         const pid = this.selectedProject.id;
         const partId = this.selectedPartId;
         const increment = (await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')).increment;
+        const today = new Date().toLocaleDateString('en-CA');
         try {
             await updateDoc(doc(db, 'users', uid, 'projects', pid, 'parts', partId), {
-                totalSeconds: increment(addedSeconds)
+                totalSeconds: increment(addedSeconds),
+                [`dailySeconds.${today}`]: increment(addedSeconds)
             });
             await updateDoc(doc(db, 'users', uid, 'projects', pid), {
                 totalSeconds: increment(addedSeconds),
