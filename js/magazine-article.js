@@ -9,6 +9,24 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/f
 let currentUser = null;
 let currentLang = 'ko';
 
+// 매거진 기사 순서 정의 (최신순)
+const MAGAZINE_ARTICLES = [
+  'knitting-history-spy',
+  'science-of-knitting-physics',
+  'knitting-mental-health',
+  '2026-crochet-fashion-trends',
+  'sustainable-knitting-slow-fashion',
+  'aran-knitting-symbols',
+  'crochet-basics',
+  'gauge-swatch-guide',
+  'amigurumi-beginners',
+  '2026-knitting-trends',
+  'yarn-care-guide',
+  'beginners-guide',
+  'crochet-vs-knitting',
+  'yarn-weight-guide'
+];
+
 const UI = {
   like:                 { ko: '좋아요',               en: 'Like',                     ja: 'いいね' },
   scrap:                { ko: '스크랩',               en: 'Save',                     ja: 'スクラップ' },
@@ -23,6 +41,9 @@ const UI = {
   cancel:               { ko: '취소',                 en: 'Cancel',                   ja: 'キャンセル' },
   confirmComment:       { ko: '댓글을 삭제할까요?',   en: 'Delete this comment?',     ja: 'このコメントを削除しますか？' },
   confirmReply:         { ko: '답글을 삭제할까요?',   en: 'Delete this reply?',       ja: 'この返信を削除しますか？' },
+  navPrev:              { ko: '← 이전 글',            en: '← Previous',               ja: '← 前の記事' },
+  navNext:              { ko: '다음 글 →',            en: 'Next →',                   ja: '次の記事 →' },
+  navList:              { ko: '목록으로',             en: 'All Articles',             ja: '一覧へ' },
 };
 
 function t(key) { return UI[key]?.[currentLang] ?? UI[key]?.ko ?? key; }
@@ -34,12 +55,50 @@ export function initMagazineArticle(articleId) {
   initShare();
   loadComments(articleId);
   setupCommentForm(articleId);
+  initNavigation(articleId);
+}
+
+// ─── Navigation ───────────────────────────────────────────
+
+function initNavigation(currentSlug) {
+  const currentIndex = MAGAZINE_ARTICLES.indexOf(currentSlug);
+  if (currentIndex === -1) return;
+
+  const prevSlug = MAGAZINE_ARTICLES[currentIndex - 1]; 
+  const nextSlug = MAGAZINE_ARTICLES[currentIndex + 1]; 
+
+  const navPrev = document.getElementById('navPrev');
+  const navNext = document.getElementById('navNext');
+  const navList = document.getElementById('navList');
+
+  if (navPrev) {
+    if (prevSlug) {
+      navPrev.innerHTML = `<a href="/magazine/${prevSlug}.html">${t('navPrev')}</a>`;
+      navPrev.style.display = '';
+    } else {
+      navPrev.style.display = 'none';
+    }
+  }
+
+  if (navNext) {
+    if (nextSlug) {
+      navNext.innerHTML = `<a href="/magazine/${nextSlug}.html">${t('navNext')}</a>`;
+      navNext.style.display = '';
+    } else {
+      navNext.style.display = 'none';
+    }
+  }
+
+  if (navList) {
+    navList.textContent = t('navList');
+    navList.href = '/magazine.html';
+  }
 }
 
 // ─── Language switching ───────────────────────────────────
 
 function initArticleLang() {
-  const saved = localStorage.getItem('lang') || 'ko';
+  const saved = localStorage.getItem('ssuessue_lang') || 'ko';
   applyArticleLang(saved);
   document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
     btn.addEventListener('click', () => applyArticleLang(btn.dataset.lang));
@@ -48,7 +107,7 @@ function initArticleLang() {
 
 function applyArticleLang(lang) {
   currentLang = lang;
-  localStorage.setItem('lang', lang);
+  localStorage.setItem('ssuessue_lang', lang);
   document.documentElement.lang = lang;
 
   // 본문 언어 섹션
@@ -58,7 +117,6 @@ function applyArticleLang(lang) {
 
   // data-ko/en/ja 속성 (헤더·푸터 등 일반 요소)
   document.querySelectorAll('[data-ko]').forEach(el => {
-    // article-title/meta는 아래에서 innerHTML로 별도 처리
     if (el.classList.contains('article-title') || el.classList.contains('article-meta')) return;
     const val = el.dataset[lang];
     if (val !== undefined) el.textContent = val;
@@ -73,11 +131,11 @@ function applyArticleLang(lang) {
   const catEl = document.querySelector('.article-category');
   if (catEl?.dataset[lang]) catEl.textContent = catEl.dataset[lang];
 
-  // 아티클 hero — 제목 (innerHTML: <br> 태그 보존)
+  // 아티클 hero — 제목
   const titleEl = document.querySelector('.article-title');
   if (titleEl?.dataset[lang]) titleEl.innerHTML = titleEl.dataset[lang];
 
-  // 아티클 hero — 날짜/메타 (innerHTML: &nbsp; 보존)
+  // 아티클 hero — 날짜/메타
   const metaEl = document.querySelector('.article-meta');
   if (metaEl?.dataset[lang]) metaEl.innerHTML = metaEl.dataset[lang];
 
@@ -99,13 +157,9 @@ function applyArticleLang(lang) {
   const commentSubmitBtn = document.getElementById('commentSubmitBtn');
   if (commentSubmitBtn) commentSubmitBtn.textContent = t('submit');
 
-  // 아티클 하단 네비게이션
-  const navPrev = document.getElementById('navPrev');
-  const navNext = document.getElementById('navNext');
-  const navList = document.getElementById('navList');
-  if (navPrev?.firstChild) navPrev.firstChild.textContent = ({ ko: '← 이전 글', en: '← Prev', ja: '← 前の記事' })[lang] || '← 이전 글';
-  if (navNext?.firstChild) navNext.firstChild.textContent = ({ ko: '다음 글 →', en: 'Next →', ja: '次の記事 →' })[lang] || '다음 글 →';
-  if (navList) navList.textContent = ({ ko: '목록으로', en: 'All Articles', ja: '一覧へ' })[lang] || '목록으로';
+  // 내비게이션 업데이트 (언어 변경 시 텍스트 갱신)
+  const slug = window.location.pathname.split('/').pop().replace('.html', '');
+  initNavigation(slug);
 }
 
 // ─── Share ────────────────────────────────────────────────
