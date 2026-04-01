@@ -4189,7 +4189,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 .notice-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem; /* 늘어난 간격 */
 }
 
 .notice-item {
@@ -4198,6 +4198,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   background: var(--bg-color);
   overflow: hidden;
   transition: all 0.2s ease;
+  margin-bottom: 1rem; /* 안드로이드 웹뷰 등 구버전 flex gap 대체용 */
 }
 
 .notice-summary {
