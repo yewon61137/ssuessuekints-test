@@ -27,11 +27,14 @@
     fetch('/magazine.html')
       .then(function(res) { return res.text(); })
       .then(function(text) {
-        var rx = /href="\/magazine\/([^\/]+)\.html"/g;
-        var m;
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(text, 'text/html');
+        var links = doc.querySelectorAll('.article-card');
         var temp = [];
-        while ((m = rx.exec(text)) !== null) {
-          if (temp.indexOf(m[1]) === -1) {
+        for (var i = 0; i < links.length; i++) {
+          var href = links[i].getAttribute('href');
+          var m = href ? href.match(/\/magazine\/([^\/]+)\.html/) : null;
+          if (m && temp.indexOf(m[1]) === -1) {
             temp.push(m[1]);
           }
         }
