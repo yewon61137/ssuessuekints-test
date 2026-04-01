@@ -29,7 +29,10 @@
     if (isNavFetched || isNavFetching) return;
     isNavFetching = true;
     fetch('/magazine.html')
-      .then(function(res) { return res.text(); })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
       .then(function(text) {
         var parser = new DOMParser();
         var doc = parser.parseFromString(text, 'text/html');
@@ -43,14 +46,19 @@
             temp.push(slugVal);
           }
         }
+        if (temp.length === 0) {
+          // 파싱 결과가 비어 있으면 재시도를 위해 플래그를 올리지 않음
+          isNavFetching = false;
+          return;
+        }
         ARTICLES = temp; // 순서 유지 (가장 최신글 0번)
         isNavFetched = true;
         isNavFetching = false;
         var saved = localStorage.getItem('ssuessue_lang') || 'ko';
         buildNav(saved);
       })
-      .catch(function(e) { 
-        console.error('Failed to fetch magazine list', e); 
+      .catch(function(e) {
+        console.error('Failed to fetch magazine list', e);
         isNavFetching = false;
       });
   }
@@ -68,7 +76,10 @@
 
     var navEl = document.querySelector('.article-nav');
     if (!navEl) return;
-    
+
+    // 슬러그 매칭 실패 시 기존 하드코딩된 nav 유지 (빈 nav로 덮어쓰지 않음)
+    if (idx === -1) return;
+
     // 이전/다음 글 결정 (magazine.html에서 나열된 순서는 "최신 -> 과거" 순)
     // 따라서 "이전 글(과거)"은 배열에서 나보다 뒤에 있는 글 (idx + 1)
     // "다음 글(최신)"은 배열에서 나보다 앞에 있는 글 (idx - 1)
