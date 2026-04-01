@@ -18,12 +18,16 @@
   };
 
   function currentSlug() {
-    var m = window.location.pathname.match(/\/magazine\/([^\/]+)\.html/);
-    return m ? m[1] : null;
+    var path = window.location.pathname;
+    if (path.endsWith('/')) path = path.slice(0, -1);
+    return path.split('/').pop().replace('.html', '');
   }
 
+  var isNavFetching = false;
+
   function fetchArticlesAndBuildNav() {
-    if (isNavFetched) return;
+    if (isNavFetched || isNavFetching) return;
+    isNavFetching = true;
     fetch('/magazine.html')
       .then(function(res) { return res.text(); })
       .then(function(text) {
@@ -33,17 +37,22 @@
         var temp = [];
         for (var i = 0; i < links.length; i++) {
           var href = links[i].getAttribute('href');
-          var m = href ? href.match(/\/magazine\/([^\/]+)\.html/) : null;
-          if (m && temp.indexOf(m[1]) === -1) {
-            temp.push(m[1]);
+          if (!href) continue;
+          var slugVal = href.split('/').pop().replace('.html', '');
+          if (slugVal && temp.indexOf(slugVal) === -1) {
+            temp.push(slugVal);
           }
         }
-        ARTICLES = temp; // magazine.html의 순서(가장 최신글이 먼저 나옴)를 그대로 유지
+        ARTICLES = temp; // 순서 유지 (가장 최신글 0번)
         isNavFetched = true;
+        isNavFetching = false;
         var saved = localStorage.getItem('ssuessue_lang') || 'ko';
         buildNav(saved);
       })
-      .catch(function(e) { console.error('Failed to fetch magazine list', e); });
+      .catch(function(e) { 
+        console.error('Failed to fetch magazine list', e); 
+        isNavFetching = false;
+      });
   }
 
   function buildNav(lang) {
