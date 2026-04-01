@@ -27,8 +27,15 @@ class RowCounter extends HTMLElement {
         this.projects        = null;   // null=not loaded, []=empty, [...]= list
         this.projectsLoading = false;
         this.selectedProject = null;   // { id, name }
+        this.selectedPartId  = null;
         this.projCounters    = [];
         this._projSyncTimer  = null;
+
+        // Timer state
+        this._timerInterval  = null;
+        this._timerSeconds   = 0;
+        this._baseSeconds    = 0;
+        this._timerRunning   = false;
     }
 
     connectedCallback() {
@@ -239,7 +246,6 @@ class RowCounter extends HTMLElement {
                 )
             );
             this.projCounters = snap.docs
-                .filter(d => d.data().status !== 'done')
                 .map(d => {
                     const p = d.data();
                     const mode = p.mode || 'normal';
@@ -255,14 +261,98 @@ class RowCounter extends HTMLElement {
                         goalRows:      p.targetRows || 0,
                         alertRow:      p.alarmRow || 0,
                         memo:          p.memo || '',
+                        status:        p.status || 'pending',
+                        totalSeconds:  p.totalSeconds || 0
                     };
                 });
+            this.projCounters.sort((a, b) => { // keep createdAt order, but push done to bottom
+               if (a.status === 'done' && b.status !== 'done') return 1;
+               if (a.status !== 'done' && b.status === 'done') return -1;
+               return 0;
+            });
         } catch(e) {
             console.error('_loadProjectParts error:', e);
             this.projCounters = [];
         }
         this.projectsLoading = false;
         this.render();
+    }
+
+    _selectPart(partId) {
+        this.selectedPartId = partId;
+        const part = this.projCounters.find(p => p.id === partId);
+        if (part) {
+            this._baseSeconds = part.totalSeconds || 0;
+            this._timerSeconds = 0;
+            this._timerRunning = false;
+        }
+        this.render();
+    }
+
+    _backToPartsList() {
+        this._pauseTimer();
+        this.selectedPartId = null;
+        this.render();
+    }
+
+    _toggleTimer() {
+        if (this._timerRunning) {
+            this._pauseTimer();
+        } else {
+            this._startTimer();
+        }
+    }
+
+    _startTimer() {
+        this._timerRunning = true;
+        this._timerInterval = setInterval(() => {
+            this._timerSeconds++;
+            const el = this.shadowRoot.querySelector('.timer-display');
+            if (el) el.textContent = this._formatTime(this._baseSeconds + this._timerSeconds);
+        }, 1000);
+        this.render();
+    }
+
+    _pauseTimer() {
+        if (!this._timerRunning) return;
+        this._timerRunning = false;
+        clearInterval(this._timerInterval);
+        
+        if (this.selectedProject && this.selectedPartId && this._timerSeconds > 0) {
+           this._saveTimerToFirestore(this._timerSeconds);
+           this._baseSeconds += this._timerSeconds;
+           this._timerSeconds = 0;
+           const p = this.projCounters.find(x => x.id === this.selectedPartId);
+           if (p) p.totalSeconds = this._baseSeconds;
+        }
+        this.render();
+    }
+
+    async _saveTimerToFirestore(addedSeconds) {
+        if (!this.currentUser || !this.selectedProject || !this.selectedPartId) return;
+        const uid = this.currentUser.uid;
+        const pid = this.selectedProject.id;
+        const partId = this.selectedPartId;
+        const increment = (await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')).increment;
+        try {
+            await updateDoc(doc(db, 'users', uid, 'projects', pid, 'parts', partId), {
+                totalSeconds: increment(addedSeconds)
+            });
+            await updateDoc(doc(db, 'users', uid, 'projects', pid), {
+                totalSeconds: increment(addedSeconds),
+                updatedAt: Date.now()
+            });
+        } catch(e) { console.error('Timer sync err', e); }
+    }
+
+    _formatTime(totalSec) {
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        if (h > 0) {
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
     // ── Project list ──────────────────────────────────────────────────────────
@@ -307,6 +397,9 @@ class RowCounter extends HTMLElement {
 
     toggleDrawer() {
         this.isOpen = !this.isOpen;
+        if (!this.isOpen) {
+            this._pauseTimer();
+        }
         localStorage.setItem(DRAWER_KEY, String(this.isOpen));
         if (this.isOpen && this.activeTab === 'project' &&
             this.currentUser && this.projects === null && !this.projectsLoading) {
@@ -664,6 +757,24 @@ class RowCounter extends HTMLElement {
         .memo-field:focus, .memo-textarea:focus { outline:none; border-color:var(--primary); }
         .memo-textarea { resize:vertical; min-height:48px; }
 
+        .timer-area {
+          display:flex; flex-direction:column; align-items:center; gap:10px;
+          background:var(--bg); padding:15px; border-radius:12px;
+          box-shadow:0 2px 6px var(--shadow); border:1.5px solid var(--border);
+        }
+        .timer-display {
+          font-size:2.2rem; font-weight:900; color:var(--primary); font-family:monospace; margin:0; line-height:1;
+        }
+        .timer-btn {
+          width:100%; padding:10px; border-radius:8px; font-weight:800;
+          font-family:inherit; font-size:0.9rem; cursor:pointer;
+          background:var(--primary); color:var(--bg); border:none; transition:opacity 0.2s;
+        }
+        .timer-btn:active { transform:scale(0.98); }
+        .timer-btn.running {
+          background:var(--bg); color:var(--primary); border:1.5px solid var(--primary);
+        }
+
         .drawer-footer {
           padding:16px; border-top:1px solid var(--border); flex-shrink:0;
         }
@@ -732,19 +843,66 @@ class RowCounter extends HTMLElement {
         }
 
         if (this.selectedProject) {
-            const partHtml = this.projectsLoading
-                ? `<div class="status-msg"><div>${tr.rc_proj_loading}</div></div>`
-                : this.projCounters.length === 0
-                    ? `<div class="status-msg"><div>${tr.rc_parts_empty}</div></div>`
-                    : this.projCounters.map(c => this._renderCounter(c, tr, true)).join('');
-            return `
-          <div class="proj-header">
-            <button class="back-btn" id="backToProjects">← ${tr.rc_proj_back}</button>
-            <span class="proj-name-label">${this._esc(this.selectedProject.title || '')}</span>
-          </div>
-          <div class="drawer-content">
-            ${partHtml}
-          </div>`;
+            if (this.projectsLoading) {
+                return `<div class="drawer-content"><div class="status-msg"><div>${tr.rc_proj_loading}</div></div></div>`;
+            }
+
+            if (this.selectedPartId) {
+                const part = this.projCounters.find(p => p.id === this.selectedPartId);
+                if (!part) return `<div class="status-msg">Error</div>`;
+
+                const activeSecs = this._baseSeconds + this._timerSeconds;
+                const timeStr = this._formatTime(activeSecs);
+                const isKo = this.lang === 'ko';
+                const isJa = this.lang === 'ja';
+                const playText = isKo ? '타이머 시작' : isJa ? 'タイマー開始' : 'Start Timer';
+                const pauseText = isKo ? '일시정지' : isJa ? '一時停止' : 'Pause';
+
+                return `
+                  <div class="proj-header">
+                    <button class="back-btn" id="backToPartsList">← ${tr.rc_proj_back}</button>
+                    <span class="proj-name-label">${this._esc(this.selectedProject.title || '')} / ${this._esc(part.name || '')}</span>
+                  </div>
+                  <div class="drawer-content" style="gap:20px;">
+                    <div class="timer-area">
+                      <div class="timer-display">${timeStr}</div>
+                      <button class="timer-btn ${this._timerRunning ? 'running' : ''}" id="toggleTimerBtn">
+                         ${this._timerRunning ? `⏸ ${pauseText}` : `▶ ${playText}`}
+                      </button>
+                    </div>
+                    ${this._renderCounter(part, tr, true)}
+                  </div>
+                `;
+            } else {
+                if (this.projCounters.length === 0) {
+                    return `
+                      <div class="proj-header">
+                        <button class="back-btn" id="backToProjects">← ${tr.rc_proj_back}</button>
+                        <span class="proj-name-label">${this._esc(this.selectedProject.title || '')}</span>
+                      </div>
+                      <div class="drawer-content"><div class="status-msg"><div>${tr.rc_parts_empty}</div></div></div>`;
+                }
+
+                const partHtml = this.projCounters.map(c => `
+                  <button class="proj-card proj-part-card" data-part-id="${this._esc(c.id)}">
+                    <span class="proj-card-name" style="${c.status === 'done' ? 'text-decoration:line-through;opacity:0.6;' : ''}">${this._esc(c.name || '—')}</span>
+                    <span style="font-size:0.75rem; opacity:0.6; margin-left:10px; font-weight:800;">
+                       ${c.count} ${c.goalRows > 0 ? `/ ${c.goalRows}` : ''}
+                    </span>
+                    <span class="proj-card-arrow" style="margin-left:auto; padding-left:10px;">→</span>
+                  </button>
+                `).join('');
+
+                return `
+                  <div class="proj-header">
+                    <button class="back-btn" id="backToProjects">← ${tr.rc_proj_back}</button>
+                    <span class="proj-name-label">${this._esc(this.selectedProject.title || '')}</span>
+                  </div>
+                  <div class="drawer-content proj-list">
+                    ${partHtml}
+                  </div>
+                `;
+            }
         }
 
         if (this.projectsLoading || this.projects === null) {
@@ -899,16 +1057,28 @@ class RowCounter extends HTMLElement {
             this.render();
         });
 
-        // Tab switching
         r.querySelectorAll('.tab-btn').forEach(btn =>
-            btn.addEventListener('click', () => this._switchTab(btn.dataset.tab)));
+            btn.addEventListener('click', () => {
+                this._pauseTimer(); // pause timer if tab switched
+                this._switchTab(btn.dataset.tab);
+            }));
 
         // Project card selection
-        r.querySelectorAll('.proj-card').forEach(card =>
-            card.addEventListener('click', () => this._selectProject({
-                id:    card.dataset.projId,
-                title: card.dataset.projTitle,
-            })));
+        r.querySelectorAll('.proj-card:not(.proj-part-card)').forEach(card =>
+            card.addEventListener('click', () => {
+                this._pauseTimer();
+                this._selectProject({
+                  id:    card.dataset.projId,
+                  title: card.dataset.projTitle,
+                });
+            }));
+
+        // Part card selection
+        r.querySelectorAll('.proj-part-card').forEach(card =>
+            card.addEventListener('click', () => this._selectPart(card.dataset.partId)));
+
+        r.getElementById('backToPartsList')?.addEventListener('click', () => this._backToPartsList());
+        r.getElementById('toggleTimerBtn')?.addEventListener('click', () => this._toggleTimer());
 
         // Counter controls
         r.querySelectorAll('.plus').forEach(btn =>

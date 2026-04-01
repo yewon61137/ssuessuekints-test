@@ -2025,6 +2025,7 @@ canvas {
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -3269,6 +3270,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   word-break: break-word;
 }
@@ -3276,6 +3278,7 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
 .mp-bio.expanded {
   display: block;
   -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 
 .mp-bio-toggle {

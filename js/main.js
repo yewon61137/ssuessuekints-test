@@ -12,6 +12,7 @@ let seedColors = [];
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
+const mainUploadWrapper = imageUpload ? imageUpload.closest('.file-upload-wrapper') : null;
 const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 const resultPlaceholder = document.getElementById('resultPlaceholder');
 const previewArea = document.getElementById('previewArea');
@@ -397,6 +398,33 @@ imageUpload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
+if (mainUploadWrapper) {
+    mainUploadWrapper.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        mainUploadWrapper.classList.add('dragging');
+    });
+    mainUploadWrapper.addEventListener('dragleave', () => {
+        mainUploadWrapper.classList.remove('dragging');
+    });
+    mainUploadWrapper.addEventListener('drop', (e) => {
+        e.preventDefault();
+        mainUploadWrapper.classList.remove('dragging');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            imageUpload.files = e.dataTransfer.files;
+            imageUpload.dispatchEvent(new Event('change'));
+        }
+    });
+    // 배경 클릭 시에도 작동하도록 하되, 2중 트리거 방지
+    mainUploadWrapper.addEventListener('click', (e) => {
+        if (e.target.classList.contains('file-upload-btn') || e.target.tagName === 'LABEL') {
+            return;
+        }
+        if (e.target !== imageUpload) {
+            imageUpload.click();
+        }
+    });
+}
+
 // --- Seed Colors (필수 색상) 선택 및 돋보기 로직 (마우스/터치 호환) ---
 const MAGNIFIER_SIZE = 140; 
 const MAGNIFIER_ZOOM = 8;
@@ -466,6 +494,7 @@ function handlePointerEnd(e) {
 
     let clientX, clientY;
     if (e.type === 'touchend') {
+        if (e.cancelable) e.preventDefault();
         if (e.changedTouches && e.changedTouches.length > 0) {
             clientX = e.changedTouches[0].clientX;
             clientY = e.changedTouches[0].clientY;

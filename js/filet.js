@@ -26,7 +26,7 @@ const inputRows10 = document.getElementById('filetRows10');
 const yarnPreset = document.getElementById('filetYarnPreset'); // 프리셋 드롭다운 추가
 const resultSizeDisplay = document.getElementById('filetResultSize');
 const uploadInput = document.getElementById('filetImageUpload');
-const uploadWrapper = document.querySelector('.file-upload-wrapper'); 
+const uploadWrapper = uploadInput ? uploadInput.closest('.file-upload-wrapper') : null; 
 const fileNameDisplay = document.getElementById('filetFileNameDisplay');
 const convertBtn = document.getElementById('filetConvertBtn');
 const clearBtn = document.getElementById('filetClearBtn');
@@ -398,6 +398,10 @@ function handleStart(e) {
 }
 function handleMove(e) {
     if (!isDrawing) return;
+    // 터치 드로잉 시 화면이 스크롤되는 현상 방지
+    if (e.cancelable && e.type.includes('touch')) {
+        e.preventDefault();
+    }
     const { x, y } = getPos(e);
     if (x >= 0 && x < gridW && y >= 0 && y < gridH) {
         if (grid[y][x] !== drawMode) {
