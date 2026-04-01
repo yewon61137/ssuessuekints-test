@@ -1,81 +1,100 @@
 // magazine-lang.js — 매거진 아티클 언어 전환 + 이전/다음 nav 자동 생성
 //
-// ★ 새 아티클 추가 시: ARTICLES 배열 맨 끝에 슬러그(파일명에서 .html 제외)를 추가하면 끝.
-//   nav(이전/다음/목록)은 자동으로 생성되며, 언어 전환도 즉시 적용됩니다.
+// ★ 새 아티클 추가 시: magazine.html 파일에 카드를 추가하기만 하면
+//   nav(이전/다음/목록)은 자동으로 생성되며, 가장 최신 글을 인식하여
+//   이전/다음 버튼 노출 여부를 자동 제어합니다.
 //
 (function () {
   'use strict';
 
-  // ────────────────────────────────────────────────────────────────────
-  // 아티클 목록 — 오래된 글부터 최신 글 순으로 유지 (순서가 이전/다음 결정)
-  // 새 글 추가 시 맨 끝에 슬러그 한 줄 추가
-  // ────────────────────────────────────────────────────────────────────
-  var ARTICLES = [
-    'yarn-weight-guide',           // 2026-01-05
-    'crochet-vs-knitting',         // 2026-01-15
-    'beginners-guide',             // 2026-01-30
-    '2026-knitting-trends',        // 2026-02-10
-    'yarn-care-guide',             // 2026-02-20
-    'amigurumi-beginners',         // 2026-02-28
-    'gauge-swatch-guide',          // 2026-03-05
-    'crochet-basics',              // 2026-03-10
-    'aran-knitting-symbols',       // 2026-03-14
-    'sustainable-knitting-slow-fashion', // 2026-03-17
-    '2026-crochet-fashion-trends', // 2026-03-20
-    'knitting-mental-health',      // 2026-03-24
-    'science-of-knitting-physics', // 2026-03-27
-    'knitting-history-spy'         // 2026-03-30 ← 현재 최신
-    // 예시: 'new-article-slug'   // YYYY-MM-DD
-  ];
+  var ARTICLES = []; // magazine.html에서 동적으로 채워짐 (0번이 가장 최신 글)
+  var isNavFetched = false;
 
   var LANGS = ['ko', 'en', 'ja'];
-
   var NAV_LABELS = {
     ko: { prev: '← 이전 글', next: '다음 글 →', list: '목록으로' },
     en: { prev: '← Prev',    next: 'Next →',     list: 'All Articles' },
     ja: { prev: '← 前の記事', next: '次の記事 →', list: '一覧へ' }
   };
 
-  // URL에서 현재 슬러그 추출
   function currentSlug() {
     var m = window.location.pathname.match(/\/magazine\/([^\/]+)\.html/);
     return m ? m[1] : null;
   }
 
-  // 이전/다음/목록 nav를 현재 위치 기반으로 자동 구성
+  function fetchArticlesAndBuildNav() {
+    if (isNavFetched) return;
+    fetch('/magazine.html')
+      .then(function(res) { return res.text(); })
+      .then(function(text) {
+        var rx = /href="\/magazine\/([^\/]+)\.html"/g;
+        var m;
+        var temp = [];
+        while ((m = rx.exec(text)) !== null) {
+          if (temp.indexOf(m[1]) === -1) {
+            temp.push(m[1]);
+          }
+        }
+        ARTICLES = temp; // magazine.html의 순서(가장 최신글이 먼저 나옴)를 그대로 유지
+        isNavFetched = true;
+        var saved = localStorage.getItem('ssuessue_lang') || 'ko';
+        buildNav(saved);
+      })
+      .catch(function(e) { console.error('Failed to fetch magazine list', e); });
+  }
+
   function buildNav(lang) {
-    var lbl = NAV_LABELS[lang];
+    if (!isNavFetched) {
+      // 아직 안 불렀으면 패치 시작
+      fetchArticlesAndBuildNav();
+      return;
+    }
+
+    var lbl = NAV_LABELS[lang] || NAV_LABELS['ko'];
     var slug = currentSlug();
     var idx = slug ? ARTICLES.indexOf(slug) : -1;
 
-    var prevSlug = (idx > 0) ? ARTICLES[idx - 1] : null;
-    var nextSlug = (idx >= 0 && idx < ARTICLES.length - 1) ? ARTICLES[idx + 1] : null;
+    var navEl = document.querySelector('.article-nav');
+    if (!navEl) return;
+    
+    // 이전/다음 글 결정 (magazine.html에서 나열된 순서는 "최신 -> 과거" 순)
+    // 따라서 "이전 글(과거)"은 배열에서 나보다 뒤에 있는 글 (idx + 1)
+    // "다음 글(최신)"은 배열에서 나보다 앞에 있는 글 (idx - 1)
+    var prevSlug = (idx >= 0 && idx < ARTICLES.length - 1) ? ARTICLES[idx + 1] : null;
+    var nextSlug = (idx > 0) ? ARTICLES[idx - 1] : null;
 
-    function setSpan(cls, targetSlug, label) {
-      var span = document.querySelector('.' + cls);
-      if (!span) return;
-      if (targetSlug) {
-        var a = span.querySelector('a');
-        if (!a) {
-          a = document.createElement('a');
-          span.appendChild(a);
-        }
-        a.href = '/magazine/' + targetSlug + '.html';
-        a.textContent = label;
-        // 불필요한 data-* 속성 제거 (이중 처리 방지)
-        a.removeAttribute('data-ko');
-        a.removeAttribute('data-en');
-        a.removeAttribute('data-ja');
-      } else {
-        span.innerHTML = '';
-      }
+    navEl.innerHTML = '';
+
+    // ← 이전 글 (과거)
+    var prevSpan = document.createElement('span');
+    prevSpan.className = 'article-nav-prev';
+    if (prevSlug) {
+      var prevA = document.createElement('a');
+      prevA.href = '/magazine/' + prevSlug + '.html';
+      prevA.textContent = lbl.prev;
+      prevSpan.appendChild(prevA);
     }
+    navEl.appendChild(prevSpan);
 
-    setSpan('article-nav-prev', prevSlug, lbl.prev);
-    setSpan('article-nav-next', nextSlug, lbl.next);
+    // 목록으로
+    var centerSpan = document.createElement('span');
+    centerSpan.className = 'article-nav-center';
+    var listA = document.createElement('a');
+    listA.href = '/magazine.html';
+    listA.textContent = lbl.list;
+    centerSpan.appendChild(listA);
+    navEl.appendChild(centerSpan);
 
-    var listLink = document.querySelector('.article-nav-center a');
-    if (listLink) listLink.textContent = lbl.list;
+    // 다음 글 → (최신)
+    var nextSpan = document.createElement('span');
+    nextSpan.className = 'article-nav-next';
+    if (nextSlug) {
+      var nextA = document.createElement('a');
+      nextA.href = '/magazine/' + nextSlug + '.html';
+      nextA.textContent = lbl.next;
+      nextSpan.appendChild(nextA);
+    }
+    navEl.appendChild(nextSpan);
   }
 
   function applyLang(lang) {
