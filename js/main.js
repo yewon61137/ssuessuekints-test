@@ -342,7 +342,7 @@ imageUpload.addEventListener('change', (e) => {
         return;
     }
 
-    if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+    if (!file.type.startsWith('image/')) {
         showStatus('status_format_err', true);
         return;
     }
