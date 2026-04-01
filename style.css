@@ -4182,3 +4182,99 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
     font-size: 0.7rem;
   }
 }
+
+/* ==============================
+   Notice / Accordion Styles
+   ============================== */
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.notice-item {
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-color);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.notice-summary {
+  padding: 1.5rem 1.75rem;
+  cursor: pointer;
+  list-style: none; /* Hide default triangle */
+  position: relative;
+  transition: background-color 0.2s;
+  outline: none;
+}
+
+.notice-summary::-webkit-details-marker {
+  display: none;
+}
+
+.notice-summary:hover {
+  background: var(--accent-color);
+}
+
+.notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.notice-badge {
+  background: var(--primary-color);
+  color: var(--bg-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.65rem;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.notice-time {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+.notice-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notice-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.notice-icon {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--secondary-color);
+  transition: transform 0.3s ease;
+  user-select: none;
+}
+
+.notice-item[open] .notice-icon {
+  transform: rotate(180deg);
+}
+
+.notice-body {
+  padding: 0 1.75rem 1.5rem 1.75rem;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--secondary-color);
+  border-top: 1px dashed var(--border-color);
+  margin-top: 0;
+  padding-top: 1.5rem;
+}
