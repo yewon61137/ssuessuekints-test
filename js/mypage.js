@@ -206,6 +206,7 @@ function switchPanel(name) {
     else if (name === 'scraps')          loadScraps(currentUid);
     else if (name === 'palettes')        loadPalettes(currentUid);
     else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
+    else if (name === 'publicProjects')  loadPublicProjects(currentUid);
     else if (name === 'stash')           initStash(currentUid);
 }
 
@@ -803,14 +804,14 @@ async function loadProjects(uid) {
     }
 }
 
-function buildProjectCard(proj, isDone = false) {
+function buildProjectCard(proj, isDone = false, readOnly = false) {
     const card = document.createElement('div');
     card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
     card.style.cursor = 'pointer';
     const projUrl = `/projects.html?id=${encodeURIComponent(proj.id)}`;
-    card.addEventListener('click', (e) => { 
+    card.addEventListener('click', (e) => {
         if (e.target.closest('.mp-proj-public-toggle')) return;
-        location.href = projUrl; 
+        location.href = projUrl;
     });
 
     const statusLabel = proj._status === 'done'     ? tr('done_badge')
@@ -823,7 +824,11 @@ function buildProjectCard(proj, isDone = false) {
         </div>
         <span class="mp-progress-pct">${proj._done} / ${proj._total}${tr('progress_done')}</span>` : '';
 
-    const shareBtn = isDone ? `<button class="secondary-btn small-btn mp-share-proj-btn">${tr('go_community')}</button>` : '';
+    const shareBtn = (!readOnly && isDone) ? `<button class="secondary-btn small-btn mp-share-proj-btn">${tr('go_community')}</button>` : '';
+    const toggleBtn = !readOnly ? `
+            <button class="secondary-btn small-btn mp-proj-public-toggle" data-id="${escHtml(proj.id)}" data-public="${!!proj.isPublic}" style="border:1px solid var(--border); padding:6px 12px; background:var(--bg); transition:background 0.2s;">
+                ${proj.isPublic ? `🔒 ${escHtml(tr('proj_private'))}로 전환` : `🔓 ${escHtml(tr('proj_public'))}로 전환`}
+            </button>` : '';
 
     card.innerHTML = `
         <div class="mp-project-header">
@@ -836,9 +841,7 @@ function buildProjectCard(proj, isDone = false) {
         ${progressHtml}
         <div class="mp-project-actions" style="flex-wrap:wrap; gap:6px;">
             <button class="secondary-btn small-btn mp-open-proj-btn">자세히 보기 →</button>
-            <button class="secondary-btn small-btn mp-proj-public-toggle" data-id="${escHtml(proj.id)}" data-public="${!!proj.isPublic}" style="border:1px solid var(--border); padding:6px 12px; background:var(--bg); transition:background 0.2s;">
-                ${proj.isPublic ? `🔒 ${escHtml(tr('proj_private'))}로 전환` : `🔓 ${escHtml(tr('proj_public'))}로 전환`}
-            </button>
+            ${toggleBtn}
             ${shareBtn}
         </div>`;
 
@@ -852,21 +855,23 @@ function buildProjectCard(proj, isDone = false) {
         location.href = '/community.html';
     });
 
-    card.querySelector('.mp-proj-public-toggle').addEventListener('click', async e => {
-        e.stopPropagation();
-        const pid = e.currentTarget.dataset.id;
-        const isPub = e.currentTarget.dataset.public === 'true';
-        try {
-            await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
-            // 업데이트 즉시 새로고침을 위해 프로젝트 리스트 다시 로드
-            loadProjects(currentUser.uid);
-        } catch(err) {
-            alert('업데이트 실패: ' + err.message);
-        }
-    });
+    if (!readOnly) {
+        card.querySelector('.mp-proj-public-toggle')?.addEventListener('click', async e => {
+            e.stopPropagation();
+            const pid = e.currentTarget.dataset.id;
+            const isPub = e.currentTarget.dataset.public === 'true';
+            try {
+                await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+                loadProjects(currentUser.uid);
+            } catch(err) {
+                alert('업데이트 실패: ' + err.message);
+            }
+        });
+    }
 
     return card;
 }
+
 
 // ── 내 글 ─────────────────────────────────────────────────────────────────────
 
@@ -1048,7 +1053,47 @@ async function loadPublicPalettes(uid) {
         loadingEl.style.display = 'none';
         emptyEl.textContent = tr('empty_public_palettes');
         emptyEl.style.display = 'block';
-        console.error(e);
+    }
+}
+
+// ── 공개 프로젝트 (타인 프로필) ──────────────────────────────────────────────────
+
+async function loadPublicProjects(uid) {
+    const loadingEl = document.getElementById('publicProjectsLoading');
+    const emptyEl   = document.getElementById('publicProjectsEmpty');
+    const gridEl    = document.getElementById('publicProjectsGrid');
+    if (!loadingEl || !gridEl) return;
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    gridEl.innerHTML = '';
+    gridEl.style.display = 'grid';
+    gridEl.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+    gridEl.style.gap = '1.25rem';
+    gridEl.style.marginTop = '1rem';
+
+    try {
+        const snap = await getDocs(query(
+            collection(db, `users/${uid}/projects`),
+            where('isPublic', '==', true)
+        ));
+        loadingEl.style.display = 'none';
+        if (snap.empty) {
+            emptyEl.textContent = tr('public_projects') + ' 없음'; // 임시
+            emptyEl.style.display = 'block';
+            return;
+        }
+        const projects = [];
+        snap.forEach(ds => projects.push({ id: ds.id, ...ds.data() }));
+        projects
+            .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+            .forEach(p => {
+                const isDone = p._status === 'done';
+                gridEl.appendChild(buildProjectCard(p, isDone, true)); // readOnly=true
+            });
+    } catch (e) {
+        loadingEl.style.display = 'none';
+        emptyEl.textContent = '불러오기 실패';
+        emptyEl.style.display = 'block';
     }
 }
 
@@ -1537,9 +1582,11 @@ async function setupOtherUserView() {
     const commentTab = document.getElementById('subtabComments');
     if (commentTab) commentTab.style.display = 'none';
 
-    // 공개 팔레트 탭 표시
+    // 공개 팔레트 & 공개 프로젝트 탭 표시
     const pubPalBtn = document.getElementById('mpNavPublicPalettes');
     if (pubPalBtn) pubPalBtn.style.display = '';
+    const pubProjBtn = document.getElementById('mpNavPublicProjects');
+    if (pubProjBtn) pubProjBtn.style.display = '';
 
     // "내 글·댓글" → "게시글" 레이블 변경
     const postsNavBtn = document.getElementById('mpNavPosts');

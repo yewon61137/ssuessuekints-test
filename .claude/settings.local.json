@@ -54,7 +54,10 @@
       "Bash(python3:*)",
       "Bash(node:*)",
       "WebFetch(domain:pagespeed.web.dev)",
-      "WebFetch(domain:www.googleapis.com)"
+      "WebFetch(domain:www.googleapis.com)",
+      "WebFetch(domain:webfontworld.github.io)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri 'https://webfontworld.github.io/gmarket/GmarketSans.css' -UseBasicParsing | Select-Object -ExpandProperty Content\")"
     ]
   }
 }
