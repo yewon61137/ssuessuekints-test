@@ -83,6 +83,14 @@
               <span class="mp-stat-val" id="mpStatPublicPalettes">—</span>
               <span class="mp-stat-lbl i18n" data-ko="공개 팔레트" data-en="Palettes" data-ja="公開パレット">공개 팔레트</span>
             </div>
+            <div class="mp-stat" id="mpStatFollowersWrap">
+              <span class="mp-stat-val" id="mpStatFollowers">—</span>
+              <span class="mp-stat-lbl i18n" data-i18n="stat_followers">팔로워</span>
+            </div>
+            <div class="mp-stat" id="mpStatFollowingWrap">
+              <span class="mp-stat-val" id="mpStatFollowing">—</span>
+              <span class="mp-stat-lbl i18n" data-i18n="stat_following">팔로잉</span>
+            </div>
           </div>
           <nav class="mp-nav" id="mpNav">
             <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile" data-i18n="tab_profile">프로필</button>
@@ -93,6 +101,7 @@
             <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
             <button class="mp-nav-btn" data-panel="stash" id="mpNavStash" data-i18n="tab_stash">내 실 창고</button>
             <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
+            <button class="mp-nav-btn" data-panel="following" id="mpNavFollowing" data-i18n="my_following">팔로우 목록</button>
           </nav>
         </aside>
 
@@ -233,6 +242,17 @@
             <div id="publicPalettesLoading" class="mypage-empty">불러오는 중...</div>
             <div id="publicPalettesEmpty" class="mypage-empty" style="display:none;"></div>
             <div class="cp-palette-grid" id="publicPalettesGrid"></div>
+          </div>
+
+          <!-- 팔로우 목록 패널 -->
+          <div class="mp-panel" id="panelFollowing">
+            <h2 class="mp-panel-title" data-i18n="my_following">팔로우 목록</h2>
+            <div id="followingLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="followingEmpty" class="mypage-empty" style="display:none;">
+              아직 팔로우 중인 유저가 없습니다.
+            </div>
+            <!-- 카드 스타일 표시 (유저 목록) -->
+            <div id="followingList" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;"></div>
           </div>
 
         </div><!-- /.mp-content -->

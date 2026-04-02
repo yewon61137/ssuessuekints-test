@@ -207,6 +207,7 @@ function switchPanel(name) {
     else if (name === 'palettes')        loadPalettes(currentUid);
     else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
     else if (name === 'stash')           initStash(currentUid);
+    else if (name === 'following')       loadFollowing(currentUid);
 }
 
 document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
@@ -308,6 +309,8 @@ async function fillSidebar(uid, readOnly = false) {
     // 통계 (병렬)
     const statsQueries = [
         getDocs(query(collection(db, 'posts'), where('uid', '==', uid))),
+        getDocs(query(collection(db, 'follows'), where('followerId', '==', uid))),
+        getDocs(query(collection(db, 'follows'), where('followingId', '==', uid)))
     ];
     if (!readOnly) {
         statsQueries.push(getDocs(query(collection(db, `users/${uid}/patterns`), limit(500))));
@@ -317,10 +320,21 @@ async function fillSidebar(uid, readOnly = false) {
     }
 
     Promise.all(statsQueries).then((results) => {
+        const posts = results[0];
+        const following = results[1];
+        const followers = results[2];
+
+        const poEl = document.getElementById('mpStatPosts');
+        if (poEl) poEl.textContent = posts.size;
+
+        const fgEl = document.getElementById('mpStatFollowing');
+        if (fgEl) fgEl.textContent = following.size;
+
+        const fwEl = document.getElementById('mpStatFollowers');
+        if (fwEl) fwEl.textContent = followers.size;
+
         if (readOnly) {
-            const [posts, publicPalettes] = results;
-            const poEl = document.getElementById('mpStatPosts');
-            if (poEl) poEl.textContent = posts.size;
+            const publicPalettes = results[3];
             let totalLikes = 0;
             posts.forEach(ds => { totalLikes += ds.data().likeCount || 0; });
             const likesEl = document.getElementById('mpStatLikes');
@@ -328,15 +342,14 @@ async function fillSidebar(uid, readOnly = false) {
             const ppEl = document.getElementById('mpStatPublicPalettes');
             if (ppEl) ppEl.textContent = publicPalettes?.size ?? 0;
         } else {
-            const [posts, patterns, scraps] = results;
+            const patterns = results[3];
+            const scraps = results[4];
             const pEl  = document.getElementById('mpStatPatterns');
-            const poEl = document.getElementById('mpStatPosts');
             const scEl = document.getElementById('mpStatScraps');
             if (pEl)  pEl.textContent  = patterns.size;
-            if (poEl) poEl.textContent = posts.size;
             if (scEl) scEl.textContent = scraps?.size ?? '—';
         }
-    }).catch(() => {});
+    }).catch((e) => { console.error('Stats loading failed', e); });
 }
 
 // ── 프로필 패널 ───────────────────────────────────────────────────────────────
@@ -1456,6 +1469,8 @@ onAuthStateChanged(auth, async user => {
             await fillSidebar(urlUid, /* readOnly */ true);
             setupOtherUserView();
         }
+        // 팔로우 버튼 상태 반영 (user 변경 시마다 갱신)
+        updateFollowBtnState(user);
     } else if (user) {
         // 유저가 바뀐 경우(다른 계정으로 재로그인) 상태 초기화
         if (_prevUid !== null && _prevUid !== user.uid) {
@@ -1483,8 +1498,8 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function setupOtherUserView() {
-    // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고 탭 숨김
-    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes', 'mpNavStash'].forEach(id => {
+    // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고/팔로우 목록 탭 숨김
+    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes', 'mpNavStash', 'mpNavFollowing'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -1512,34 +1527,10 @@ async function setupOtherUserView() {
 
     switchPanel('posts');
 
-    // 팔로우 버튼 기능 초기화
+    // 팔로우 버튼 노출 및 이벤트 연결 (1회)
     const followBtn = document.getElementById('mpFollowBtn');
     if (followBtn) {
         followBtn.style.display = 'block';
-        let following = false;
-
-        const updateBtnDOM = () => {
-            if (following) {
-                followBtn.textContent = tr('following');
-                followBtn.classList.remove('primary-btn');
-                followBtn.classList.add('secondary-btn');
-            } else {
-                followBtn.textContent = tr('follow');
-                followBtn.classList.remove('secondary-btn');
-                followBtn.classList.add('primary-btn');
-            }
-        };
-
-        const initBtnState = async () => {
-            if (auth.currentUser) {
-                try {
-                    following = await isFollowing(urlUid);
-                } catch { following = false; }
-            } else {
-                following = false;
-            }
-            updateBtnDOM();
-        };
 
         followBtn.addEventListener('click', async () => {
             if (!auth.currentUser) {
@@ -1548,13 +1539,15 @@ async function setupOtherUserView() {
             }
             followBtn.disabled = true;
             try {
-                if (following) {
+                // 현재 UI 상태에 따라 토글
+                const isCurrentlyFollowing = followBtn.classList.contains('secondary-btn');
+                if (isCurrentlyFollowing) {
                     await unfollowUser(urlUid);
                 } else {
                     await followUser(urlUid);
                 }
-                following = !following;
-                updateBtnDOM();
+                // 상태 최신화
+                updateFollowBtnState(auth.currentUser);
             } catch (err) {
                 console.error(err);
                 alert(err.message || '오류가 발생했습니다.');
@@ -1562,7 +1555,84 @@ async function setupOtherUserView() {
                 followBtn.disabled = false;
             }
         });
-
-        initBtnState();
     }
 }
+
+// 팔로우 버튼 UI 상태 업데이트
+async function updateFollowBtnState(user) {
+    const followBtn = document.getElementById('mpFollowBtn');
+    if (!followBtn) return;
+    
+    let following = false;
+    if (user) {
+        try {
+            following = await isFollowing(urlUid);
+        } catch { following = false; }
+    }
+    
+    if (following) {
+        followBtn.textContent = tr('following');
+        followBtn.classList.remove('primary-btn');
+        followBtn.classList.add('secondary-btn');
+    } else {
+        followBtn.textContent = tr('follow');
+        followBtn.classList.remove('secondary-btn');
+        followBtn.classList.add('primary-btn');
+    }
+}
+
+// ── 팔로우 목록 (본인 전용) ───────────────────────────────────────────────────
+
+async function loadFollowing(uid) {
+    const loadingEl = document.getElementById('followingLoading');
+    const emptyEl   = document.getElementById('followingEmpty');
+    const listEl    = document.getElementById('followingList');
+    loadingEl.style.display = 'block';
+    emptyEl.style.display   = 'none';
+    listEl.innerHTML = '';
+
+    try {
+        const snap = await getDocs(query(
+            collection(db, 'follows'),
+            where('followerId', '==', uid)
+        ));
+        
+        loadingEl.style.display = 'none';
+        if (snap.empty) { emptyEl.style.display = 'block'; return; }
+        
+        // 병렬로 프로필 정보 수집
+        const followedUsers = await Promise.all(snap.docs.map(async d => {
+            const data = d.data();
+            const targetUid = data.followingId;
+            const profile = await getUserProfile(targetUid);
+            return { uid: targetUid, profile: profile || {} };
+        }));
+
+        followedUsers.forEach(user => {
+            const card = document.createElement('div');
+            card.className = 'mp-project-card';
+            card.style.display = 'flex';
+            card.style.alignItems = 'center';
+            card.style.gap = '1rem';
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => { location.href = `/mypage.html?uid=${user.uid}`; });
+
+            const photoURL = user.profile.profilePhotoURL;
+            const photoEl = photoURL 
+                ? `<div style="width:40px;height:40px;border-radius:50%;background-image:url('${photoURL}');background-size:cover;background-position:center;flex-shrink:0;"></div>`
+                : `<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#888;flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>`;
+            
+            card.innerHTML = `
+                ${photoEl}
+                <div style="flex-grow:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">
+                    ${escHtml(user.profile.nickname || 'Unknown')}
+                </div>
+            `;
+            listEl.appendChild(card);
+        });
+    } catch (e) {
+        loadingEl.textContent = '목록을 불러오지 못했습니다.';
+        console.error(e);
+    }
+}
+

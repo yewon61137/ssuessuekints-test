@@ -131,6 +131,7 @@ export const t = {
         legend_filet: '범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)',
         // Follow
         follow: '팔로우', following: '팔로잉',
+        my_following: '팔로우 목록', stat_following: '팔로잉', stat_followers: '팔로워',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -258,6 +259,7 @@ export const t = {
         legend_filet: 'Legend: ■ Filled, □ Empty',
         // Follow
         follow: 'Follow', following: 'Following',
+        my_following: 'Following', stat_following: 'Following', stat_followers: 'Followers',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
@@ -385,6 +387,7 @@ export const t = {
         legend_filet: '凡例: ■ 埋める, □ 空ける',
         // Follow
         follow: 'フォロー', following: 'フォロー中',
+        my_following: 'フォロー・フォロワー', stat_following: 'フォロー', stat_followers: 'フォロワー',
     }
 };
 
