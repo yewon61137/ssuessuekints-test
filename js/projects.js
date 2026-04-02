@@ -170,6 +170,15 @@ function renderProjectDetail(project, parts) {
     const titleEl = $('detail-title');
     if (titleEl) titleEl.textContent = project.title || '';
 
+    const btnTogglePublic = $('btn-toggle-public');
+    if (btnTogglePublic) {
+        btnTogglePublic.innerHTML = project.isPublic 
+            ? `🔒 ${esc(T.proj_private)}로 전환` 
+            : `🔓 ${esc(T.proj_public)}로 전환`;
+        btnTogglePublic.dataset.id = project.id;
+        btnTogglePublic.dataset.public = !!project.isPublic;
+    }
+
     const infoEl = $('detail-info');
     if (infoEl) {
         infoEl.innerHTML = [
@@ -748,6 +757,18 @@ function attachEvents() {
         if (partsUnsubscribe) { partsUnsubscribe(); partsUnsubscribe = null; }
         currentProjectId = null;
         showView('view-list');
+    });
+
+    $('btn-toggle-public')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        const pid = btn.dataset.id;
+        const isPub = btn.dataset.public === 'true';
+        if (!pid) return;
+        try {
+            await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+        } catch (err) {
+            alert('업데이트 실패: ' + err.message);
+        }
     });
 
     $('btn-edit-project')?.addEventListener('click', async () => {
