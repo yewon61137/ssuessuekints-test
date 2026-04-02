@@ -129,6 +129,8 @@ export const t = {
         btn_convert_filet: '이미지를 격자로 변환',
         btn_clear_grid: '격자 초기화',
         legend_filet: '범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)',
+        // Follow
+        follow: '팔로우', following: '팔로잉',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -254,6 +256,8 @@ export const t = {
         btn_convert_filet: 'Convert to Grid',
         btn_clear_grid: 'Clear Grid',
         legend_filet: 'Legend: ■ Filled, □ Empty',
+        // Follow
+        follow: 'Follow', following: 'Following',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
@@ -379,6 +383,8 @@ export const t = {
         btn_convert_filet: '画像を格子に変換',
         btn_clear_grid: '格子を初期화',
         legend_filet: '凡例: ■ 埋める, □ 空ける',
+        // Follow
+        follow: 'フォロー', following: 'フォロー中',
     }
 };
 

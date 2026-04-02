@@ -1,6 +1,6 @@
 // mypage.js — 마이페이지 v2 (사이드바 5탭 레이아웃)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount } from './auth.js';
+import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount, followUser, unfollowUser, isFollowing } from './auth.js';
 import { t as sharedT, initLang } from './i18n.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
@@ -1511,4 +1511,58 @@ async function setupOtherUserView() {
     }
 
     switchPanel('posts');
+
+    // 팔로우 버튼 기능 초기화
+    const followBtn = document.getElementById('mpFollowBtn');
+    if (followBtn) {
+        followBtn.style.display = 'block';
+        let following = false;
+
+        const updateBtnDOM = () => {
+            if (following) {
+                followBtn.textContent = tr('following');
+                followBtn.classList.remove('primary-btn');
+                followBtn.classList.add('secondary-btn');
+            } else {
+                followBtn.textContent = tr('follow');
+                followBtn.classList.remove('secondary-btn');
+                followBtn.classList.add('primary-btn');
+            }
+        };
+
+        const initBtnState = async () => {
+            if (auth.currentUser) {
+                try {
+                    following = await isFollowing(urlUid);
+                } catch { following = false; }
+            } else {
+                following = false;
+            }
+            updateBtnDOM();
+        };
+
+        followBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) {
+                openAuthModal();
+                return;
+            }
+            followBtn.disabled = true;
+            try {
+                if (following) {
+                    await unfollowUser(urlUid);
+                } else {
+                    await followUser(urlUid);
+                }
+                following = !following;
+                updateBtnDOM();
+            } catch (err) {
+                console.error(err);
+                alert(err.message || '오류가 발생했습니다.');
+            } finally {
+                followBtn.disabled = false;
+            }
+        });
+
+        initBtnState();
+    }
 }

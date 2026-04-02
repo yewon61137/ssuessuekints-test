@@ -50,7 +50,11 @@
       "Bash(python -c \":*)",
       "Bash(python fix_magazine.py)",
       "Bash(rm fix_magazine.py)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:pagespeed.web.dev)",
+      "WebFetch(domain:www.googleapis.com)"
     ]
   }
 }

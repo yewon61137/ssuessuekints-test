@@ -917,3 +917,40 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
         createdAt: serverTimestamp()
     });
 }
+
+// ==========================================
+// 팔로우 기능 (follows 컬렉션)
+// ==========================================
+
+export async function followUser(targetUid) {
+    const user = auth.currentUser;
+    if (!user) throw new Error('로그인이 필요합니다.');
+    if (user.uid === targetUid) throw new Error('자기 자신을 팔로우할 수 없습니다.');
+
+    // uid 조합을 문서 ID로 사용하여 중복 방지 및 빠른 조회 보장
+    const docId = `${user.uid}_${targetUid}`;
+    const followRef = doc(db, 'follows', docId);
+
+    await setDoc(followRef, {
+        followerId: user.uid,
+        followingId: targetUid,
+        createdAt: serverTimestamp()
+    });
+}
+
+export async function unfollowUser(targetUid) {
+    const user = auth.currentUser;
+    if (!user) throw new Error('로그인이 필요합니다.');
+
+    const docId = `${user.uid}_${targetUid}`;
+    await deleteDoc(doc(db, 'follows', docId));
+}
+
+export async function isFollowing(targetUid) {
+    const user = auth.currentUser;
+    if (!user) return false;
+
+    const docId = `${user.uid}_${targetUid}`;
+    const snap = await getDoc(doc(db, 'follows', docId));
+    return snap.exists();
+}
