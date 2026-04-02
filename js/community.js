@@ -38,69 +38,49 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
     }
 
     try {
-        let results = [];
-        let queryCursor = cursorDoc;
-        let queryAttempt = 0;
-        let hasMore = true;
-
-        while (results.length < PAGE_SIZE && queryAttempt < 5 && hasMore) {
-            let q;
-            if (tagFilter) {
-                q = query(
-                    collection(db, 'posts'),
-                    where('tags', 'array-contains', tagFilter),
-                    orderBy('createdAt', 'desc'),
-                    limit(PAGE_SIZE)
-                );
-            } else {
-                q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            }
-            if (queryCursor) q = query(q, startAfter(queryCursor));
-
-            const snap = await getDocs(q);
-            if (snap.empty) {
-                hasMore = false;
-                break;
-            }
-
-            queryCursor = snap.docs[snap.docs.length - 1];
-
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.isPublic === false) return;
-                
-                // 팔로우 필터 로컬 검증
-                if (isFollowingFilter) {
-                    if (!followedUids.includes(data.uid)) return;
-                }
-
-                results.push({ id: docSnap.id, data });
-            });
-
-            // 내부적으로 필터링을 안 거칠 경우 딱 1번만 돌고 break
-            if (!isFollowingFilter) {
-                if (snap.docs.length < PAGE_SIZE) hasMore = false;
-                break;
-            }
-            
-            queryAttempt++;
-        }
-
-        loadingEl.style.display = 'none';
-
-        if (results.length === 0 && !cursorDoc) {
+        if (isFollowingFilter && followedUids.length === 0) {
+            loadingEl.style.display = 'none';
             emptyEl.style.display = 'block';
             isLoading = false;
             return;
         }
 
-        results.slice(0, PAGE_SIZE).forEach(item => {
-            gridEl.appendChild(renderPostCard(item.id, item.data));
+        let q;
+        const uids = isFollowingFilter ? followedUids.slice(0, 30) : null;
+
+        if (tagFilter) {
+            if (isFollowingFilter) {
+                q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), where('uid', 'in', uids), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            } else {
+                q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            }
+        } else {
+            if (isFollowingFilter) {
+                q = query(collection(db, 'posts'), where('uid', 'in', uids), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            } else {
+                q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            }
+        }
+        
+        if (cursorDoc) q = query(q, startAfter(cursorDoc));
+
+        const snap = await getDocs(q);
+        loadingEl.style.display = 'none';
+
+        if (snap.empty && !cursorDoc) {
+            emptyEl.style.display = 'block';
+            isLoading = false;
+            return;
+        }
+
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.isPublic === false) return;
+            gridEl.appendChild(renderPostCard(docSnap.id, data));
         });
 
-        // hasMore가 true이고 실제로 결과를 PAGE_SIZE만큼 채우거나 순회한 snap이 꽉 찼으면 더보기 유지
-        if (hasMore) {
-            lastDoc = queryCursor;
+        if (snap.docs.length === PAGE_SIZE) {
+            lastDoc = snap.docs[snap.docs.length - 1];
             loadMoreArea.style.display = 'block';
         } else {
             lastDoc = null;
@@ -108,7 +88,7 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
         }
     } catch (e) {
         console.error('Feed load error:', e);
-        loadingEl.textContent = '불러오기 실패. 다시 시도해주세요.';
+        loadingEl.textContent = '불러오기 실패. (필터 복합 인덱스가 필요할 수 있습니다. 콘솔을 확인하세요.)';
     }
     isLoading = false;
 }
@@ -185,10 +165,10 @@ if (followingBtn) {
             try {
                 const snap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', currentUser.uid)));
                 followedUids = snap.docs.map(doc => doc.data().followingId);
-                if (followedUids.length === 0) followedUids = ['__empty__']; // 빈 배열일 경우 아무도 안 보이게 설정
+                // 빈 배열이라면 조회 자체를 즉시 멈추도록 loadFeed 상단에 방어 코드가 있으므로 안전합니다.
             } catch (err) {
                 console.error(err);
-                followedUids = ['__empty__'];
+                followedUids = [];
             }
         }
         
