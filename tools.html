@@ -9,13 +9,6 @@
     gtag('js', new Date());
     gtag('config', 'G-KSBJ5J8N4K');
   </script>
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vsvc6kadap");
-  </script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2930322697184296" crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2930322697184296">
@@ -31,6 +24,9 @@
 
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
   <link rel="dns-prefetch" href="https://webfontworld.github.io">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+  <link rel="dns-prefetch" href="https://www.clarity.ms">
   <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
   <link href='/style.css?v=5' rel='stylesheet'>
@@ -392,7 +388,7 @@
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>
-  <script src="/js/scroll-top.js"></script>
+  <script src="/js/scroll-top.js" defer></script>
 
   <!-- AUTH MODAL -->
   <div id="authModal" class="modal-overlay" style="display:none;">
@@ -508,6 +504,16 @@
           }
         });
       }
+    });
+  </script>
+  <!-- Microsoft Clarity (deferred) -->
+  <script>
+    window.addEventListener("load", function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script","vsvc6kadap");
     });
   </script>
 </body>

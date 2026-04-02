@@ -9,13 +9,6 @@
     gtag('js', new Date());
     gtag('config', 'G-KSBJ5J8N4K');
   </script>
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vsvc6kadap");
-  </script>
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="/favicon.png" />
@@ -28,6 +21,9 @@
   <title>마이페이지 | SSUESSUE KNITS</title>
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
   <link rel="dns-prefetch" href="https://webfontworld.github.io">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+  <link rel="dns-prefetch" href="https://www.clarity.ms">
   <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
   <link href='/style.css?v=5' rel='stylesheet'>
@@ -98,7 +94,8 @@
             <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns" data-i18n="tab_patterns">내 도안함</button>
             <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">내 프로젝트</button>
             <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">내 글·댓글</button>
-            <button class="mp-nav-btn" data-panel="publicPalettes" id="mpNavPublicPalettes" style="display:none;" data-i18n="tab_public_palettes">공개 팔레트</button>
+            <button class="mp-nav-btn" data-panel="publicPalettes" id="mpNavPublicPalettes" style="display:none;" data-i18n="title_public_palettes">공개 팔레트</button>
+            <button class="mp-nav-btn" data-panel="publicProjects" id="mpNavPublicProjects" style="display:none;" data-i18n="public_projects">공개 프로젝트</button>
             <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
             <button class="mp-nav-btn" data-panel="stash" id="mpNavStash" data-i18n="tab_stash">내 실 창고</button>
             <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
@@ -242,6 +239,14 @@
             <div id="publicPalettesLoading" class="mypage-empty">불러오는 중...</div>
             <div id="publicPalettesEmpty" class="mypage-empty" style="display:none;"></div>
             <div class="cp-palette-grid" id="publicPalettesGrid"></div>
+          </div>
+
+          <!-- 공개 프로젝트 패널 (타인 프로필) -->
+          <div class="mp-panel" id="panelPublicProjects">
+            <h2 class="mp-panel-title" data-i18n="public_projects">공개 프로젝트</h2>
+            <div id="publicProjectsLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="publicProjectsEmpty" class="mypage-empty" style="display:none;">공개된 프로젝트가 없습니다.</div>
+            <div id="publicProjectsGrid"></div>
           </div>
 
           <!-- (팔로우 목록 패널 삭제됨) -->
@@ -449,6 +454,16 @@
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script src="/js/cookie-consent.js"></script>
-  <script src="/js/scroll-top.js"></script>
+  <script src="/js/scroll-top.js" defer></script>
+  <!-- Microsoft Clarity (deferred) -->
+  <script>
+    window.addEventListener("load", function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script","vsvc6kadap");
+    });
+  </script>
 </body>
 </html>
