@@ -15,6 +15,8 @@ const PAGE_SIZE = 12;
 let currentTagFilter = '';
 let isFollowingFilter = false;
 let followedUids = [];
+let localFollowFeed = [];
+let localFollowIndex = 0;
 let lastDoc = null;
 let isLoading = false;
 let currentUser = null;
@@ -45,21 +47,68 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
             return;
         }
 
-        let q;
         const uids = isFollowingFilter ? followedUids.slice(0, 30) : null;
 
+        // 팔로우 필터가 적용 중이면 로컬에서 정렬 및 페이징 처리 (복합 인덱스 회피)
+        if (isFollowingFilter) {
+            if (!cursorDoc) {
+                let q;
+                if (tagFilter) {
+                    q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), where('uid', 'in', uids));
+                } else {
+                    q = query(collection(db, 'posts'), where('uid', 'in', uids));
+                }
+                const snap = await getDocs(q);
+                
+                let tempResults = [];
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.isPublic === false) return;
+                    tempResults.push({ id: docSnap.id, data });
+                });
+                
+                // 날짜순 내림차순 정렬 (JS 로컬)
+                tempResults.sort((a, b) => {
+                    const tA = a.data.createdAt?.toMillis ? a.data.createdAt.toMillis() : 0;
+                    const tB = b.data.createdAt?.toMillis ? b.data.createdAt.toMillis() : 0;
+                    return tB - tA;
+                });
+                
+                localFollowFeed = tempResults;
+                localFollowIndex = 0;
+            }
+            
+            loadingEl.style.display = 'none';
+            if (localFollowFeed.length === 0) {
+                emptyEl.style.display = 'block';
+                isLoading = false;
+                return;
+            }
+
+            const pageItems = localFollowFeed.slice(localFollowIndex, localFollowIndex + PAGE_SIZE);
+            pageItems.forEach(item => {
+                gridEl.appendChild(renderPostCard(item.id, item.data));
+            });
+            
+            localFollowIndex += PAGE_SIZE;
+
+            if (localFollowIndex < localFollowFeed.length) {
+                lastDoc = 'virtual'; 
+                loadMoreArea.style.display = 'block';
+            } else {
+                lastDoc = null;
+                loadMoreArea.style.display = 'none';
+            }
+            isLoading = false;
+            return;
+        }
+
+        // 일반 쿼리
+        let q;
         if (tagFilter) {
-            if (isFollowingFilter) {
-                q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), where('uid', 'in', uids), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            } else {
-                q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            }
+            q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
         } else {
-            if (isFollowingFilter) {
-                q = query(collection(db, 'posts'), where('uid', 'in', uids), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            } else {
-                q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            }
+            q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
         }
         
         if (cursorDoc) q = query(q, startAfter(cursorDoc));
@@ -88,7 +137,7 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
         }
     } catch (e) {
         console.error('Feed load error:', e);
-        loadingEl.textContent = '불러오기 실패. (필터 복합 인덱스가 필요할 수 있습니다. 콘솔을 확인하세요.)';
+        loadingEl.textContent = '불러오기 실패. 잠시 후 다시 시도해주세요.';
     }
     isLoading = false;
 }
