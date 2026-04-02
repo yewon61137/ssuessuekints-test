@@ -87,7 +87,7 @@
               <span class="mp-stat-val" id="mpStatFollowers">—</span>
               <span class="mp-stat-lbl i18n" data-i18n="stat_followers">팔로워</span>
             </div>
-            <div class="mp-stat" id="mpStatFollowingWrap">
+            <div class="mp-stat clickable-stat" id="mpStatFollowingWrap">
               <span class="mp-stat-val" id="mpStatFollowing">—</span>
               <span class="mp-stat-lbl i18n" data-i18n="stat_following">팔로잉</span>
             </div>
@@ -101,7 +101,6 @@
             <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
             <button class="mp-nav-btn" data-panel="stash" id="mpNavStash" data-i18n="tab_stash">내 실 창고</button>
             <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
-            <button class="mp-nav-btn" data-panel="following" id="mpNavFollowing" data-i18n="my_following">팔로우 목록</button>
           </nav>
         </aside>
 
@@ -244,16 +243,8 @@
             <div class="cp-palette-grid" id="publicPalettesGrid"></div>
           </div>
 
-          <!-- 팔로우 목록 패널 -->
-          <div class="mp-panel" id="panelFollowing">
-            <h2 class="mp-panel-title" data-i18n="my_following">팔로우 목록</h2>
-            <div id="followingLoading" class="mypage-empty">불러오는 중...</div>
-            <div id="followingEmpty" class="mypage-empty" style="display:none;">
-              아직 팔로우 중인 유저가 없습니다.
-            </div>
-            <!-- 카드 스타일 표시 (유저 목록) -->
-            <div id="followingList" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;"></div>
-          </div>
+          <!-- (팔로우 목록 패널 삭제됨) -->
+
 
         </div><!-- /.mp-content -->
       </div><!-- /.mp-layout -->
@@ -362,6 +353,19 @@
       </div>
     </div>
   </footer>
+
+  <!-- 팔로우 목록 모달 -->
+  <div id="followingModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box" style="max-height: 80vh; overflow-y: auto;">
+      <button class="modal-close" id="followingModalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <h3 style="margin-bottom: 1.5rem; font-weight: 800; font-size: 1.2rem;" data-i18n="my_following">팔로우 목록</h3>
+      <div id="followingLoading" class="mypage-empty" style="padding: 2rem 0;">불러오는 중...</div>
+      <div id="followingEmpty" class="mypage-empty" style="display:none; padding: 2rem 0;">
+        아직 팔로우 중인 유저가 없습니다.
+      </div>
+      <div id="followingList" style="display:grid; grid-template-columns: 1fr; gap: 0.75rem;"></div>
+    </div>
+  </div>
 
   <!-- 로그인/회원가입 모달 -->
   <div id="authModal" class="modal-overlay" style="display:none;">

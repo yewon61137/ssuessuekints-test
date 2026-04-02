@@ -4279,3 +4279,19 @@ header .lang-globe-btn:hover { background: #f0f0f0; }
   margin-top: 0;
   padding-top: 1.5rem;
 }
+
+/* ==============================
+   Clickable Stats (Mypage)
+   ============================== */
+.clickable-stat {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.clickable-stat:hover {
+  opacity: 0.7;
+}
+.clickable-stat:hover .mp-stat-val {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+

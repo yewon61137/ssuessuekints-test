@@ -207,7 +207,6 @@ function switchPanel(name) {
     else if (name === 'palettes')        loadPalettes(currentUid);
     else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
     else if (name === 'stash')           initStash(currentUid);
-    else if (name === 'following')       loadFollowing(currentUid);
 }
 
 document.querySelectorAll('.mp-nav-btn[data-panel]').forEach(btn => {
@@ -299,11 +298,22 @@ async function fillSidebar(uid, readOnly = false) {
     }
 
     // 도안 수, 스크랩 수는 본인 전용 — 타인 프로필에서는 숨기고 받은 좋아요 + 공개 팔레트 표시
+    const followingWrap = document.getElementById('mpStatFollowingWrap');
     if (readOnly) {
         document.getElementById('mpStatPatterns')?.closest('.mp-stat')?.style.setProperty('display', 'none');
         document.getElementById('mpStatScraps')?.closest('.mp-stat')?.style.setProperty('display', 'none');
         document.getElementById('mpStatLikesWrap')?.style.setProperty('display', '');
         document.getElementById('mpStatPublicPalettesWrap')?.style.setProperty('display', '');
+        if (followingWrap) followingWrap.classList.remove('clickable-stat');
+        if (followingWrap) followingWrap.onclick = null;
+    } else {
+        if (followingWrap) {
+            followingWrap.classList.add('clickable-stat');
+            followingWrap.onclick = () => {
+                document.getElementById('followingModal').style.display = 'flex';
+                loadFollowing(uid);
+            };
+        }
     }
 
     // 통계 (병렬)
@@ -1498,8 +1508,8 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function setupOtherUserView() {
-    // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고/팔로우 목록 탭 숨김
-    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes', 'mpNavStash', 'mpNavFollowing'].forEach(id => {
+    // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고 탭 숨김
+    ['mpNavPatterns', 'mpNavProfile', 'mpNavProjects', 'mpNavScraps', 'mpNavPalettes', 'mpNavStash'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -1635,4 +1645,10 @@ async function loadFollowing(uid) {
         console.error(e);
     }
 }
+
+// 모달 닫기
+document.getElementById('followingModalCloseBtn')?.addEventListener('click', () => {
+    document.getElementById('followingModal').style.display = 'none';
+});
+
 
