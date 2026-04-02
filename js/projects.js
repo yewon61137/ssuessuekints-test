@@ -121,6 +121,7 @@ function renderProjectList(projects) {
           <div class="proj-card-header">
             <span class="proj-status-badge ${statusClass}">${esc(statusLabel)}</span>
             <h3 class="proj-card-title">${esc(proj.title || '제목 없음')}</h3>
+            ${proj.isPublic ? `<span class="proj-public-badge" style="margin-left:auto; font-size:0.7em; background:#e0f7fa; color:#006064; padding:2px 6px; border-radius:4px; font-weight:700;">${esc(T.proj_public)}</span>` : ''}
           </div>
           ${proj.yarn ? `<div class="proj-card-meta">🧶 ${esc(proj.yarn)}</div>` : ''}
           ${proj.needle ? `<div class="proj-card-meta">🪡 ${esc(proj.needle)}</div>` : ''}
@@ -131,13 +132,33 @@ function renderProjectList(projects) {
             </div>
             <div class="proj-progress-label">${esc(T.proj_progress_label)}: ${progressText} (${pct}%)</div>
           </div>` : ''}
+          <div class="proj-card-actions" style="margin-top:12px; display:flex; justify-content:flex-end;">
+            <button class="proj-public-toggle" data-id="${esc(proj.id)}" data-public="${!!proj.isPublic}" style="background:transparent; border:1px solid var(--border); padding:5px 10px; border-radius:8px; color:var(--text); font-size:0.75rem; cursor:pointer; font-weight:700; transition:background 0.2s;">
+                ${proj.isPublic ? `🔒 ${esc(T.proj_private)}로 전환` : `🔓 ${esc(T.proj_public)}로 전환`}
+            </button>
+          </div>
         </div>`;
     }).join('');
 
     // 클릭 → 상세 화면
     container.querySelectorAll('.proj-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.proj-public-toggle')) return;
             openProjectDetail(card.dataset.id);
+        });
+    });
+
+    // 공개/비공개 토글
+    container.querySelectorAll('.proj-public-toggle').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const pid = btn.dataset.id;
+            const isPub = btn.dataset.public === 'true';
+            try {
+                await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+            } catch(err) {
+                alert('업데이트 실패: ' + err.message);
+            }
         });
     });
 }
@@ -465,7 +486,7 @@ async function saveProject(data, projectId = null) {
         await updateDoc(doc(db, 'users', currentUser.uid, 'projects', projectId), data);
         return projectId;
     } else {
-        const docRef = await addDoc(ref, { ...data, createdAt: serverTimestamp() });
+        const docRef = await addDoc(ref, { ...data, isPublic: false, createdAt: serverTimestamp() });
         return docRef.id;
     }
 }

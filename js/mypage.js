@@ -808,7 +808,10 @@ function buildProjectCard(proj, isDone = false) {
     card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
     card.style.cursor = 'pointer';
     const projUrl = `/projects.html?id=${encodeURIComponent(proj.id)}`;
-    card.addEventListener('click', () => { location.href = projUrl; });
+    card.addEventListener('click', (e) => { 
+        if (e.target.closest('.mp-proj-public-toggle')) return;
+        location.href = projUrl; 
+    });
 
     const statusLabel = proj._status === 'done'     ? tr('done_badge')
                       : proj._status === 'inProgress' ? '진행중'
@@ -826,12 +829,16 @@ function buildProjectCard(proj, isDone = false) {
         <div class="mp-project-header">
             <span class="mp-project-name">${escHtml(proj.title || 'Project')}</span>
             ${isDone ? `<span class="mp-project-badge">${escHtml(statusLabel)}</span>` : ''}
+            ${proj.isPublic ? `<span class="mp-project-badge" style="margin-left:auto; font-size:0.7em; background:#e0f7fa; color:#006064;">${escHtml(tr('proj_public'))}</span>` : ''}
         </div>
         ${proj.yarn   ? `<div class="mp-project-meta">🧶 ${escHtml(proj.yarn)}</div>` : ''}
         ${proj.needle ? `<div class="mp-project-meta">🪡 ${escHtml(proj.needle)}</div>` : ''}
         ${progressHtml}
-        <div class="mp-project-actions">
+        <div class="mp-project-actions" style="flex-wrap:wrap; gap:6px;">
             <button class="secondary-btn small-btn mp-open-proj-btn">자세히 보기 →</button>
+            <button class="secondary-btn small-btn mp-proj-public-toggle" data-id="${escHtml(proj.id)}" data-public="${!!proj.isPublic}" style="border:1px solid var(--border); padding:6px 12px; background:var(--bg); transition:background 0.2s;">
+                ${proj.isPublic ? `🔒 ${escHtml(tr('proj_private'))}로 전환` : `🔓 ${escHtml(tr('proj_public'))}로 전환`}
+            </button>
             ${shareBtn}
         </div>`;
 
@@ -843,6 +850,19 @@ function buildProjectCard(proj, isDone = false) {
     card.querySelector('.mp-share-proj-btn')?.addEventListener('click', e => {
         e.stopPropagation();
         location.href = '/community.html';
+    });
+
+    card.querySelector('.mp-proj-public-toggle').addEventListener('click', async e => {
+        e.stopPropagation();
+        const pid = e.currentTarget.dataset.id;
+        const isPub = e.currentTarget.dataset.public === 'true';
+        try {
+            await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+            // 업데이트 즉시 새로고침을 위해 프로젝트 리스트 다시 로드
+            loadProjects(currentUser.uid);
+        } catch(err) {
+            alert('업데이트 실패: ' + err.message);
+        }
     });
 
     return card;
