@@ -1,3 +1,29 @@
+/* GmarketSans font-display:swap override — prevents FOIT on slow mobile connections */
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url('https://webfontworld.github.io/gmarket/GmarketSansLight.woff2') format('woff2'),
+       url('https://webfontworld.github.io/gmarket/GmarketSansLight.woff') format('woff');
+}
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('https://webfontworld.github.io/gmarket/GmarketSansMedium.woff2') format('woff2'),
+       url('https://webfontworld.github.io/gmarket/GmarketSansMedium.woff') format('woff');
+}
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('https://webfontworld.github.io/gmarket/GmarketSansBold.woff2') format('woff2'),
+       url('https://webfontworld.github.io/gmarket/GmarketSansBold.woff') format('woff');
+}
+
 :root {
   --bg-color: #ffffff;
   --text-color: #000000;
