@@ -21,7 +21,7 @@
     },
   };
 
-  const lang = localStorage.getItem('lang') || 'ko';
+  const lang = localStorage.getItem('ssuessue_lang') || 'ko';
   const tx = t[lang] || t.ko;
 
   const banner = document.createElement('div');
