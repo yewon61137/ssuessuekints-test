@@ -13,6 +13,8 @@ import {
 
 const PAGE_SIZE = 12;
 let currentTagFilter = '';
+let isFollowingFilter = false;
+let followedUids = [];
 let lastDoc = null;
 let isLoading = false;
 let currentUser = null;
@@ -36,36 +38,69 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
     }
 
     try {
-        let q;
-        if (tagFilter) {
-            q = query(
-                collection(db, 'posts'),
-                where('tags', 'array-contains', tagFilter),
-                orderBy('createdAt', 'desc'),
-                limit(PAGE_SIZE)
-            );
-        } else {
-            q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-        }
-        if (cursorDoc) q = query(q, startAfter(cursorDoc));
+        let results = [];
+        let queryCursor = cursorDoc;
+        let queryAttempt = 0;
+        let hasMore = true;
 
-        const snap = await getDocs(q);
+        while (results.length < PAGE_SIZE && queryAttempt < 5 && hasMore) {
+            let q;
+            if (tagFilter) {
+                q = query(
+                    collection(db, 'posts'),
+                    where('tags', 'array-contains', tagFilter),
+                    orderBy('createdAt', 'desc'),
+                    limit(PAGE_SIZE)
+                );
+            } else {
+                q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            }
+            if (queryCursor) q = query(q, startAfter(queryCursor));
+
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                hasMore = false;
+                break;
+            }
+
+            queryCursor = snap.docs[snap.docs.length - 1];
+
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.isPublic === false) return;
+                
+                // 팔로우 필터 로컬 검증
+                if (isFollowingFilter) {
+                    if (!followedUids.includes(data.uid)) return;
+                }
+
+                results.push({ id: docSnap.id, data });
+            });
+
+            // 내부적으로 필터링을 안 거칠 경우 딱 1번만 돌고 break
+            if (!isFollowingFilter) {
+                if (snap.docs.length < PAGE_SIZE) hasMore = false;
+                break;
+            }
+            
+            queryAttempt++;
+        }
+
         loadingEl.style.display = 'none';
 
-        if (snap.empty && !cursorDoc) {
+        if (results.length === 0 && !cursorDoc) {
             emptyEl.style.display = 'block';
             isLoading = false;
             return;
         }
 
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.isPublic === false) return;
-            gridEl.appendChild(renderPostCard(docSnap.id, data));
+        results.slice(0, PAGE_SIZE).forEach(item => {
+            gridEl.appendChild(renderPostCard(item.id, item.data));
         });
 
-        if (snap.docs.length === PAGE_SIZE) {
-            lastDoc = snap.docs[snap.docs.length - 1];
+        // hasMore가 true이고 실제로 결과를 PAGE_SIZE만큼 채우거나 순회한 snap이 꽉 찼으면 더보기 유지
+        if (hasMore) {
+            lastDoc = queryCursor;
             loadMoreArea.style.display = 'block';
         } else {
             lastDoc = null;
@@ -118,16 +153,49 @@ function renderPostCard(postId, data) {
     return card;
 }
 
-// --- 태그 필터 ---
+// --- 태그 필터 (태그 칩들) ---
 document.getElementById('tagFilterRow').addEventListener('click', e => {
     const chip = e.target.closest('.tag-chip');
     if (!chip) return;
-    document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('active'));
+    
+    // 팔로우 칩인 경우 이벤트 분리
+    if (chip.id === 'followingFilterBtn') return;
+
+    // 카테고리 태그 칩 처리
+    document.querySelectorAll('.tag-chip:not(#followingFilterBtn)').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    currentTagFilter = chip.getAttribute('data-tag');
+    currentTagFilter = chip.getAttribute('data-tag') || '';
     lastDoc = null;
     loadFeed(currentTagFilter, null);
 });
+
+// --- 팔로우 필터 토글 ---
+const followingBtn = document.getElementById('followingFilterBtn');
+if (followingBtn) {
+    followingBtn.addEventListener('click', async () => {
+        if (!currentUser) {
+            openAuthModal();
+            return;
+        }
+        isFollowingFilter = !isFollowingFilter;
+        followingBtn.classList.toggle('active', isFollowingFilter);
+        
+        if (isFollowingFilter) {
+            // 내가 팔로우한 목록 가져오기
+            try {
+                const snap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', currentUser.uid)));
+                followedUids = snap.docs.map(doc => doc.data().followingId);
+                if (followedUids.length === 0) followedUids = ['__empty__']; // 빈 배열일 경우 아무도 안 보이게 설정
+            } catch (err) {
+                console.error(err);
+                followedUids = ['__empty__'];
+            }
+        }
+        
+        lastDoc = null;
+        loadFeed(currentTagFilter, null);
+    });
+}
 
 // 더 보기 버튼
 document.getElementById('loadMoreBtn').addEventListener('click', () => {

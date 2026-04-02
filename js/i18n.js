@@ -132,6 +132,7 @@ export const t = {
         // Follow
         follow: '팔로우', following: '팔로잉',
         my_following: '팔로우 목록', stat_following: '팔로잉', stat_followers: '팔로워',
+        filter_following: '팔로우 중',
     },
     en: {
         btn_signin: 'Sign In', btn_signout: 'Sign Out',
@@ -260,6 +261,7 @@ export const t = {
         // Follow
         follow: 'Follow', following: 'Following',
         my_following: 'Following', stat_following: 'Following', stat_followers: 'Followers',
+        filter_following: 'Following',
     },
     ja: {
         btn_signin: 'ログイン', btn_signout: 'ログアウト',
@@ -388,6 +390,7 @@ export const t = {
         // Follow
         follow: 'フォロー', following: 'フォロー中',
         my_following: 'フォロー・フォロワー', stat_following: 'フォロー', stat_followers: 'フォロワー',
+        filter_following: 'フォロー中',
     }
 };
 
