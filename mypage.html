@@ -18,7 +18,7 @@
   <meta name="msvalidate.01" content="5DDB8283B15FB361A17AE41935C60F82" />
   <link rel="canonical" href="https://ssuessueknits.com/mypage.html" />
   <link rel="alternate" type="application/rss+xml" title="SSUESSUE KNITS RSS" href="https://ssuessueknits.com/rss.xml" />
-  <title>마이페이지 | SSUESSUE KNITS</title>
+  <title>마이?�이지 | SSUESSUE KNITS</title>
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
   <link rel="dns-prefetch" href="https://webfontworld.github.io">
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
@@ -26,93 +26,93 @@
   <link rel="dns-prefetch" href="https://www.clarity.ms">
   <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
-  <link href='/style.css?v=5' rel='stylesheet' media="all">
+  <link href='/style.css?v=9' rel='stylesheet' media="all">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <script type="module" src="/js/header.js"></script>
+  <script type="module" src="/js/header.js?v=9"></script>
 
   <main class="mp-page-wrap">
 
     <!-- 비로그인 -->
     <div id="notLoggedIn" class="mp-guest" style="display:none;">
       <div class="mypage-empty">
-        <p id="notLoggedInMsg" data-i18n="not_logged_in">로그인하면 마이페이지를 이용할 수 있습니다.</p>
-        <button class="primary-btn" id="gotoSignInBtn" data-i18n="go_to_signin" style="margin-top:1.5rem;max-width:260px;">로그인</button>
+        <p id="notLoggedInMsg" data-i18n="not_logged_in">로그?�하�?마이?�이지�??�용?????�습?�다.</p>
+        <button class="primary-btn" id="gotoSignInBtn" data-i18n="go_to_signin" style="margin-top:1.5rem;max-width:260px;">로그??/button>
       </div>
     </div>
 
-    <!-- 로그인 -->
+    <!-- 로그??-->
     <div id="loggedIn" style="display:none;">
       <div class="mp-layout">
 
-        <!-- ── 사이드바 ── -->
+        <!-- ?�?� ?�이?�바 ?�?� -->
         <aside class="mp-sidebar">
           <div class="mp-user-summary">
             <div class="mp-avatar" id="mpAvatar">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
             <div class="mp-user-info">
-              <div class="mp-nickname" id="mpNickname">—</div>
+              <div class="mp-nickname" id="mpNickname">??/div>
               <div class="mp-joined" id="mpJoined"></div>
-              <button id="mpFollowBtn" class="primary-btn small-btn" style="display:none; margin-top:8px; width:100%; border-radius:4px;" data-i18n="follow">팔로우</button>
+              <button id="mpFollowBtn" class="primary-btn small-btn" style="display:none; margin-top:8px; width:100%; border-radius:4px;" data-i18n="follow">?�로??/button>
             </div>
           </div>
           <div id="mpBio" class="mp-bio" style="display:none;"></div>
           <div class="mp-stats-row">
             <div class="mp-stat">
-              <span class="mp-stat-val" id="mpStatPatterns">—</span>
-              <span class="mp-stat-lbl i18n" data-ko="도안" data-en="Patterns" data-ja="編み図">도안</span>
+              <span class="mp-stat-val" id="mpStatPatterns">??/span>
+              <span class="mp-stat-lbl i18n" data-ko="?�안" data-en="Patterns" data-ja="編み??>?�안</span>
             </div>
             <div class="mp-stat">
-              <span class="mp-stat-val" id="mpStatPosts">—</span>
-              <span class="mp-stat-lbl i18n" data-ko="게시글" data-en="Posts" data-ja="投稿">게시글</span>
+              <span class="mp-stat-val" id="mpStatPosts">??/span>
+              <span class="mp-stat-lbl i18n" data-ko="게시글" data-en="Posts" data-ja="?�稿">게시글</span>
             </div>
             <div class="mp-stat">
-              <span class="mp-stat-val" id="mpStatScraps">—</span>
-              <span class="mp-stat-lbl i18n" data-ko="스크랩" data-en="Scraps" data-ja="スクラップ">스크랩</span>
+              <span class="mp-stat-val" id="mpStatScraps">??/span>
+              <span class="mp-stat-lbl i18n" data-ko="?�크?? data-en="Scraps" data-ja="?�ク?�ッ??>?�크??/span>
             </div>
             <div class="mp-stat" id="mpStatLikesWrap" style="display:none;">
-              <span class="mp-stat-val" id="mpStatLikes">—</span>
-              <span class="mp-stat-lbl i18n" data-ko="받은 좋아요" data-en="Likes" data-ja="いいね">받은 좋아요</span>
+              <span class="mp-stat-val" id="mpStatLikes">??/span>
+              <span class="mp-stat-lbl i18n" data-ko="받�? 좋아?? data-en="Likes" data-ja="?�い??>받�? 좋아??/span>
             </div>
             <div class="mp-stat" id="mpStatPublicPalettesWrap" style="display:none;">
-              <span class="mp-stat-val" id="mpStatPublicPalettes">—</span>
-              <span class="mp-stat-lbl i18n" data-ko="공개 팔레트" data-en="Palettes" data-ja="公開パレット">공개 팔레트</span>
+              <span class="mp-stat-val" id="mpStatPublicPalettes">??/span>
+              <span class="mp-stat-lbl i18n" data-ko="공개 ?�레?? data-en="Palettes" data-ja="?�開?�レ?�ト">공개 ?�레??/span>
             </div>
             <div class="mp-stat" id="mpStatFollowersWrap">
-              <span class="mp-stat-val" id="mpStatFollowers">—</span>
-              <span class="mp-stat-lbl i18n" data-i18n="stat_followers">팔로워</span>
+              <span class="mp-stat-val" id="mpStatFollowers">??/span>
+              <span class="mp-stat-lbl i18n" data-i18n="stat_followers">?�로??/span>
             </div>
             <div class="mp-stat clickable-stat" id="mpStatFollowingWrap">
-              <span class="mp-stat-val" id="mpStatFollowing">—</span>
-              <span class="mp-stat-lbl i18n" data-i18n="stat_following">팔로잉</span>
+              <span class="mp-stat-val" id="mpStatFollowing">??/span>
+              <span class="mp-stat-lbl i18n" data-i18n="stat_following">?�로??/span>
             </div>
           </div>
           <nav class="mp-nav" id="mpNav">
-            <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile" data-i18n="tab_profile">프로필</button>
-            <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns" data-i18n="tab_patterns">내 도안함</button>
-            <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">내 프로젝트</button>
-            <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">내 글·댓글</button>
-            <button class="mp-nav-btn" data-panel="publicPalettes" id="mpNavPublicPalettes" style="display:none;" data-i18n="title_public_palettes">공개 팔레트</button>
-            <button class="mp-nav-btn i18n" data-panel="publicProjects" id="mpNavPublicProjects" style="display:none;" data-i18n="public_projects">공개 프로젝트</button>
-            <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">스크랩</button>
-            <button class="mp-nav-btn" data-panel="stash" id="mpNavStash" data-i18n="tab_stash">내 실 창고</button>
-            <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">내 팔레트</button>
+            <button class="mp-nav-btn active" data-panel="profile" id="mpNavProfile" data-i18n="tab_profile">?�로??/button>
+            <button class="mp-nav-btn" data-panel="patterns" id="mpNavPatterns" data-i18n="tab_patterns">???�안??/button>
+            <button class="mp-nav-btn" data-panel="projects" id="mpNavProjects" data-i18n="tab_projects">???�로?�트</button>
+            <button class="mp-nav-btn" data-panel="posts" id="mpNavPosts" data-i18n="tab_posts">??글·?��?</button>
+            <button class="mp-nav-btn" data-panel="publicPalettes" id="mpNavPublicPalettes" style="display:none;" data-i18n="title_public_palettes">공개 ?�레??/button>
+            <button class="mp-nav-btn i18n" data-panel="publicProjects" id="mpNavPublicProjects" style="display:none;" data-i18n="public_projects">공개 ?�로?�트</button>
+            <button class="mp-nav-btn" data-panel="scraps" id="mpNavScraps" data-i18n="tab_scraps">?�크??/button>
+            <button class="mp-nav-btn" data-panel="stash" id="mpNavStash" data-i18n="tab_stash">????창고</button>
+            <button class="mp-nav-btn" data-panel="palettes" id="mpNavPalettes" data-i18n="tab_palettes">???�레??/button>
           </nav>
         </aside>
 
-        <!-- ── 콘텐츠 ── -->
+        <!-- ?�?� 콘텐�??�?� -->
         <div class="mp-content">
 
-          <!-- Panel: 프로필 -->
+          <!-- Panel: ?�로??-->
           <div class="mp-panel active" id="panelProfile">
-            <h2 class="mp-panel-title" id="titleProfile" data-i18n="title_profile">프로필</h2>
+            <h2 class="mp-panel-title" id="titleProfile" data-i18n="title_profile">?�로??/h2>
             <div class="profile-edit-section">
               <div class="profile-edit-avatar-row">
                 <div class="profile-edit-avatar-wrap">
                   <div class="profile-edit-avatar" id="editAvatarPreview"></div>
-                  <label for="editPhotoInput" class="profile-edit-avatar-cam" title="사진 변경">
+                  <label for="editPhotoInput" class="profile-edit-avatar-cam" title="?�진 변�?>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                   </label>
                 </div>
@@ -120,136 +120,136 @@
               </div>
               <form class="profile-edit-form" id="profileEditForm">
                 <div class="profile-edit-row">
-                  <label class="write-label" id="labelNickname" data-i18n="label_nickname">닉네임</label>
+                  <label class="write-label" id="labelNickname" data-i18n="label_nickname">?�네??/label>
                   <div class="nickname-input-group">
                     <div class="nickname-input-row">
                       <input type="text" id="editNickname" maxlength="20" required autocomplete="off">
-                      <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn">중복 확인</button>
+                      <button type="button" class="secondary-btn small-btn" id="editCheckNicknameBtn">중복 ?�인</button>
                     </div>
                     <div id="editNicknameStatus" class="nickname-status" style="display:none;"></div>
                   </div>
                 </div>
                 <div class="profile-edit-row">
-                  <label class="write-label" id="labelBio" data-i18n="label_bio">자기소개</label>
+                  <label class="write-label" id="labelBio" data-i18n="label_bio">?�기?�개</label>
                   <textarea id="editBio" maxlength="100" style="width:100%;border:2px solid #000;padding:0.75rem;font-family:inherit;resize:none;min-height:80px;box-sizing:border-box;"></textarea>
                 </div>
                 <div id="profileEditMsg" class="nickname-status" style="display:none;"></div>
-                <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn">변경사항 저장</button>
+                <button type="submit" class="primary-btn auth-submit-btn" id="profileEditSaveBtn">변경사???�??/button>
               </form>
               <div class="mp-withdrawal-section">
-                <button type="button" id="withdrawalBtn" class="mp-withdrawal-btn">회원 탈퇴</button>
+                <button type="button" id="withdrawalBtn" class="mp-withdrawal-btn">?�원 ?�퇴</button>
               </div>
             </div>
           </div>
 
-          <!-- Panel: 내 도안함 -->
+          <!-- Panel: ???�안??-->
           <div class="mp-panel" id="panelPatterns">
             <div class="mp-panel-header">
-              <h2 class="mp-panel-title" id="titlePatterns" data-i18n="title_patterns">내 도안함</h2>
-              <a href="/pattern.html" class="secondary-btn small-btn" id="goGenerateLink" data-i18n="go_generate">← 도안 만들기</a>
+              <h2 class="mp-panel-title" id="titlePatterns" data-i18n="title_patterns">???�안??/h2>
+              <a href="/pattern.html" class="secondary-btn small-btn" id="goGenerateLink" data-i18n="go_generate">???�안 만들�?/a>
             </div>
-            <div id="patternsLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="patternsLoading" class="mypage-empty">불러?�는 �?..</div>
             <div id="patternsEmpty" class="mypage-empty" style="display:none;">
-              아직 저장된 도안이 없어요.
-              <a href="/pattern.html" style="color:#000;font-weight:700;">도안 만들러 가기 →</a>
+              ?�직 ?�?�된 ?�안???�어??
+              <a href="/pattern.html" style="color:#000;font-weight:700;">?�안 만들??가�???/a>
             </div>
             <div class="pattern-grid" id="patternGrid"></div>
           </div>
 
-          <!-- Panel: 내 프로젝트 -->
+          <!-- Panel: ???�로?�트 -->
           <div class="mp-panel" id="panelProjects">
-            <h2 class="mp-panel-title" id="titleProjects" data-i18n="title_projects">내 프로젝트</h2>
+            <h2 class="mp-panel-title" id="titleProjects" data-i18n="title_projects">???�로?�트</h2>
             <div id="projectsEmpty" class="mypage-empty" style="display:none;">
-              진행 중인 프로젝트가 없어요.
-              <a href="#" class="gnb-counter-btn" style="color:#000;font-weight:700;">단수 카운터 시작하기 →</a>
+              진행 중인 ?�로?�트가 ?�어??
+              <a href="#" class="gnb-counter-btn" style="color:#000;font-weight:700;">?�수 카운???�작?�기 ??/a>
             </div>
-            <!-- 진행 중 -->
+            <!-- 진행 �?-->
             <div id="projectsActive"></div>
-            <!-- 완료 -->
+            <!-- ?�료 -->
             <div id="projectsDoneWrap" style="display:none;">
-              <h3 class="mp-section-sub" id="titleDoneProjects">완료된 프로젝트</h3>
+              <h3 class="mp-section-sub" id="titleDoneProjects">?�료???�로?�트</h3>
               <div id="projectsDone"></div>
             </div>
           </div>
 
-          <!-- Panel: 내 글·댓글 -->
+          <!-- Panel: ??글·?��? -->
           <div class="mp-panel" id="panelPosts">
-            <h2 class="mp-panel-title" id="titlePosts" data-i18n="title_posts">내 글·댓글</h2>
+            <h2 class="mp-panel-title" id="titlePosts" data-i18n="title_posts">??글·?��?</h2>
             <div class="mp-subtabs" id="postsSubtabs">
-              <button class="mp-subtab active" data-subtab="myposts" id="subtabPosts" data-i18n="subtab_posts">내 글</button>
-              <button class="mp-subtab" data-subtab="mycomments" id="subtabComments" data-i18n="subtab_comments">내 댓글</button>
+              <button class="mp-subtab active" data-subtab="myposts" id="subtabPosts" data-i18n="subtab_posts">??글</button>
+              <button class="mp-subtab" data-subtab="mycomments" id="subtabComments" data-i18n="subtab_comments">???��?</button>
             </div>
-            <!-- 내 글 -->
+            <!-- ??글 -->
             <div id="subPanelPosts">
-              <div id="myPostsLoading" class="mypage-empty">불러오는 중...</div>
+              <div id="myPostsLoading" class="mypage-empty">불러?�는 �?..</div>
               <div id="myPostsEmpty" class="mypage-empty" style="display:none;">
-                아직 작성한 글이 없어요.
-                <a href="/community.html" style="color:#000;font-weight:700;">커뮤니티 가기 →</a>
+                ?�직 ?�성??글???�어??
+                <a href="/community.html" style="color:#000;font-weight:700;">커�??�티 가�???/a>
               </div>
               <div class="post-grid" id="myPostsGrid"></div>
             </div>
-            <!-- 내 댓글 -->
+            <!-- ???��? -->
             <div id="subPanelComments" style="display:none;">
-              <div id="myCommentsLoading" class="mypage-empty">불러오는 중...</div>
+              <div id="myCommentsLoading" class="mypage-empty">불러?�는 �?..</div>
               <div id="myCommentsEmpty" class="mypage-empty" style="display:none;">
-                아직 작성한 댓글이 없어요.
+                ?�직 ?�성???��????�어??
               </div>
               <div id="myCommentsList"></div>
             </div>
           </div>
 
-          <!-- Panel: 스크랩 -->
+          <!-- Panel: ?�크??-->
           <div class="mp-panel" id="panelScraps">
-            <h2 class="mp-panel-title" id="titleScraps" data-i18n="title_scraps">스크랩</h2>
-            <div id="scrapsLoading" class="mypage-empty">불러오는 중...</div>
+            <h2 class="mp-panel-title" id="titleScraps" data-i18n="title_scraps">?�크??/h2>
+            <div id="scrapsLoading" class="mypage-empty">불러?�는 �?..</div>
             <div id="scrapsEmpty" class="mypage-empty" style="display:none;">
-              스크랩한 게시글이 없어요.
-              <a href="/community.html" style="color:#000;font-weight:700;">커뮤니티 구경하기 →</a>
+              ?�크?�한 게시글???�어??
+              <a href="/community.html" style="color:#000;font-weight:700;">커�??�티 구경?�기 ??/a>
             </div>
             <div class="post-grid" id="scrapsGrid"></div>
           </div>
 
-          <!-- 내 팔레트 패널 -->
+          <!-- ???�레???�널 -->
           <div class="mp-panel" id="panelPalettes">
-            <h2 class="mp-panel-title" data-i18n="title_palettes">내 팔레트</h2>
-            <div id="palettesLoading" class="mypage-empty">불러오는 중...</div>
+            <h2 class="mp-panel-title" data-i18n="title_palettes">???�레??/h2>
+            <div id="palettesLoading" class="mypage-empty">불러?�는 �?..</div>
             <div id="palettesEmpty" class="mypage-empty" style="display:none;">
-              저장된 팔레트가 없어요.
-              <a href="/color-palette.html" style="color:#000;font-weight:700;">배색 도우미 가기 →</a>
+              ?�?�된 ?�레?��? ?�어??
+              <a href="/color-palette.html" style="color:#000;font-weight:700;">배색 ?�우�?가�???/a>
             </div>
             <div class="cp-palette-grid" id="palettesGrid"></div>
           </div>
 
-          <!-- Panel: 내 실 창고 (Yarn Stash) -->
+          <!-- Panel: ????창고 (Yarn Stash) -->
           <div class="mp-panel" id="panelStash">
             <div class="mp-panel-header">
-              <h2 class="mp-panel-title" id="titleStash" data-i18n="title_stash">내 실 창고</h2>
-              <button class="primary-btn small-btn" id="btn-new-yarn" data-i18n="yarn_new">실 등록</button>
+              <h2 class="mp-panel-title" id="titleStash" data-i18n="title_stash">????창고</h2>
+              <button class="primary-btn small-btn" id="btn-new-yarn" data-i18n="yarn_new">???�록</button>
             </div>
-            <div id="stashLoading" class="mypage-empty">불러오는 중...</div>
+            <div id="stashLoading" class="mypage-empty">불러?�는 �?..</div>
             <div id="stashEmpty" class="mypage-empty" style="display:none;">
-              창고에 등록된 실이 없어요.
+              창고???�록???�이 ?�어??
             </div>
             <div class="yarn-grid" id="yarnGrid"></div>
           </div>
 
-          <!-- 공개 팔레트 패널 (타인 프로필) -->
+          <!-- 공개 ?�레???�널 (?�???�로?? -->
           <div class="mp-panel" id="panelPublicPalettes">
-            <h2 class="mp-panel-title" data-i18n="title_public_palettes">공개 팔레트</h2>
-            <div id="publicPalettesLoading" class="mypage-empty">불러오는 중...</div>
+            <h2 class="mp-panel-title" data-i18n="title_public_palettes">공개 ?�레??/h2>
+            <div id="publicPalettesLoading" class="mypage-empty">불러?�는 �?..</div>
             <div id="publicPalettesEmpty" class="mypage-empty" style="display:none;"></div>
             <div class="cp-palette-grid" id="publicPalettesGrid"></div>
           </div>
 
-          <!-- 공개 프로젝트 패널 (타인 프로필) -->
+          <!-- 공개 ?�로?�트 ?�널 (?�???�로?? -->
           <div class="mp-panel" id="panelPublicProjects">
-            <h2 class="mp-panel-title" data-i18n="public_projects">공개 프로젝트</h2>
-            <div id="publicProjectsLoading" class="mypage-empty">불러오는 중...</div>
-            <div id="publicProjectsEmpty" class="mypage-empty" style="display:none;">공개된 프로젝트가 없습니다.</div>
+            <h2 class="mp-panel-title" data-i18n="public_projects">공개 ?�로?�트</h2>
+            <div id="publicProjectsLoading" class="mypage-empty">불러?�는 �?..</div>
+            <div id="publicProjectsEmpty" class="mypage-empty" style="display:none;">공개???�로?�트가 ?�습?�다.</div>
             <div id="publicProjectsGrid"></div>
           </div>
 
-          <!-- (팔로우 목록 패널 삭제됨) -->
+          <!-- (?�로??목록 ?�널 ??��?? -->
 
 
         </div><!-- /.mp-content -->
@@ -258,65 +258,65 @@
 
   </main>
 
-  <!-- 회원 탈퇴 확인 모달 -->
+  <!-- ?�원 ?�퇴 ?�인 모달 -->
   <div id="withdrawalModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-      <h3 style="margin:0 0 1rem;font-size:1.1rem;">회원 탈퇴</h3>
-      <p style="margin:0 0 0.75rem;font-size:0.9rem;">탈퇴 시 아래 데이터가 <strong>영구 삭제</strong>됩니다.</p>
+      <h3 style="margin:0 0 1rem;font-size:1.1rem;">?�원 ?�퇴</h3>
+      <p style="margin:0 0 0.75rem;font-size:0.9rem;">?�퇴 ???�래 ?�이?��? <strong>?�구 ??��</strong>?�니??</p>
       <ul style="font-size:0.85rem;margin:0 0 0.75rem;padding-left:1.2rem;color:#555;">
-        <li>프로필 정보 및 사진</li>
-        <li>저장된 모든 도안</li>
-        <li>좋아요 및 스크랩 목록</li>
+        <li>?�로???�보 �??�진</li>
+        <li>?�?�된 모든 ?�안</li>
+        <li>좋아??�??�크??목록</li>
       </ul>
-      <p style="font-size:0.85rem;color:#888;margin:0 0 1.25rem;">※ 작성한 게시글·댓글은 삭제되지 않습니다.</p>
-      <p style="font-size:0.9rem;margin:0 0 0.5rem;">계속하려면 아래에 <strong>탈퇴합니다</strong>를 입력하세요.</p>
-      <input type="text" id="withdrawalConfirmInput" placeholder="탈퇴합니다" style="width:100%;border:2px solid #000;padding:0.6rem 0.75rem;font-size:0.9rem;box-sizing:border-box;margin-bottom:0.5rem;">
+      <p style="font-size:0.85rem;color:#888;margin:0 0 1.25rem;">???�성??게시글·?��??� ??��?��? ?�습?�다.</p>
+      <p style="font-size:0.9rem;margin:0 0 0.5rem;">계속?�려�??�래??<strong>?�퇴?�니??/strong>�??�력?�세??</p>
+      <input type="text" id="withdrawalConfirmInput" placeholder="?�퇴?�니?? style="width:100%;border:2px solid #000;padding:0.6rem 0.75rem;font-size:0.9rem;box-sizing:border-box;margin-bottom:0.5rem;">
       <div id="withdrawalError" style="display:none;color:#dc3545;font-size:0.85rem;margin-bottom:0.75rem;"></div>
       <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
         <button type="button" id="withdrawalCancelBtn" class="secondary-btn" style="flex:1;">취소</button>
-        <button type="button" id="withdrawalConfirmBtn" style="flex:1;background:#dc3545;color:#fff;border:2px solid #dc3545;padding:0.6rem;font-size:0.9rem;font-weight:700;cursor:pointer;">탈퇴하기</button>
+        <button type="button" id="withdrawalConfirmBtn" style="flex:1;background:#dc3545;color:#fff;border:2px solid #dc3545;padding:0.6rem;font-size:0.9rem;font-weight:700;cursor:pointer;">?�퇴?�기</button>
       </div>
     </div>
   </div>
 
-  <!-- 실 등록/수정 모달 -->
+  <!-- ???�록/?�정 모달 -->
   <div id="yarnModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-      <h3 id="yarnModalTitle" style="margin:0 0 1.5rem;" data-i18n="yarn_modal_title">실 정보 등록</h3>
+      <h3 id="yarnModalTitle" style="margin:0 0 1.5rem;" data-i18n="yarn_modal_title">???�보 ?�록</h3>
       <form id="yarnForm">
         <input type="hidden" id="yarn-form-id">
         <div class="profile-photo-upload-area" style="margin-bottom:1.5rem;">
           <div class="profile-photo-preview" id="yarnPhotoPreview" style="background:#f0f0f0; border-radius:8px; width:100px; height:100px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
           </div>
-          <label for="yarnPhotoInput" class="secondary-btn small-btn" data-i18n="photo_upload" style="cursor:pointer;">사진 선택</label>
+          <label for="yarnPhotoInput" class="secondary-btn small-btn" data-i18n="photo_upload" style="cursor:pointer;">?�진 ?�택</label>
           <input type="file" id="yarnPhotoInput" accept="image/*" style="display:none;">
         </div>
         <div class="profile-edit-row">
-          <label class="write-label" data-i18n="yarn_label_brand">브랜드</label>
-          <input type="text" id="input-yarn-brand" placeholder="예: 낙양모사" required style="width:100%; box-sizing:border-box;">
+          <label class="write-label" data-i18n="yarn_label_brand">브랜??/label>
+          <input type="text" id="input-yarn-brand" placeholder="?? ?�양모사" required style="width:100%; box-sizing:border-box;">
         </div>
         <div class="profile-edit-row">
-          <label class="write-label" data-i18n="yarn_label_name">실 이름</label>
-          <input type="text" id="input-yarn-name" placeholder="예: 시지프" required style="width:100%; box-sizing:border-box;">
+          <label class="write-label" data-i18n="yarn_label_name">???�름</label>
+          <input type="text" id="input-yarn-name" placeholder="?? ?��??? required style="width:100%; box-sizing:border-box;">
         </div>
         <div class="profile-edit-row">
-          <label class="write-label" data-i18n="yarn_label_color">색상/로트</label>
-          <input type="text" id="input-yarn-color" placeholder="예: 05번 그레이 / Lot 11" style="width:100%; box-sizing:border-box;">
+          <label class="write-label" data-i18n="yarn_label_color">?�상/로트</label>
+          <input type="text" id="input-yarn-color" placeholder="?? 05�?그레??/ Lot 11" style="width:100%; box-sizing:border-box;">
         </div>
         <div style="display:flex; gap:1rem; margin-bottom:1rem;">
           <div style="flex:1;">
-            <label class="write-label" data-i18n="yarn_label_quantity">보유량 (볼/타래)</label>
+            <label class="write-label" data-i18n="yarn_label_quantity">보유??(�??�??</label>
             <input type="number" id="input-yarn-qty-ball" step="0.1" value="1" style="width:100%; box-sizing:border-box;">
           </div>
           <div style="flex:1;">
             <label class="write-label" data-i18n="yarn_label_weight">무게 (g)</label>
-            <input type="number" id="input-yarn-qty-gram" step="1" placeholder="선택" style="width:100%; box-sizing:border-box;">
+            <input type="number" id="input-yarn-qty-gram" step="1" placeholder="?�택" style="width:100%; box-sizing:border-box;">
           </div>
         </div>
         <div class="profile-edit-row">
           <label class="write-label" data-i18n="yarn_label_needle">추천 바늘</label>
-          <input type="text" id="input-yarn-needle" placeholder="예: 4.5mm - 5.0mm" style="width:100%; box-sizing:border-box;">
+          <input type="text" id="input-yarn-needle" placeholder="?? 4.5mm - 5.0mm" style="width:100%; box-sizing:border-box;">
         </div>
         <div class="profile-edit-row">
           <label class="write-label" data-i18n="yarn_label_notes">메모</label>
@@ -324,7 +324,7 @@
         </div>
         <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
           <button type="button" id="btn-yarn-modal-cancel" class="secondary-btn" style="flex:1;" data-i18n="btn_cancel">취소</button>
-          <button type="submit" class="primary-btn" style="flex:1;" data-i18n="btn_save">저장</button>
+          <button type="submit" class="primary-btn" style="flex:1;" data-i18n="btn_save">?�??/button>
         </div>
       </form>
     </div>
@@ -334,19 +334,19 @@
     <div class="footer-inner">
       <span class="footer-brand">SSUESSUE KNITS</span>
       <nav class="footer-nav">
-        <a href="/about.html" data-i18n="footer_about">소개</a>
-        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
-        <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
-        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
-        <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
+        <a href="/about.html" data-i18n="footer_about">?�개</a>
+        <a href="/terms.html" data-i18n="footer_terms">?�용?��?</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인?�보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="?�용?�내" data-en="Guide" data-ja="?�利?�案??>?�용?�내</a>
+        <a href="/about.html" class="i18n" data-ko="?�휴·광고 문의" data-en="Partnership" data-ja="?�携?�広?�の?�問?�合?�せ">?�휴·광고 문의</a>
       </nav>
     </div>
     <div class="footer-biz">
       <div class="footer-biz-text">
-        <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
-      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
-      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
-      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
+        <span>?�호: ?�쓔 (SSUESSUE) &nbsp;|&nbsp; ?�?? 김?�원 &nbsp;|&nbsp; ?�업?�등록번?? 402-34-06132</span>
+      <span>주소: ?�라?�도 무안�??�향???�향�?127-3 &nbsp;|&nbsp; ?�태/종목: ?�매 / ?�자?�거???�화)</span>
+      <span>?�신?�매???�고번호: 2023-?�남무안-0173 &nbsp;|&nbsp; ?�메?? yewon61137@gmail.com</span>
+      <span>고객지???�영?�간: ?�일 10:00~17:00 (주말·공휴???�외)</span>
       </div>
       <div class="footer-social">
         <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
@@ -360,90 +360,90 @@
     </div>
   </footer>
 
-  <!-- 팔로우 목록 모달 -->
+  <!-- ?�로??목록 모달 -->
   <div id="followingModal" class="modal-overlay" style="display:none;">
     <div class="modal-box" style="max-height: 80vh; overflow-y: auto;">
-      <button class="modal-close" id="followingModalCloseBtn" aria-label="닫기">&#x2715;</button>
-      <h3 style="margin-bottom: 1.5rem; font-weight: 800; font-size: 1.2rem;" data-i18n="my_following">팔로우 목록</h3>
-      <div id="followingLoading" class="mypage-empty" style="padding: 2rem 0;">불러오는 중...</div>
+      <button class="modal-close" id="followingModalCloseBtn" aria-label="?�기">&#x2715;</button>
+      <h3 style="margin-bottom: 1.5rem; font-weight: 800; font-size: 1.2rem;" data-i18n="my_following">?�로??목록</h3>
+      <div id="followingLoading" class="mypage-empty" style="padding: 2rem 0;">불러?�는 �?..</div>
       <div id="followingEmpty" class="mypage-empty" style="display:none; padding: 2rem 0;">
-        아직 팔로우 중인 유저가 없습니다.
+        ?�직 ?�로??중인 ?��?가 ?�습?�다.
       </div>
       <div id="followingList" style="display:grid; grid-template-columns: 1fr; gap: 0.75rem;"></div>
     </div>
   </div>
 
-  <!-- 로그인/회원가입 모달 -->
+  <!-- 로그???�원가??모달 -->
   <div id="authModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <button class="modal-close" id="modalCloseBtn" aria-label="?�기">&#x2715;</button>
       <div class="modal-tabs">
-        <button class="modal-tab active" id="tabSignIn" data-i18n="tab_signin">로그인</button>
-        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">회원가입</button>
+        <button class="modal-tab active" id="tabSignIn" data-i18n="tab_signin">로그??/button>
+        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">?�원가??/button>
       </div>
       <button class="google-btn" id="googleSignInBtn">
         <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
-        <span data-i18n="btn_google">Google로 계속하기</span>
+        <span data-i18n="btn_google">Google�?계속?�기</span>
       </button>
       <button class="social-btn naver-btn" id="naverSignInBtn">
         <span class="naver-icon">N</span>
-        <span data-i18n="btn_naver">네이버로 계속하기</span>
+        <span data-i18n="btn_naver">?�이버로 계속?�기</span>
       </button>
-      <div class="modal-divider"><span data-i18n="or_divider">또는</span></div>
+      <div class="modal-divider"><span data-i18n="or_divider">?�는</span></div>
       <div id="signinPanel">
         <form id="emailSignInForm" class="auth-form">
-          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signin">로그인</button>
+          <input type="email" id="signinEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비�?번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signin">로그??/button>
         </form>
       </div>
       <div id="signupPanel" style="display:none;">
         <form id="emailSignUpForm" class="auth-form">
-          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required>
-          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" id="emailSignUpSubmitBtn" data-i18n="btn_signup">회원가입</button>
+          <input type="email" id="signupEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비�?번호 (6???�상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비�?번호 ?�인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn" id="emailSignUpSubmitBtn" data-i18n="btn_signup">?�원가??/button>
         </form>
       </div>
       <div id="profileSetupPanel" style="display:none;">
         <div class="profile-setup-header">
-          <p class="profile-setup-title">프로필 설정</p>
-          <p class="profile-setup-desc">커뮤니티에서 사용할 닉네임을 설정해주세요.</p>
+          <p class="profile-setup-title">?�로???�정</p>
+          <p class="profile-setup-desc">커�??�티?�서 ?�용???�네?�을 ?�정?�주?�요.</p>
         </div>
         <form id="profileSetupForm" class="auth-form">
           <div class="profile-photo-upload-area">
             <div class="profile-photo-preview" id="profilePhotoPreview">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
-            <label for="profilePhotoInput" class="secondary-btn small-btn">사진 선택 (선택)</label>
+            <label for="profilePhotoInput" class="secondary-btn small-btn">?�진 ?�택 (?�택)</label>
             <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
           </div>
           <div class="nickname-input-group">
             <div class="nickname-input-row">
-              <input type="text" id="profileNickname" placeholder="닉네임 (2~20자, 필수)" maxlength="20" required autocomplete="off">
-              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 확인</button>
+              <input type="text" id="profileNickname" placeholder="?�네??(2~20?? ?�수)" maxlength="20" required autocomplete="off">
+              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 ?�인</button>
             </div>
             <div id="nicknameStatus" class="nickname-status" style="display:none;"></div>
           </div>
-          <input type="text" id="profileRealName" placeholder="실명 (선택)" maxlength="50" autocomplete="name">
-          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>완료</button>
+          <input type="text" id="profileRealName" placeholder="?�명 (?�택)" maxlength="50" autocomplete="name">
+          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>?�료</button>
         </form>
       </div>
       <div id="verificationSentPanel" style="display:none;text-align:center;padding:1rem 0;">
-        <div style="font-size:3rem;margin-bottom:1rem;">✉️</div>
-        <h3 style="margin-bottom:1rem;font-weight:800;">이메일 인증이 필요합니다</h3>
+        <div style="font-size:3rem;margin-bottom:1rem;">?�️</div>
+        <h3 style="margin-bottom:1rem;font-weight:800;">?�메???�증???�요?�니??/h3>
         <p style="font-size:0.9rem;line-height:1.6;color:var(--secondary-color);margin-bottom:1.5rem;">
-          <span id="sentEmailAddress" style="font-weight:700;color:var(--primary-color);"></span>(으)로 인증 메일을 보냈습니다.<br>
-          메일함의 링크를 클릭하면 이 화면이 자동으로 전환됩니다.
+          <span id="sentEmailAddress" style="font-weight:700;color:var(--primary-color);"></span>(??�??�증 메일??보냈?�니??<br>
+          메일?�의 링크�??�릭?�면 ???�면???�동?�로 ?�환?�니??
         </p>
         <p style="font-size:0.8rem;color:#cc6600;margin-bottom:1.5rem;background:#fff9f0;padding:0.5rem 0.75rem;border:1px solid #ffe0b3;text-align:left;line-height:1.7;">
-          ⚠️ 메일이 오지 않았다면 <b>스팸함</b>을 꼭 확인해 주세요!<br>
-          📌 <b>네이버·카카오·다음 등 국내 메일</b>은 발신 서버 차단으로 수신이 안 될 수 있습니다.<br>
-          <b>Gmail</b> 주소로 가입하시면 안정적으로 받으실 수 있습니다.
+          ?�️ 메일???��? ?�았?�면 <b>?�팸??/b>??�??�인??주세??<br>
+          ?�� <b>?�이버·카카오·?�음 ??�?�� 메일</b>?� 발신 ?�버 차단?�로 ?�신?????????�습?�다.<br>
+          <b>Gmail</b> 주소�?가?�하?�면 ?�정?�으�?받으?????�습?�다.
         </p>
         <div style="display:flex;flex-direction:column;gap:0.75rem;">
-          <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">인증 완료 확인</button>
-          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%;max-width:none;">메일 다시 보내기</button>
+          <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">?�증 ?�료 ?�인</button>
+          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%;max-width:none;">메일 ?�시 보내�?/button>
         </div>
       </div>
       <div id="authModalError" class="auth-error" style="display:none;"></div>
@@ -451,7 +451,7 @@
   </div>
 
   <!-- DBG: V6 -->
-  <script type="module" src="/js/mypage.js?v=8"></script>
+  <script type="module" src="/js/mypage.js?v=9"></script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
   <script defer src="/js/cookie-consent.js"></script>

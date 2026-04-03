@@ -1623,6 +1623,14 @@ async function setupOtherUserView() {
     const postsTitle = document.querySelector('#panelPosts .mp-panel-title');
     if (postsTitle) postsTitle.textContent = tr('tab_other_posts');
 
+    // Bug 1: 타인 프로필에서는 상단 GNB/헤더의 '마이페이지' 및 '내 프로젝트' 활성화 제거 (강제)
+    document.querySelectorAll('.gnb-link.active, .auth-user .lang-btn.active').forEach(link => {
+        const h = link.getAttribute('href');
+        if (h && (h.includes('mypage.html') || h.includes('projects.html'))) {
+            link.classList.remove('active');
+        }
+    });
+
     // 존재하지 않는 uid 체크
     const profile = await getUserProfile(urlUid);
     if (!profile) {

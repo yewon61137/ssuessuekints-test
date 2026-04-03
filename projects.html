@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex">
-  <title>내 프로젝트 | SSUESSUE KNITS</title>
+  <title>???�로?�트 | SSUESSUE KNITS</title>
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
@@ -14,9 +14,9 @@
   <link rel="dns-prefetch" href="https://www.clarity.ms">
   <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
   <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
-  <link href="/style.css?v=5" rel="stylesheet" media="all">
+  <link href="/style.css?v=9" rel="stylesheet" media="all">
   <style>
-    /* ── 프로젝트 전용 스타일 ── */
+    /* ?�?� ?�로?�트 ?�용 ?��????�?� */
     .proj-page { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
 
     .view-header {
@@ -32,7 +32,7 @@
     }
     .btn-back:hover { border-color: #000; }
 
-    /* 프로젝트 카드 */
+    /* ?�로?�트 카드 */
     .proj-card {
       border: 2px solid #e8e8e8; border-radius: 16px;
       padding: 1.25rem 1.5rem; cursor: pointer; transition: all 0.2s;
@@ -50,22 +50,22 @@
     .proj-status-badge.status-done { background: #e8f5e9; color: #2e7d32; }
     .proj-status-badge.status-pending { background: #f5f5f5; color: #888; }
 
-    /* 진행률 바 */
+    /* 진행�?�?*/
     .proj-progress-wrap { margin-top: 0.75rem; }
     .proj-progress-track { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
     .proj-progress-fill { height: 100%; background: #000; border-radius: 3px; transition: width 0.4s ease; }
     .proj-progress-label { font-size: 0.7rem; color: #888; margin-top: 4px; text-align: right; font-weight: 700; }
 
-    /* 빈 상태 */
+    /* �??�태 */
     .proj-empty-msg { text-align: center; color: #aaa; font-size: 0.9rem; padding: 3rem 0; }
 
-    /* 게스트 화면 */
+    /* 게스???�면 */
     .guest-view {
       text-align: center; padding: 4rem 1rem;
     }
     .guest-view p { font-size: 1rem; color: #666; margin-bottom: 1.5rem; }
 
-    /* 파트 목록 */
+    /* ?�트 목록 */
     .part-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.9rem 1rem; border: 1.5px solid #e8e8e8; border-radius: 12px;
@@ -85,11 +85,11 @@
     }
     .part-open-btn:hover { background: #333; }
 
-    /* 프로젝트 상세 info */
+    /* ?�로?�트 ?�세 info */
     #detail-info { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin-bottom: 1.5rem; color: #555; font-size: 0.85rem; }
     #detail-info span { display: flex; align-items: center; gap: 0.3rem; }
 
-    /* 카운터 카드 */
+    /* 카운??카드 */
     .counter-card {
       background: #f7f7f7; border-radius: 20px; padding: 1.5rem;
       display: flex; flex-direction: column; align-items: center; gap: 1rem;
@@ -129,7 +129,7 @@
     .counter-progress-fill { height: 100%; background: #000; border-radius: 4px; transition: width 0.35s; }
     .counter-progress-label { font-size: 0.72rem; color: #888; text-align: right; margin-top: 3px; font-weight: 700; }
 
-    /* 파트 설정 */
+    /* ?�트 ?�정 */
     .counter-settings { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px dashed #ddd; padding-top: 1rem; }
     .settings-row {
       display: flex; align-items: center; gap: 0.5rem;
@@ -143,7 +143,7 @@
     .settings-row input[type="number"] { width: 80px; }
     .settings-row textarea { flex: 1; resize: vertical; min-height: 48px; }
 
-    /* 파트 액션 버튼 */
+    /* ?�트 ?�션 버튼 */
     .part-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .part-action-btn {
       font-size: 0.78rem; padding: 7px 14px; border-radius: 9px; border: 1.5px solid;
@@ -177,7 +177,7 @@
     .proj-form-input:focus { outline: none; border-color: #000; }
     .proj-modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
 
-    /* 반응형 */
+    /* 반응??*/
     @media (max-width: 480px) {
       .counter-main { font-size: 3rem; }
       .counter-btn { width: 52px; height: 52px; font-size: 1.7rem; }
@@ -204,7 +204,7 @@
       .counter-mode-btn.active { background: #eee; color: #000; }
     }
 
-    /* ── PDF 뷰어 모달 ── */
+    /* ?�?� PDF 뷰어 모달 ?�?� */
     .pdf-viewer-box {
       position: relative;
       width: 95%;
@@ -234,7 +234,7 @@
       overflow: hidden;
       min-height: 0;
     }
-    /* PDF iframe 래퍼 — 모바일 스크롤 핵심 */
+    /* PDF iframe ?�퍼 ??모바???�크�??�심 */
     .pdf-iframe-wrap {
       flex: 1;
       overflow: auto;
@@ -251,12 +251,12 @@
       touch-action: auto;
       background: #f0f0f0;
     }
-    /* 다크모드 */
+    /* ?�크모드 */
     @media (prefers-color-scheme: dark) {
       .pdf-viewer-box { background: #1c1c1c; border-color: #fff; }
       .pdf-viewer-topbar { border-color: #333; }
     }
-    /* ── 모바일 (≤640px) ── */
+    /* ?�?� 모바??(??40px) ?�?� */
     @media (max-width: 640px) {
       .pdf-viewer-box {
         width: 100%;
@@ -270,7 +270,7 @@
       .pdf-iframe-wrap { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
     }
 
-    /* ── 타이머 스타일 ── */
+    /* ?�?� ?�?�머 ?��????�?� */
     .timer-container {
       background: #000;
       color: #fff;
@@ -306,7 +306,7 @@
     .timer-btn:hover { background: #fff; color: #000; }
     .timer-btn.active { background: #fff; color: #000; border-color: #fff; }
 
-    /* ── 진행 사진 갤러리 ── */
+    /* ?�?� 진행 ?�진 갤러�??�?� */
     .detail-photos-section {
       margin-top: 3rem;
       padding-top: 2rem;
@@ -373,77 +373,77 @@
   <meta name="google-adsense-account" content="ca-pub-2930322697184296">
 </head>
 <body>
-  <script type="module" src="/js/header.js"></script>
+  <script type="module" src="/js/header.js?v=9"></script>
 
   <main class="proj-page">
 
-    <!-- 비로그인 화면 -->
+    <!-- 비로그인 ?�면 -->
     <div id="guest-view" class="guest-view" style="display:none;">
-      <p id="guest-msg" data-i18n="proj_login_required">로그인 후 프로젝트를 관리할 수 있습니다.</p>
-      <button class="primary-btn" id="guest-login-btn" data-i18n="proj_login_btn">로그인하기</button>
+      <p id="guest-msg" data-i18n="proj_login_required">로그?????�로?�트�?관리할 ???�습?�다.</p>
+      <button class="primary-btn" id="guest-login-btn" data-i18n="proj_login_btn">로그?�하�?/button>
     </div>
 
-    <!-- 로그인 후 화면 -->
+    <!-- 로그?????�면 -->
     <div id="logged-in-view" style="display:none;">
 
-      <!-- ── 프로젝트 목록 ── -->
+      <!-- ?�?� ?�로?�트 목록 ?�?� -->
       <div id="view-list">
         <div class="view-header">
-          <h1 data-i18n="proj_title">내 프로젝트</h1>
-          <button class="primary-btn" id="btn-new-project" data-i18n="proj_new" style="white-space:nowrap;">새 프로젝트</button>
+          <h1 data-i18n="proj_title">???�로?�트</h1>
+          <button class="primary-btn" id="btn-new-project" data-i18n="proj_new" style="white-space:nowrap;">???�로?�트</button>
         </div>
         <div id="projects-container"></div>
       </div>
 
-      <!-- ── 프로젝트 상세 ── -->
+      <!-- ?�?� ?�로?�트 ?�세 ?�?� -->
       <div id="view-detail" style="display:none;">
         <div class="view-header">
-          <button class="btn-back" id="btn-back-to-list">← <span data-i18n="proj_title">내 프로젝트</span></button>
+          <button class="btn-back" id="btn-back-to-list">??<span data-i18n="proj_title">???�로?�트</span></button>
           <h2 id="detail-title"></h2>
           <button class="part-action-btn btn-secondary" id="btn-toggle-public" style="margin-left:auto;"></button>
-          <button class="part-action-btn btn-secondary" id="btn-edit-project" data-i18n="proj_edit">수정</button>
-          <button class="part-action-btn btn-danger"    id="btn-delete-project" data-i18n="proj_delete">삭제</button>
+          <button class="part-action-btn btn-secondary" id="btn-edit-project" data-i18n="proj_edit">?�정</button>
+          <button class="part-action-btn btn-danger"    id="btn-delete-project" data-i18n="proj_delete">??��</button>
         </div>
         <div id="detail-info"></div>
         <div id="pdf-section" class="part-actions" style="margin-bottom:1.5rem;"></div>
         <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1rem;">
-          <button class="primary-btn" id="btn-new-part" data-i18n="part_new" style="font-size:0.82rem; padding:7px 14px;">파트 추가</button>
+          <button class="primary-btn" id="btn-new-part" data-i18n="part_new" style="font-size:0.82rem; padding:7px 14px;">?�트 추�?</button>
         </div>
         <div id="parts-container"></div>
 
-        <!-- 진행 사진 섹션 -->
+        <!-- 진행 ?�진 ?�션 -->
         <div class="detail-photos-section">
           <div class="photos-header">
-            <h3 data-i18n="proj_photos_title">진행 사진</h3>
-            <label for="photo-upload-input" class="primary-btn" style="font-size:0.8rem; cursor:pointer;" data-i18n="photo_upload">사진 추가</label>
+            <h3 data-i18n="proj_photos_title">진행 ?�진</h3>
+            <label for="photo-upload-input" class="primary-btn" style="font-size:0.8rem; cursor:pointer;" data-i18n="photo_upload">?�진 추�?</label>
             <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
           </div>
           <div id="photos-grid" class="photos-grid">
-            <!-- 사진 아이템들이 여기에 동적으로 추가됨 -->
+            <!-- ?�진 ?�이?�들???�기???�적?�로 추�???-->
           </div>
         </div>
       </div>
 
-      <!-- ── 파트 상세 (카운터) ── -->
+      <!-- ?�?� ?�트 ?�세 (카운?? ?�?� -->
       <div id="view-part" style="display:none;">
         <div class="view-header">
-          <button class="btn-back" id="btn-back-to-detail">←</button>
+          <button class="btn-back" id="btn-back-to-detail">??/button>
           <h2 id="part-detail-title"></h2>
-          <button class="part-action-btn btn-primary"  id="btn-view-pdf-part" style="display:none;">📖 <span data-i18n="pdf_view">도안 보기</span></button>
-          <button class="part-action-btn btn-secondary" id="btn-edit-part" data-i18n="proj_edit">수정</button>
-          <button class="part-action-btn btn-danger"    id="btn-delete-part" data-i18n="part_delete">삭제</button>
+          <button class="part-action-btn btn-primary"  id="btn-view-pdf-part" style="display:none;">?�� <span data-i18n="pdf_view">?�안 보기</span></button>
+          <button class="part-action-btn btn-secondary" id="btn-edit-part" data-i18n="proj_edit">?�정</button>
+          <button class="part-action-btn btn-danger"    id="btn-delete-part" data-i18n="part_delete">??��</button>
         </div>
 
         <div class="counter-card" id="counter-card">
-          <!-- 모드 전환 -->
+          <!-- 모드 ?�환 -->
           <div class="counter-mode-row">
-            <button class="counter-mode-btn active" id="mode-normal" data-i18n="btn_mode_normal">일반</button>
+            <button class="counter-mode-btn active" id="mode-normal" data-i18n="btn_mode_normal">?�반</button>
             <button class="counter-mode-btn"        id="mode-repeat" data-i18n="btn_mode_repeat">반복</button>
           </div>
 
-          <!-- 카운터 컨트롤 -->
+          <!-- 카운??컨트�?-->
           <div class="counter-controls">
-            <button class="counter-btn" id="btn-count-minus">−</button>
+            <button class="counter-btn" id="btn-count-minus">??/button>
             <div class="counter-display">
               <div class="counter-main" id="counter-main-count">0</div>
               <div class="counter-sub"  id="counter-sub-count" style="display:none;"></div>
@@ -451,25 +451,25 @@
             <button class="counter-btn" id="btn-count-plus">+</button>
           </div>
 
-          <!-- 타이머 섹션 -->
+          <!-- ?�?�머 ?�션 -->
           <div class="timer-container" id="timer-container">
             <div class="timer-display" id="timer-display">00:00:00</div>
             <div class="timer-controls">
-              <button id="btn-timer-start" class="timer-btn" data-i18n="timer_start">시작</button>
-              <button id="btn-timer-pause" class="timer-btn" data-i18n="timer_pause" style="display:none;">일시정지</button>
+              <button id="btn-timer-start" class="timer-btn" data-i18n="timer_start">?�작</button>
+              <button id="btn-timer-pause" class="timer-btn" data-i18n="timer_pause" style="display:none;">?�시?��?</button>
             </div>
             <div style="font-size:0.78rem; font-weight:800; color:#fff; margin-bottom:0.25rem;">
-              <span data-i18n="total_time_spent">프로젝트 총 시간</span>: <span id="accumulated-time">00:00:00</span>
+              <span data-i18n="total_time_spent">?�로?�트 �??�간</span>: <span id="accumulated-time">00:00:00</span>
             </div>
             <div style="font-size:0.72rem; color:#aaa; margin-top:0.25rem;">
-              <span data-i18n="part_time_spent">파트 누적 시간</span>: <span id="part-accumulated-time">00:00:00</span>
+              <span data-i18n="part_time_spent">?�트 ?�적 ?�간</span>: <span id="part-accumulated-time">00:00:00</span>
             </div>
             <div style="font-size:0.72rem; color:#aaa; margin-top:0.1rem;">
-              <span data-i18n="today_time_spent">오늘 뜬 시간</span>: <span id="today-time">00:00:00</span>
+              <span data-i18n="today_time_spent">?�늘 ???�간</span>: <span id="today-time">00:00:00</span>
             </div>
           </div>
 
-          <!-- 진행률 -->
+          <!-- 진행�?-->
           <div class="counter-progress-wrap" id="counter-progress-wrap" style="display:none; width:100%;">
             <div class="counter-progress-track">
               <div class="counter-progress-fill" id="counter-progress-fill" style="width:0%"></div>
@@ -477,17 +477,17 @@
             <div class="counter-progress-label" id="counter-progress-label"></div>
           </div>
 
-          <!-- 설정 -->
+          <!-- ?�정 -->
           <div class="counter-settings">
             <div class="settings-row" id="repeat-unit-row" style="display:none;">
-              <label data-i18n="part_repeat_unit">반복 단위</label>
+              <label data-i18n="part_repeat_unit">반복 ?�위</label>
               <input type="number" id="part-repeat-unit" min="1" value="1">
             </div>
             <div class="settings-row">
-              <label data-i18n="part_target_rows">목표 단수</label>
-              <input type="number" id="part-target-rows" min="0" placeholder="—">
-              <label data-i18n="part_alarm_row">알림 단</label>
-              <input type="number" id="part-alarm-row"   min="0" placeholder="—">
+              <label data-i18n="part_target_rows">목표 ?�수</label>
+              <input type="number" id="part-target-rows" min="0" placeholder="??>
+              <label data-i18n="part_alarm_row">?�림 ??/label>
+              <input type="number" id="part-alarm-row"   min="0" placeholder="??>
             </div>
             <div class="settings-row">
               <label data-i18n="part_memo">메모</label>
@@ -496,27 +496,27 @@
           </div>
         </div>
 
-        <!-- 파트 상태 버튼 -->
+        <!-- ?�트 ?�태 버튼 -->
         <div class="part-actions" style="margin-top:1.25rem;">
-          <button class="part-action-btn btn-primary" id="btn-mark-done" data-i18n="part_mark_done">파트 완료로 표시</button>
-          <button class="part-action-btn btn-secondary" id="btn-mark-in-progress" data-i18n="part_mark_in_progress" style="display:none;">진행중으로 변경</button>
-          <button class="part-action-btn btn-secondary" id="btn-count-reset" data-i18n="btn_reset">초기화</button>
+          <button class="part-action-btn btn-primary" id="btn-mark-done" data-i18n="part_mark_done">?�트 ?�료�??�시</button>
+          <button class="part-action-btn btn-secondary" id="btn-mark-in-progress" data-i18n="part_mark_in_progress" style="display:none;">진행중으�?변�?/button>
+          <button class="part-action-btn btn-secondary" id="btn-count-reset" data-i18n="btn_reset">초기??/button>
         </div>
       </div>
 
       <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
 
-      <!-- PDF 뷰어 모달 (카운터 패널 포함) -->
+      <!-- PDF 뷰어 모달 (카운???�널 ?�함) -->
       <div id="pdf-viewer-modal" class="proj-modal-overlay" style="padding:0;">
         <div class="pdf-viewer-box">
-          <!-- 상단 바 -->
+          <!-- ?�단 �?-->
           <div class="pdf-viewer-topbar">
-            <h3 class="i18n" data-ko="도안 보기" data-en="View Pattern" data-ja="編み図を見る">도안 보기</h3>
-            <button class="btn-back" id="pdf-close-btn">닫기 ✕</button>
+            <h3 class="i18n" data-ko="?�안 보기" data-en="View Pattern" data-ja="編み?�を見る">?�안 보기</h3>
+            <button class="btn-back" id="pdf-close-btn">?�기 ??/button>
           </div>
-          <!-- 메인 영역 -->
+          <!-- 메인 ?�역 -->
           <div class="pdf-viewer-main">
-            <!-- PDF iframe 래퍼 (모바일 스크롤 지원) -->
+            <!-- PDF iframe ?�퍼 (모바???�크�?지?? -->
             <div class="pdf-iframe-wrap">
               <iframe id="pdf-iframe" scrolling="yes" allowfullscreen></iframe>
             </div>
@@ -526,18 +526,18 @@
     </div><!-- /logged-in-view -->
   </main>
 
-  <!-- 프로젝트 생성/수정 모달 -->
+  <!-- ?�로?�트 ?�성/?�정 모달 -->
   <div class="proj-modal-overlay" id="project-modal">
     <div class="proj-modal-box">
-      <h3 data-i18n="proj_new">새 프로젝트</h3>
+      <h3 data-i18n="proj_new">???�로?�트</h3>
       <form id="project-form">
         <input type="hidden" id="project-form-id">
         <div class="proj-form-group">
-          <label data-i18n="proj_name_placeholder">작품명</label>
+          <label data-i18n="proj_name_placeholder">?�품�?/label>
           <input class="proj-form-input" id="input-proj-title" type="text" required data-i18n-placeholder="proj_name_placeholder">
         </div>
         <div class="proj-form-group">
-          <label data-i18n="proj_yarn_placeholder">실</label>
+          <label data-i18n="proj_yarn_placeholder">??/label>
           <input class="proj-form-input" id="input-proj-yarn" type="text">
         </div>
         <div class="proj-form-group">
@@ -545,41 +545,41 @@
           <input class="proj-form-input" id="input-proj-needle" type="text">
         </div>
         <div class="proj-form-group">
-          <label data-i18n="proj_start_date">시작일</label>
+          <label data-i18n="proj_start_date">?�작??/label>
           <input class="proj-form-input" id="input-start-date" type="date">
         </div>
         <div class="proj-form-group">
-          <label data-i18n="proj_target_date">완성 목표일</label>
+          <label data-i18n="proj_target_date">?�성 목표??/label>
           <input class="proj-form-input" id="input-target-date" type="date">
         </div>
         <div class="proj-form-group">
-          <label data-i18n="pdf_upload">도안 PDF 업로드</label>
+          <label data-i18n="pdf_upload">?�안 PDF ?�로??/label>
           <input class="proj-form-input" id="input-proj-pdf" type="file" accept="application/pdf">
         </div>
         <div class="proj-modal-actions">
           <button type="button" class="part-action-btn btn-secondary" id="btn-proj-modal-cancel" data-i18n="proj_cancel">취소</button>
-          <button type="submit" class="part-action-btn btn-primary" data-i18n="proj_save">저장</button>
+          <button type="submit" class="part-action-btn btn-primary" data-i18n="proj_save">?�??/button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 파트 생성/수정 모달 -->
+  <!-- ?�트 ?�성/?�정 모달 -->
   <div class="proj-modal-overlay" id="part-modal">
     <div class="proj-modal-box">
-      <h3 data-i18n="part_new">파트 추가</h3>
+      <h3 data-i18n="part_new">?�트 추�?</h3>
       <form id="part-form">
         <input type="hidden" id="part-form-id">
         <div class="proj-form-group">
-          <label data-i18n="part_name_placeholder">파트명</label>
+          <label data-i18n="part_name_placeholder">?�트�?/label>
           <input class="proj-form-input" id="input-part-title" type="text" required>
         </div>
         <div class="proj-form-group">
-          <label data-i18n="part_target_rows">목표 단수</label>
+          <label data-i18n="part_target_rows">목표 ?�수</label>
           <input class="proj-form-input" id="input-part-target-rows" type="number" min="0" placeholder="0">
         </div>
         <div class="proj-form-group">
-          <label data-i18n="part_alarm_row">알림 단</label>
+          <label data-i18n="part_alarm_row">?�림 ??/label>
           <input class="proj-form-input" id="input-part-alarm-row" type="number" min="0" placeholder="0">
         </div>
         <div class="proj-form-group">
@@ -588,76 +588,76 @@
         </div>
         <div class="proj-modal-actions">
           <button type="button" class="part-action-btn btn-secondary" id="btn-part-modal-cancel" data-i18n="proj_cancel">취소</button>
-          <button type="submit" class="part-action-btn btn-primary" data-i18n="proj_save">저장</button>
+          <button type="submit" class="part-action-btn btn-primary" data-i18n="proj_save">?�??/button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Auth Modal (다른 페이지와 동일) -->
+  <!-- Auth Modal (?�른 ?�이지?� ?�일) -->
   <div id="authModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
+      <button class="modal-close" id="modalCloseBtn" aria-label="?�기">&#x2715;</button>
       <div class="modal-tabs">
-        <button class="modal-tab active" id="tabSignIn" data-i18n="tab_signin">로그인</button>
-        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">회원가입</button>
+        <button class="modal-tab active" id="tabSignIn" data-i18n="tab_signin">로그??/button>
+        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">?�원가??/button>
       </div>
       <div class="social-login-group">
         <button class="social-btn google-btn" id="googleSignInBtn">
           <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
-          <span data-i18n="btn_google">Google로 계속하기</span>
+          <span data-i18n="btn_google">Google�?계속?�기</span>
         </button>
         <button class="social-btn naver-btn" id="naverSignInBtn">
           <span class="naver-icon">N</span>
-          <span data-i18n="btn_naver">네이버로 계속하기</span>
+          <span data-i18n="btn_naver">?�이버로 계속?�기</span>
         </button>
       </div>
-      <div class="modal-divider"><span data-i18n="or_divider">또는</span></div>
+      <div class="modal-divider"><span data-i18n="or_divider">?�는</span></div>
       <div id="signinPanel">
         <form id="emailSignInForm" class="auth-form">
-          <input type="email" id="signinEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signinPassword" placeholder="비밀번호" autocomplete="current-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signin">로그인</button>
+          <input type="email" id="signinEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비�?번호" autocomplete="current-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signin">로그??/button>
         </form>
       </div>
       <div id="signupPanel" style="display:none;">
         <form id="emailSignUpForm" class="auth-form">
-          <input type="email" id="signupEmail" placeholder="이메일" autocomplete="email" required>
-          <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" required minlength="6">
-          <input type="password" id="signupConfirm" placeholder="비밀번호 확인" autocomplete="new-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signup">회원가입</button>
+          <input type="email" id="signupEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비�?번호 (6???�상)" autocomplete="new-password" required minlength="6">
+          <input type="password" id="signupConfirm" placeholder="비�?번호 ?�인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signup">?�원가??/button>
         </form>
       </div>
       <div id="verificationSentPanel" style="display:none; text-align:center;">
-        <div style="font-size:3rem; margin-bottom:1rem;">✉️</div>
-        <h3 style="margin-bottom:0.5rem;">인증 메일을 보냈습니다</h3>
+        <div style="font-size:3rem; margin-bottom:1rem;">?�️</div>
+        <h3 style="margin-bottom:0.5rem;">?�증 메일??보냈?�니??/h3>
         <p style="font-size:0.85rem; color:#666; margin-bottom:1.5rem;">
           <span id="sentEmailAddress" style="font-weight:700;"></span>
         </p>
-        <button class="primary-btn" id="verifyDoneBtn">인증 완료</button>
-        <button class="link-btn" id="resendEmailBtn" style="margin-top:1rem; font-size:0.75rem;">다시 보내기</button>
+        <button class="primary-btn" id="verifyDoneBtn">?�증 ?�료</button>
+        <button class="link-btn" id="resendEmailBtn" style="margin-top:1rem; font-size:0.75rem;">?�시 보내�?/button>
       </div>
       <div id="profileSetupPanel" style="display:none;">
-        <h3 style="text-align:center; margin-bottom:1.5rem;">프로필 완성하기</h3>
+        <h3 style="text-align:center; margin-bottom:1.5rem;">?�로???�성?�기</h3>
         <form id="profileSetupForm" class="auth-form">
           <div class="profile-photo-setup">
             <div class="profile-photo-preview" id="profilePhotoPreview"></div>
             <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
-            <button type="button" class="secondary-btn small-btn" onclick="document.getElementById('profilePhotoInput').click()">사진 변경</button>
+            <button type="button" class="secondary-btn small-btn" onclick="document.getElementById('profilePhotoInput').click()">?�진 변�?/button>
           </div>
           <div class="input-group">
-            <label for="profileNickname">닉네임</label>
+            <label for="profileNickname">?�네??/label>
             <div style="display:flex; gap:0.5rem;">
-              <input type="text" id="profileNickname" placeholder="2~20자" required style="flex:1;">
-              <button type="button" class="secondary-btn" id="checkNicknameBtn" style="white-space:nowrap; padding:0 0.8rem;">중복 확인</button>
+              <input type="text" id="profileNickname" placeholder="2~20?? required style="flex:1;">
+              <button type="button" class="secondary-btn" id="checkNicknameBtn" style="white-space:nowrap; padding:0 0.8rem;">중복 ?�인</button>
             </div>
             <div id="nicknameStatus" class="nickname-status" style="display:none;"></div>
           </div>
           <div class="input-group" style="margin-top:1rem;">
-            <label for="profileRealName">실명 (선택)</label>
-            <input type="text" id="profileRealName" placeholder="실명을 입력하면 소통이 편해져요">
+            <label for="profileRealName">?�명 (?�택)</label>
+            <input type="text" id="profileRealName" placeholder="?�명???�력?�면 ?�통???�해?�요">
           </div>
-          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" style="margin-top:1rem;">완료</button>
+          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" style="margin-top:1rem;">?�료</button>
         </form>
       </div>
       <div id="authModalError" class="auth-error-msg" style="display:none;"></div>
@@ -668,19 +668,19 @@
     <div class="footer-inner">
       <span class="footer-brand">SSUESSUE KNITS</span>
       <nav class="footer-nav">
-        <a href="/about.html" data-i18n="footer_about">소개</a>
-        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
-        <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
-        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
-        <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
+        <a href="/about.html" data-i18n="footer_about">?�개</a>
+        <a href="/terms.html" data-i18n="footer_terms">?�용?��?</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인?�보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="?�용?�내" data-en="Guide" data-ja="?�利?�案??>?�용?�내</a>
+        <a href="/about.html" class="i18n" data-ko="?�휴·광고 문의" data-en="Partnership" data-ja="?�携?�広?�の?�問?�合?�せ">?�휴·광고 문의</a>
       </nav>
     </div>
     <div class="footer-biz">
       <div class="footer-biz-text">
-        <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
-      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
-      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
-      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
+        <span>?�호: ?�쓔 (SSUESSUE) &nbsp;|&nbsp; ?�?? 김?�원 &nbsp;|&nbsp; ?�업?�등록번?? 402-34-06132</span>
+      <span>주소: ?�라?�도 무안�??�향???�향�?127-3 &nbsp;|&nbsp; ?�태/종목: ?�매 / ?�자?�거???�화)</span>
+      <span>?�신?�매???�고번호: 2023-?�남무안-0173 &nbsp;|&nbsp; ?�메?? yewon61137@gmail.com</span>
+      <span>고객지???�영?�간: ?�일 10:00~17:00 (주말·공휴???�외)</span>
       </div>
       <div class="footer-social">
         <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
@@ -695,7 +695,7 @@
   </footer>
 
   <script type="module">
-    import { init } from '/js/projects.js?v=8';
+    import { init } from '/js/projects.js?v=9';
     init();
   </script>
 
