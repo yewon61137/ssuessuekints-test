@@ -800,10 +800,10 @@ async function loadProjects(uid) {
         }
         emptyEl.style.display = 'none';
 
-        active.forEach(p => activeEl.appendChild(buildProjectCard(p, false)));
+        active.forEach(p => activeEl.appendChild(buildProjectCard(uid, p, false)));
         if (done.length > 0) {
             doneWrap.style.display = '';
-            done.forEach(p => doneEl.appendChild(buildProjectCard(p, true)));
+            done.forEach(p => doneEl.appendChild(buildProjectCard(uid, p, true)));
         }
     } catch (e) {
         console.error('loadProjects error:', e);
@@ -811,13 +811,13 @@ async function loadProjects(uid) {
     }
 }
 
-function buildProjectCard(proj, isDone = false, readOnly = false) {
+function buildProjectCard(uid, proj, isDone = false, readOnly = false) {
     const card = document.createElement('div');
     card.className = 'mp-project-card' + (isDone ? ' mp-project-done' : '');
     card.style.cursor = 'pointer';
-    const projUrl = `/projects.html?id=${encodeURIComponent(proj.id)}`;
+    const projUrl = `/projects.html?uid=${uid}&id=${encodeURIComponent(proj.id)}`;
     card.addEventListener('click', (e) => {
-        if (e.target.closest('.mp-proj-public-toggle')) return;
+        if (e.target.closest('.mp-proj-public-toggle') || e.target.closest('.mp-proj-delete-btn')) return;
         location.href = projUrl;
     });
 
@@ -1109,7 +1109,7 @@ async function loadPublicProjects(uid) {
             .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
             .forEach(p => {
                 const isDone = p._status === 'done';
-                gridEl.appendChild(buildProjectCard(p, isDone, true)); // readOnly=true
+                gridEl.appendChild(buildProjectCard(uid, p, isDone, true)); // readOnly=true
             });
     } catch (e) {
         loadingEl.style.display = 'none';
@@ -1328,8 +1328,9 @@ function renderStash(yarns) {
         const item = document.createElement('div');
         item.className = 'yarn-item';
         const photoHtml = y.photoURL 
-            ? `<img src="${y.photoURL}" alt="${y.name}">`
+            ? `<img src="${y.photoURL}" alt="${y.name}" loading="lazy">`
             : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>`;
+
         
         const qtyBall = y.quantityBall || 0;
         const qtyGram = y.quantityGram ? `(${y.quantityGram}g)` : '';

@@ -15,6 +15,8 @@ import {
 
 // ── 상태 ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
+let targetUid = null;    // 현재 조회 중인 데이터의 소유자 UID
+let isReadOnly = false;   // 읽기 전용 모드 여부
 let currentProjectId = null;
 let currentPartId = null;
 let currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
@@ -153,7 +155,7 @@ function renderProjectList(projects) {
             const pid = btn.dataset.id;
             const isPub = btn.dataset.public === 'true';
             try {
-                await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+                await updateDoc(doc(db, 'users', targetUid, 'projects', pid), { isPublic: !isPub });
             } catch(err) {
                 alert('업데이트 실패: ' + err.message);
             }
@@ -168,13 +170,25 @@ function renderProjectDetail(project, parts) {
     const titleEl = $('detail-title');
     if (titleEl) titleEl.textContent = project.title || '';
 
+    const btnEdit = $('btn-edit-project');
+    const btnDel = $('btn-delete-project');
+    const btnNewPart = $('btn-new-part');
     const btnTogglePublic = $('btn-toggle-public');
+
+    if (btnEdit) btnEdit.style.display = isReadOnly ? 'none' : '';
+    if (btnDel)  btnDel.style.display  = isReadOnly ? 'none' : '';
+    if (btnNewPart) btnNewPart.style.display = isReadOnly ? 'none' : '';
     if (btnTogglePublic) {
-        btnTogglePublic.innerHTML = project.isPublic 
-            ? `🔒 ${esc(T.proj_private)}로 전환` 
-            : `🔓 ${esc(T.proj_public)}로 전환`;
-        btnTogglePublic.dataset.id = project.id;
-        btnTogglePublic.dataset.public = !!project.isPublic;
+        if (isReadOnly) {
+            btnTogglePublic.style.display = 'none';
+        } else {
+            btnTogglePublic.style.display = '';
+            btnTogglePublic.innerHTML = project.isPublic 
+                ? `🔒 ${esc(T.proj_private)}로 전환` 
+                : `🔓 ${esc(T.proj_public)}로 전환`;
+            btnTogglePublic.dataset.id = project.id;
+            btnTogglePublic.dataset.public = !!project.isPublic;
+        }
     }
 
     const infoEl = $('detail-info');
@@ -194,15 +208,20 @@ function renderProjectDetail(project, parts) {
         if (project.patternPdfURL) {
             pdfSection.innerHTML = `
               <button class="part-action-btn btn-primary" id="btn-view-pdf">${esc(T2.pdf_view)}</button>
+              ${isReadOnly ? '' : `
               <button class="part-action-btn btn-secondary" id="btn-replace-pdf">${esc(T2.pdf_replace)}</button>
-              <button class="part-action-btn btn-danger"    id="btn-delete-pdf">${esc(T2.pdf_delete)}</button>`;
+              <button class="part-action-btn btn-danger"    id="btn-delete-pdf">${esc(T2.pdf_delete)}</button>`}`;
             $('btn-view-pdf')?.addEventListener('click', () => openPdfViewer(project.patternPdfURL));
-            $('btn-replace-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
-            $('btn-delete-pdf')?.addEventListener('click', () => deletePdf(project));
-        } else {
+            if (!isReadOnly) {
+                $('btn-replace-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
+                $('btn-delete-pdf')?.addEventListener('click', () => deletePdf(project));
+            }
+        } else if (!isReadOnly) {
             pdfSection.innerHTML = `
               <button class="part-action-btn btn-secondary" id="btn-upload-pdf">${esc(T2.pdf_upload)}</button>`;
             $('btn-upload-pdf')?.addEventListener('click', () => $('pdf-file-input')?.click());
+        } else {
+            pdfSection.innerHTML = '';
         }
     }
 
@@ -295,27 +314,57 @@ function renderPartDetail(part) {
     // 타이머 버튼 리스너 (기존 리스너 제거 위해 클론 교체 권장되나 여기서는 단순 등록)
     // 실제로는 init 시점에 한 번만 등록하는 것이 좋음. 이벤트 버블링이나 전역 등록 고려.
 
-    // 완료 버튼 상태
+    // 완료 버튼 상태 (읽기 전용이면 숨김)
     const doneBtn = $('btn-mark-done');
     const progressBtn = $('btn-mark-in-progress');
-    if (doneBtn) doneBtn.style.display = part.status === 'done' ? 'none' : '';
-    if (progressBtn) progressBtn.style.display = part.status !== 'inProgress' ? '' : 'none';
+    const resetBtn = $('btn-count-reset');
+    const editPartBtn = $('btn-edit-part');
+    const delPartBtn = $('btn-delete-part');
 
-    // 목표 단수, 알림 단 입력
+    if (doneBtn) doneBtn.style.display = (isReadOnly || part.status === 'done') ? 'none' : '';
+    if (progressBtn) progressBtn.style.display = (isReadOnly || part.status === 'inProgress') ? 'none' : (part.status !== 'inProgress' ? '' : 'none');
+    if (resetBtn) resetBtn.style.display = isReadOnly ? 'none' : '';
+    if (editPartBtn) editPartBtn.style.display = isReadOnly ? 'none' : '';
+    if (delPartBtn) delPartBtn.style.display = isReadOnly ? 'none' : '';
+
+    // 플러스/마이너스 버튼 비활성화 (읽기 전용)
+    const pBtn = $('btn-count-plus');
+    const mBtn = $('btn-count-minus');
+    if (pBtn) pBtn.style.display = isReadOnly ? 'none' : '';
+    if (mBtn) mBtn.style.display = isReadOnly ? 'none' : '';
+
+    // 설정 필드 비활성화 및 값 설정
     const targetInput = $('part-target-rows');
     const alarmInput = $('part-alarm-row');
     const memoInput = $('part-memo');
+    const repeatUnitInput = $('part-repeat-unit');
+    const modeBtns = document.querySelectorAll('.counter-mode-btn');
+
+    if (targetInput) {
+        targetInput.readOnly = isReadOnly;
+        targetInput.value = part.targetRows || '';
+    }
+    if (alarmInput) {
+        alarmInput.readOnly = isReadOnly;
+        alarmInput.value = part.alarmRow || '';
+    }
+    if (memoInput) {
+        memoInput.readOnly = isReadOnly;
+        memoInput.value = part.memo || '';
+    }
+    if (repeatUnitInput) {
+        repeatUnitInput.readOnly = isReadOnly;
+        repeatUnitInput.value = activeCounter.repeatUnit;
+    }
+    if (isReadOnly) modeBtns.forEach(b => b.style.pointerEvents = 'none');
+    else modeBtns.forEach(b => b.style.pointerEvents = '');
+
     const modeNormal = $('mode-normal');
     const modeRepeat = $('mode-repeat');
-    const repeatUnitInput = $('part-repeat-unit');
     const repeatUnitRow = $('repeat-unit-row');
 
-    if (targetInput) targetInput.value = part.targetRows || '';
-    if (alarmInput)  alarmInput.value  = part.alarmRow || '';
-    if (memoInput)   memoInput.value   = part.memo || '';
-    if (modeNormal)  modeNormal.classList.toggle('active', activeCounter.mode === 'normal');
-    if (modeRepeat)  modeRepeat.classList.toggle('active', activeCounter.mode === 'repeat');
-    if (repeatUnitInput) repeatUnitInput.value = activeCounter.repeatUnit;
+    if (modeNormal) modeNormal.classList.toggle('active', activeCounter.mode === 'normal');
+    if (modeRepeat) modeRepeat.classList.toggle('active', activeCounter.mode === 'repeat');
     if (repeatUnitRow) repeatUnitRow.style.display = activeCounter.mode === 'repeat' ? '' : 'none';
 
     // 카운터 화면 도안 보기 버튼 설정
@@ -323,7 +372,7 @@ function renderPartDetail(part) {
     if (pdfBtn) {
         pdfBtn.style.display = 'none'; // 기본 숨김
         // 프로젝트 데이터에서 PDF URL 확인
-        getDocs(query(collection(db, 'users', currentUser.uid, 'projects'))).then(snap => {
+        getDocs(query(collection(db, 'users', targetUid, 'projects'))).then(snap => {
             const proj = snap.docs.find(d => d.id === currentProjectId)?.data();
             if (proj && proj.patternPdfURL) {
                 pdfBtn.style.display = '';
@@ -382,7 +431,7 @@ async function saveTimer() {
         const batch = [];
         // 파트 업데이트
         batch.push(updateDoc(
-            doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
+            doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', currentPartId),
             { 
                 totalSeconds: increment(timerSeconds),
                 [`dailySeconds.${today}`]: increment(timerSeconds)
@@ -390,7 +439,7 @@ async function saveTimer() {
         ));
         // 프로젝트 업데이트
         batch.push(updateDoc(
-            doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+            doc(db, 'users', targetUid, 'projects', currentProjectId),
             { totalSeconds: increment(timerSeconds) }
         ));
 
@@ -462,13 +511,13 @@ async function openProjectDetail(projectId) {
     if (partsUnsubscribe) partsUnsubscribe();
 
     // 프로젝트 문서 실시간 리스너
-    projectUnsubscribe = onSnapshot(doc(db, 'users', currentUser.uid, 'projects', projectId), docSnap => {
+    projectUnsubscribe = onSnapshot(doc(db, 'users', targetUid, 'projects', projectId), docSnap => {
         if (!docSnap.exists()) return;
         const project = { id: docSnap.id, ...docSnap.data() };
         projectBaseSeconds = project.totalSeconds || 0;
         
         // 파트 목록 실시간 리스너 (한 번만 설정)
-        const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
+        const partsRef = collection(db, 'users', targetUid, 'projects', projectId, 'parts');
         const partsQuery = query(partsRef, orderBy('createdAt', 'asc'));
         
         if (partsUnsubscribe) partsUnsubscribe();
@@ -488,9 +537,10 @@ function openPartDetail(part) {
 // ── Firestore CRUD ─────────────────────────────────────────────────────────────
 
 async function saveProject(data, projectId = null) {
-    const ref = collection(db, 'users', currentUser.uid, 'projects');
+    if (isReadOnly) return;
+    const ref = collection(db, 'users', targetUid, 'projects');
     if (projectId) {
-        await updateDoc(doc(db, 'users', currentUser.uid, 'projects', projectId), data);
+        await updateDoc(doc(db, 'users', targetUid, 'projects', projectId), data);
         return projectId;
     } else {
         const docRef = await addDoc(ref, { ...data, isPublic: false, createdAt: serverTimestamp() });
@@ -499,29 +549,32 @@ async function saveProject(data, projectId = null) {
 }
 
 async function deleteProject(projectId) {
+    if (isReadOnly) return;
     // Storage PDF 먼저 삭제 시도
     try {
-        const pdfRef = storageRef(storage, `users/${currentUser.uid}/projects/${projectId}/pattern.pdf`);
+        const pdfRef = storageRef(storage, `users/${targetUid}/projects/${projectId}/pattern.pdf`);
         await deleteObject(pdfRef);
     } catch { /* 파일 없으면 무시 */ }
     // 파트 먼저 삭제
-    const partsRef = collection(db, 'users', currentUser.uid, 'projects', projectId, 'parts');
+    const partsRef = collection(db, 'users', targetUid, 'projects', projectId, 'parts');
     const partsSnap = await getDocs(partsRef);
     await Promise.all(partsSnap.docs.map(d => deleteDoc(d.ref)));
-    await deleteDoc(doc(db, 'users', currentUser.uid, 'projects', projectId));
+    await deleteDoc(doc(db, 'users', targetUid, 'projects', projectId));
 }
 
 async function savePart(data, partId = null) {
-    const partsRef = collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts');
+    if (isReadOnly) return null;
+    const partsRef = collection(db, 'users', targetUid, 'projects', currentProjectId, 'parts');
     if (partId) {
-        await updateDoc(doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', partId), data);
+        await updateDoc(doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', partId), data);
     } else {
         await addDoc(partsRef, { ...data, currentRows: 0, currentRepeat: 1, currentStep: 0, mode: 'normal', status: 'pending', createdAt: serverTimestamp() });
     }
 }
 
 async function deletePart(partId) {
-    await deleteDoc(doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', partId));
+    if (isReadOnly) return;
+    await deleteDoc(doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', partId));
 }
 
 // 카운터 +/- 디바운스 저장
@@ -531,7 +584,7 @@ function scheduleCounterSave(partId) {
         if (!currentUser || !currentProjectId || !partId) return;
         try {
             await updateDoc(
-                doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', partId),
+                doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', partId),
                 {
                     currentRows: activeCounter.count,
                     currentRepeat: activeCounter.currentRepeat,
@@ -547,6 +600,7 @@ function scheduleCounterSave(partId) {
 
 // ── PDF 업로드 / 삭제 ─────────────────────────────────────────────────────────
 async function uploadPdf(file, project) {
+    if (isReadOnly) return;
     const T = tr();
     const { validateFile } = await import('./auth.js');
     const v = validateFile(file, { 
@@ -558,7 +612,7 @@ async function uploadPdf(file, project) {
     if (!v.valid) {
         alert(v.error); return;
     }
-    const path = `users/${currentUser.uid}/projects/${currentProjectId}/pattern.pdf`;
+    const path = `users/${targetUid}/projects/${currentProjectId}/pattern.pdf`;
     const fileRef = storageRef(storage, path);
     const pdfSection = $('pdf-section');
     if (pdfSection) pdfSection.innerHTML = `<span style="font-size:0.82rem;color:#888;">${esc(T.pdf_uploading)} 0%</span>`;
@@ -573,13 +627,13 @@ async function uploadPdf(file, project) {
         async () => {
             const url = await getDownloadURL(fileRef);
             await updateDoc(
-                doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+                doc(db, 'users', targetUid, 'projects', currentProjectId),
                 { patternPdfURL: url, patternPdfPath: path }
             );
             project.patternPdfURL = url;
             project.patternPdfPath = path;
             const partsSnap = await getDocs(
-                query(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
+                query(collection(db, 'users', targetUid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
             );
             renderProjectDetail(project, partsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
         }
@@ -587,18 +641,19 @@ async function uploadPdf(file, project) {
 }
 
 async function deletePdf(project) {
+    if (isReadOnly) return;
     if (!confirm(tr().pdf_delete_confirm)) return;
     try {
-        const path = project.patternPdfPath || `users/${currentUser.uid}/projects/${currentProjectId}/pattern.pdf`;
+        const path = project.patternPdfPath || `users/${targetUid}/projects/${currentProjectId}/pattern.pdf`;
         await deleteObject(storageRef(storage, path));
         await updateDoc(
-            doc(db, 'users', currentUser.uid, 'projects', currentProjectId),
+            doc(db, 'users', targetUid, 'projects', currentProjectId),
             { patternPdfURL: null, patternPdfPath: null }
         );
         project.patternPdfURL = null;
         project.patternPdfPath = null;
         const partsSnap = await getDocs(
-            query(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
+            query(collection(db, 'users', targetUid, 'projects', currentProjectId, 'parts'), orderBy('createdAt', 'asc'))
         );
         renderProjectDetail(project, partsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (e) { alert('삭제 실패: ' + e.message); }
@@ -623,7 +678,7 @@ function openPdfViewer(url) {
 function subscribePhotos(projectId) {
     if (photosUnsubscribe) { photosUnsubscribe(); photosUnsubscribe = null; }
     const ref = query(
-        collection(db, 'users', currentUser.uid, 'projects', projectId, 'photos'),
+        collection(db, 'users', targetUid, 'projects', projectId, 'photos'),
         orderBy('timestamp', 'desc')
     );
     photosUnsubscribe = onSnapshot(ref, snap => {
@@ -654,6 +709,7 @@ function renderProgressPhotos(photos) {
 }
 
 async function uploadProgressPhoto(file) {
+    if (isReadOnly) return;
     const T = tr();
     const { validateFile } = await import('./auth.js');
     const v = validateFile(file);
@@ -661,7 +717,7 @@ async function uploadProgressPhoto(file) {
         alert(v.error); return;
     }
     const filename = `${Date.now()}_${file.name}`;
-    const path = `users/${currentUser.uid}/projects/${currentProjectId}/photos/${filename}`;
+    const path = `users/${targetUid}/projects/${currentProjectId}/photos/${filename}`;
     const fileRef = storageRef(storage, path);
     const grid = $('photos-grid');
     
@@ -674,7 +730,7 @@ async function uploadProgressPhoto(file) {
     try {
         const snap = await uploadBytesResumable(fileRef, file);
         const url = await getDownloadURL(snap.ref);
-        await addDoc(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'photos'), {
+        await addDoc(collection(db, 'users', targetUid, 'projects', currentProjectId, 'photos'), {
             url, path, timestamp: serverTimestamp()
         });
     } catch (e) {
@@ -683,9 +739,10 @@ async function uploadProgressPhoto(file) {
 }
 
 async function deleteProgressPhoto(id, path) {
+    if (isReadOnly) return;
     try {
         await deleteObject(storageRef(storage, path));
-        await deleteDoc(doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'photos', id));
+        await deleteDoc(doc(db, 'users', targetUid, 'projects', currentProjectId, 'photos', id));
     } catch (e) {
         alert('사진 삭제 실패: ' + e.message);
     }
@@ -758,20 +815,21 @@ function attachEvents() {
     });
 
     $('btn-toggle-public')?.addEventListener('click', async (e) => {
+        if (isReadOnly) return;
         const btn = e.currentTarget;
         const pid = btn.dataset.id;
         const isPub = btn.dataset.public === 'true';
         if (!pid) return;
         try {
-            await updateDoc(doc(db, 'users', currentUser.uid, 'projects', pid), { isPublic: !isPub });
+            await updateDoc(doc(db, 'users', targetUid, 'projects', pid), { isPublic: !isPub });
         } catch (err) {
             alert('업데이트 실패: ' + err.message);
         }
     });
 
     $('btn-edit-project')?.addEventListener('click', async () => {
-        if (!currentProjectId) return;
-        const snap = await getDocs(collection(db, 'users', currentUser.uid, 'projects'));
+        if (isReadOnly || !currentProjectId) return;
+        const snap = await getDocs(collection(db, 'users', targetUid, 'projects'));
         const proj = snap.docs.find(d => d.id === currentProjectId)?.data();
         if (!proj) return;
         $('input-proj-title').value = proj.title || '';
@@ -927,10 +985,10 @@ function attachEvents() {
 
     // 파트 완료 / 진행중 변경
     $('btn-mark-done')?.addEventListener('click', async () => {
-        if (!currentPartId) return;
+        if (isReadOnly || !currentPartId) return;
         try {
             await updateDoc(
-                doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
+                doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', currentPartId),
                 { status: 'done' }
             );
             $('btn-mark-done').style.display = 'none';
@@ -939,10 +997,10 @@ function attachEvents() {
     });
 
     $('btn-mark-in-progress')?.addEventListener('click', async () => {
-        if (!currentPartId) return;
+        if (isReadOnly || !currentPartId) return;
         try {
             await updateDoc(
-                doc(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts', currentPartId),
+                doc(db, 'users', targetUid, 'projects', currentProjectId, 'parts', currentPartId),
                 { status: 'inProgress' }
             );
             $('btn-mark-in-progress').style.display = 'none';
@@ -961,8 +1019,8 @@ function attachEvents() {
     });
 
     $('btn-edit-part')?.addEventListener('click', async () => {
-        if (!currentPartId || !currentProjectId) return;
-        const snap = await getDocs(collection(db, 'users', currentUser.uid, 'projects', currentProjectId, 'parts'));
+        if (isReadOnly || !currentPartId || !currentProjectId) return;
+        const snap = await getDocs(collection(db, 'users', targetUid, 'projects', currentProjectId, 'parts'));
         const part = snap.docs.find(d => d.id === currentPartId)?.data();
         if (!part) return;
         $('input-part-title').value = part.title || '';
@@ -982,10 +1040,11 @@ function attachEvents() {
 
     // ── PDF 파일 input (숨김) ──
     $('pdf-file-input')?.addEventListener('change', async e => {
+        if (isReadOnly) return;
         const file = e.target.files?.[0];
         if (!file || !currentProjectId || !currentUser) return;
         // 현재 프로젝트 데이터 가져오기
-        const projSnap = await getDocs(collection(db, 'users', currentUser.uid, 'projects'));
+        const projSnap = await getDocs(collection(db, 'users', targetUid, 'projects'));
         const projDoc  = projSnap.docs.find(d => d.id === currentProjectId);
         const project  = projDoc ? { id: projDoc.id, ...projDoc.data() } : {};
         await uploadPdf(file, project);
@@ -1067,19 +1126,30 @@ export function init() {
     });
 
     onAuthStateChanged(auth, user => {
-        if (user) {
-            currentUser = user;
-            showLoggedIn();
-            // URL ?id=projId → 해당 프로젝트 상세 바로 열기
-            const urlProjectId = new URLSearchParams(location.search).get('id');
+        currentUser = user;
+        const params = new URLSearchParams(location.search);
+        const urlUid = params.get('uid');
+        const urlProjectId = params.get('id');
+
+        if (urlUid) {
+            // 타인 프로필 또는 URL에 명시된 UID 조회
+            targetUid = urlUid;
+            isReadOnly = (user?.uid !== urlUid);
+        } else if (user) {
+            // 내 프로젝트 조회
+            targetUid = user.uid;
+            isReadOnly = false;
+        }
+
+        if (targetUid) {
+            showLoggedIn(); // UI 틀만 노출
             if (urlProjectId) {
                 openProjectDetail(urlProjectId);
             } else {
                 showView('view-list');
-                loadProjects(user.uid);
+                loadProjects(targetUid);
             }
         } else {
-            currentUser = null;
             showGuest();
         }
     });

@@ -432,6 +432,17 @@ const MAGNIFIER_ZOOM = 8;
 magnifierCanvas.width = MAGNIFIER_SIZE;
 magnifierCanvas.height = MAGNIFIER_SIZE;
 
+let cachedRect = null;
+function getCachedRect() {
+    if (!cachedRect) {
+        cachedRect = previewCanvas.getBoundingClientRect();
+    }
+    return cachedRect;
+}
+function resetCachedRect() { cachedRect = null; }
+window.addEventListener('resize', resetCachedRect);
+window.addEventListener('scroll', resetCachedRect);
+
 function handlePointerMove(e) {
     if (!isPreviewMode || !originalImage) {
         magnifierCanvas.style.display = 'none';
@@ -449,7 +460,7 @@ function handlePointerMove(e) {
         clientY = e.clientY;
     }
 
-    const rect = previewCanvas.getBoundingClientRect();
+    const rect = getCachedRect();
     const scaleX = previewCanvas.width / rect.width;
     const scaleY = previewCanvas.height / rect.height;
     
