@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
+  <meta charset="UTF-8">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSBJ5J8N4K"></script>
   <script>
@@ -13,7 +14,7 @@
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2930322697184296" crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2930322697184296">
-  <meta charset="UTF-8" />
+  
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,8 +22,8 @@
   <meta name="msvalidate.01" content="5DDB8283B15FB361A17AE41935C60F82" />
   <link rel="canonical" href="https://ssuessueknits.com/community.html" />
   <link rel="alternate" type="application/rss+xml" title="SSUESSUE KNITS RSS" href="https://ssuessueknits.com/rss.xml" />
-  <title>커�??�티 | SSUESSUE KNITS</title>
-  <meta name="description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
+  <title>커�??�티 | SSUESSUE KNITS</title>
+  <meta name="description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
 
   <!-- hreflang -->
   <link rel="alternate" hreflang="ko" href="https://ssuessueknits.com/community.html" />
@@ -33,13 +34,13 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ssuessueknits.com/community.html">
-  <meta property="og:title" content="커�??�티 | SSUESSUE KNITS">
-  <meta property="og:description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
+  <meta property="og:title" content="커�??�티 | SSUESSUE KNITS">
+  <meta property="og:description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
   <meta property="og:image" content="https://ssuessueknits.com/og-image.png">
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://ssuessueknits.com/community.html">
-  <meta property="twitter:title" content="커�??�티 | SSUESSUE KNITS">
-  <meta property="twitter:description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
+  <meta property="twitter:title" content="커�??�티 | SSUESSUE KNITS">
+  <meta property="twitter:description" content="SSUESSUE KNITS ?�개�?커�??�티 - 직접 만든 ?�안???�랑?�고, ?�개 ?�과 질문???�눠보세?? ?�안 ?�성기로 만든 ?�품 공유 ?�영!">
   <meta property="twitter:image" content="https://ssuessueknits.com/og-image.png">
 
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
@@ -57,20 +58,20 @@
   <main class="community-container">
     <div class="community-toolbar">
       <div class="tag-filter-row" id="tagFilterRow">
-        <button class="tag-chip active" data-tag="" data-i18n="tag_all">?�체</button>
+        <button class="tag-chip active" data-tag="" data-i18n="tag_all">?�체</button>
         <button class="tag-chip" data-tag="코바?? data-i18n="tag_crochet">코바??/button>
-        <button class="tag-chip" data-tag="?�바늘" data-i18n="tag_knitting">?�바늘</button>
-        <button class="tag-chip" data-tag="?�성?? data-i18n="tag_finished">?�성??/button>
-        <button class="tag-chip" data-tag="진행�? data-i18n="tag_wip">진행�?/button>
+        <button class="tag-chip" data-tag="?�바늘" data-i18n="tag_knitting">?�바늘</button>
+        <button class="tag-chip" data-tag="?�성?? data-i18n="tag_finished">?�성??/button>
+        <button class="tag-chip" data-tag="진행�? data-i18n="tag_wip">진행�?/button>
         <button class="tag-chip" data-tag="질문" data-i18n="tag_question">질문</button>
         <span style="border-left: 1px solid #ccc; height: 16px; margin: 0 4px; align-self: center;"></span>
-        <button class="tag-chip" id="followingFilterBtn" data-i18n="filter_following">?�로??�?/button>
+        <button class="tag-chip" id="followingFilterBtn" data-i18n="filter_following">?�로??�?/button>
       </div>
-      <button class="primary-btn write-btn" id="writeBtn" data-i18n="btn_write">글?�기</button>
+      <button class="primary-btn write-btn" id="writeBtn" data-i18n="btn_write">글?�기</button>
     </div>
 
-    <div id="feedLoading" class="mypage-empty" data-i18n="feed_loading">불러?�는 �?..</div>
-    <div id="feedEmpty" class="mypage-empty" data-i18n="feed_empty" style="display:none;">게시글???�습?�다. �?글???�성?�보?�요!</div>
+    <div id="feedLoading" class="mypage-empty" data-i18n="feed_loading">불러?�는 �?..</div>
+    <div id="feedEmpty" class="mypage-empty" data-i18n="feed_empty" style="display:none;">게시글???�습?�다. �?글???�성?�보?�요!</div>
     <div class="post-grid" id="postGrid"></div>
     <div id="loadMoreArea" style="text-align:center;margin:2rem 0;display:none;">
       <button class="secondary-btn" id="loadMoreBtn" data-i18n="load_more" style="max-width:200px;">??보기</button>
@@ -81,19 +82,19 @@
     <div class="footer-inner">
       <span class="footer-brand">SSUESSUE KNITS</span>
       <nav class="footer-nav">
-        <a href="/about.html" data-i18n="footer_about">?�개</a>
-        <a href="/terms.html" data-i18n="footer_terms">?�용?��?</a>
-        <a href="/privacy.html" data-i18n="footer_privacy">개인?�보처리방침</a>
-        <a href="/guide.html" class="i18n" data-ko="?�용?�내" data-en="Guide" data-ja="?�利?�案??>?�용?�내</a>
-        <a href="/about.html" class="i18n" data-ko="?�휴·광고 문의" data-en="Partnership" data-ja="?�携?�広?�の?�問?�合?�せ">?�휴·광고 문의</a>
+        <a href="/about.html" data-i18n="footer_about">?�개</a>
+        <a href="/terms.html" data-i18n="footer_terms">?�용?��?</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인?�보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="?�용?�내" data-en="Guide" data-ja="?�利?�案??>?�용?�내</a>
+        <a href="/about.html" class="i18n" data-ko="?�휴·광고 문의" data-en="Partnership" data-ja="?�携?�広?�の?�問?�合?�せ">?�휴·광고 문의</a>
       </nav>
     </div>
     <div class="footer-biz">
       <div class="footer-biz-text">
-        <span>?�호: ?�쓔 (SSUESSUE) &nbsp;|&nbsp; ?�?? 김?�원 &nbsp;|&nbsp; ?�업?�등록번?? 402-34-06132</span>
-      <span>주소: ?�라?�도 무안�??�향???�향�?127-3 &nbsp;|&nbsp; ?�태/종목: ?�매 / ?�자?�거???�화)</span>
-      <span>?�신?�매???�고번호: 2023-?�남무안-0173 &nbsp;|&nbsp; ?�메?? yewon61137@gmail.com</span>
-      <span>고객지???�영?�간: ?�일 10:00~17:00 (주말·공휴???�외)</span>
+        <span>?�호: ?�쓔 (SSUESSUE) &nbsp;|&nbsp; ?�?? 김?�원 &nbsp;|&nbsp; ?�업?�등록번?? 402-34-06132</span>
+      <span>주소: ?�라?�도 무안�??�향???�향�?127-3 &nbsp;|&nbsp; ?�태/종목: ?�매 / ?�자?�거???�화)</span>
+      <span>?�신?�매???�고번호: 2023-?�남무안-0173 &nbsp;|&nbsp; ?�메?? yewon61137@gmail.com</span>
+      <span>고객지???�영?�간: ?�일 10:00~17:00 (주말·공휴???�외)</span>
       </div>
       <div class="footer-social">
         <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
@@ -107,119 +108,119 @@
     </div>
   </footer>
 
-  <!-- 글?�기 모달 -->
+  <!-- 글?�기 모달 -->
   <div id="writeModal" class="modal-overlay" style="display:none;">
     <div class="modal-box write-modal">
-      <button class="modal-close" id="writeModalClose" aria-label="?�기">&#x2715;</button>
-      <p class="profile-setup-title" style="margin-bottom:1.25rem;">??글 ?�성</p>
+      <button class="modal-close" id="writeModalClose" aria-label="?�기">&#x2715;</button>
+      <p class="profile-setup-title" style="margin-bottom:1.25rem;">??글 ?�성</p>
       <form id="writeForm" class="write-form">
-        <input type="text" id="writeTitle" placeholder="?�목 (?�수, 최�? 100??" maxlength="100" required>
-        <textarea id="writeContent" placeholder="?�용 (최�? 2000??" maxlength="2000" rows="5" required></textarea>
+        <input type="text" id="writeTitle" placeholder="?�목 (?�수, 최�? 100??" maxlength="100" required>
+        <textarea id="writeContent" placeholder="?�용 (최�? 2000??" maxlength="2000" rows="5" required></textarea>
 
-        <!-- ?��?지 ?�로??-->
+        <!-- ?��?지 ?�로??-->
         <div class="image-upload-grid" id="imageUploadGrid">
-          <div class="image-slot" id="imgSlot0"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="0"></label></div>
-          <div class="image-slot" id="imgSlot1"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="1"></label></div>
-          <div class="image-slot" id="imgSlot2"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="2"></label></div>
-          <div class="image-slot" id="imgSlot3"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="3"></label></div>
+          <div class="image-slot" id="imgSlot0"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="0"></label></div>
+          <div class="image-slot" id="imgSlot1"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="1"></label></div>
+          <div class="image-slot" id="imgSlot2"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="2"></label></div>
+          <div class="image-slot" id="imgSlot3"><label>+ ?�진 추�?<input type="file" accept="image/*" class="img-file-input" data-idx="3"></label></div>
         </div>
 
-        <!-- ?�그 -->
+        <!-- ?�그 -->
         <div>
-          <label class="write-label">?�그 ?�택</label>
+          <label class="write-label">?�그 ?�택</label>
           <div class="tag-checkbox-group">
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="코바??> 코바??/label>
-            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="?�바늘"> ?�바늘</label>
-            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="?�성??> ?�성??/label>
-            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="진행�?> 진행�?/label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="?�바늘"> ?�바늘</label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="?�성??> ?�성??/label>
+            <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="진행�?> 진행�?/label>
             <label class="tag-checkbox-label"><input type="checkbox" name="writeTag" value="질문"> 질문</label>
           </div>
         </div>
 
 
-        <!-- 공개 ?��? -->
+        <!-- 공개 ?��? -->
         <label class="tag-checkbox-label" style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;">
           <input type="checkbox" id="writeIsPublic" checked>
-          <span>공개 (커�??�티 ?�드???�시?�니??</span>
+          <span>공개 (커�??�티 ?�드???�시?�니??</span>
         </label>
 
         <div id="writeError" class="auth-error" style="display:none;"></div>
-        <button type="submit" class="primary-btn auth-submit-btn" id="writeSubmitBtn">게시?�기</button>
+        <button type="submit" class="primary-btn auth-submit-btn" id="writeSubmitBtn">게시?�기</button>
       </form>
     </div>
   </div>
 
-  <!-- 로그???�원가??모달 -->
+  <!-- 로그???�원가??모달 -->
   <div id="authModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-      <button class="modal-close" id="modalCloseBtn" aria-label="?�기">&#x2715;</button>
+      <button class="modal-close" id="modalCloseBtn" aria-label="?�기">&#x2715;</button>
       <div class="modal-tabs">
         <button class="modal-tab active" id="tabSignIn" data-i18n="tab_signin">로그??/button>
-        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">?�원가??/button>
+        <button class="modal-tab" id="tabSignUp" data-i18n="tab_signup">?�원가??/button>
       </div>
       <button class="google-btn" id="googleSignInBtn">
         <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:8px;"><path fill="#4285F4" d="M46.145 24.5c0-1.567-.14-3.077-.402-4.52H24v8.554h12.433c-.536 2.738-2.17 5.058-4.627 6.613v5.496h7.49C43.306 36.625 46.145 30.985 46.145 24.5z"/><path fill="#34A853" d="M24 47c6.24 0 11.47-2.07 15.293-5.617l-7.49-5.497c-2.07 1.387-4.72 2.206-7.803 2.206-6.002 0-11.083-4.054-12.898-9.502H3.4v5.674C7.205 42.804 15.035 47 24 47z"/><path fill="#FBBC05" d="M11.102 28.59A13.97 13.97 0 0 1 10.5 24c0-1.594.273-3.14.602-4.59v-5.673H3.4A22.965 22.965 0 0 0 1 24c0 3.723.893 7.24 2.4 10.263l7.702-5.673z"/><path fill="#EA4335" d="M24 10.158c3.383 0 6.42 1.163 8.808 3.447l6.605-6.606C35.467 3.296 30.24 1 24 1 15.035 1 7.205 5.196 3.4 13.737l7.702 5.673C12.917 14.212 17.998 10.158 24 10.158z"/></svg>
-        <span data-i18n="btn_google">Google�?계속?�기</span>
+        <span data-i18n="btn_google">Google�?계속?�기</span>
       </button>
       <button class="social-btn naver-btn" id="naverSignInBtn">
         <span class="naver-icon">N</span>
-        <span data-i18n="btn_naver">?�이버로 계속?�기</span>
+        <span data-i18n="btn_naver">?�이버로 계속?�기</span>
       </button>
-      <div class="modal-divider"><span data-i18n="or_divider">?�는</span></div>
+      <div class="modal-divider"><span data-i18n="or_divider">?�는</span></div>
       <div id="signinPanel">
         <form id="emailSignInForm" class="auth-form">
-          <input type="email" id="signinEmail" placeholder="?�메?? autocomplete="email" required>
-          <input type="password" id="signinPassword" placeholder="비�?번호" autocomplete="current-password" required>
+          <input type="email" id="signinEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signinPassword" placeholder="비�?번호" autocomplete="current-password" required>
           <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signin">로그??/button>
         </form>
       </div>
       <div id="signupPanel" style="display:none;">
         <form id="emailSignUpForm" class="auth-form">
-          <input type="email" id="signupEmail" placeholder="?�메?? autocomplete="email" required>
-          <input type="password" id="signupPassword" placeholder="비�?번호 (6???�상)" autocomplete="new-password" required>
-          <input type="password" id="signupConfirm" placeholder="비�?번호 ?�인" autocomplete="new-password" required>
-          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signup">?�원가??/button>
+          <input type="email" id="signupEmail" placeholder="?�메?? autocomplete="email" required>
+          <input type="password" id="signupPassword" placeholder="비�?번호 (6???�상)" autocomplete="new-password" required>
+          <input type="password" id="signupConfirm" placeholder="비�?번호 ?�인" autocomplete="new-password" required>
+          <button type="submit" class="primary-btn auth-submit-btn" data-i18n="btn_signup">?�원가??/button>
         </form>
       </div>
       <div id="profileSetupPanel" style="display:none;">
         <div class="profile-setup-header">
-          <p class="profile-setup-title">?�로???�정</p>
-          <p class="profile-setup-desc">커�??�티?�서 ?�용???�네?�을 ?�정?�주?�요.</p>
+          <p class="profile-setup-title">?�로???�정</p>
+          <p class="profile-setup-desc">커�??�티?�서 ?�용???�네?�을 ?�정?�주?�요.</p>
         </div>
         <form id="profileSetupForm" class="auth-form">
           <div class="profile-photo-upload-area">
             <div class="profile-photo-preview" id="profilePhotoPreview">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
-            <label for="profilePhotoInput" class="secondary-btn small-btn">?�진 ?�택 (?�택)</label>
+            <label for="profilePhotoInput" class="secondary-btn small-btn">?�진 ?�택 (?�택)</label>
             <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
           </div>
           <div class="nickname-input-group">
             <div class="nickname-input-row">
-              <input type="text" id="profileNickname" placeholder="?�네??(2~20?? ?�수)" maxlength="20" required autocomplete="off">
-              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 ?�인</button>
+              <input type="text" id="profileNickname" placeholder="?�네??(2~20?? ?�수)" maxlength="20" required autocomplete="off">
+              <button type="button" class="secondary-btn small-btn" id="checkNicknameBtn">중복 ?�인</button>
             </div>
             <div id="nicknameStatus" class="nickname-status" style="display:none;"></div>
           </div>
-          <input type="text" id="profileRealName" placeholder="?�명 (?�택)" maxlength="50" autocomplete="name">
-          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>?�료</button>
+          <input type="text" id="profileRealName" placeholder="?�명 (?�택)" maxlength="50" autocomplete="name">
+          <button type="submit" class="primary-btn auth-submit-btn" id="profileSaveBtn" disabled>?�료</button>
         </form>
       </div>
       <div id="verificationSentPanel" style="display:none; text-align:center; padding: 1rem 0;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">?�️</div>
-        <h3 style="margin-bottom: 1rem; font-weight:800;">?�메???�증???�요?�니??/h3>
+        <div style="font-size: 3rem; margin-bottom: 1rem;">?�️</div>
+        <h3 style="margin-bottom: 1rem; font-weight:800;">?�메???�증???�요?�니??/h3>
         <p style="font-size: 0.9rem; line-height: 1.6; color: var(--secondary-color); margin-bottom: 1.5rem;">
-          <span id="sentEmailAddress" style="font-weight:700; color:var(--primary-color);"></span>(??�??�증 메일??보냈?�니??<br>
-          메일?�의 링크�??�릭?�면 ???�면???�동?�로 ?�환?�니??
+          <span id="sentEmailAddress" style="font-weight:700; color:var(--primary-color);"></span>(??�??�증 메일??보냈?�니??<br>
+          메일?�의 링크�??�릭?�면 ???�면???�동?�로 ?�환?�니??
         </p>
         <p style="font-size: 0.8rem; color: #cc6600; margin-bottom: 1.5rem; background: #fff9f0; padding: 0.5rem 0.75rem; border: 1px solid #ffe0b3; text-align: left; line-height: 1.7;">
-          ?�️ 메일???��? ?�았?�면 <b>?�팸??/b>??�??�인??주세??<br>
-          ?�� <b>?�이버·카카오·?�음 ??�?�� 메일</b>?� 발신 ?�버 차단?�로 ?�신?????????�습?�다.<br>
-          <b>Gmail</b> 주소�?가?�하?�면 ?�정?�으�?받으?????�습?�다.
+          ?�️ 메일???��? ?�았?�면 <b>?�팸??/b>??�??�인??주세??<br>
+          ?�� <b>?�이버·카카오·?�음 ??�?�� 메일</b>?� 발신 ?�버 차단?�로 ?�신?????????�습?�다.<br>
+          <b>Gmail</b> 주소�?가?�하?�면 ?�정?�으�?받으?????�습?�다.
         </p>
         <div style="display:flex; flex-direction:column; gap:0.75rem;">
-          <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">?�증 ?�료 ?�인</button>
-          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%; max-width:none;">메일 ?�시 보내�?/button>
+          <button type="button" class="primary-btn auth-submit-btn" id="verifyDoneBtn">?�증 ?�료 ?�인</button>
+          <button type="button" class="secondary-btn small-btn" id="resendEmailBtn" style="width:100%; max-width:none;">메일 ?�시 보내�?/button>
         </div>
       </div>
       <div id="authModalError" class="auth-error" style="display:none;"></div>
