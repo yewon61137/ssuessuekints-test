@@ -104,6 +104,9 @@
 
   /* ── Breadcrumbs Generator ── */
   const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
+  const urlUid = params.get('uid');
+
   if (path !== '/' && path !== '/index.html') {
     const breadcrumbsContainer = document.createElement('ul');
     breadcrumbsContainer.className = 'breadcrumbs';
@@ -141,10 +144,16 @@
       };
 
       if (labels[label]) {
+        let finalLabel = labels[label];
+        // uid 파라미터가 있으면 "내 프로젝트", "마이페이지" 대신 일반 명칭 사용
+        if (urlUid) {
+          if (label === 'mypage') finalLabel = { ko: '프로필', en: 'Profile', ja: 'プロフィール' };
+          if (label === 'projects') finalLabel = { ko: '프로젝트', en: 'Projects', ja: 'プロジェクト' };
+        }
         if (isLast) {
-          li.innerHTML = `<span class="current i18n" data-ko="${labels[label].ko}" data-en="${labels[label].en}" data-ja="${labels[label].ja}">${labels[label].en}</span>`;
+          li.innerHTML = `<span class="current i18n" data-ko="${finalLabel.ko}" data-en="${finalLabel.en}" data-ja="${finalLabel.ja}">${finalLabel.en}</span>`;
         } else {
-          li.innerHTML = `<a href="${currentPath}.html" class="i18n" data-ko="${labels[label].ko}" data-en="${labels[label].en}" data-ja="${labels[label].ja}">${labels[label].en}</a>`;
+          li.innerHTML = `<a href="${currentPath}.html" class="i18n" data-ko="${finalLabel.ko}" data-en="${finalLabel.en}" data-ja="${finalLabel.ja}">${finalLabel.en}</a>`;
         }
       } else {
         // Fallback for magazine articles or unknowns
@@ -160,5 +169,21 @@
 
     document.querySelector('header').insertAdjacentElement('afterend', breadcrumbsContainer);
   }
+
+  /* ── Navigation Active State ── */
+  const cleanPath = (path === '/index.html' || path === '/') ? '/' : path;
+  document.querySelectorAll('.gnb-link, .auth-user .lang-btn').forEach(link => {
+      const href = link.getAttribute('href');
+      if (!href || href === '#') return;
+      
+      const cleanHref = (href === '/index.html' || href === '/') ? '/' : href;
+      if (cleanPath === cleanHref) {
+          // 타인 페이지 조회 시에는 GNB의 "내 프로젝트"나 헤더의 "마이페이지"를 활성화하지 않음
+          if (urlUid && (cleanHref === '/mypage.html' || cleanHref === '/projects.html')) {
+              return;
+          }
+          link.classList.add('active');
+      }
+  });
 
 })();

@@ -15,8 +15,8 @@ import {
 
 // ── 상태 ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
-let targetUid = null;    // 현재 조회 중인 데이터의 소유자 UID
-let isReadOnly = false;   // 읽기 전용 모드 여부
+let targetUid = new URLSearchParams(location.search).get('uid');    // 현재 조회 중인 데이터의 소유자 UID
+let isReadOnly = !!targetUid;   // uid가 있으면 기본적으로 읽기 전용 (본인 확인 전까지)
 let currentProjectId = null;
 let currentPartId = null;
 let currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
@@ -1135,9 +1135,6 @@ export function init() {
         const urlProjectId = params.get('id');
 
         // 초기화
-        targetUid = null;
-        isReadOnly = true;
-
         if (urlUid) {
             // 1순위: URL에 명시된 UID (타인 프로필 또는 공유 링크)
             targetUid = urlUid;
@@ -1146,6 +1143,9 @@ export function init() {
             // 2순위: 로그인한 본인 UID
             targetUid = user.uid;
             isReadOnly = false;
+        } else {
+            targetUid = null;
+            isReadOnly = true;
         }
 
         if (targetUid) {

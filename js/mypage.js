@@ -50,6 +50,7 @@ const pageT = {
         palette_public: '공개', palette_private: '비공개',
         palette_make_public: '공개로 전환', palette_make_private: '비공개로 전환',
         tab_other_posts: '게시글', user_not_found: '존재하지 않는 사용자예요.',
+        user_profile_suffix: '님의 프로필',
         bio_more: '더 보기', bio_less: '접기',
         tab_stash: '내 실 창고', title_stash: '내 실 창고',
         empty_stash: '창고에 등록된 실이 없어요.',
@@ -98,6 +99,7 @@ const pageT = {
         palette_public: 'Public', palette_private: 'Private',
         palette_make_public: 'Make Public', palette_make_private: 'Make Private',
         tab_other_posts: 'Posts', user_not_found: 'This user does not exist.',
+        user_profile_suffix: "'s Profile",
         bio_more: 'More', bio_less: 'Less',
         tab_stash: 'My Yarn Stash', title_stash: 'My Yarn Stash',
         empty_stash: 'No yarns in your stash.',
@@ -145,6 +147,7 @@ const pageT = {
         palette_public: '公開', palette_private: '非公開',
         palette_make_public: '公開にする', palette_make_private: '非公開にする',
         tab_other_posts: '投稿', user_not_found: 'このユーザーは存在しません。',
+        user_profile_suffix: 'さんのプロフィール',
         public_projects: '公開プロジェクト',
         bio_more: 'もっと見る', bio_less: '閉じる',
         tab_stash: 'マイ毛糸倉庫', title_stash: 'マイ毛糸倉庫',
@@ -1630,6 +1633,20 @@ async function setupOtherUserView() {
     }
 
     switchPanel('posts');
+    
+    // breadcrumbs & headerTitle 업데이트 (단일 유저 정보를 가져왔으므로 nickname 사용 가능)
+    const headerTitle = document.getElementById('mpHeaderTitle');
+    if (headerTitle && profile.nickname) {
+        headerTitle.textContent = `${profile.nickname}${tr('user_profile_suffix')}`;
+    }
+    const breadcrumbCurrent = document.querySelector('.breadcrumbs .current');
+    if (breadcrumbCurrent && profile.nickname) {
+        breadcrumbCurrent.textContent = `${profile.nickname}${tr('user_profile_suffix')}`;
+        // i18n 속성 제거해서 자동 번역 방지
+        breadcrumbCurrent.removeAttribute('data-ko');
+        breadcrumbCurrent.removeAttribute('data-en');
+        breadcrumbCurrent.removeAttribute('data-ja');
+    }
 
     // 팔로우 버튼 노출 및 이벤트 연결 (1회)
     const followBtn = document.getElementById('mpFollowBtn');
