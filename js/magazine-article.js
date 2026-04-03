@@ -3,8 +3,8 @@ import {
   doc, getDoc, setDoc, deleteDoc, serverTimestamp,
   collection, query, orderBy, getDocs, addDoc,
   runTransaction, increment
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+} from './firebase-db.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 
 let currentUser = null;
 let currentLang = 'ko';

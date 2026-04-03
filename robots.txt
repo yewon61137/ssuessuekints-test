@@ -1,10 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /mypage.html
-Disallow: /post.html
-
-# Naver crawler
-User-agent: Yeti
-Allow: /
 
 Sitemap: https://ssuessueknits.com/sitemap.xml

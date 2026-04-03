@@ -1,10 +1,10 @@
 ﻿import { auth, db, initAuth, openAuthModal } from './auth.js';
 import { initLang } from './i18n.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
   collection, addDoc, getDocs, doc, deleteDoc, updateDoc,
   query, orderBy, limit, serverTimestamp
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+} from './firebase-db.js';
 
 // ─── i18n ────────────────────────────────────────────────────────────────────
 

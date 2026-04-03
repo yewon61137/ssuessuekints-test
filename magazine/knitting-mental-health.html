@@ -27,9 +27,9 @@
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="https://www.clarity.ms">
-  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
-  <link href='/style.css?v=5' rel='stylesheet'>
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
+  <link href='/style.css?v=5' rel='stylesheet' media="all">
   <style>
     .article-hero{padding:2.5rem 0 1.5rem;border-bottom:1.5px solid var(--border-color);margin-bottom:2rem}
     .article-category{display:inline-block;background:var(--primary-color);color:#fff;font-size:.72rem;font-weight:700;padding:.22rem .7rem;border-radius:20px;letter-spacing:.03em;margin-bottom:.9rem}
@@ -226,9 +226,9 @@
   <script type="module" src="/js/init-auth.js"></script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
-  <script src="/js/cookie-consent.js"></script>
+  <script defer src="/js/cookie-consent.js"></script>
   <script src="/js/scroll-top.js" defer></script>
-  <script src="/js/magazine-lang.js"></script>
+  <script defer src="/js/magazine-lang.js"></script>
   <script type="module">
     import { initMagazineArticle } from '/js/magazine-article.js';
     initMagazineArticle('knitting-mental-health');

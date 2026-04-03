@@ -1,9 +1,9 @@
 // auth.js — Firebase 초기화 + 인증 + 도안 저장 + 프로필 관리
 // Firebase 10 CDN ES 모듈 사용 (빌드 불필요)
 
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { auth } from './firebase-auth.js';
+import { db } from './firebase-db.js';
 import {
-    getAuth,
     onAuthStateChanged,
     signOut,
     GoogleAuthProvider,
@@ -13,14 +13,12 @@ import {
     signInWithEmailAndPassword,
     updateProfile,
     sendEmailVerification,
-    applyActionCode,
     deleteUser,
     setPersistence,
     browserSessionPersistence,
     browserLocalPersistence
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+} from './firebase-auth.js';
 import {
-    getFirestore,
     collection,
     addDoc,
     serverTimestamp,
@@ -30,30 +28,10 @@ import {
     setDoc,
     deleteDoc,
     updateDoc
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import {
-    getStorage,
-    ref,
-    uploadBytes,
-    getDownloadURL,
-    listAll,
-    deleteObject
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+} from './firebase-db.js';
 
-// ⚠️ firebase-config.js 파일에서 설정을 수정하세요
-import { firebaseConfig } from './firebase-config.js';
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-setPersistence(auth, browserSessionPersistence).catch(() => {});
-
-export { 
-    collection, addDoc, serverTimestamp, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, 
-    query, where, orderBy, limit 
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-export { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+export { auth, db };
+// Storage is imported dynamically in functions that need it
 
 export async function applyAuthPersistence() {
     const rm = document.getElementById('rememberMeCheck');
@@ -119,6 +97,7 @@ export async function updateUserProfile(uid, { nickname, currentNickname, realNa
         const v = validateFile(photoFile);
         if (!v.valid) throw new Error(v.error);
 
+        const { storage, ref, uploadBytes, getDownloadURL } = await import('./firebase-storage.js');
         const photoRef = ref(storage, `users/${uid}/profile/avatar.jpg`);
         await uploadBytes(photoRef, photoFile);
         profilePhotoURL = await getDownloadURL(photoRef);
@@ -177,6 +156,7 @@ async function saveUserProfile(user, nickname, realName, photoFile) {
         const v = validateFile(photoFile);
         if (!v.valid) throw new Error(v.error);
 
+        const { storage, ref, uploadBytes, getDownloadURL } = await import('./firebase-storage.js');
         const photoRef = ref(storage, `users/${user.uid}/profile/avatar.jpg`);
         await uploadBytes(photoRef, photoFile);
         profilePhotoURL = await getDownloadURL(photoRef);
@@ -815,6 +795,7 @@ export async function deleteUserAccount(user) {
 
     // 3. Storage 파일 삭제 (users/{uid}/ 하위 전체)
     try {
+        const { storage, ref, listAll, deleteObject } = await import('./firebase-storage.js');
         const deleteDir = async (dirRef) => {
             const result = await listAll(dirRef);
             await Promise.all(result.items.map(item => deleteObject(item)));
@@ -859,6 +840,8 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
 
     const patternId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const basePath = `users/${user.uid}/patterns/${patternId}`;
+
+    const { storage, ref, uploadBytes, getDownloadURL } = await import('./firebase-storage.js');
 
     // 1. 도안 이미지 업로드 (PNG)
     const patternBlob = await canvasToBlob(patternCanvas, 'image/png');
@@ -954,3 +937,4 @@ export async function isFollowing(targetUid) {
     const snap = await getDoc(doc(db, 'follows', docId));
     return snap.exists();
 }
+

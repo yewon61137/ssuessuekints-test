@@ -31,9 +31,9 @@
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="https://www.clarity.ms">
-  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
-  <link href='/style.css?v=5' rel='stylesheet'>
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
+  <link href='/style.css?v=5' rel='stylesheet' media="all">
   <style>
     .magazine-intro { padding: 3rem 0 2.5rem; text-align: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); }
     .magazine-intro h2 { font-size: 2rem; font-weight: 900; margin: 0 0 0.75rem; letter-spacing: -0.03em; }
@@ -324,7 +324,7 @@
   </footer>
 
   <script type="module" src="/js/init-auth.js"></script>
-  <script src="/js/magazine-lang.js"></script>
+  <script defer src="/js/magazine-lang.js"></script>
   <!-- Microsoft Clarity (deferred) -->
   <script>
     window.addEventListener("load", function() {

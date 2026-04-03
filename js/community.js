@@ -1,15 +1,15 @@
 // community.js — 커뮤니티 피드
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { auth, db, initAuth, openAuthModal, getUserProfile } from './auth.js';
 import { initLang, formatDate } from './i18n.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
     collection, query, orderBy, limit, getDocs, addDoc, setDoc,
     serverTimestamp, where, startAfter, doc, getDoc
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+} from './firebase-db.js';
 import {
-    ref, uploadBytes, getDownloadURL
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+    storage, ref, uploadBytes, getDownloadURL
+} from './firebase-storage.js';
 
 const PAGE_SIZE = 12;
 let currentTagFilter = '';

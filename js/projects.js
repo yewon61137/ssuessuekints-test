@@ -6,14 +6,12 @@ import { t, initLang, applyLang, formatDate } from './i18n.js';
 import {
     collection, doc, addDoc, updateDoc, deleteDoc,
     getDocs, onSnapshot, serverTimestamp, query, orderBy, increment
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+} from './firebase-db.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
-    getStorage, ref as storageRef, uploadBytesResumable,
+    storage, ref as storageRef, uploadBytesResumable,
     getDownloadURL, deleteObject
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
-
-const storage = getStorage();
+} from './firebase-storage.js';
 
 // ── 상태 ──────────────────────────────────────────────────────────────────────
 let currentUser = null;

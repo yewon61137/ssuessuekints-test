@@ -1,13 +1,13 @@
 // post.js — 게시글 상세 페이지
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { auth, db, initAuth, openAuthModal, getUserProfile } from './auth.js';
 import { initLang, formatDate } from './i18n.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
     doc, getDoc, collection, query, orderBy, getDocs,
     addDoc, deleteDoc, updateDoc, serverTimestamp, runTransaction, increment
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject, listAll } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+} from './firebase-db.js';
+import { storage, ref, deleteObject, listAll } from './firebase-storage.js';
 
 initLang();
 

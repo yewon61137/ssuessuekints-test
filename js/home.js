@@ -1,10 +1,10 @@
 // home.js — 홈페이지 JS (index.html)
 import { auth, db, initAuth } from './auth.js';
 import { initLang, applyLang } from './i18n.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
     collection, query, orderBy, limit, getDocs
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+} from './firebase-db.js';
 
 // ── Lang select helper (레거시, 기존 select 사용 페이지 호환) ──
 window._applyLangFromSelect = function(val) {

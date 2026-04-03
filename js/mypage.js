@@ -1,13 +1,14 @@
 // mypage.js — 마이페이지 v2 (사이드바 5탭 레이아웃)
 
-import { auth, db, storage, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount, followUser, unfollowUser, isFollowing } from './auth.js';
+import { auth, db, initAuth, openAuthModal, getUserProfile, updateUserProfile, checkNicknameAvailable, deleteUserAccount, followUser, unfollowUser, isFollowing } from './auth.js';
 import { t as sharedT, initLang } from './i18n.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { onAuthStateChanged } from './firebase-auth.js';
 import {
     collection, collectionGroup, query, orderBy, limit, getDocs,
     doc, getDoc, deleteDoc, updateDoc, where, onSnapshot, addDoc, serverTimestamp
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { ref, deleteObject, getBlob, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+} from './firebase-db.js';
+import { ref, deleteObject, uploadBytes, getDownloadURL } from './firebase-storage.js';
+// getBlob is not used in the truncated part, checking if it is used later.
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 
@@ -58,6 +59,7 @@ const pageT = {
         yarn_label_needle: '추천 바늘', yarn_label_notes: '메모',
         yarn_delete_confirm: '이 실을 삭제하시겠습니까?',
         yarn_upload_error: '사진 업로드 중 오류가 발생했습니다.',
+        confirm_delete_project: '이 프로젝트를 삭제하시겠습니까?',
     },
     en: {
         tab_profile: 'Profile', tab_patterns: 'My Patterns',
@@ -105,6 +107,7 @@ const pageT = {
         yarn_label_needle: 'Recommended Needle', yarn_label_notes: 'Notes',
         yarn_delete_confirm: 'Delete this yarn?',
         yarn_upload_error: 'Error uploading photo.',
+        confirm_delete_project: 'Delete this project?',
     },
     ja: {
         tab_profile: 'プロフィール', tab_patterns: 'マイ編み図',
@@ -152,6 +155,7 @@ const pageT = {
         yarn_label_needle: 'おすすめの針', yarn_label_notes: 'メモ',
         yarn_delete_confirm: 'この毛糸を削除しますか？',
         yarn_upload_error: '写真のアップロード中にエラーが発生しました。',
+        confirm_delete_project: 'このプロジェクトを削除しますか？',
     }
 };
 
@@ -828,6 +832,7 @@ function buildProjectCard(proj, isDone = false, readOnly = false) {
         <span class="mp-progress-pct">${proj._done} / ${proj._total}${tr('progress_done')}</span>` : '';
 
     const shareBtn = (!readOnly && isDone) ? `<button class="secondary-btn small-btn mp-share-proj-btn">${tr('go_community')}</button>` : '';
+    const deleteBtn = !readOnly ? `<button class="secondary-btn small-btn mp-proj-delete-btn" style="border:1px solid var(--border); color:#ff5252;">${tr('delete')}</button>` : '';
     const toggleBtn = !readOnly ? `
             <button class="secondary-btn small-btn mp-proj-public-toggle" data-id="${escHtml(proj.id)}" data-public="${!!proj.isPublic}" style="border:1px solid var(--border); padding:6px 12px; background:var(--bg); transition:background 0.2s;">
                 ${proj.isPublic ? `🔒 ${escHtml(tr('proj_private'))}로 전환` : `🔓 ${escHtml(tr('proj_public'))}로 전환`}
@@ -845,6 +850,7 @@ function buildProjectCard(proj, isDone = false, readOnly = false) {
         <div class="mp-project-actions" style="flex-wrap:wrap; gap:6px;">
             <button class="secondary-btn small-btn mp-open-proj-btn">자세히 보기 →</button>
             ${toggleBtn}
+            ${deleteBtn}
             ${shareBtn}
         </div>`;
 
@@ -868,6 +874,18 @@ function buildProjectCard(proj, isDone = false, readOnly = false) {
                 loadProjects(currentUser.uid);
             } catch(err) {
                 alert('업데이트 실패: ' + err.message);
+            }
+        });
+
+        card.querySelector('.mp-proj-delete-btn')?.addEventListener('click', async e => {
+            e.stopPropagation();
+            if (!confirm(tr('confirm_delete_project'))) return;
+            const pid = proj.id;
+            try {
+                await deleteDoc(doc(db, 'users', currentUser.uid, 'projects', pid));
+                loadProjects(currentUser.uid);
+            } catch(err) {
+                alert('삭제 실패: ' + err.message);
             }
         });
     }
