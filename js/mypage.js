@@ -1095,6 +1095,7 @@ async function loadPublicProjects(uid) {
             });
     } catch (e) {
         loadingEl.style.display = 'none';
+        console.error(e);
         emptyEl.textContent = '불러오기 실패';
         emptyEl.style.display = 'block';
     }
