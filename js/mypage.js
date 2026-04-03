@@ -18,6 +18,7 @@ const pageT = {
         subtab_posts: '내 글', subtab_comments: '내 댓글',
         not_logged_in: '로그인하면 마이페이지를 이용할 수 있습니다.',
         go_to_signin: '로그인', loading: '불러오는 중...',
+        public_projects: '공개 프로젝트',
         empty_patterns: '아직 저장된 도안이 없어요.',
         empty_posts: '아직 작성한 글이 없어요.', empty_scraps: '스크랩한 게시글이 없어요.',
         empty_comments: '아직 작성한 댓글이 없어요.', empty_projects: '진행 중인 프로젝트가 없어요.',
@@ -64,6 +65,7 @@ const pageT = {
         subtab_posts: 'Posts', subtab_comments: 'Comments',
         not_logged_in: 'Sign in to access your page.',
         go_to_signin: 'Sign In', loading: 'Loading...',
+        public_projects: 'Public Projects',
         empty_patterns: 'No saved patterns yet.',
         empty_posts: 'No posts yet.', empty_scraps: 'No scrapped posts yet.',
         empty_comments: 'No comments yet.', empty_projects: 'No active projects.',
@@ -140,6 +142,7 @@ const pageT = {
         palette_public: '公開', palette_private: '非公開',
         palette_make_public: '公開にする', palette_make_private: '非公開にする',
         tab_other_posts: '投稿', user_not_found: 'このユーザーは存在しません。',
+        public_projects: '公開プロジェクト',
         bio_more: 'もっと見る', bio_less: '閉じる',
         tab_stash: 'マイ毛糸倉庫', title_stash: 'マイ毛糸倉庫',
         empty_stash: '倉庫に登録された毛糸がありません。',
@@ -152,7 +155,7 @@ const pageT = {
     }
 };
 
-let currentLang = localStorage.getItem('lang') || 'ko';
+let currentLang = localStorage.getItem('ssuessue_lang') || 'ko';
 function tr(key) { return pageT[currentLang]?.[key] ?? sharedT[currentLang]?.[key] ?? key; }
 
 // ── 상태 ─────────────────────────────────────────────────────────────────────
@@ -205,8 +208,8 @@ function switchPanel(name) {
     else if (name === 'posts')           loadMyPosts(currentUid);
     else if (name === 'scraps')          loadScraps(currentUid);
     else if (name === 'palettes')        loadPalettes(currentUid);
-    else if (name === 'publicPalettes')  loadPublicPalettes(currentUid);
-    else if (name === 'publicProjects')  loadPublicProjects(currentUid);
+    else if (name === 'publicPalettes')  loadPublicPalettes(urlUid || currentUid);
+    else if (name === 'publicProjects')  loadPublicProjects(urlUid || currentUid);
     else if (name === 'stash')           initStash(currentUid);
 }
 
@@ -1508,7 +1511,7 @@ function resetPageState() {
 
     // 패널 콘텐츠 초기화
     ['patternsGrid', 'projectsActive', 'projectsDone', 'scrapsGrid',
-     'palettesGrid', 'publicPalettesGrid', 'yarnGrid'].forEach(id => {
+     'palettesGrid', 'publicPalettesGrid', 'publicProjectsGrid', 'yarnGrid'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
     });
@@ -1542,7 +1545,7 @@ onAuthStateChanged(auth, async user => {
         if (!panelLoaded['_sidebar']) {
             panelLoaded['_sidebar'] = true;
             await fillSidebar(urlUid, /* readOnly */ true);
-            setupOtherUserView();
+            await setupOtherUserView();
         }
         // 팔로우 버튼 상태 반영 (user 변경 시마다 갱신)
         updateFollowBtnState(user);
@@ -1582,7 +1585,10 @@ async function setupOtherUserView() {
     const commentTab = document.getElementById('subtabComments');
     if (commentTab) commentTab.style.display = 'none';
 
+    console.warn('[DEBUG] setupOtherUserView start. mpNavPublicProjects exists:', !!document.getElementById('mpNavPublicProjects'));
+
     // 공개 팔레트 & 공개 프로젝트 탭 표시
+    console.warn('[DEBUG] Public Projects BTN Found:', !!document.getElementById('mpNavPublicProjects'));
     const pubPalBtn = document.getElementById('mpNavPublicPalettes');
     if (pubPalBtn) pubPalBtn.style.display = '';
     const pubProjBtn = document.getElementById('mpNavPublicProjects');
@@ -1597,6 +1603,7 @@ async function setupOtherUserView() {
     // 존재하지 않는 uid 체크
     const profile = await getUserProfile(urlUid);
     if (!profile) {
+        // DBG: V6
         document.getElementById('loggedIn').innerHTML =
             `<div class="mypage-empty" style="padding:4rem 1rem;">${escHtml(tr('user_not_found'))}</div>`;
         return;
