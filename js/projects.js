@@ -1077,6 +1077,9 @@ function showGuest() {
     $('guest-view')?.style && ($('guest-view').style.display = '');
     $('logged-in-view')?.style && ($('logged-in-view').style.display = 'none');
     if (projectsUnsubscribe) { projectsUnsubscribe(); projectsUnsubscribe = null; }
+    if (projectUnsubscribe) { projectUnsubscribe(); projectUnsubscribe = null; }
+    if (partsUnsubscribe) { partsUnsubscribe(); partsUnsubscribe = null; }
+    if (photosUnsubscribe) { photosUnsubscribe(); photosUnsubscribe = null; }
 }
 
 function loadProjects(uid) {
@@ -1131,18 +1134,23 @@ export function init() {
         const urlUid = params.get('uid');
         const urlProjectId = params.get('id');
 
+        // 초기화
+        targetUid = null;
+        isReadOnly = true;
+
         if (urlUid) {
-            // 타인 프로필 또는 URL에 명시된 UID 조회
+            // 1순위: URL에 명시된 UID (타인 프로필 또는 공유 링크)
             targetUid = urlUid;
             isReadOnly = (user?.uid !== urlUid);
         } else if (user) {
-            // 내 프로젝트 조회
+            // 2순위: 로그인한 본인 UID
             targetUid = user.uid;
             isReadOnly = false;
         }
 
         if (targetUid) {
-            showLoggedIn(); // UI 틀만 노출
+            // 프로젝트 조회 모드
+            showLoggedIn(); 
             if (urlProjectId) {
                 openProjectDetail(urlProjectId);
             } else {
@@ -1150,6 +1158,7 @@ export function init() {
                 loadProjects(targetUid);
             }
         } else {
+            // 데이터 대상이 없고 로그아웃 상태면 게스트 화면 노출
             showGuest();
         }
     });
