@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE } from './colorUtils.js';
+import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE, applyMedianFilter } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -587,7 +587,7 @@ clearSeedsBtn.addEventListener('click', () => {
     renderSeedColors();
 });
 
-// --- 2. 도안 생성 로직 ---
+// --- 2. \ub3c4\uc548 \uc0dd\uc131 \ub85c\uc9c1 (potrace \ubca1\ud130\ud654 \ud30c\uc774\ud504\ub77c\uc778) ---
 generateBtn.addEventListener('click', async () => {
     if (!originalImage) return;
 
@@ -598,7 +598,7 @@ generateBtn.addEventListener('click', async () => {
     const isMmMode = document.querySelector('input[name="yarnUnit"]:checked').value === 'mm';
     const yarnType = yarnWeightSelect.value;
     const yarnMm = yarnMmInput.value;
-    
+
     const colorCount = parseInt(colorCountInput.value, 10);
     const showGrid = showGridCheckbox.checked;
     const techniqueRatio = parseFloat(techniqueRatioSelect.value);
@@ -610,190 +610,284 @@ generateBtn.addEventListener('click', async () => {
     }
 
     const gauge = isMmMode ? getGaugeFromMm(yarnMm) : gaugeData[yarnType];
-    
     const targetStitches = Math.round((widthCm / 10) * gauge.sts);
     const imgRatio = originalImage.height / originalImage.width;
     const targetRows = Math.round(targetStitches * imgRatio * techniqueRatio);
 
-    // Limit stitches/rows for browser canvas safety (especially mobile iOS)
     if (targetStitches > 1500 || targetRows > 1500) {
         showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
         generateBtn.disabled = false;
         return;
     }
 
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-    tempCanvas.width = targetStitches;
-    tempCanvas.height = targetRows;
+    // UI \uc5c5\ub370\uc774\ud2b8\ub97c \uc704\ud574 \ub2e4\uc74c \ud2b1\uc73c\ub85c \uc591\ubcf4
+    await new Promise(res => setTimeout(res, 50));
 
-    tempCtx.imageSmoothingEnabled = false; // Nearest-neighbor 리샘플링 강제
-    tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
+    try {
+        // \u2500\u2500 1. \uc2a4\uce94\uc6a9 \uce94\ubc84\uc2a4 (\uc6d0\ubcf8 \uc774\ubbf8\uc9c0, \ucd5c\ub300 2000px, imageSmoothingEnabled=false) \u2500\u2500
+        const origW = originalImage.width;
+        const origH = originalImage.height;
+        const SCAN_MAX_DIM = 2000;
+        const scanScale = Math.min(1, SCAN_MAX_DIM / Math.max(origW, origH));
+        const scanW = Math.round(origW * scanScale);
+        const scanH = Math.round(origH * scanScale);
 
-    setTimeout(() => {
-        try {
-            const imageData = tempCtx.getImageData(0, 0, targetStitches, targetRows);
-            const pixels = getPixelArray(imageData, targetStitches, targetRows);
+        const scanCanvas = document.createElement('canvas');
+        scanCanvas.width = scanW;
+        scanCanvas.height = scanH;
+        const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+        scanCtx.imageSmoothingEnabled = false;
+        scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
+        const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
 
-            // 이미지 실제 색상 복잡도를 분석해 상한선 이하로 최적 색상 수 결정
-            const optimalColorCount = detectOptimalColorCount(pixels, colorCount);
-            const { palette: rawPalette, assignments: rawAssignments } = kMeans(pixels, optimalColorCount, targetStitches, targetRows, 15, seedColors);
+        // \u2500\u2500 2. \uc774\uc9c4\ud654 \uce94\ubc84\uc2a4 (\uc5b4\ub450\uc6b4 \ud53d\uc140 \u2192 \uac80\uc815, \ub098\uba38\uc9c0 \u2192 \ud770\uc0c9) \u2500\u2500
+        const DARK_LUM = 77; // 0.30 \xd7 255
+        const binCanvas = document.createElement('canvas');
+        binCanvas.width = scanW;
+        binCanvas.height = scanH;
+        const binCtx = binCanvas.getContext('2d');
+        binCtx.imageSmoothingEnabled = false;
+        const binImgData = binCtx.createImageData(scanW, scanH);
+        for (let i = 0; i < scanW * scanH; i++) {
+            const si = i * 4;
+            const a = scanData[si + 3];
+            let val = 255;
+            if (a > 128) {
+                const lum = 0.299 * scanData[si] + 0.587 * scanData[si + 1] + 0.114 * scanData[si + 2];
+                if (lum <= DARK_LUM) val = 0;
+            }
+            binImgData.data[si]     = val;
+            binImgData.data[si + 1] = val;
+            binImgData.data[si + 2] = val;
+            binImgData.data[si + 3] = 255;
+        }
+        binCtx.putImageData(binImgData, 0, 0);
 
-            // 유사 색상(Delta E < 15) 병합 (팔레트 생성 목적)
-            const { palette } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
+        // \u2500\u2500 3. \uc678\uacfd\uc120 \ub9c8\uc2a4\ud06c \uc0dd\uc131 \u2500\u2500
+        const cellScaleX = scanW / targetStitches;
+        const cellScaleY = scanH / targetRows;
 
-            // 원본 이미지를 스캔용 캔버스에 그리기
-            // 최대 2000px로 제한해 성능 확보, imageSmoothingEnabled=false 유지
-            const origW = originalImage.width;
-            const origH = originalImage.height;
-            const SCAN_MAX_DIM = 2000;
-            const scanScale = Math.min(1, SCAN_MAX_DIM / Math.max(origW, origH));
-            const scanW = Math.round(origW * scanScale);
-            const scanH = Math.round(origH * scanScale);
-            const scanCanvas = document.createElement('canvas');
-            scanCanvas.width = scanW;
-            scanCanvas.height = scanH;
-            const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
-            scanCtx.imageSmoothingEnabled = false;
-            scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
-            const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
-
-            const DARK_LUM_THRESHOLD = 77; // 명도 30% = 0.30 × 255
-            const BLACK = [0, 0, 0];
-            const cellScaleX = scanW / targetStitches;
-            const cellScaleY = scanH / targetRows;
-            let hasBlackCell = false;
-
-            // 각 격자 칸별 색상 결정
-            const gridCellColors = new Array(targetStitches * targetRows);
-
+        // potrace \ubbf8\uc0ac\uc6a9 \uc2dc \ud3f4\ubc31: \ud53d\uc140 \uc9c1\uc811 \uc2a4\uce94
+        function buildOutlineMaskDirect() {
+            const mask = new Uint8Array(targetStitches * targetRows);
             for (let gy = 0; gy < targetRows; gy++) {
                 for (let gx = 0; gx < targetStitches; gx++) {
                     const x0 = Math.floor(gx * cellScaleX);
                     const x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
                     const y0 = Math.floor(gy * cellScaleY);
                     const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
-
-                    // 1단계: 어두운 픽셀 존재 여부 검사 (발견 즉시 break)
-                    let hasDark = false;
                     outerDark:
                     for (let py = y0; py < y1; py++) {
                         for (let px = x0; px < x1; px++) {
-                            const pidx = (py * scanW + px) * 4;
-                            if (scanData[pidx + 3] <= 128) continue; // 투명 픽셀 제외
-                            const r = scanData[pidx], g = scanData[pidx + 1], b = scanData[pidx + 2];
-                            if (0.299 * r + 0.587 * g + 0.114 * b <= DARK_LUM_THRESHOLD) {
-                                hasDark = true;
-                                break outerDark;
-                            }
+                            const si = (py * scanW + px) * 4;
+                            if (scanData[si + 3] <= 128) continue;
+                            const lum = 0.299 * scanData[si] + 0.587 * scanData[si + 1] + 0.114 * scanData[si + 2];
+                            if (lum <= DARK_LUM) { mask[gy * targetStitches + gx] = 1; break outerDark; }
                         }
-                    }
-
-                    if (hasDark) {
-                        gridCellColors[gy * targetStitches + gx] = null; // 검정 표시
-                        hasBlackCell = true;
-                        continue;
-                    }
-
-                    // 2단계: 나머지 픽셀들의 최빈 팔레트 색상 결정
-                    const freq = new Int32Array(palette.length);
-                    let hasPixel = false;
-
-                    for (let py = y0; py < y1; py++) {
-                        for (let px = x0; px < x1; px++) {
-                            const pidx = (py * scanW + px) * 4;
-                            if (scanData[pidx + 3] <= 128) continue;
-                            hasPixel = true;
-                            const r = scanData[pidx], g = scanData[pidx + 1], b = scanData[pidx + 2];
-                            let minDist = Infinity, minIdx = 0;
-                            for (let ci = 0; ci < palette.length; ci++) {
-                                const c = palette[ci];
-                                const dr = r - c[0], dg = g - c[1], db = b - c[2];
-                                const d = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
-                                if (d < minDist) { minDist = d; minIdx = ci; }
-                            }
-                            freq[minIdx]++;
-                        }
-                    }
-
-                    if (!hasPixel) {
-                        gridCellColors[gy * targetStitches + gx] = palette[0] || BLACK;
-                    } else {
-                        let modeIdx = 0, maxFreq = 0;
-                        for (let ci = 0; ci < palette.length; ci++) {
-                            if (freq[ci] > maxFreq) { maxFreq = freq[ci]; modeIdx = ci; }
-                        }
-                        gridCellColors[gy * targetStitches + gx] = palette[modeIdx];
                     }
                 }
             }
-
-            // 검정 사용 시 범례 팔레트에 추가
-            const legendPalette = hasBlackCell ? [BLACK, ...palette] : palette;
-
-            let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches)));
-
-            // Safety Check: Total dimension should not exceed MAX_CANVAS_DIMENSION
-            if (targetStitches * pixelSize > MAX_CANVAS_DIMENSION || targetRows * pixelSize > MAX_CANVAS_DIMENSION) {
-                pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(targetStitches, targetRows));
-            }
-
-            const renderWidth = targetStitches * pixelSize;
-            const renderHeight = targetRows * pixelSize;
-
-            const paddingTop = showGrid ? 40 : 10;
-            const paddingRight = showGrid ? 60 : 10;
-            const paddingBottom = showGrid ? 60 : 10;
-            const paddingLeft = showGrid ? 40 : 10;
-
-            canvas.width = renderWidth + paddingLeft + paddingRight;
-            canvas.height = renderHeight + paddingTop + paddingBottom;
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-            ctx.translate(paddingLeft, paddingTop);
-
-            for (let gy = 0; gy < targetRows; gy++) {
-                for (let gx = 0; gx < targetStitches; gx++) {
-                    const cellColor = gridCellColors[gy * targetStitches + gx];
-                    const color = cellColor === null ? BLACK : cellColor;
-                    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                    ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
-                }
-            }
-
-            if (showGrid) {
-                drawGridWithLabels(targetStitches, targetRows, pixelSize);
-            }
-            
-            ctx.restore();
-
-            resultPanel.style.display = 'block';
-            resultPlaceholder.style.display = 'none';
-            canvas.style.display = 'block';
-            
-            const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
-            patternInfo.textContent = `${targetStitches} Stitches x ${targetRows} Rows (approx. ${widthCm}cm x ${calcHeightCm}cm)`;
-            updateLegend(legendPalette);
-
-            showStatus('status_done', false);
-            downloadPdfBtn.disabled = false;
-            saveToCloudBtn.disabled = false;
-            saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '내 도안에 저장';
-            saveToHistory(canvas.toDataURL('image/png'), legendPalette, patternInfo.textContent);
-
-            resultPanel.scrollIntoView({ behavior: 'smooth' });
-            
-        } catch (error) {
-            console.error(error);
-            showStatus('status_error', true);
-        } finally {
-            generateBtn.disabled = false;
+            return mask;
         }
-    }, 50);
+
+        // potrace SVG \uacbd\ub85c\ub97c \uaca9\uc790 \ud574\uc0c1\ub3c4\ub85c \ub798\uc2a4\ud130\ub77c\uc774\uc988
+        function rasterizeSVGToMask(svg) {
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svg, 'image/svg+xml');
+            const svgEl = svgDoc.querySelector('svg');
+            if (!svgEl) return buildOutlineMaskDirect();
+
+            let svgW = scanW, svgH = scanH;
+            const vb = svgEl.getAttribute('viewBox');
+            if (vb) {
+                const parts = vb.trim().split(/[\s,]+/).map(Number);
+                if (parts.length >= 4) { svgW = parts[2]; svgH = parts[3]; }
+            }
+
+            const rc = document.createElement('canvas');
+            rc.width = targetStitches;
+            rc.height = targetRows;
+            const rctx = rc.getContext('2d');
+            rctx.fillStyle = 'white';
+            rctx.fillRect(0, 0, targetStitches, targetRows);
+            rctx.fillStyle = 'black';
+            rctx.save();
+            rctx.scale(targetStitches / svgW, targetRows / svgH);
+            for (const pathEl of svgDoc.querySelectorAll('path')) {
+                const d = pathEl.getAttribute('d');
+                if (d) rctx.fill(new Path2D(d), 'evenodd');
+            }
+            rctx.restore();
+
+            const rd = rctx.getImageData(0, 0, targetStitches, targetRows).data;
+            const mask = new Uint8Array(targetStitches * targetRows);
+            for (let i = 0; i < targetStitches * targetRows; i++) {
+                mask[i] = rd[i * 4] < 128 ? 1 : 0;
+            }
+            return mask;
+        }
+
+        // potrace \uc2e4\ud589: Canvas \u2192 Blob \u2192 Potrace.trace \u2192 SVG \u2192 \ub798\uc2a4\ud130\ub77c\uc774\uc988
+        const outlineMask = await new Promise(resolve => {
+            if (typeof Potrace === 'undefined') {
+                resolve(buildOutlineMaskDirect());
+                return;
+            }
+            binCanvas.toBlob(blob => {
+                try {
+                    Potrace.trace(blob, { threshold: 128 }, (err, svg) => {
+                        if (err || !svg) { resolve(buildOutlineMaskDirect()); return; }
+                        try { resolve(rasterizeSVGToMask(svg)); }
+                        catch (_) { resolve(buildOutlineMaskDirect()); }
+                    });
+                } catch (_) {
+                    resolve(buildOutlineMaskDirect());
+                }
+            }, 'image/png');
+        });
+
+        // \u2500\u2500 4. \ud314\ub808\ud2b8 \uad6c\uc131 (\ucd5c\ube48 \uc0c9\uc0c1 \uc0c1\uc704 colorCount\uac1c, seedColors \uc6b0\uc120) \u2500\u2500
+        const QUANT = 24;
+        const colorFreq = new Map();
+
+        for (let gy = 0; gy < targetRows; gy++) {
+            for (let gx = 0; gx < targetStitches; gx++) {
+                if (outlineMask[gy * targetStitches + gx]) continue;
+                const x0 = Math.floor(gx * cellScaleX), x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
+                const y0 = Math.floor(gy * cellScaleY), y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
+                for (let py = y0; py < y1; py++) {
+                    for (let px = x0; px < x1; px++) {
+                        const si = (py * scanW + px) * 4;
+                        if (scanData[si + 3] <= 128) continue;
+                        const r = Math.round(scanData[si]     / QUANT) * QUANT;
+                        const g = Math.round(scanData[si + 1] / QUANT) * QUANT;
+                        const b = Math.round(scanData[si + 2] / QUANT) * QUANT;
+                        const key = (r << 16) | (g << 8) | b;
+                        colorFreq.set(key, (colorFreq.get(key) || 0) + 1);
+                    }
+                }
+            }
+        }
+
+        const palette = seedColors.map(sc => [sc[0], sc[1], sc[2]]);
+        for (const [key] of Array.from(colorFreq.entries()).sort((a, b) => b[1] - a[1])) {
+            if (palette.length >= colorCount) break;
+            const r = (key >> 16) & 255, g = (key >> 8) & 255, b = key & 255;
+            const tooClose = palette.some(p => {
+                const dr = r - p[0], dg = g - p[1], db = b - p[2];
+                return dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11 < QUANT * QUANT;
+            });
+            if (!tooClose) palette.push([r, g, b]);
+        }
+        if (palette.length === 0) palette.push([200, 200, 200]);
+
+        // \u2500\u2500 5. \uac01 \uaca9\uc790 \uce78\uc5d0 \ud314\ub808\ud2b8 \uc778\ub371\uc2a4 \ud560\ub2f9 \u2500\u2500
+        const BLACK = [0, 0, 0];
+        const legendPalette = [BLACK, ...palette];
+        const assignments = new Array(targetStitches * targetRows).fill(0);
+
+        for (let gy = 0; gy < targetRows; gy++) {
+            for (let gx = 0; gx < targetStitches; gx++) {
+                const cellIdx = gy * targetStitches + gx;
+                if (outlineMask[cellIdx]) { assignments[cellIdx] = 0; continue; }
+
+                const x0 = Math.floor(gx * cellScaleX), x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
+                const y0 = Math.floor(gy * cellScaleY), y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
+                const freq = new Int32Array(palette.length);
+                let hasPixel = false;
+
+                for (let py = y0; py < y1; py++) {
+                    for (let px = x0; px < x1; px++) {
+                        const si = (py * scanW + px) * 4;
+                        if (scanData[si + 3] <= 128) continue;
+                        hasPixel = true;
+                        const r = scanData[si], g = scanData[si + 1], b = scanData[si + 2];
+                        let minD = Infinity, minI = 0;
+                        for (let ci = 0; ci < palette.length; ci++) {
+                            const c = palette[ci];
+                            const dr = r - c[0], dg = g - c[1], db = b - c[2];
+                            const d = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+                            if (d < minD) { minD = d; minI = ci; }
+                        }
+                        freq[minI]++;
+                    }
+                }
+
+                if (hasPixel) {
+                    let modeI = 0, maxF = 0;
+                    for (let ci = 0; ci < palette.length; ci++) {
+                        if (freq[ci] > maxF) { maxF = freq[ci]; modeI = ci; }
+                    }
+                    assignments[cellIdx] = modeI + 1;
+                } else {
+                    assignments[cellIdx] = 1;
+                }
+            }
+        }
+
+        // \u2500\u2500 6. \uc911\uc559\uac12 \ud544\ud130\ub85c \uc0c9\uc0c1 \ub178\uc774\uc988 \uc81c\uac70 \u2500\u2500
+        const filtered = applyMedianFilter(assignments, targetStitches, targetRows);
+        for (let i = 0; i < targetStitches * targetRows; i++) {
+            if (outlineMask[i]) filtered[i] = 0;
+        }
+
+        // \u2500\u2500 7. \ub3c4\uc548 \uce94\ubc84\uc2a4 \uadf8\ub9ac\uae30 \u2500\u2500
+        let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches)));
+        if (targetStitches * pixelSize > MAX_CANVAS_DIMENSION || targetRows * pixelSize > MAX_CANVAS_DIMENSION) {
+            pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(targetStitches, targetRows));
+        }
+
+        const renderWidth  = targetStitches * pixelSize;
+        const renderHeight = targetRows     * pixelSize;
+        const paddingTop    = showGrid ? 40 : 10;
+        const paddingRight  = showGrid ? 60 : 10;
+        const paddingBottom = showGrid ? 60 : 10;
+        const paddingLeft   = showGrid ? 40 : 10;
+
+        canvas.width  = renderWidth  + paddingLeft + paddingRight;
+        canvas.height = renderHeight + paddingTop  + paddingBottom;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(paddingLeft, paddingTop);
+
+        for (let gy = 0; gy < targetRows; gy++) {
+            for (let gx = 0; gx < targetStitches; gx++) {
+                const palIdx = filtered[gy * targetStitches + gx];
+                const color  = legendPalette[palIdx] || legendPalette[0];
+                ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
+            }
+        }
+
+        if (showGrid) drawGridWithLabels(targetStitches, targetRows, pixelSize);
+        ctx.restore();
+
+        resultPanel.style.display = 'block';
+        resultPlaceholder.style.display = 'none';
+        canvas.style.display = 'block';
+
+        const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
+        patternInfo.textContent = `${targetStitches} Stitches x ${targetRows} Rows (approx. ${widthCm}cm x ${calcHeightCm}cm)`;
+        updateLegend(legendPalette);
+
+        showStatus('status_done', false);
+        downloadPdfBtn.disabled = false;
+        saveToCloudBtn.disabled = false;
+        saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '\ub0b4 \ub3c4\uc548\uc5d0 \uc800\uc7a5';
+        saveToHistory(canvas.toDataURL('image/png'), legendPalette, patternInfo.textContent);
+        resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error(error);
+        showStatus('status_error', true);
+    } finally {
+        generateBtn.disabled = false;
+    }
 });
+
+
 
 function drawGridWithLabels(cols, rows, cellSize) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'; 
