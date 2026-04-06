@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, rgbToHex, hexToRgb } from './colorUtils.js';
+import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -70,6 +70,7 @@ const translations = {
         label_yarn_mm: "실 굵기 (mm)",
         label_width: "원하는 편물의 가로 크기",
         label_max_colors: "최대 색상 수",
+        color_count_hint: "이미지에 따라 실제 색상 수는 더 적을 수 있어요. 색상이 적을수록 뜨개하기 쉬워요 😊",
         unit_colors: "색",
         label_grid: "10단위 그리드 및 좌표 표시",
         regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
@@ -137,6 +138,7 @@ const translations = {
         label_yarn_mm: "Yarn Weight (mm)",
         label_width: "Desired Finished Width",
         label_max_colors: "Max Color Count",
+        color_count_hint: "Actual colors may be fewer depending on the image. Fewer colors = easier to knit 😊",
         unit_colors: "colors",
         label_grid: "Show 10-unit Grid & Coordinates",
         regen_hint: "💡 Re-generate to get slightly different color combinations.",
@@ -204,6 +206,7 @@ const translations = {
         label_yarn_mm: "糸の太さ (mm)",
         label_width: "仕上がり幅",
         label_max_colors: "最大色数",
+        color_count_hint: "画像によっては実際の色数がより少なくなることがあります。色が少ないほど編みやすくなります 😊",
         unit_colors: "色",
         label_grid: "10単位グリッドと座標を表示",
         regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
@@ -612,7 +615,13 @@ generateBtn.addEventListener('click', async () => {
         try {
             const imageData = tempCtx.getImageData(0, 0, targetStitches, targetRows);
             const pixels = getPixelArray(imageData, targetStitches, targetRows);
-            const { palette, assignments } = kMeans(pixels, colorCount, targetStitches, targetRows, 15, seedColors);
+
+            // 이미지 실제 색상 복잡도를 분석해 상한선 이하로 최적 색상 수 결정
+            const optimalColorCount = detectOptimalColorCount(pixels, colorCount);
+            const { palette: rawPalette, assignments: rawAssignments } = kMeans(pixels, optimalColorCount, targetStitches, targetRows, 15, seedColors);
+
+            // 유사 색상(Delta E < 15) 병합
+            const { palette, assignments } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
             
             let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             

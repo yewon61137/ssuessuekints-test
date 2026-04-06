@@ -207,6 +207,160 @@ export function kMeans(pixels, k, width, height, maxIter = 15, seedColors = []) 
     return { palette: centers, assignments };
 }
 
+// RGB → HSL 변환 (H: 0~360, S: 0~1, L: 0~1)
+function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+        }
+    }
+    return [h * 360, s, l];
+}
+
+// 이미지 픽셀을 분석해 실제로 구분되는 색상 그룹 수를 추정
+// 반환값: min(실제 색상 그룹 수, maxColors)
+export function detectOptimalColorCount(pixels, maxColors) {
+    if (pixels.length === 0) return maxColors;
+
+    // 서브샘플링 (최대 5000픽셀)
+    const step = Math.max(1, Math.floor(pixels.length / 5000));
+    const sampled = [];
+    for (let i = 0; i < pixels.length; i += step) sampled.push(pixels[i]);
+
+    // 무채색 판별 임계값
+    const ACHROMATIC_SAT = 0.12;
+    const ACHROMATIC_L_LOW = 0.15;  // 거의 검정
+    const ACHROMATIC_L_HIGH = 0.85; // 거의 흰색
+
+    let hasAchromatic = false;
+    let hasDarkAchromatic = false;
+
+    // Hue를 36개 버킷(10도 단위)으로 분류
+    const hueBuckets = new Array(36).fill(0);
+
+    for (const p of sampled) {
+        const [h, s, l] = rgbToHsl(p[0], p[1], p[2]);
+
+        if (s < ACHROMATIC_SAT) {
+            if (l < ACHROMATIC_L_LOW) hasDarkAchromatic = true;
+            else hasAchromatic = true;
+            continue;
+        }
+
+        // 유채색: hue 버킷 증가
+        const bucket = Math.floor(h / 10) % 36;
+        hueBuckets[bucket]++;
+    }
+
+    // 의미 있는 hue 버킷 클러스터링 (인접 버킷 묶기)
+    const total = sampled.length;
+    const MIN_RATIO = 0.02; // 전체의 2% 이상이면 유의미한 색상 그룹으로 인정
+    const significant = hueBuckets.map((count, i) => ({ i, count }))
+        .filter(b => b.count / total >= MIN_RATIO);
+
+    // 인접 hue 버킷 병합 (±20도 이내는 같은 그룹)
+    const merged = [];
+    let used = new Array(significant.length).fill(false);
+    for (let a = 0; a < significant.length; a++) {
+        if (used[a]) continue;
+        let group = [significant[a].i];
+        for (let b = a + 1; b < significant.length; b++) {
+            const diff = Math.min(
+                Math.abs(significant[a].i - significant[b].i),
+                36 - Math.abs(significant[a].i - significant[b].i)
+            );
+            if (diff <= 2) { // ±20도
+                group.push(significant[b].i);
+                used[b] = true;
+            }
+        }
+        merged.push(group);
+        used[a] = true;
+    }
+
+    let colorGroups = merged.length;
+    if (hasAchromatic) colorGroups++;
+    if (hasDarkAchromatic) colorGroups++;
+
+    // 최소 2, 사용자 설정 이하로 반환
+    return Math.min(Math.max(colorGroups, 2), maxColors);
+}
+
+// Delta E (CIE76) 계산: RGB → Lab 변환 후 차이
+function rgbToLab(r, g, b) {
+    // sRGB → linear
+    let rr = r / 255, gg = g / 255, bb = b / 255;
+    rr = rr > 0.04045 ? Math.pow((rr + 0.055) / 1.055, 2.4) : rr / 12.92;
+    gg = gg > 0.04045 ? Math.pow((gg + 0.055) / 1.055, 2.4) : gg / 12.92;
+    bb = bb > 0.04045 ? Math.pow((bb + 0.055) / 1.055, 2.4) : bb / 12.92;
+
+    // linear → XYZ (D65)
+    const x = (rr * 0.4124 + gg * 0.3576 + bb * 0.1805) / 0.95047;
+    const y = (rr * 0.2126 + gg * 0.7152 + bb * 0.0722) / 1.00000;
+    const z = (rr * 0.0193 + gg * 0.1192 + bb * 0.9505) / 1.08883;
+
+    function f(t) { return t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116; }
+    const L = 116 * f(y) - 16;
+    const A = 500 * (f(x) - f(y));
+    const B = 200 * (f(y) - f(z));
+    return [L, A, B];
+}
+
+function deltaE(c1, c2) {
+    const [L1, a1, b1] = rgbToLab(c1[0], c1[1], c1[2]);
+    const [L2, a2, b2] = rgbToLab(c2[0], c2[1], c2[2]);
+    return Math.sqrt((L1-L2)**2 + (a1-a2)**2 + (b1-b2)**2);
+}
+
+// k-means 결과 팔레트에서 Delta E < threshold 인 유사 색상 병합
+// seedColors: 필수 색상 (병합 대상에서 제외)
+// 반환: { palette, assignments } (병합 후)
+export function mergeByDeltaE(palette, assignments, seedColors = [], threshold = 15) {
+    const n = palette.length;
+    if (n <= 1) return { palette, assignments };
+
+    // 어떤 인덱스가 어떤 인덱스로 병합되는지 맵 (초기: 자기 자신)
+    const mapping = Array.from({ length: n }, (_, i) => i);
+
+    // seed 색상 인덱스 집합 (고정)
+    const seedSet = new Set();
+    for (let s = 0; s < seedColors.length && s < n; s++) seedSet.add(s);
+
+    for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+            // 둘 다 seed면 스킵
+            if (seedSet.has(i) && seedSet.has(j)) continue;
+            if (deltaE(palette[i], palette[j]) < threshold) {
+                // seed가 아닌 쪽을 seed 쪽(또는 더 작은 인덱스)으로 병합
+                const keep = seedSet.has(i) ? i : (seedSet.has(j) ? j : i);
+                const drop = keep === i ? j : i;
+                // drop → keep 으로 재매핑 (전이적 처리)
+                for (let k = 0; k < n; k++) {
+                    if (mapping[k] === drop) mapping[k] = keep;
+                }
+            }
+        }
+    }
+
+    // 실제 사용 인덱스 추출 (순서 유지)
+    const usedIdxSet = new Set(mapping);
+    const usedIdxArr = Array.from(usedIdxSet).sort((a, b) => a - b);
+    const newPalette = usedIdxArr.map(i => palette[i]);
+    const reMap = new Map(usedIdxArr.map((orig, newIdx) => [orig, newIdx]));
+
+    const newAssignments = assignments.map(a => reMap.get(mapping[a]));
+
+    return { palette: newPalette, assignments: newAssignments };
+}
+
 export function rgbToHex([r, g, b]) {
     return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
 }
