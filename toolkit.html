@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSBJ5J8N4K"></script>
   <script>
@@ -10,26 +9,30 @@
     gtag('js', new Date());
     gtag('config', 'G-KSBJ5J8N4K');
   </script>
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vsvc6kadap");
+  </script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2930322697184296" crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2930322697184296">
-  
+  <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>게이지 계산�?| SSUESSUE KNITS</title>
-  <meta name="description" content="?�개�?게이지 계산 �?�??�림/줄임 계산???�한 ?�마???�구?? SSUESSUE KNITS?�서 ???�리?�게 ?�개질하?�요.">
+  <title>게이지 계산기 | SSUESSUE KNITS</title>
+  <meta name="description" content="뜨개질 게이지 계산 및 코 늘림/줄임 계산을 위한 스마트 도구함. SSUESSUE KNITS에서 더 편리하게 뜨개질하세요.">
   
   <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
   <link rel="dns-prefetch" href="https://webfontworld.github.io">
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
-  <link rel="dns-prefetch" href="https://www.clarity.ms">
-  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
-  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
-  <link href='/style.css?v=9' rel='stylesheet' media="all">
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css"></noscript>
+  <link href='/style.css?v=10' rel='stylesheet'>
   <style>
-    /* ?�?� 게이지 계산�??�용 ?��????�?� */
+    /* ── 게이지 계산기 전용 스타일 ── */
     .toolkit-container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -171,35 +174,35 @@
   </style>
 </head>
 <body>
-  <script type="module" src="/js/header.js?v=9"></script>
+  <script type="module" src="/js/header.js?v=10"></script>
 
   <main class="container">
     <div class="toolkit-container">
       
-      <!-- 1. 게이지 계산�?-->
+      <!-- 1. 게이지 계산기 -->
       <section class="tool-card" id="gaugeTool">
-        <h3 class="tool-title"><i>?��</i> <span data-i18n="tool_gauge_title">게이지 계산�?/span></h3>
+        <h3 class="tool-title"><i>📏</i> <span data-i18n="tool_gauge_title">게이지 계산기</span></h3>
         
         <div class="calc-group">
-          <label data-i18n="label_my_gauge">??게이지 (10cm 기�?)</label>
+          <label data-i18n="label_my_gauge">내 게이지 (10cm 기준)</label>
           <div class="calc-input-row" style="margin-bottom: 0.5rem;">
             <input type="number" id="gaugeSts" value="22" step="0.5" min="1">
-            <span class="calc-unit i18n" data-ko="�? data-en="sts" data-ja="??>�?/span>
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="gaugeRows" value="30" step="0.5" min="1">
-            <span class="calc-unit i18n" data-ko="?? data-en="rows" data-ja="�?>??/span>
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
           </div>
         </div>
 
         <div class="unit-toggle-row">
-          <span class="i18n" data-ko="?�위" data-en="Unit" data-ja="?�位">?�위</span>
+          <span class="i18n" data-ko="단위" data-en="Unit" data-ja="単位">단위</span>
           <button class="unit-btn active" id="unitCm">cm</button>
           <button class="unit-btn" id="unitInch">inch</button>
         </div>
 
         <div class="calc-group">
-          <label class="i18n" data-ko="목표 ?�이�? data-en="Target Size" data-ja="仕上?�り?�イ??>목표 ?�이�?/label>
+          <label class="i18n" data-ko="목표 사이즈" data-en="Target Size" data-ja="仕上がりサイズ">목표 사이즈</label>
           <div class="calc-input-row" style="margin-bottom: 0.5rem;">
             <input type="number" id="targetWidth" value="50" min="1">
             <span class="calc-unit gauge-unit-label">cm</span>
@@ -212,7 +215,7 @@
 
         <div class="result-area">
           <div class="result-box">
-            <div class="result-label i18n" data-ko="?�요??�?�????? data-en="Total Stitches & Rows" data-ja="必要?�目?�・段数">?�요??�?�?????/div>
+            <div class="result-label i18n" data-ko="필요한 총 코/단 수" data-en="Total Stitches & Rows" data-ja="必要な目数・段数">필요한 총 코/단 수</div>
             <div class="result-value"><span id="resTotalSts">110</span> <small>sts</small> × <span id="resTotalRows">180</span> <small>rows</small></div>
             <div id="resDimsCm"   class="result-dims">50.0 × 60.0 cm</div>
             <div id="resDimsInch" class="result-dims">19.7" × 23.6"</div>
@@ -221,37 +224,37 @@
         <div id="gaugeHistory" class="gauge-history"></div>
       </section>
 
-      <!-- 2. ?�안 변??계산�?-->
+      <!-- 2. 도안 변환 계산기 -->
       <section class="tool-card" id="convertTool">
-        <h3 class="tool-title"><i>?��</i> <span data-i18n="tool_convert_title">?�안 변??계산�?/span></h3>
+        <h3 class="tool-title"><i>🔄</i> <span data-i18n="tool_convert_title">도안 변환 계산기</span></h3>
         
         <div class="calc-group">
-          <label data-i18n="label_pattern_gauge">?�안 게이지 (10cm)</label>
+          <label data-i18n="label_pattern_gauge">도안 게이지 (10cm)</label>
           <div class="calc-input-row" style="margin-bottom: 0.5rem;">
             <input type="number" id="convPatternSts" value="20" step="0.5" min="1">
-            <span class="calc-unit i18n" data-ko="�? data-en="sts" data-ja="??>�?/span>
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="convPatternRows" value="28" step="0.5" min="1">
-            <span class="calc-unit i18n" data-ko="?? data-en="rows" data-ja="�?>??/span>
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
           </div>
         </div>
 
         <div class="calc-group">
-          <label data-i18n="label_pattern_size">?�안??�?????/label>
+          <label data-i18n="label_pattern_size">도안의 코/단 수</label>
           <div class="calc-input-row" style="margin-bottom: 0.5rem;">
             <input type="number" id="convInputSts" value="100" min="1">
-            <span class="calc-unit i18n" data-ko="�? data-en="sts" data-ja="??>�?/span>
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="convInputRows" value="140" min="1">
-            <span class="calc-unit i18n" data-ko="?? data-en="rows" data-ja="�?>??/span>
+            <span class="calc-unit i18n" data-ko="단" data-en="rows" data-ja="段">단</span>
           </div>
         </div>
 
         <div class="result-area">
           <div class="result-box">
-            <div class="result-label" data-i18n="label_target_res">?��? ??�?????/div>
+            <div class="result-label" data-i18n="label_target_res">내가 뜰 코/단 수</div>
             <div class="result-value"><span id="convResSts">110</span> <small>sts</small> × <span id="convResRows">150</span> <small>rows</small></div>
           </div>
           <div id="gaugeBarArea"  class="gauge-bar-area"></div>
@@ -259,86 +262,86 @@
         </div>
       </section>
 
-      <!-- 3. 균등 ?�림/줄임 계산�?-->
+      <!-- 3. 균등 늘림/줄임 계산기 -->
       <section class="tool-card" id="shapingTool">
-        <h3 class="tool-title"><i>?��</i> <span data-i18n="tool_shaping_title">균등 ?�림/줄임</span></h3>
+        <h3 class="tool-title"><i>📐</i> <span data-i18n="tool_shaping_title">균등 늘림/줄임</span></h3>
         
         <div class="calc-group">
-          <label class="i18n" data-ko="?�재 �??? data-en="Current Stitches" data-ja="?�在??��??>?�재 �???/label>
+          <label class="i18n" data-ko="현재 코 수" data-en="Current Stitches" data-ja="現在の目数">현재 코 수</label>
           <div class="calc-input-row">
             <input type="number" id="currentSts" value="100" min="1">
-            <span class="calc-unit i18n" data-ko="�? data-en="sts" data-ja="??>�?/span>
+            <span class="calc-unit i18n" data-ko="코" data-en="sts" data-ja="目">코</span>
           </div>
         </div>
 
         <div class="calc-group">
-          <label class="i18n" data-ko="?�릴/줄일 �??? data-en="Amount to Inc/Dec" data-ja="増減?�る??��">?�릴/줄일 �???/label>
+          <label class="i18n" data-ko="늘릴/줄일 코 수" data-en="Amount to Inc/Dec" data-ja="増減する目数">늘릴/줄일 코 수</label>
           <div class="calc-input-row">
             <input type="number" id="shapingAmount" value="8" min="1">
             <select id="shapingType" style="padding: 0.75rem; border: 1.5px solid var(--border-color); border-radius: 6px; background: white; font-family: inherit;">
-              <option value="inc" data-ko="?�림 (+)" data-en="Increase" data-ja="増し??>?�림 (+)</option>
-              <option value="dec" data-ko="줄임 (-)" data-en="Decrease" data-ja="減ら?�目">줄임 (-)</option>
+              <option value="inc" data-ko="늘림 (+)" data-en="Increase" data-ja="増し目">늘림 (+)</option>
+              <option value="dec" data-ko="줄임 (-)" data-en="Decrease" data-ja="減らし目">줄임 (-)</option>
             </select>
           </div>
         </div>
 
         <div class="result-area">
           <div class="result-box">
-            <div class="result-label i18n" data-ko="최종 �??? data-en="Final Stitches" data-ja="?�終目??>최종 �???/div>
+            <div class="result-label i18n" data-ko="최종 코 수" data-en="Final Stitches" data-ja="最終目数">최종 코 수</div>
             <div class="result-value" id="resFinalSts">108</div>
             <div id="shapingInstruction" class="shaping-pattern"></div>
           </div>
         </div>
       </section>
 
-      <!-- 4. 블로??계산�?-->
+      <!-- 4. 블로킹 계산기 -->
       <section class="tool-card" id="blockingTool">
-        <h3 class="tool-title"><i>?��</i>
-          <span class="i18n" data-ko="블로??계산�? data-en="Blocking Calculator" data-ja="?�ロ?�キ?�グ計算�?>블로??계산�?/span>
+        <h3 class="tool-title"><i>💧</i>
+          <span class="i18n" data-ko="블로킹 계산기" data-en="Blocking Calculator" data-ja="ブロッキング計算機">블로킹 계산기</span>
         </h3>
 
         <div class="calc-group">
-          <label class="i18n" data-ko="블로????치수 (cm)" data-en="Pre-blocking Size (cm)" data-ja="?�ロ?�キ?�グ?�サ?�ズ (cm)">블로????치수</label>
+          <label class="i18n" data-ko="블로킹 전 치수 (cm)" data-en="Pre-blocking Size (cm)" data-ja="ブロッキング前サイズ (cm)">블로킹 전 치수</label>
           <div class="calc-input-row" style="margin-bottom:0.5rem;">
             <input type="number" id="blockPreWidth" value="52" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="가�?cm" data-en="W cm" data-ja="�?cm">가�?cm</span>
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="blockPreHeight" value="63" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="?�로 cm" data-en="H cm" data-ja="�?cm">?�로 cm</span>
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
           </div>
         </div>
 
         <div class="calc-group">
-          <label class="i18n" data-ko="블로????치수 (cm)" data-en="Post-blocking Size (cm)" data-ja="?�ロ?�キ?�グ後サ?�ズ (cm)">블로????치수</label>
+          <label class="i18n" data-ko="블로킹 후 치수 (cm)" data-en="Post-blocking Size (cm)" data-ja="ブロッキング後サイズ (cm)">블로킹 후 치수</label>
           <div class="calc-input-row" style="margin-bottom:0.5rem;">
             <input type="number" id="blockPostWidth" value="50" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="가�?cm" data-en="W cm" data-ja="�?cm">가�?cm</span>
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="blockPostHeight" value="60" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="?�로 cm" data-en="H cm" data-ja="�?cm">?�로 cm</span>
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
           </div>
         </div>
 
         <div class="calc-group">
           <label class="i18n"
-            data-ko="?�하???�성 치수 ??블로??????치수 ??��"
-            data-en="Desired final size ??cast-on size"
-            data-ja="希望??��?�サ?�ズ ??編み始め?�イ?�を?�算">?�하???�성 치수 (??��)</label>
+            data-ko="원하는 완성 치수 → 블로킹 전 뜰 치수 역산"
+            data-en="Desired final size → cast-on size"
+            data-ja="希望の完成サイズ → 編み始めサイズを逆算">원하는 완성 치수 (역산)</label>
           <div class="calc-input-row" style="margin-bottom:0.5rem;">
             <input type="number" id="blockTargetWidth" value="50" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="가�?cm" data-en="W cm" data-ja="�?cm">가�?cm</span>
+            <span class="calc-unit i18n" data-ko="가로 cm" data-en="W cm" data-ja="幅 cm">가로 cm</span>
           </div>
           <div class="calc-input-row">
             <input type="number" id="blockTargetHeight" value="60" min="0" step="0.1">
-            <span class="calc-unit i18n" data-ko="?�로 cm" data-en="H cm" data-ja="�?cm">?�로 cm</span>
+            <span class="calc-unit i18n" data-ko="세로 cm" data-en="H cm" data-ja="丈 cm">세로 cm</span>
           </div>
         </div>
 
         <div class="result-area">
           <div class="result-box">
-            <div class="result-label i18n" data-ko="블로??변?�율" data-en="Blocking Rate" data-ja="?�ロ?�キ?�グ変化??>블로??변?�율</div>
+            <div class="result-label i18n" data-ko="블로킹 변화율" data-en="Blocking Rate" data-ja="ブロッキング変化率">블로킹 변화율</div>
             <div id="blockRateDisplay" class="result-value" style="font-size:1.1rem;line-height:1.6;">-</div>
             <div id="blockCastOnDisplay" style="margin-top:0.75rem;font-size:0.95rem;font-weight:700;"></div>
           </div>
@@ -352,41 +355,41 @@
     <!-- SEO & Educational Content Section -->
     <section class="step-section" style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
       <div class="section-title">
-        <h2 class="i18n" data-ko="?�개�??�구 ?�용 가?�드" data-en="Knitting Tools Guide" data-ja="編み?�ツ?�ル活用?�イ??>?�개�??�구 ?�용 가?�드</h2>
+        <h2 class="i18n" data-ko="뜨개질 도구 활용 가이드" data-en="Knitting Tools Guide" data-ja="編み物ツール活用ガイド">뜨개질 도구 활용 가이드</h2>
       </div>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; line-height: 1.8; color: var(--secondary-color); font-size: 0.9rem;">
         
         <!-- Gauge Info -->
         <div>
-          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="?�� 게이지(Gauge)가 ??중요?��???" data-en="?�� Why is Gauge Important?" data-ja="?�� ?�ー?�（Gauge）は?�ぜ?�要?�す?�？">?�� 게이지(Gauge)가 ??중요?��???</h3>
+          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="📏 게이지(Gauge)가 왜 중요한가요?" data-en="📏 Why is Gauge Important?" data-ja="📏 ゲージ（Gauge）はなぜ重要ですか？">📏 게이지(Gauge)가 왜 중요한가요?</h3>
           <p class="i18n" 
-            data-ko="게이지??10cm ?�각???�에 ?�어가??코�? ?�의 개수�??��??�니?? ?�람마다 ?��?(?�는 ?????�르�??�문?? 같�? 바늘�??�을 ?�용?�더?�도 ?�성???�물???�기가 ?�라�????�습?�다. 게이지 계산기�? ?�해 ?�안???�치�????��???맞춰 조정?�면, ?�치 ?�는 ?�기�??�성?�는 것을 미연??방�??????�습?�다."
+            data-ko="게이지는 10cm 사각형 안에 들어가는 코와 단의 개수를 의미합니다. 사람마다 손땀(뜨는 힘)이 다르기 때문에, 같은 바늘과 실을 사용하더라도 완성된 편물의 크기가 달라질 수 있습니다. 게이지 계산기를 통해 도안의 수치를 내 손땀에 맞춰 조정하면, 원치 않는 크기로 완성되는 것을 미연에 방지할 수 있습니다."
             data-en="Gauge is the number of stitches and rows per 10cm. Because every knitter's tension is unique, the same needles and yarn can produce different sizes. By using the Gauge Calculator to adjust pattern counts to your tension, you can ensure your finished piece fits perfectly every time."
-            data-ja="?�ー?�と??0cm?�方??��?�入?�目?�と段数??��?�で?�。編?�?�（?�加減）??��?�よ?�て?�な?�た?�、同?�針?�糸?�使?�て?�完?�サ?�ズ?�変?�る?�と?�あ?�ま?�。ゲ?�ジ計算機を使っ??��?�図??��?�を?�分??��?�ジ?�合?�せ?�こ?�で?�思わ?�サ?�ズ?�な?�の?�防?�こ?�が?�き?�す??>
-            게이지??10cm ?�각???�에 ?�어가??코�? ?�의 개수�??��??�니??
+            data-ja="ゲージとは10cm四方の中に入る目数と段数のことです。編む力（手加減）は人によって異なるため、同じ針と糸を使っても完成サイズが変わることがあります。ゲージ計算機を使って編み図の数値を自分のゲージに合わせることで、思わぬサイズになるのを防ぐことができます。">
+            게이지는 10cm 사각형 안에 들어가는 코와 단의 개수를 의미합니다.
           </p>
         </div>
 
         <!-- Blocking Info -->
         <div>
-          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="?�� 블로??Blocking)??마법" data-en="?�� The Magic of Blocking" data-ja="?�� ?�ロ?�キ?�グ（Blocking）の魔法">?�� 블로??Blocking)??마법</h3>
+          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="💧 블로킹(Blocking)의 마법" data-en="💧 The Magic of Blocking" data-ja="💧 ブロッキング（Blocking）の魔法">💧 블로킹(Blocking)의 마법</h3>
           <p class="i18n" 
-            data-ko="블로?��? ?�성???�물???�탁?�여 모양???�고 건조?�는 과정?�니?? ??과정???�해 �?모양??고르�??�돈?�고, ?�물???�레?�프?�이 좋아집니?? ?�히 ?�이??�?같�? 천연 ?�유??블로???�후??치수 변?��? ?��?�? 블로??계산기�? ?�용?�여 ?�탁 ??줄어?�거???�어??치수�?미리 계산?�여 ?�는 것이 중요?�니??"
+            data-ko="블로킹은 완성된 편물을 세탁하여 모양을 잡고 건조하는 과정입니다. 이 과정을 통해 코 모양이 고르게 정돈되고, 편물의 드레이프성이 좋아집니다. 특히 울이나 면 같은 천연 섬유는 블로킹 전후의 치수 변화가 크므로, 블로킹 계산기를 사용하여 세탁 후 줄어들거나 늘어날 치수를 미리 계산하여 뜨는 것이 중요합니다."
             data-en="Blocking is the process of washing and shaping your finished knitwear. This levels out the stitches and improves the drape of the fabric. Natural fibers like wool and cotton often change size after washing. Use the Blocking Calculator to predict how much your garment will shrink or grow after its first bath."
-            data-ja="?�ロ?�キ?�グ??��編?�上?�っ?�作?�を水通し?�て形を?�え?�乾?�さ?�る工程?�す?�こ?�に?�り編み??��?�れ?�に?�い?�編?�の質感?�向上し?�す?�特?�ウ?�ル?�綿?�ど??��?�繊�?��?�ロ?�キ?�グ?�後??��?�ズ変化?�大?�い?�め?�ブ??��??��?�計算機?�使?�て洗濯後の変化?�予測し??��?�?�と?�重要で?��?>
-            블로?��? ?�성???�물???�탁?�여 모양???�고 건조?�는 과정?�니??
+            data-ja="ブロッキングは、編み上がった作品を水通しして形を整え、乾燥させる工程です。これにより編み目がきれいに揃い、編地の質感が向上します。特にウールや綿などの天然繊維はブロッキング前後のサイズ変化が大きいため、ブロッキング計算機を使って洗濯後の変化を予測して編むことが重要です。">
+            블로킹은 완성된 편물을 세탁하여 모양을 잡고 건조하는 과정입니다.
           </p>
         </div>
 
         <!-- Shaping Info -->
         <div>
-          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="?�� 균등??증�??� 감소" data-en="?�� Even Increases and Decreases" data-ja="?�� ?�等?�増減（?�ン??��?�シ?�グ?�デ?�ク?�ー?�ン?�）">?�� 균등??증�??� 감소</h3>
+          <h3 style="color: var(--text-color); font-size: 1.1rem; margin-bottom: 1rem;" class="i18n" data-ko="📐 균등한 증가와 감소" data-en="📐 Even Increases and Decreases" data-ja="📐 均等な増減（インクリーシング・ディクリーシング）">📐 균등한 증가와 감소</h3>
           <p class="i18n" 
-            data-ko="?�매???�의 몸판?????? ?�정 ?�에???�러 코�? ?�꺼번에 ?�리거나 줄여?????��? ?�습?�다. ?�때 코�? 균등??간격?�로 배치?�야 곡선??매끄?�고 ?�물???��? ?�습?�다. 균등 계산기�? ?�용?�면 '�?코마??1코씩 ?�려???�는지'�??�동?�로 계산?�주??복잡???�산 ?�이???�성???��? ?�품??만들 ???�습?�다."
+            data-ko="소매나 옷의 몸판을 뜰 때, 특정 단에서 여러 코를 한꺼번에 늘리거나 줄여야 할 때가 있습니다. 이때 코를 균등한 간격으로 배치해야 곡선이 매끄럽고 편물이 울지 않습니다. 균등 계산기를 사용하면 '몇 코마다 1코씩 늘려야 하는지'를 자동으로 계산해주어 복잡한 암산 없이도 완성도 높은 작품을 만들 수 있습니다."
             data-en="When shaping sleeves or bodices, you often need to increase or decrease multiple stitches in a single row. Distributing these evenly ensures smooth curves and prevents puckering. Our Even Shaping tool calculates exactly how many stitches to knit between each change, taking the math out of your crafting."
-            data-ja="袖や身頃?�編?�?�、特定の段で一度に?�目?�増?�し?�り減ら?�た?�す?�こ?�が?�り?�す?�こ??��?�目?�均等な?�隔?�配�?��?�こ?�で?�曲線が滑ら?�に?�り?�編?�が歪�???��?�げ?�す?�均等計算機?�使?�ば?�何??��?�に1??��?�す?�」を?�動?�計算し?�く?�る??��?�複?�な計算?�し?�完?�度??��?�作?�を作れ?�す??>
-            ?�매???�의 몸판?????? ?�정 ?�에???�러 코�? ?�꺼번에 ?�리거나 줄여?????��? ?�습?�다.
+            data-ja="袖や身頃を編む際、特定の段で一度に数目を増やしたり減らしたりすることがあります。この時、目を均等な間隔で配置することで、曲線が滑らかになり、編地が歪むのを防げます。均等計算機を使えば「何目ごとに1目増やすか」を自動で計算してくれるので、複雑な計算なしで完成度の高い作品を作れます。">
+            소매나 옷의 몸판을 뜰 때, 특정 단에서 여러 코를 한꺼번에 늘리거나 줄여야 할 때가 있습니다.
           </p>
         </div>
 
@@ -398,19 +401,19 @@
     <div class="footer-inner">
       <span class="footer-brand">SSUESSUE KNITS</span>
       <nav class="footer-nav">
-        <a href="/about.html" data-i18n="footer_about">?�개</a>
-        <a href="/terms.html" data-i18n="footer_terms">?�용?��?</a>
-        <a href="/privacy.html" data-i18n="footer_privacy">개인?�보처리방침</a>
-        <a href="/guide.html" class="i18n" data-ko="?�용?�내" data-en="Guide" data-ja="?�利?�案??>?�용?�내</a>
-        <a href="/about.html" class="i18n" data-ko="?�휴·광고 문의" data-en="Partnership" data-ja="?�携?�広?�の?�問?�合?�せ">?�휴·광고 문의</a>
+        <a href="/about.html" data-i18n="footer_about">소개</a>
+        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+        <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
       </nav>
     </div>
     <div class="footer-biz">
       <div class="footer-biz-text">
-        <span>?�호: ?�쓔 (SSUESSUE) &nbsp;|&nbsp; ?�?? 김?�원 &nbsp;|&nbsp; ?�업?�등록번?? 402-34-06132</span>
-      <span>주소: ?�라?�도 무안�??�향???�향�?127-3 &nbsp;|&nbsp; ?�태/종목: ?�매 / ?�자?�거???�화)</span>
-      <span>?�신?�매???�고번호: 2023-?�남무안-0173 &nbsp;|&nbsp; ?�메?? yewon61137@gmail.com</span>
-      <span>고객지???�영?�간: ?�일 10:00~17:00 (주말·공휴???�외)</span>
+        <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
+      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
+      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
+      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
       </div>
       <div class="footer-social">
         <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
@@ -427,17 +430,7 @@
   <script type="module" src="/js/toolkit.js"></script>
   <script type="module" src="/js/row-counter.js"></script>
   <knitting-row-counter></knitting-row-counter>
-  <script defer src="/js/cookie-consent.js"></script>
-  <script src="/js/scroll-top.js" defer></script>
-  <!-- Microsoft Clarity (deferred) -->
-  <script>
-    window.addEventListener("load", function() {
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window,document,"clarity","script","vsvc6kadap");
-    });
-  </script>
+  <script src="/js/cookie-consent.js"></script>
+  <script src="/js/scroll-top.js"></script>
 </body>
 </html>

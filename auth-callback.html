@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-    
+    <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <title>?�증 �?.. | SSUESSUE KNITS</title>
+    <title>인증 중... | SSUESSUE KNITS</title>
     <style>
         body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f9f9f9; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+
+  <!-- Microsoft Clarity (deferred) -->
+  <script>
+    window.addEventListener("load", function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script","vsvc6kadap");
+    });
+  </script>
 </head>
 <body>
     <div class="loader-wrap" style="text-align: center;">
         <div class="loader"></div>
-        <div id="statusMessage" style="margin-top: 15px; font-size: 14px; color: #666;">?�증 ?�터 ?�결 �?..</div>
+        <div id="statusMessage" style="margin-top: 15px; font-size: 14px; color: #666;">인증 센터 연결 중...</div>
     </div>
 
-    <!-- 글로벌 ?�러 ?�들?? 비동�?모듈 로딩 ??발생 ?�러(구문 ?�러 ?? ?�착 ?�도 -->
+    <!-- 글로벌 에러 핸들러: 비동기 모듈 로딩 전 발생 에러(구문 에러 등) 포착 시도 -->
     <script>
         window._sendFailure = function(msg) {
             console.error('Final failure:', msg);
@@ -27,22 +37,23 @@
                 }
                 localStorage.setItem('naver_auth_result', JSON.stringify({ type: 'naver_auth_complete', success: false, error: msg }));
             } catch (e) {}
-            setTimeout(() => { try { window.close(); } catch (e) {} }, 3000); // 3�????�기
+            setTimeout(() => { try { window.close(); } catch (e) {} }, 3000); // 3초 후 닫기
         };
 
         window.onerror = function(msg, url, line) {
-            document.getElementById('statusMessage').textContent = '?�류 발생: ' + msg;
-            window._sendFailure('?�기???�류 (' + line + '): ' + msg);
+            document.getElementById('statusMessage').textContent = '오류 발생: ' + msg;
+            window._sendFailure('전기적 오류 (' + line + '): ' + msg);
         };
         window.onunhandledrejection = function(e) {
-            document.getElementById('statusMessage').textContent = '?�증 중단?? ' + e.reason;
-            window._sendFailure('비동�??�류: ' + e.reason);
+            document.getElementById('statusMessage').textContent = '인증 중단됨: ' + e.reason;
+            window._sendFailure('비동기 오류: ' + e.reason);
         };
 
-        // 30�??�?�아??        setTimeout(() => {
-            if (document.getElementById('statusMessage').textContent !== '?�료') {
-                document.getElementById('statusMessage').textContent = '?�청 ?�간 초과';
-                window._sendFailure('?�증 ?�청 ?�간??초과?�었?�니?? ?�시 ?�도?�주?�요.');
+        // 30초 타임아웃
+        setTimeout(() => {
+            if (document.getElementById('statusMessage').textContent !== '완료') {
+                document.getElementById('statusMessage').textContent = '요청 시간 초과';
+                window._sendFailure('인증 요청 시간이 초과되었습니다. 다시 시도해주세요.');
             }
         }, 30000);
     </script>
@@ -53,7 +64,7 @@
             if (statusEl) statusEl.textContent = msg;
         }
 
-        // 결과�?부�?창에 ?�달?�는 ?�퍼
+        // 결과를 부모 창에 전달하는 헬퍼
         function sendResult(data) {
             try {
                 if (window.opener && !window.opener.closed) {
@@ -67,7 +78,7 @@
                 localStorage.setItem('naver_auth_result', JSON.stringify(data));
                 if (localStorage.getItem('naver_redirect_fallback') === '1') {
                     localStorage.removeItem('naver_redirect_fallback');
-                    // 로그???�작 ???�?�해???�래 ?�이지�?복�? (?�으�???
+                    // 로그인 시작 전 저장해둔 원래 페이지로 복귀 (없으면 홈)
                     const returnPath = localStorage.getItem('naver_return_path') || '/';
                     localStorage.removeItem('naver_return_path');
                     window.location.href = returnPath;
@@ -82,37 +93,38 @@
 
         async function handleCallback() {
             try {
-                updateStatus('?�증 코드 ?�인 �?..');
+                updateStatus('인증 코드 확인 중...');
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
                 const error = urlParams.get('error');
 
                 if (error) {
-                    sendResult({ type: 'naver_auth_complete', success: false, error: '?�이�??�증 ?�패: ' + error });
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '네이버 인증 실패: ' + error });
                     return;
                 }
 
-                // CSRF 방�?: state 검�?                let savedState = null;
+                // CSRF 방지: state 검증
+                let savedState = null;
                 try {
                     savedState = localStorage.getItem('naver_oauth_state');
                     localStorage.removeItem('naver_oauth_state');
                 } catch (e) {}
 
                 if (!state || (savedState && state !== savedState)) {
-                    sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검�??�패. ?�시 ?�도?�주?�요.' });
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '보안 검증 실패. 다시 시도해주세요.' });
                     return;
                 }
 
                 if (!code) {
-                    sendResult({ type: 'naver_auth_complete', success: false, error: '?�증 코드가 ?�습?�다.' });
+                    sendResult({ type: 'naver_auth_complete', success: false, error: '인증 코드가 없습니다.' });
                     return;
                 }
 
-                updateStatus('?�버???�증 ?�청 �?..');
+                updateStatus('서버에 인증 요청 중...');
                 const response = await fetch(`/api/naver?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
                 if (!response.ok) {
-                    let errorMessage = `?�버 ?�답 ?�류 (${response.status})`;
+                    let errorMessage = `서버 응답 오류 (${response.status})`;
                     try {
                         const errorData = await response.json();
                         errorMessage = errorData.error || errorMessage;
@@ -121,10 +133,10 @@
                 }
 
                 const data = await response.json();
-                if (!data.firebaseToken) throw new Error('?�증 ?�큰???�효?��? ?�습?�다.');
+                if (!data.firebaseToken) throw new Error('인증 토큰이 유효하지 않습니다.');
 
-                updateStatus('?�료');
-                // ?�큰�??�용???�보�?부�?창으�??�달 ??Firebase 로그?��? 메인 창에??처리
+                updateStatus('완료');
+                // 토큰과 사용자 정보를 부모 창으로 전달 — Firebase 로그인은 메인 창에서 처리
                 sendResult({
                     type: 'naver_auth_complete',
                     success: true,
@@ -135,22 +147,12 @@
 
             } catch (e) {
                 console.error('Auth traceback:', e);
-                updateStatus('?�류: ' + e.message);
-                sendResult({ type: 'naver_auth_complete', success: false, error: '로그???�류: ' + e.message });
+                updateStatus('오류: ' + e.message);
+                sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 오류: ' + e.message });
             }
         }
 
         handleCallback();
     </script>
-  <!-- Microsoft Clarity (deferred) -->
-  <script>
-    window.addEventListener("load", function() {
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window,document,"clarity","script","vsvc6kadap");
-    });
-  </script>
 </body>
 </html>
