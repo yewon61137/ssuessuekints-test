@@ -3,6 +3,7 @@
 # HTML — 항상 최신 버전 확인
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+  Content-Type: text/html; charset=UTF-8
 
 # CSS/JS — 버전 쿼리스트링(v=5)으로 관리되므로 1년 캐시
 /style.css
