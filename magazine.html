@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSBJ5J8N4K"></script>
   <script>
@@ -10,107 +9,331 @@
     gtag('js', new Date());
     gtag('config', 'G-KSBJ5J8N4K');
   </script>
-  
+  <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="naver-site-verification" content="8c838934c5a874ca70de00787bcaab146ea7f409" />
+  <link rel="canonical" href="https://ssuessueknits.com/magazine.html" />
+  <link rel="alternate" hreflang="ko" href="https://ssuessueknits.com/magazine.html" />
+  <link rel="alternate" hreflang="en" href="https://ssuessueknits.com/magazine.html?lang=en" />
+  <link rel="alternate" hreflang="ja" href="https://ssuessueknits.com/magazine.html?lang=ja" />
+  <link rel="alternate" hreflang="x-default" href="https://ssuessueknits.com/magazine.html" />
   <title>매거진 | SSUESSUE KNITS</title>
-  <meta name="description" content="뜨개질 가이드, 패션 트렌드, 뜨개 과학 등 다채로운 뜨개 이야기를 만나보세요.">
-  <link href='/style.css?v=9' rel='stylesheet' media="all">
+  <meta name="description" content="코바늘 기초, 게이지 스와치, 아미구루미, 실 굵기 가이드, 트렌드까지 — SSUESSUE KNITS 매거진에서 뜨개 관련 모든 정보를 찾아보세요.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ssuessueknits.com/magazine.html">
+  <meta property="og:title" content="매거진 | SSUESSUE KNITS">
+  <meta property="og:description" content="뜨개질 실 굵기 가이드, 코바늘 vs 대바늘 비교, 입문 팁, 트렌드까지 — SSUESSUE KNITS 매거진에서 뜨개 관련 모든 정보를 찾아보세요.">
+  <meta property="og:image" content="https://ssuessueknits.com/og-image.png">
+  <link rel="preconnect" href="https://webfontworld.github.io" crossorigin>
+  <link rel="dns-prefetch" href="https://webfontworld.github.io">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+  <link rel="dns-prefetch" href="https://www.clarity.ms">
+  <link rel="preload" href="https://webfontworld.github.io/gmarket/GmarketSans.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="all">
+  <noscript><link rel="stylesheet" href="https://webfontworld.github.io/gmarket/GmarketSans.css" media="all"></noscript>
+  <link href='/style.css?v=10' rel='stylesheet' media="all">
   <style>
-    .magazine-intro { padding: 4rem 2rem 3rem; text-align: center; background: #fafafa; border-bottom: 1px solid #eee; }
-    .magazine-intro h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 1rem; }
-    .magazine-intro p { font-size: 1.1rem; color: #666; max-width: 800px; margin: 0 auto; line-height: 1.8; }
-    .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
-    .article-card { background: #fff; border: 1px solid #eee; border-radius: 24px; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-    .article-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-color); }
-    .article-content { padding: 2rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
-    .article-badge-row { margin-bottom: 0.5rem; }
-    .article-card-category { font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 100px; background: #f0f0f0; }
+    .magazine-intro { padding: 3rem 0 2.5rem; text-align: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); }
+    .magazine-intro h2 { font-size: 2rem; font-weight: 900; margin: 0 0 0.75rem; letter-spacing: -0.03em; }
+    .magazine-intro p { margin: 0; font-size: 1rem; color: var(--secondary-color); line-height: 1.8; max-width: 700px; margin-inline: auto; word-break: keep-all; }
+    
+    .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; margin-bottom: 5rem; }
+    .article-card { border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); background: #fff; }
+    .article-card:hover { transform: translateY(-8px); box-shadow: 0 16px 32px rgba(0,0,0,0.06); border-color: var(--primary-color); }
+
+    
+    .article-content { padding: 1.75rem; flex: 1; display: flex; flex-direction: column; gap: 0.85rem; }
+    .article-badge-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
+    
+    .article-card-category { font-size: 0.72rem; font-weight: 800; padding: 0.28rem 0.75rem; border-radius: 100px; letter-spacing: 0.02em; display: inline-block; }
     .cat-history { background: #efe4d8; color: #8d6e63; }
     .cat-science { background: #e3f2fd; color: #1e88e5; }
+    .cat-fashion { background: #fce4ec; color: #d81b60; }
+    .cat-basics { background: #f1f8e9; color: #558b2f; }
     .cat-lifestyle { background: #fff3e0; color: #ef6c00; }
-    .article-card h3 { font-size: 1.3rem; font-weight: 800; line-height: 1.4; margin: 0; }
-    .article-card p { font-size: 0.95rem; color: #666; line-height: 1.7; margin: 0; flex: 1; }
-    .article-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f9f9f9; }
-    .article-card-meta { font-size: 0.85rem; color: #aaa; }
-    .article-card-read { font-weight: 800; color: var(--primary-color); }
+
+    .article-card h3 { font-size: 1.2rem; font-weight: 800; margin: 0; line-height: 1.45; word-break: keep-all; color: #111; }
+    .article-card p { font-size: 0.92rem; color: #666; line-height: 1.75; margin: 0; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .article-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; padding-top: 1.2rem; border-top: 1px solid #f2f2f2; }
+    .article-card-meta { font-size: 0.8rem; color: #aaa; font-weight: 500; }
+    .article-card-read { font-size: 0.85rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 0.3rem; }
+
+    @media (max-width: 650px) {
+      .magazine-intro { padding: 3rem 1.5rem 2rem; }
+      .article-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .article-card { border-radius: 20px; }
+    }
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2930322697184296" crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-2930322697184296">
 </head>
 <body>
-  <script type="module" src="/js/header.js?v=9"></script>
+  <script type="module" src="/js/header.js?v=10"></script>
 
   <main class="container">
-    <section class="magazine-intro">
-      <h2 class="i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</h2>
-      <p class="i18n" 
-         data-ko="쓔쓔닛츠 매거진은 뜨개질의 역사, 과학, 트렌드, 그리고 라이프스타일을 다룹니다. 우리는 한 코의 실이 만드는 무한한 가능성을 믿으며, 뜨개질이 주는 즐거움과 가치를 깊이 있게 탐구합니다." 
-         data-en="SSUESSUE KNITS Magazine explores the history, science, trends, and lifestyle of knitting. We believe in the infinite possibilities created by a single stitch." 
-         data-ja="SSUESSUE KNITSマガジンは、編み物の歴史、科学、トレンド、ライフスタイルを探求します。">
-         쓔쓔닛츠 매거진은 뜨개질의 역사, 과학, 트렌드, 그리고 라이프스타일을 다룹니다.
-      </p>
+    <section class="step-section">
+      <div class="magazine-intro">
+        <h2 class="i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</h2>
+        <p class="i18n" data-ko="뜨개질 실 가이드, 기법 비교, 트렌드, 입문 팁까지 — 뜨개를 사랑하는 모든 분들을 위한 콘텐츠를 발행합니다." data-en="Yarn guides, technique comparisons, trends, and beginner tips — contents for everyone who loves knitting." data-ja="糸のガイド、技法比較、トレンド、入門チップまで — 編み物を愛するすべての人のためにコンテンツを配信します。">뜨개질 실 가이드, 기법 비교, 트렌드, 입문 팁까지 — 뜨개를 사랑하는 모든 분들을 위한 콘텐츠를 발행합니다.</p>
+      </div>
+
+      <div class="article-grid">
+
+        <!-- History -->
+        <a href="/magazine/knitting-history-spy.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-history i18n" data-ko="뜨개 역사" data-en="History" data-ja="歴史">뜨개 역사</span>
+            </div>
+            <h3 class="i18n" data-ko="전쟁터의 스파이와 뜨개질 암호" data-en="Spies and Knitting Codes" data-ja="戦場のスパイと編み物の暗号">전쟁터의 스파이와 뜨개질 암호</h3>
+            <p class="i18n" data-ko="세계대전 당시 스파이들이 뜨개질을 암호 전달 수단으로 사용했다는 놀라운 사실을 아시나요?" data-en="Discover how spies used knitting as a code during World Wars." data-ja="世界大戦中、スパイが編み物を暗号伝達手段として使用していた驚きの事実。">세계대전 당시 스파이들이 뜨개질을 암호 전달 수단으로 사용했다는 놀라운 사실을 아시나요?</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.30</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Science -->
+        <a href="/magazine/science-of-knitting-physics.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-science i18n" data-ko="뜨개 과학" data-en="Science" data-ja="科学">뜨개 과학</span>
+            </div>
+            <h3 class="i18n" data-ko="뜨개질의 물리 — 왜 신축성이 좋을까?" data-en="The Physics of Knitting" data-ja="編み物の物理 — なぜニットは伸縮性が高いのか？">뜨개질의 물리 — 왜 신축성이 좋을까?</h3>
+            <p class="i18n" data-ko="니트 편물의 독특한 신축성 뒤에 숨겨진 루프의 기하학과 NASA의 우주 안테나 기술까지." data-en="Explore the geometry of loops and how NASA uses knitting for space antennas." data-ja="ニット独特の伸縮性の背後に隠されたループの幾何学とNASAの宇宙技術まで。">니트 편물의 독특한 신축성 뒤에 숨겨진 루프의 기하학과 NASA의 우주 안테나 기술까지.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.27</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Lifestyle -->
+        <a href="/magazine/knitting-mental-health.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-lifestyle i18n" data-ko="뜨개 라이프" data-en="Life" data-ja="ライフ">뜨개 라이프</span>
+            </div>
+            <h3 class="i18n" data-ko="뜨개질은 마음의 요가입니다" data-en="Knitting is Yoga for the Mind" data-ja="編み物は心のヨガです">뜨개질은 마음의 요가입니다</h3>
+            <p class="i18n" data-ko="스트레스 해소와 우울감 완화에 뜨개질이 어떤 실질적인 도움을 주는지 알아봅니다." data-en="Discover how knitting helps with stress and anxiety through rhythmic repetition." data-ja="ストレス解消や抑うつの緩和に編み物がどのように役立つか。">스트레스 해소와 우울감 완화에 뜨개질이 어떤 실질적인 도움을 주는지 알아봅니다.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.24</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Fashion -->
+        <a href="/magazine/2026-crochet-fashion-trends.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-fashion i18n" data-ko="뜨개 패션" data-en="Fashion" data-ja="ファッション">뜨개 패션</span>
+            </div>
+            <h3 class="i18n" data-ko="2026년 런웨이를 장식한 크로셰 트렌드" data-en="2026 Runway Crochet Trends" data-ja="2026年ランウェイのクロシェトレンド">2026년 런웨이를 장식한 크로셰 트렌드</h3>
+            <p class="i18n" data-ko="맥시멀리즘, 지속 가능한 럭셔리 등 2026년 최신 크로셰 패션을 분석합니다." data-en="Maximalism, sustainable luxury, and latest crochet trends from Paris." data-ja="マキシマリズム、サステナブルラグジュアリーなど最新トレンド。">맥시멀리즘, 지속 가능한 럭셔리 등 2026년 최신 크로셰 패션을 분석합니다.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.20</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Fashion 2 -->
+        <a href="/magazine/sustainable-knitting-slow-fashion.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-fashion i18n" data-ko="뜨개 패션" data-en="Fashion" data-ja="ファッション">뜨개 패션</span>
+            </div>
+            <h3 class="i18n" data-ko="지속 가능한 패션과 슬로우 패션" data-en="Sustainable & Slow Fashion" data-ja="持続可能なファッションとスローファッション">지속 가능한 패션과 슬로우 패션</h3>
+            <p class="i18n" data-ko="패스트 패션의 대안으로서 수작업의 의미와 친환경 뜨개 라이프를 제안합니다." data-en="Knitting as an eco-friendly alternative to fast fashion, quality over quantity." data-ja="ファストファッションの代案としての手仕事の意味。">패스트 패션의 대안으로서 수작업의 의미와 친환경 뜨개 라이프를 제안합니다.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.17</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- History 2 -->
+        <a href="/magazine/aran-knitting-symbols.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-history i18n" data-ko="뜨개 역사" data-en="History" data-ja="歴史">뜨개 역사</span>
+            </div>
+            <h3 class="i18n" data-ko="아란 무늬 속에 담긴 상징과 역사" data-en="Symbolism of Aran Patterns" data-ja="アラン模様の象徴と歴史">아란 무늬 속에 담긴 상징과 역사</h3>
+            <p class="i18n" data-ko="아일랜드 아란 제도의 거친 바다에서 탄생한 케이블, 다이아몬드 무늬의 의미." data-en="Discover the hidden meanings of cables and diamonds from Aran Islands." data-ja="アイルランドのアラン諸島で誕生した模様の象徴。">아일랜드 아란 제도의 거친 바다에서 탄생한 케이블, 다이아몬드 무늬의 의미.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.14</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Basics -->
+        <a href="/magazine/crochet-basics.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="코바늘 기법" data-en="Crochet" data-ja="かぎ針">코바늘 기법</span>
+            </div>
+            <h3 class="i18n" data-ko="코바늘 기초 기법 완전 정리" data-en="Basic Crochet Guide" data-ja="かぎ針編み基本ガイド">코바늘 기초 기법 완전 정리</h3>
+            <p class="i18n" data-ko="사슬뜨기부터 한길긴뜨기까지, 초보자도 쉽게 따라하는 단계별 가이드." data-en="From chains to double crochet, a step-by-step guide for beginners." data-ja="くさり編みから長編みまで。初心者のためのガイド。">사슬뜨기부터 한길긴뜨기까지, 초보자도 쉽게 따라하는 단계별 가이드.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.10</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Science 2 -->
+        <a href="/magazine/gauge-swatch-guide.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-science i18n" data-ko="기법 · 테크닉" data-en="Technique" data-ja="技術">기법 · 테크닉</span>
+            </div>
+            <h3 class="i18n" data-ko="게이지 스와치 완벽 가이드" data-en="Gauge Swatch Guide" data-ja="ゲージスウォッチガイド">게이지 스와치 완벽 가이드</h3>
+            <p class="i18n" data-ko="뜨개 사이즈를 정확하게 맞추는 법. 계산법과 블로킹의 중요성 정리." data-en="How to get your size right. Calculation and importance of blocking." data-ja="サイズを正しく合わせる方法。">뜨개 사이즈를 정확하게 맞추는 법. 계산법과 블로킹의 중요성 정리.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.03.05</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+        <!-- Basics 2 -->
+        <a href="/magazine/amigurumi-beginners.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="코바늘 기법" data-en="Crochet" data-ja="かぎ針">코바늘 기법</span>
+            </div>
+            <h3 class="i18n" data-ko="아미구루미 입문 가이드" data-en="Amigurumi Guide" data-ja="あみぐるみ入門ガイド">아미구루미 입문 가이드</h3>
+            <p class="i18n" data-ko="귀여운 뜨개 인형의 시작. 매직링부터 눈 달기, 솜 넣기까지 안내." data-en="Make your first plush. From magic ring to stuffing." data-ja="かわいいぬいぐるみの作り方。">귀여운 뜨개 인형의 시작. 매직링부터 눈 달기, 솜 넣기까지 안내.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.02.28</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Basics 3 -->
+        <a href="/magazine/yarn-care-guide.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="실 & 관리" data-en="Yarn & Care" data-ja="糸・管理">실 & 관리</span>
+            </div>
+            <h3 class="i18n" data-ko="소재별 세탁·보관 가이드" data-en="Yarn Care Guide" data-ja="素材別管理ガイド">소재별 세탁·보관 가이드</h3>
+            <p class="i18n" data-ko="울, 면, 실크 등 소재별 최적의 관리법과 블로킹 팁 정리." data-en="Wash and store your knits by fiber type: wool, cotton, silk." data-ja="素材ごとの最適な管理方法。">울, 면, 실크 등 소재별 최적의 관리법과 블로킹 팁 정리.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.02.20</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Fashion 3 -->
+        <a href="/magazine/2026-knitting-trends.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-fashion i18n" data-ko="트렌드" data-en="Trends" data-ja="トレンド">트렌드</span>
+            </div>
+            <h3 class="i18n" data-ko="2026 뜨개질 트렌드 총정리" data-en="2026 Knitting Trends" data-ja="2026年トレンドまとめ">2026 뜨개질 트렌드 총정리</h3>
+            <p class="i18n" data-ko="올해 주목할 스타일 7가지. 점보 얀부터 모던 그래니 스퀘어까지." data-en="7 styles to watch this year. From jumbo yarn to granny squares." data-ja="今年注目の7つのスタイル。">올해 주목할 스타일 7가지. 점보 얀부터 모던 그래니 스퀘어까지.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.02.10</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Basics 4 -->
+        <a href="/magazine/beginners-guide.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="입문 가이드" data-en="Beginner" data-ja="入門">입문 가이드</span>
+            </div>
+            <h3 class="i18n" data-ko="뜨개질 입문 완전 가이드" data-en="Beginner's Guide" data-ja="編み物入門ガイド">뜨개질 입문 완전 가이드</h3>
+            <p class="i18n" data-ko="도구 선택부터 첫 작품 완성까지 아우르는 단계별 입문 가이드." data-en="From tools to your first finished object. Step-by-step." data-ja="道具選びから最初の作品まで。">도구 선택부터 첫 작품 완성까지 아우르는 단계별 입문 가이드.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.01.30</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Basics 5 -->
+        <a href="/magazine/crochet-vs-knitting.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="기법 비교" data-en="Comparison" data-ja="比較">기법 비교</span>
+            </div>
+            <h3 class="i18n" data-ko="코바늘 vs 대바늘 차이점 비교" data-en="Crochet vs Knitting" data-ja="かぎ針編み vs 棒針編み">코바늘 vs 대바늘 차이점 비교</h3>
+            <p class="i18n" data-ko="도구, 난이도, 완성품 느낌까지 나에게 맞는 기법을 찾아보세요." data-en="Find the right technique for you based on difficulty and feel." data-ja="自分に合った技法を探す。">도구, 난이도, 완성품 느낌까지 나에게 맞는 기법을 찾아보세요.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.01.15</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Basics 6 -->
+        <a href="/magazine/yarn-weight-guide.html" class="article-card">
+          <div class="article-content">
+            <div class="article-badge-row">
+              <span class="article-card-category cat-basics i18n" data-ko="실 & 도구" data-en="Yarn & Tools" data-ja="糸・道具">실 & 도구</span>
+            </div>
+            <h3 class="i18n" data-ko="실 굵기 완전 가이드" data-en="Yarn Weight Guide" data-ja="糸の太さ完全ガイド">실 굵기 완전 가이드</h3>
+            <p class="i18n" data-ko="Lace부터 Super Bulky까지 7가지 실 굵기별 특징 정리." data-en="Learn about 7 yarn weights from Lace to Super Bulky." data-ja="7つの糸の太さ別特徴まとめ。">Lace부터 Super Bulky까지 7가지 실 굵기별 특징 정리.</p>
+            <div class="article-card-footer">
+              <span class="article-card-meta">2026.01.05</span>
+              <span class="article-card-read i18n" data-ko="읽기 →" data-en="Read →" data-ja="読む →">읽기 →</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
     </section>
-
-    <div class="article-grid">
-      <!-- Article 1 -->
-      <a href="/magazine/knitting-history-spy.html" class="article-card">
-        <div class="article-content">
-          <div class="article-badge-row">
-            <span class="article-card-category cat-history">뜨개 역사</span>
-          </div>
-          <h3>전쟁터의 스파이와 뜨개질 암호</h3>
-          <p>세계대전 당시 스파이들이 뜨개질을 정교한 암호 전달 수단으로 활용했다는 사실을 알고 계셨나요? 역사 속 흥미로운 뜨개질 보안 기술을 소개합니다.</p>
-          <div class="article-card-footer">
-            <span class="article-card-meta">2026.03.30</span>
-            <span class="article-card-read">읽기 →</span>
-          </div>
-        </div>
-      </a>
-
-      <!-- Article 2 -->
-      <a href="/magazine/science-of-knitting-physics.html" class="article-card">
-        <div class="article-content">
-          <div class="article-badge-row">
-            <span class="article-card-category cat-science">뜨개 과학</span>
-          </div>
-          <h3>뜨개질의 물리: 왜 니트는 신축성이 좋을까?</h3>
-          <p>니트 편물의 독특한 신축성 뒤에 숨겨진 루프의 기하학과 NASA의 우주 안테나 기술까지, 뜨개질 속에 담긴 놀라운 물리학적 원리를 파헤쳐 봅니다.</p>
-          <div class="article-card-footer">
-            <span class="article-card-meta">2026.03.27</span>
-            <span class="article-card-read">읽기 →</span>
-          </div>
-        </div>
-      </a>
-
-      <!-- Article 3 -->
-      <a href="/magazine/knitting-mental-health.html" class="article-card">
-        <div class="article-content">
-          <div class="article-badge-row">
-            <span class="article-card-category cat-lifestyle">뜨개 라이프</span>
-          </div>
-          <h3>뜨개질은 마음을 위한 요가입니다</h3>
-          <p>스트레스 해소와 우울감 완화에 뜨개질이 어떤 실질적인 도움을 주는지 알아봅니다. 리드미컬한 반복이 주는 명상 효과와 심리적 안정을 경험해 보세요.</p>
-          <div class="article-card-footer">
-            <span class="article-card-meta">2026.03.24</span>
-            <span class="article-card-read">읽기 →</span>
-          </div>
-        </div>
-      </a>
-      
-      <!-- 추가 기사들(생략하지만 실제로는 더 많이 존재함) -->
-    </div>
   </main>
 
   <footer class="site-footer">
-    <!-- Footer content -->
+    <div class="footer-inner">
+      <span class="footer-brand">SSUESSUE KNITS</span>
+      <nav class="footer-nav">
+        <a href="/about.html" data-i18n="footer_about">소개</a>
+        <a href="/terms.html" data-i18n="footer_terms">이용약관</a>
+        <a href="/privacy.html" data-i18n="footer_privacy">개인정보처리방침</a>
+        <a href="/guide.html" class="i18n" data-ko="이용안내" data-en="Guide" data-ja="ご利用案内">이용안내</a>
+        <a href="/about.html" class="i18n" data-ko="제휴·광고 문의" data-en="Partnership" data-ja="提携・広告のお問い合わせ">제휴·광고 문의</a>
+      </nav>
+    </div>
+    <div class="footer-biz">
+      <div class="footer-biz-text">
+        <span>상호: 쓔쓔 (SSUESSUE) &nbsp;|&nbsp; 대표: 김예원 &nbsp;|&nbsp; 사업자등록번호: 402-34-06132</span>
+      <span>주소: 전라남도 무안군 삼향읍 삼향로 127-3 &nbsp;|&nbsp; 업태/종목: 소매 / 전자상거래(잡화)</span>
+      <span>통신판매업 신고번호: 2023-전남무안-0173 &nbsp;|&nbsp; 이메일: yewon61137@gmail.com</span>
+      <span>고객지원 운영시간: 평일 10:00~17:00 (주말·공휴일 제외)</span>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/ssuessue_knits/" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"
+           onclick="(function(e){if(/Mobi|Android/i.test(navigator.userAgent)){e.preventDefault();window.location='instagram://user?username=ssuessue_knits';setTimeout(function(){window.location='https://www.instagram.com/ssuessue_knits/'},1500);}})(event)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+      </div>
+    </div>
+    <p class="copyright">&copy; 2024 SSUESSUE. All rights reserved.</p>
   </footer>
 
-  <script type="module">
-    import { initAuth } from '/js/auth.js';
-    import { initLang } from '/js/i18n.js';
-    initAuth();
-    initLang();
+  <script type="module" src="/js/init-auth.js?v=10"></script>
+  <script defer src="/js/magazine-lang.js?v=10"></script>
+  <!-- Microsoft Clarity (deferred) -->
+  <script>
+    window.addEventListener("load", function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script","vsvc6kadap");
+    });
   </script>
 </body>
 </html>

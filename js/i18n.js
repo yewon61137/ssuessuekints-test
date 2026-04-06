@@ -430,6 +430,12 @@ export function applyLang(lang, opts = {}) {
         el.style.display = el.getAttribute('data-lang-section') === lang ? 'block' : 'none';
     });
 
+    // .i18n-placeholder 패턴 추가
+    document.querySelectorAll('.i18n-placeholder').forEach(el => {
+        const val = el.getAttribute('data-placeholder-' + lang);
+        if (val) el.placeholder = val;
+    });
+
     // 네이버 로그인은 한국어 사용자에게만 표시
     document.querySelectorAll('.naver-btn').forEach(el => {
         el.style.display = lang === 'ko' ? '' : 'none';
