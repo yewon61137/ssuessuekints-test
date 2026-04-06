@@ -59,7 +59,10 @@
       "Bash(curl:*)",
       "Bash(powershell -Command \"Invoke-WebRequest -Uri 'https://webfontworld.github.io/gmarket/GmarketSans.css' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
       "Bash(bash /tmp/analyze.sh)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(py _replace_handler.py)",
+      "Bash(py -c ':*)",
+      "Bash(py _replace2.py)"
     ]
   }
 }
