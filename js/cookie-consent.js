@@ -21,6 +21,11 @@
     },
   };
 
+  function updateBannerHeight() {
+    const height = banner.offsetHeight;
+    document.documentElement.style.setProperty('--cookie-banner-height', `${height}px`);
+  }
+
   const lang = localStorage.getItem('ssuessue_lang') || 'ko';
   const tx = t[lang] || t.ko;
 
@@ -35,9 +40,15 @@
   `;
   document.body.appendChild(banner);
 
+  // Initial measurement and observation for resizing
+  setTimeout(updateBannerHeight, 100);
+  window.addEventListener('resize', updateBannerHeight);
+
   banner.querySelector('.cookie-accept').addEventListener('click', () => {
     localStorage.setItem('cookieConsent', '1');
     banner.style.transform = 'translateY(100%)';
+    document.documentElement.style.setProperty('--cookie-banner-height', '0px');
+    window.removeEventListener('resize', updateBannerHeight);
     setTimeout(() => banner.remove(), 300);
   });
 })();

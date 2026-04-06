@@ -543,13 +543,13 @@ class RowCounter extends HTMLElement {
         * { box-sizing: border-box; }
 
         .fab {
-          position:fixed; bottom:24px; right:24px;
+          position:fixed; bottom:calc(24px + var(--cookie-banner-height, 0px)); right:24px;
           width:54px; height:54px; border-radius:50%;
           background:var(--primary); color:var(--bg);
           border:none; cursor:pointer;
           box-shadow:0 4px 14px var(--shadow);
           display:flex; align-items:center; justify-content:center;
-          z-index:9998; transition:transform 0.25s, opacity 0.25s;
+          z-index:9998; transition:transform 0.25s, opacity 0.25s, bottom 0.3s ease;
         }
         .fab:hover { transform:scale(1.1); }
         .fab.hidden { opacity:0; pointer-events:none; transform:scale(0.8); }

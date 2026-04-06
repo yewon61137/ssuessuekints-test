@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE } from './colorUtils.js';
+import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE, applyMedianFilter } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -116,6 +116,7 @@ const translations = {
         preset_lace20: "일반 레이스사 (#20)",
         preset_summer: "여름용 면사 (코바늘 0-2호)",
         preset_winter: "일반 털실 (코바늘 3-5호)",
+        recommended: "추천",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -184,6 +185,7 @@ const translations = {
         preset_lace20: "Standard Lace (#20)",
         preset_summer: "Summer Cotton (0-2 Hook)",
         preset_winter: "Standard Wool (3-5 Hook)",
+        recommended: "Recommended",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -252,6 +254,7 @@ const translations = {
         preset_lace20: "レース糸 (#20)",
         preset_summer: "夏用コットン (かぎ針 0-2号)",
         preset_winter: "一般毛糸 (かぎ針 3-5号)",
+        recommended: "おすすめ",
     }
 };
 
@@ -379,7 +382,22 @@ imageUpload.addEventListener('change', (e) => {
             }
             previewCanvas.width = drawWidth;
             previewCanvas.height = drawHeight;
+            previewCtx.imageSmoothingEnabled = false; // Nearest-neighbor 유지
             previewCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
+            
+            // 색상 추천 로직
+            const recBadge = document.getElementById('colorRecommendation');
+            if (recBadge) {
+                const imageData = previewCtx.getImageData(0, 0, drawWidth, drawHeight);
+                const pixels = getPixelArray(imageData, drawWidth, drawHeight);
+                const recommended = detectOptimalColorCount(pixels, 20);
+                const recText = translations[currentLang].recommended || "Recommended";
+                recBadge.innerHTML = `<span class="recommendation-badge" title="Click to apply">${recText}: ${recommended}</span>`;
+                recBadge.style.cursor = 'pointer';
+                recBadge.onclick = () => {
+                    colorCountInput.value = recommended;
+                };
+            }
             
             // 결과 영역 초기화
             resultPlaceholder.style.display = 'block';
@@ -609,6 +627,7 @@ generateBtn.addEventListener('click', async () => {
     tempCanvas.width = targetStitches;
     tempCanvas.height = targetRows;
 
+    tempCtx.imageSmoothingEnabled = false; // Nearest-neighbor 리샘플링 강제
     tempCtx.drawImage(originalImage, 0, 0, targetStitches, targetRows);
 
     setTimeout(() => {
@@ -621,7 +640,10 @@ generateBtn.addEventListener('click', async () => {
             const { palette: rawPalette, assignments: rawAssignments } = kMeans(pixels, optimalColorCount, targetStitches, targetRows, 15, seedColors);
 
             // 유사 색상(Delta E < 15) 병합
-            const { palette, assignments } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
+            const { palette, assignments: mergedAssignments } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
+            
+            // 3x3 중앙값 필터 적용 (노이즈 제거)
+            const assignments = applyMedianFilter(mergedAssignments, targetStitches, targetRows);
             
             let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
             

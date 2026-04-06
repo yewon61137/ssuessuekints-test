@@ -372,3 +372,38 @@ export function hexToRgb(hex) {
     const b = bigint & 255;
     return [r, g, b];
 }
+
+/**
+ * 3x3 Median Filter to reduce noise in the generated pattern assignments.
+ * For each pixel, picks the most frequent assignment in its 3x3 neighborhood.
+ */
+export function applyMedianFilter(assignments, width, height) {
+    const newAssignments = new Array(assignments.length).fill(0);
+    
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const counts = new Map();
+            let maxCount = 0;
+            let currentMode = assignments[y * width + x];
+
+            // 3x3 window
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const ny = y + dy;
+                    const nx = x + dx;
+                    if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+                        const val = assignments[ny * width + nx];
+                        const c = (counts.get(val) || 0) + 1;
+                        counts.set(val, c);
+                        if (c > maxCount) {
+                            maxCount = c;
+                            currentMode = val;
+                        }
+                    }
+                }
+            }
+            newAssignments[y * width + x] = currentMode;
+        }
+    }
+    return newAssignments;
+}

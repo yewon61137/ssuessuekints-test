@@ -211,7 +211,10 @@
 
           <!-- Row 2 -->
           <div class="control-group">
-            <label for="colorCount" data-i18n="label_max_colors">최대 색상 수</label>
+            <label for="colorCount">
+              <span data-i18n="label_max_colors">최대 색상 수</span>
+              <span id="colorRecommendation" class="recommendation-badge" style="display:none;"></span>
+            </label>
             <div class="input-with-hint">
               <input type="number" id="colorCount" value="15" min="2" max="40">
               <span class="hint" data-i18n="unit_colors">색</span>
