@@ -1,15 +1,19 @@
-const CACHE_NAME = 'ssuessue-pwa-v5';
+const CACHE_NAME = 'ssuessue-pwa-v10';
+const PRE_CACHE_ASSETS = [
+    '/',
+    '/index.html',
+    '/style.css?v=10',
+    '/favicon.png',
+    '/js/header.js?v=10',
+    '/js/auth.js?v=10',
+    '/js/home.js?v=10'
+];
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll([
-                '/',
-                '/index.html',
-                '/style.css',
-                '/favicon.png'
-            ]);
+            return cache.addAll(PRE_CACHE_ASSETS);
         })
     );
 });
@@ -18,7 +22,10 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keyList => {
             return Promise.all(keyList.map(key => {
-                if (key !== CACHE_NAME) return caches.delete(key);
+                if (key !== CACHE_NAME) {
+                    console.log('[SW] Deleting old cache:', key);
+                    return caches.delete(key);
+                }
             }));
         })
     );
@@ -26,26 +33,28 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Firebase Storage, Firestore 등 외부 API 요청은 캐시에서 제외
-    if (e.request.url.startsWith('https://firestore.googleapis.com') ||
-        e.request.url.startsWith('https://firebasestorage.googleapis.com') ||
+    // Firebase API, Google Ads 등 외부 요청 및 POST 등 비-GET 요청 제외
+    if (e.request.url.includes('google') || 
+        e.request.url.includes('firebase') || 
+        e.request.url.includes('clarity.ms') ||
         e.request.method !== 'GET') {
         return;
     }
 
     e.respondWith(
-        caches.match(e.request).then((res) => {
-            return res || fetch(e.request).then(response => {
-                // 추가적으로 네트워크 결과를 캐싱하려면 아래 로직 활성화
-                // return caches.open(CACHE_NAME).then(cache => {
-                //     cache.put(e.request, response.clone());
-                //     return response;
-                // });
-                return response;
+        caches.match(e.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            
+            // 캐시에 없으면서 네트워크 요청에 실패한 경우에만 에러 페이지 처리
+            return fetch(e.request).catch(err => {
+                console.error('[SW] Fetch failed:', e.request.url, err);
+                return new Response('오프라인 상태이거나 네트워크 오류가 발생했습니다.', { 
+                    status: 503, 
+                    statusText: 'Service Unavailable' 
+                });
             });
-        }).catch(() => {
-            // 오프라인이면서 캐시에도 없는 경우 빈 응답 반환 (앱 다운 방지)
-            return new Response('오프라인 상태입니다.', { status: 503, statusText: 'Service Unavailable' });
         })
     );
 });
