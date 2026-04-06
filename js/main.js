@@ -1,6 +1,6 @@
 // main.js - 뜨개질 도안 생성기 핵심 로직
 
-import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE, applyMedianFilter } from './colorUtils.js';
+import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete } from './auth.js';
 import { t as sharedT } from './i18n.js';
 
@@ -639,14 +639,100 @@ generateBtn.addEventListener('click', async () => {
             const optimalColorCount = detectOptimalColorCount(pixels, colorCount);
             const { palette: rawPalette, assignments: rawAssignments } = kMeans(pixels, optimalColorCount, targetStitches, targetRows, 15, seedColors);
 
-            // 유사 색상(Delta E < 15) 병합
-            const { palette, assignments: mergedAssignments } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
-            
-            // 3x3 중앙값 필터 적용 (노이즈 제거)
-            const assignments = applyMedianFilter(mergedAssignments, targetStitches, targetRows);
-            
-            let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches))); 
-            
+            // 유사 색상(Delta E < 15) 병합 (팔레트 생성 목적)
+            const { palette } = mergeByDeltaE(rawPalette, rawAssignments, seedColors, 15);
+
+            // 원본 이미지를 스캔용 캔버스에 그리기
+            // 최대 2000px로 제한해 성능 확보, imageSmoothingEnabled=false 유지
+            const origW = originalImage.width;
+            const origH = originalImage.height;
+            const SCAN_MAX_DIM = 2000;
+            const scanScale = Math.min(1, SCAN_MAX_DIM / Math.max(origW, origH));
+            const scanW = Math.round(origW * scanScale);
+            const scanH = Math.round(origH * scanScale);
+            const scanCanvas = document.createElement('canvas');
+            scanCanvas.width = scanW;
+            scanCanvas.height = scanH;
+            const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+            scanCtx.imageSmoothingEnabled = false;
+            scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
+            const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
+
+            const DARK_LUM_THRESHOLD = 77; // 명도 30% = 0.30 × 255
+            const BLACK = [0, 0, 0];
+            const cellScaleX = scanW / targetStitches;
+            const cellScaleY = scanH / targetRows;
+            let hasBlackCell = false;
+
+            // 각 격자 칸별 색상 결정
+            const gridCellColors = new Array(targetStitches * targetRows);
+
+            for (let gy = 0; gy < targetRows; gy++) {
+                for (let gx = 0; gx < targetStitches; gx++) {
+                    const x0 = Math.floor(gx * cellScaleX);
+                    const x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
+                    const y0 = Math.floor(gy * cellScaleY);
+                    const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
+
+                    // 1단계: 어두운 픽셀 존재 여부 검사 (발견 즉시 break)
+                    let hasDark = false;
+                    outerDark:
+                    for (let py = y0; py < y1; py++) {
+                        for (let px = x0; px < x1; px++) {
+                            const pidx = (py * scanW + px) * 4;
+                            if (scanData[pidx + 3] <= 128) continue; // 투명 픽셀 제외
+                            const r = scanData[pidx], g = scanData[pidx + 1], b = scanData[pidx + 2];
+                            if (0.299 * r + 0.587 * g + 0.114 * b <= DARK_LUM_THRESHOLD) {
+                                hasDark = true;
+                                break outerDark;
+                            }
+                        }
+                    }
+
+                    if (hasDark) {
+                        gridCellColors[gy * targetStitches + gx] = null; // 검정 표시
+                        hasBlackCell = true;
+                        continue;
+                    }
+
+                    // 2단계: 나머지 픽셀들의 최빈 팔레트 색상 결정
+                    const freq = new Int32Array(palette.length);
+                    let hasPixel = false;
+
+                    for (let py = y0; py < y1; py++) {
+                        for (let px = x0; px < x1; px++) {
+                            const pidx = (py * scanW + px) * 4;
+                            if (scanData[pidx + 3] <= 128) continue;
+                            hasPixel = true;
+                            const r = scanData[pidx], g = scanData[pidx + 1], b = scanData[pidx + 2];
+                            let minDist = Infinity, minIdx = 0;
+                            for (let ci = 0; ci < palette.length; ci++) {
+                                const c = palette[ci];
+                                const dr = r - c[0], dg = g - c[1], db = b - c[2];
+                                const d = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+                                if (d < minDist) { minDist = d; minIdx = ci; }
+                            }
+                            freq[minIdx]++;
+                        }
+                    }
+
+                    if (!hasPixel) {
+                        gridCellColors[gy * targetStitches + gx] = palette[0] || BLACK;
+                    } else {
+                        let modeIdx = 0, maxFreq = 0;
+                        for (let ci = 0; ci < palette.length; ci++) {
+                            if (freq[ci] > maxFreq) { maxFreq = freq[ci]; modeIdx = ci; }
+                        }
+                        gridCellColors[gy * targetStitches + gx] = palette[modeIdx];
+                    }
+                }
+            }
+
+            // 검정 사용 시 범례 팔레트에 추가
+            const legendPalette = hasBlackCell ? [BLACK, ...palette] : palette;
+
+            let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / targetStitches)));
+
             // Safety Check: Total dimension should not exceed MAX_CANVAS_DIMENSION
             if (targetStitches * pixelSize > MAX_CANVAS_DIMENSION || targetRows * pixelSize > MAX_CANVAS_DIMENSION) {
                 pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(targetStitches, targetRows));
@@ -654,30 +740,27 @@ generateBtn.addEventListener('click', async () => {
 
             const renderWidth = targetStitches * pixelSize;
             const renderHeight = targetRows * pixelSize;
-            
-            // 좌표 라벨과 테두리가 잘리지 않도록 여백 설정 (사방 여백 부여)
-            const paddingTop = showGrid ? 40 : 10; 
-            const paddingRight = showGrid ? 60 : 10; 
-            const paddingBottom = showGrid ? 60 : 10; 
-            const paddingLeft = showGrid ? 40 : 10; // 왼쪽 여백 추가 및 개선
-            
+
+            const paddingTop = showGrid ? 40 : 10;
+            const paddingRight = showGrid ? 60 : 10;
+            const paddingBottom = showGrid ? 60 : 10;
+            const paddingLeft = showGrid ? 40 : 10;
+
             canvas.width = renderWidth + paddingLeft + paddingRight;
             canvas.height = renderHeight + paddingTop + paddingBottom;
-            
+
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 패턴 그리기 시작점으로 이동
             ctx.save();
             ctx.translate(paddingLeft, paddingTop);
 
-            for (let y = 0; y < targetRows; y++) {
-                for (let x = 0; x < targetStitches; x++) {
-                    const idx = y * targetStitches + x;
-                    const colorIdx = assignments[idx];
-                    const color = palette[colorIdx];
+            for (let gy = 0; gy < targetRows; gy++) {
+                for (let gx = 0; gx < targetStitches; gx++) {
+                    const cellColor = gridCellColors[gy * targetStitches + gx];
+                    const color = cellColor === null ? BLACK : cellColor;
                     ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                    ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
                 }
             }
 
@@ -693,13 +776,13 @@ generateBtn.addEventListener('click', async () => {
             
             const calcHeightCm = ((targetRows / gauge.rows) * 10).toFixed(1);
             patternInfo.textContent = `${targetStitches} Stitches x ${targetRows} Rows (approx. ${widthCm}cm x ${calcHeightCm}cm)`;
-            updateLegend(palette);
-            
+            updateLegend(legendPalette);
+
             showStatus('status_done', false);
             downloadPdfBtn.disabled = false;
             saveToCloudBtn.disabled = false;
             saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '내 도안에 저장';
-            saveToHistory(canvas.toDataURL('image/png'), palette, patternInfo.textContent);
+            saveToHistory(canvas.toDataURL('image/png'), legendPalette, patternInfo.textContent);
 
             resultPanel.scrollIntoView({ behavior: 'smooth' });
             
