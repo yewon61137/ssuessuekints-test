@@ -625,7 +625,7 @@ generateBtn.addEventListener('click', async () => {
     try {
         // ── 상수 ──────────────────────────────────────────────────────────
         const DARK_THRESHOLD = 0.25;  // 명도(V) 25% 이하 = 어두운 픽셀
-        const DARK_RATIO     = 0.15;  // 어두운 픽셀 비율 15% 이상이면 → 검정 칸
+        const DARK_RATIO     = 0.08;  // 어두운 픽셀 비율 8% 이상이면 → 검정 칸
         const DARK_COLOR     = [26, 26, 26]; // #1a1a1a
 
         // ── 1. 원본 이미지를 격자 해상도로 부드럽게 축소 ──────────────────
@@ -727,31 +727,34 @@ generateBtn.addEventListener('click', async () => {
             for (let gy = 0; gy < h; gy++) {
                 for (let gx = 0; gx < w; gx++) {
                     const idx = gy * w + gx;
-                    // 3x3 이웃에서 검정 칸 수 체크
+                    // 비검정 칸은 그대로 유지 (검정으로 확장하지 않음)
+                    if (colors[idx] !== DARK_COLOR) {
+                        out[idx] = colors[idx];
+                        continue;
+                    }
+                    // 검정 칸만 처리: 완전 고립 노이즈 점만 제거
                     let darkNeighbors = 0, totalNeighbors = 0;
                     let sumR = 0, sumG = 0, sumB = 0;
                     for (let dy = -1; dy <= 1; dy++) {
                         for (let dx = -1; dx <= 1; dx++) {
+                            if (dy === 0 && dx === 0) continue; // 자기 자신 제외
                             const ny = gy + dy, nx = gx + dx;
                             if (ny < 0 || ny >= h || nx < 0 || nx >= w) continue;
                             const nc = colors[ny * w + nx];
                             totalNeighbors++;
-                            if (nc === DARK_COLOR) { darkNeighbors++; }
+                            if (nc === DARK_COLOR) darkNeighbors++;
                             sumR += nc[0]; sumG += nc[1]; sumB += nc[2];
                         }
                     }
-                    // 이웃의 과반이 검정이면 검정, 아니면 이웃 평균
-                    if (darkNeighbors > totalNeighbors / 2) {
-                        out[idx] = DARK_COLOR;
-                    } else if (colors[idx] === DARK_COLOR && darkNeighbors <= 1) {
-                        // 고립된 검정 칸 → 이웃 평균으로 대체
+                    if (darkNeighbors === 0) {
+                        // 이웃에 검정이 전혀 없는 고립 노이즈 → 이웃 평균으로 대체
                         out[idx] = [
                             Math.round(sumR / totalNeighbors),
                             Math.round(sumG / totalNeighbors),
                             Math.round(sumB / totalNeighbors),
                         ];
                     } else {
-                        out[idx] = colors[idx];
+                        out[idx] = DARK_COLOR;
                     }
                 }
             }
