@@ -697,7 +697,7 @@ generateBtn.addEventListener('click', async () => {
         const colorDist = (c1, c2) => Math.abs(c1[0]-c2[0]) + Math.abs(c1[1]-c2[1]) + Math.abs(c1[2]-c2[2]);
         const BG_DISTANCE_THRESHOLD = 40; // 배경으로 간주할 최대 거리
 
-        // --- 3. 어댑티브 샘플링 (피사체 우선 추출) ---
+        // --- 3. 지분율 10% 필터링 (Threshold Mode Downsampling) ---
         const cellScaleX = scanW / cols;
         const cellScaleY = scanH / rows;
         let gridColors = [];
@@ -709,89 +709,48 @@ generateBtn.addEventListener('click', async () => {
                 const y0 = Math.floor(gy * cellScaleY);
                 const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
 
-                let maxDist = -1;
-                let bestColor = bgColor;
                 let validPixels = 0;
+                const counts = new Map();
 
+                // 1. 셀 내의 색상을 양자화(노이즈 병합)하여 빈도수 조사
                 for (let py = y0; py < y1; py++) {
                     for (let px = x0; px < x1; px++) {
                         const si = (py * scanW + px) * 4;
-                        if (scanData[si + 3] < 128) continue; // 투명은 무시
+                        if (scanData[si + 3] < 128) continue;
 
                         validPixels++;
-                        const c = [scanData[si], scanData[si+1], scanData[si+2]];
-                        const dist = colorDist(c, bgColor);
+                        const r = scanData[si], g = scanData[si+1], b = scanData[si+2];
+                        const key = (Math.round(r/8)*8) + ',' + (Math.round(g/8)*8) + ',' + (Math.round(b/8)*8);
+                        
+                        if (!counts.has(key)) {
+                            counts.set(key, { c: [r, g, b], count: 0 });
+                        }
+                        counts.get(key).count++;
+                    }
+                }
 
+                // 2. 전체 픽셀의 10% 미만을 차지하는 색상(번짐 찌꺼기)은 철저히 무시
+                const THRESHOLD_COUNT = validPixels * 0.1;
+                let maxDist = -1;
+                let candidateColor = bgColor;
+
+                for (let val of counts.values()) {
+                    if (val.count >= THRESHOLD_COUNT) {
+                        const dist = colorDist(val.c, bgColor);
                         if (dist > maxDist) {
                             maxDist = dist;
-                            bestColor = c;
+                            candidateColor = val.c;
                         }
                     }
                 }
 
+                // 3. 만약 10%를 넘으면서 배경보다 확연히 다른 색상이 선택되었다면 적용, 아니면 배경 처리
                 if (validPixels > 0 && maxDist > BG_DISTANCE_THRESHOLD) {
-                    // 배경과 충분히 다른 픽셀이 있다면, 그 중 가장 확연히 튀는 픽셀(윤곽선/주 피사체)을 1순위로 채택
-                    gridColors.push(bestColor);
+                    gridColors.push(candidateColor);
                 } else if (validPixels > 0) {
-                    // 전부 배경과 비슷하다면 안전하게 배경색 사용
                     gridColors.push([Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])]);
                 } else {
-                    gridColors.push([255, 255, 255]); // 완전 투명 폴백
-                }
-            }
-        }
-
-        // --- 3.5 플러드 필 (Flood-Fill) 클린업 ---
-        // 윤곽선 외부로 새어나간 에지(Color Spill)를 완벽히 제거하기 위해
-        // 테두리 픽셀에서 출발하는 BFS 물채우기(배경색으로 덮어쓰기)를 실행합니다.
-        // 먼저, 도안 내에서 배경과 가장 대비가 큰 색상(주요 윤곽선)의 거리를 찾습니다.
-        let maxGridDist = 0;
-        for (let i = 0; i < gridColors.length; i++) {
-            const d = colorDist(gridColors[i], bgColor);
-            if (d > maxGridDist) maxGridDist = d;
-        }
-        
-        // 최대 거리의 60% 이상 차이나는 색을 '단단한 벽(윤곽선)'으로 간주합니다.
-        // 윤곽선이 없는 그림의 경우 피사체 자체가 벽이 됩니다.
-        const WALL_THRESHOLD = Math.max(BG_DISTANCE_THRESHOLD, maxGridDist * 0.6);
-        const isWall = (c) => colorDist(c, bgColor) > WALL_THRESHOLD;
-
-        const flooded = new Uint8Array(cols * rows);
-        const queue = [];
-
-        // BFS 시작점: 상하좌우 테두리 중 벽이 아닌 곳
-        for (let x = 0; x < cols; x++) {
-            if (!isWall(gridColors[x])) { queue.push({x, y: 0}); flooded[x] = 1; }
-            const bottomIdx = (rows-1)*cols + x;
-            if (!isWall(gridColors[bottomIdx])) { queue.push({x, y: rows-1}); flooded[bottomIdx] = 1; }
-        }
-        for (let y = 0; y < rows; y++) {
-            const leftIdx = y*cols;
-            if (!isWall(gridColors[leftIdx])) { queue.push({x: 0, y}); flooded[leftIdx] = 1; }
-            const rightIdx = y*cols + cols - 1;
-            if (!isWall(gridColors[rightIdx])) { queue.push({x: cols-1, y}); flooded[rightIdx] = 1; }
-        }
-
-        let head = 0;
-        const dirs = [[0,1], [1,0], [0,-1], [-1,0]];
-        while(head < queue.length) {
-            const {x, y} = queue[head++];
-            const idx = y * cols + x;
-            
-            // 외부 공간은 무조건 배경색(bgColor)으로 물청소(색상 번짐 완벽 차단)
-            gridColors[idx] = [Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])];
-
-            for (let d of dirs) {
-                const nx = x + d[0], ny = y + d[1];
-                if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-                    const nidx = ny * cols + nx;
-                    if (!flooded[nidx]) {
-                        // 단단한 벽(닫힌 윤곽선)을 만나지 않았다면 물채우기 계속 진행
-                        if (!isWall(gridColors[nidx])) {
-                            flooded[nidx] = 1;
-                            queue.push({x: nx, y: ny});
-                        }
-                    }
+                    gridColors.push([255, 255, 255]);
                 }
             }
         }
