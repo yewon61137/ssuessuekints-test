@@ -937,41 +937,48 @@ downloadPdfBtn.addEventListener('click', () => {
             showStatus('status_pdf_err', true);
             return;
         }
+
+        // 1. 파일명(=도안 이름) 먼저 입력받기
+        const infoRaw = patternInfo.textContent || '';
+        const numbers = infoRaw.match(/\d+(\.\d+)?/g);
+        const defaultName = (numbers && numbers.length >= 4)
+            ? `knitting_pattern_${numbers[2]}cm`
+            : 'knitting_pattern';
+        const filename = window.prompt('저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
+        if (filename === null) return;
+        const finalName = filename.trim() || defaultName;
+
+        // 2. PDF 생성
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-        const imgData = canvas.toDataURL('image/png');
         const pdfWidth  = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
+        let textY = margin + 6;
 
-        // 도안 정보 추출
-        const infoRaw = patternInfo.textContent || '';
-        const numbers = infoRaw.match(/\d+(\.\d+)?/g);
-        let stitchesRows = '';
-        let sizeInfo = '';
-        if (numbers && numbers.length >= 4) {
-            stitchesRows = `${numbers[0]} Stitches x ${numbers[1]} Rows`;
-            sizeInfo     = `Finished size: approx. ${numbers[2]}cm x ${numbers[3]}cm`;
-        }
+        // 도안 이름
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(finalName, margin, textY);
+        textY += 8;
 
-        // 텍스트 직접 렌더링 (잘림 없음)
-        let textY = margin + 7;
-        if (stitchesRows) {
-            pdf.setFontSize(13);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(stitchesRows, margin, textY);
-            textY += 7;
-        }
-        if (sizeInfo) {
+        // 코수 / 단수
+        if (numbers && numbers.length >= 2) {
             pdf.setFontSize(11);
             pdf.setFont('helvetica', 'normal');
-            pdf.text(sizeInfo, margin, textY);
+            pdf.text(`Stitches: ${numbers[0]}  /  Rows: ${numbers[1]}`, margin, textY);
             textY += 6;
         }
 
-        // 도안 이미지 (텍스트 아래 5mm 여백)
-        const imgY  = textY + 5;
+        // 완성 크기
+        if (numbers && numbers.length >= 4) {
+            pdf.text(`Size: approx. ${numbers[2]}cm x ${numbers[3]}cm`, margin, textY);
+            textY += 6;
+        }
+
+        // 도안 이미지
+        const imgData = canvas.toDataURL('image/png');
+        const imgY  = textY + 4;
         const maxW  = pdfWidth  - margin * 2;
         const maxH  = pdfHeight - imgY   - margin;
         let finalW  = maxW;
@@ -1001,14 +1008,7 @@ downloadPdfBtn.addEventListener('click', () => {
             }
         });
 
-        const defaultName = (() => {
-            const nums = patternInfo.textContent.match(/\d+(\.\d+)?/g);
-            if (nums && nums.length >= 4) return `knitting_pattern_${nums[2]}cm`;
-            return 'knitting_pattern';
-        })();
-        const filename = window.prompt('저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
-        if (filename === null) return;
-        pdf.save(`${filename.trim() || defaultName}.pdf`);
+        pdf.save(`${finalName}.pdf`);
     } catch (e) {
         showStatus('status_error', true);
     }
