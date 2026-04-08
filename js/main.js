@@ -73,6 +73,7 @@ const translations = {
         color_count_hint: "이미지에 따라 실제 색상 수는 더 적을 수 있어요. 색상이 적을수록 뜨개하기 쉬워요 😊",
         unit_colors: "색",
         label_grid: "10단위 그리드 및 좌표 표시",
+        label_smoothing: "도안 노이즈 스무딩 (부드럽게)",
         regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
         btn_generate: "도안 생성하기",
         btn_download: "PDF 다운로드",
@@ -142,6 +143,7 @@ const translations = {
         color_count_hint: "Actual colors may be fewer depending on the image. Fewer colors = easier to knit 😊",
         unit_colors: "colors",
         label_grid: "Show 10-unit Grid & Coordinates",
+        label_smoothing: "Pattern Noise Smoothing (Softer)",
         regen_hint: "💡 Re-generate to get slightly different color combinations.",
         btn_generate: "Generate Pattern",
         btn_download: "Download PDF",
@@ -211,6 +213,7 @@ const translations = {
         color_count_hint: "画像によっては実際の色数がより少なくなることがあります。色が少ないほど編みやすくなります 😊",
         unit_colors: "色",
         label_grid: "10単位グリッドと座標を表示",
+        label_smoothing: "図案ノイズスムージング（滑らかに）",
         regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
         btn_generate: "編み図を生成",
         btn_download: "PDFをダウンロード",
@@ -623,176 +626,94 @@ generateBtn.addEventListener('click', async () => {
     await new Promise(res => setTimeout(res, 50));
 
     try {
-        // ── 상수 ──────────────────────────────────────────────────────────
-        const DARK_THRESHOLD = 0.25;  // 명도(V) 25% 이하 = 어두운 픽셀
-        const DARK_RATIO     = 0.08;  // 어두운 픽셀 비율 8% 이상이면 → 검정 칸
-        const DARK_COLOR     = [26, 26, 26]; // #1a1a1a
-
-        // ── 1. 원본 이미지를 격자 해상도로 부드럽게 축소 ──────────────────
-        //    (imageSmoothingEnabled=true, quality='high' → 대표색 정확도 향상)
-        const origW = originalImage.width;
-        const origH = originalImage.height;
         const cols  = targetStitches;
         const rows  = targetRows;
 
+        // 1. 작은 캔버스에 직접 축소 (Nearest Neighbor 적용으로 픽셀화 명확히 유지)
         const smallCanvas = document.createElement('canvas');
         smallCanvas.width  = cols;
         smallCanvas.height = rows;
         const smallCtx = smallCanvas.getContext('2d', { willReadFrequently: true });
-        smallCtx.imageSmoothingEnabled = true;
-        smallCtx.imageSmoothingQuality = 'high';
+        
+        // 안티앨리어싱(흐림) 강제 끄기! (가장 핵심적인 수정)
+        smallCtx.imageSmoothingEnabled = false;
         smallCtx.drawImage(originalImage, 0, 0, cols, rows);
         const smallData = smallCtx.getImageData(0, 0, cols, rows).data;
 
-        // ── 2. 원본 이미지 픽셀 취득 (칸별 다수 픽셀 분석용) ─────────────
-        const SCAN_MAX = 2000;
-        const scanScale = Math.min(1, SCAN_MAX / Math.max(origW, origH));
-        const scanW = Math.round(origW * scanScale);
-        const scanH = Math.round(origH * scanScale);
-
-        const scanCanvas = document.createElement('canvas');
-        scanCanvas.width  = scanW;
-        scanCanvas.height = scanH;
-        const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
-        scanCtx.imageSmoothingEnabled = true;
-        scanCtx.imageSmoothingQuality = 'high';
-        scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
-        const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
-
-        const cellScaleX = scanW / cols;
-        const cellScaleY = scanH / rows;
-
-        // ── 3. 각 격자 칸 색상 결정 ───────────────────────────────────────
-        //    - 해당 칸 영역의 어두운 픽셀 비율 ≥ DARK_RATIO → 검정
-        //    - 그 외 → 영역 픽셀 평균 RGB (투명 픽셀은 흰색으로 처리)
-        const gridColors = []; // [r,g,b] per cell, length = cols*rows
-        let   hasBlack   = false;
-
-        for (let gy = 0; gy < rows; gy++) {
-            for (let gx = 0; gx < cols; gx++) {
-                const x0 = Math.floor(gx * cellScaleX);
-                const x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
-                const y0 = Math.floor(gy * cellScaleY);
-                const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
-
-                let darkCount = 0, totalCount = 0;
-                let sumR = 0, sumG = 0, sumB = 0, sumPx = 0;
-
-                for (let py = y0; py < y1; py++) {
-                    for (let px = x0; px < x1; px++) {
-                        const si = (py * scanW + px) * 4;
-                        const a  = scanData[si + 3];
-                        totalCount++;
-
-                        if (a < 128) {
-                            // 투명 픽셀 → 흰색으로 처리
-                            sumR += 255; sumG += 255; sumB += 255;
-                            sumPx++;
-                        } else {
-                            const r = scanData[si], g = scanData[si + 1], b = scanData[si + 2];
-                            const v = Math.max(r, g, b) / 255; // HSV 명도
-                            if (v <= DARK_THRESHOLD) darkCount++;
-                            sumR += r; sumG += g; sumB += b;
-                            sumPx++;
-                        }
-                    }
-                }
-
-                if (totalCount > 0 && darkCount / totalCount >= DARK_RATIO) {
-                    gridColors.push(DARK_COLOR);
-                    hasBlack = true;
-                } else if (sumPx > 0) {
-                    gridColors.push([
-                        Math.round(sumR / sumPx),
-                        Math.round(sumG / sumPx),
-                        Math.round(sumB / sumPx),
-                    ]);
-                } else {
-                    gridColors.push([255, 255, 255]); // 완전 투명 칸 폴백
-                }
+        // 2. 픽셀 데이터를 색상 배열로 직결 (scanCanvas 및 임계값 삭제)
+        let gridColors = [];
+        for (let i = 0; i < smallData.length; i += 4) {
+            const a = smallData[i + 3];
+            if (a < 128) {
+                gridColors.push([255, 255, 255]); // 투명 픽셀은 흰색으로
+            } else {
+                gridColors.push([smallData[i], smallData[i + 1], smallData[i + 2]]);
             }
         }
 
-        // ── 4. 중앙값 필터로 노이즈 제거 ─────────────────────────────────
-        //    applyMedianFilter 는 팔레트 인덱스 배열 기반이므로
-        //    임시로 인덱스화해서 필터 적용 후 복원
-        const BLACK_IDX = 0;
-        const COLOR_IDX_OFFSET = 1; // 0 = 검정 예약
-
-        // gridColors → 임시 인덱스 매핑 (검정=0, 나머지=1(색상별 분류 전))
-        // 필터 전에는 색상을 그대로 평균값으로 갖고 있으므로
-        // R값을 임시 인덱스 대신 직접 사용하는 간략 필터 적용
-        function medianFilterColors(colors, w, h) {
-            const out = new Array(w * h);
-            for (let gy = 0; gy < h; gy++) {
-                for (let gx = 0; gx < w; gx++) {
-                    const idx = gy * w + gx;
-                    // 비검정 칸은 그대로 유지 (검정으로 확장하지 않음)
-                    if (colors[idx] !== DARK_COLOR) {
-                        out[idx] = colors[idx];
-                        continue;
-                    }
-                    // 검정 칸만 처리: 완전 고립 노이즈 점만 제거
-                    let darkNeighbors = 0, totalNeighbors = 0;
+        // 3. 노이즈 스무딩 처리 (UI 체크박스 옵션 선택 기반)
+        const smoothingCheckbox = document.getElementById('applySmoothing');
+        const applyPatternSmoothing = smoothingCheckbox ? smoothingCheckbox.checked : false;
+        
+        if (applyPatternSmoothing) {
+            // 이웃 픽셀들의 평균으로 노이즈 점을 가라앉히는 단순한 필터
+            const smoothedColors = [];
+            for (let gy = 0; gy < rows; gy++) {
+                for (let gx = 0; gx < cols; gx++) {
+                    const idx = gy * cols + gx;
                     let sumR = 0, sumG = 0, sumB = 0;
+                    let totalNeighbors = 0;
+                    
                     for (let dy = -1; dy <= 1; dy++) {
                         for (let dx = -1; dx <= 1; dx++) {
-                            if (dy === 0 && dx === 0) continue; // 자기 자신 제외
                             const ny = gy + dy, nx = gx + dx;
-                            if (ny < 0 || ny >= h || nx < 0 || nx >= w) continue;
-                            const nc = colors[ny * w + nx];
-                            totalNeighbors++;
-                            if (nc === DARK_COLOR) darkNeighbors++;
-                            sumR += nc[0]; sumG += nc[1]; sumB += nc[2];
+                            if (ny >= 0 && ny < rows && nx >= 0 && nx < cols) {
+                                const nc = gridColors[ny * cols + nx];
+                                sumR += nc[0]; sumG += nc[1]; sumB += nc[2];
+                                totalNeighbors++;
+                            }
                         }
                     }
-                    if (darkNeighbors === 0) {
-                        // 이웃에 검정이 전혀 없는 고립 노이즈 → 이웃 평균으로 대체
-                        out[idx] = [
-                            Math.round(sumR / totalNeighbors),
-                            Math.round(sumG / totalNeighbors),
-                            Math.round(sumB / totalNeighbors),
-                        ];
-                    } else {
-                        out[idx] = DARK_COLOR;
-                    }
+                    smoothedColors.push([
+                        Math.round(sumR / totalNeighbors),
+                        Math.round(sumG / totalNeighbors),
+                        Math.round(sumB / totalNeighbors)
+                    ]);
                 }
             }
-            return out;
+            gridColors = smoothedColors;
         }
 
-        const filteredColors = medianFilterColors(gridColors, cols, rows);
-
-        // ── 5. 검정 외 칸에 kMeans + mergeByDeltaE 로 색상 압축 ──────────
-        //    격자 결과 색상만 사용 (전체 이미지 픽셀 아님)
-        const nonBlackColors = filteredColors.filter(c => c !== DARK_COLOR);
-        const nonBlackPixels = nonBlackColors.map((c, i) => [c[0], c[1], c[2], i, 0]);
+        // 4. K-Means 색상 양자화
+        const allPixels = [];
+        for (let gy = 0; gy < rows; gy++) {
+            for (let gx = 0; gx < cols; gx++) {
+                const c = gridColors[gy * cols + gx];
+                allPixels.push([c[0], c[1], c[2], gx, gy]);
+            }
+        }
 
         let palette = [];
-        if (nonBlackPixels.length > 0) {
-            const effectiveK = Math.min(colorCount, nonBlackPixels.length);
+        if (allPixels.length > 0) {
+            const effectiveK = Math.min(colorCount, allPixels.length);
             const { palette: rawPalette, assignments: rawAssign } =
-                kMeans(nonBlackPixels, effectiveK, cols, rows, 15, seedColors);
+                kMeans(allPixels, effectiveK, cols, rows, 15, seedColors);
             const { palette: mergedPalette } =
                 mergeByDeltaE(rawPalette, rawAssign, seedColors, 15);
             palette = mergedPalette;
         }
         if (palette.length === 0) palette.push([200, 200, 200]);
 
-        // ── 6. 최종 팔레트 인덱스 배열 생성 ──────────────────────────────
-        //    legendPalette[0] = 검정, [1..N] = kMeans 팔레트
-        const legendPalette = hasBlack ? [DARK_COLOR, ...palette] : palette;
-
-        const finalAssignments = filteredColors.map(c => {
-            if (c === DARK_COLOR) return 0;
-            // 가장 가까운 팔레트 색 찾기
-            let minD = Infinity, minI = hasBlack ? 1 : 0;
-            const offset = hasBlack ? 1 : 0;
+        // 5. 최종 팔레트 매칭
+        const legendPalette = palette;
+        
+        const finalAssignments = gridColors.map(c => {
+            let minD = Infinity, minI = 0;
             for (let ci = 0; ci < palette.length; ci++) {
                 const p  = palette[ci];
                 const dr = c[0] - p[0], dg = c[1] - p[1], db = c[2] - p[2];
                 const d  = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
-                if (d < minD) { minD = d; minI = ci + offset; }
+                if (d < minD) { minD = d; minI = ci; }
             }
             return minI;
         });
