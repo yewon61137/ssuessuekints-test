@@ -635,11 +635,7 @@ generateBtn.addEventListener('click', async () => {
         const cols  = targetStitches;
         const rows  = targetRows;
 
-        // --- 1. 대비 및 윤곽선 강조 값 ---
-        const contrastSlider = document.getElementById('contrastBoost');
-        const contrastVal = contrastSlider ? parseFloat(contrastSlider.value) : 120;
-        
-        // 스캔용 고해상도 캔버스 준비
+        // --- 1. 스캔용 고해상도 캔버스 준비 및 화이트 매팅 (투명 방지) ---
         const SCAN_MAX = 2000;
         const origW = originalImage.width;
         const origH = originalImage.height;
@@ -652,29 +648,22 @@ generateBtn.addEventListener('click', async () => {
         scanCanvas.height = scanH;
         const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
         
-        // 캔버스 필터 적용 (대비 및 채도 증폭으로 피사체/배경 분리도 극대화)
-        scanCtx.filter = `contrast(${contrastVal}%) saturate(${Math.max(100, contrastVal * 0.9)}%)`;
+        // 투명 배경이 검정색으로 인식되는 치명적 버그 방지를 위해 강제 흰색 매팅
+        scanCtx.fillStyle = '#ffffff';
+        scanCtx.fillRect(0, 0, scanW, scanH);
+        
         scanCtx.imageSmoothingEnabled = true;
         scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
 
-        // --- 1.5 캔버스 필터 적용 후, 배경 밝기에 따른 지능적 형태학적 팽창 (Closing Gaps & Preventing Spills) ---
-        // 가장자리 픽셀들의 평균 밝기를 대강 측정
-        const tl = scanCtx.getImageData(0, 0, 1, 1).data;
-        const br = scanCtx.getImageData(scanW-1, scanH-1, 1, 1).data;
-        const bgBrightness = (tl[0]+tl[1]+tl[2] + br[0]+br[1]+br[2]) / 2;
-
-        // 배경이 밝으면(일반 도안) 어두운 선을 팽창(darken), 배경이 어두우면(칠판 등) 밝은 선을 팽창(lighten)
-        scanCtx.globalCompositeOperation = bgBrightness > 380 ? 'darken' : 'lighten';
-        
-        // 셀(격자) 하나 크기의 약 45%만큼 상하좌우로 겹쳐서 선을 물리적으로 두껍게 만듭니다.
-        // 이로 인해 윤곽선이 꽉 닫히게 되며, 내부 색상이 격자 바깥으로 튀어나갈 공간 자체를 물리적으로 차단합니다.
+        // --- 1.5 형태학적 팽창 (Closing Gaps) ---
+        // 어두운 윤곽선(검은 선)을 셀 크기에 비례하여 강제로 두껍게 팽창시킵니다.
+        // 배경을 강제 흰색으로 고정했으므로 무조건 'darken' 모드를 안전하게 사용합니다.
+        scanCtx.globalCompositeOperation = 'darken';
         const offset = Math.max(1, Math.floor((scanW / cols) * 0.45)); 
         scanCtx.drawImage(originalImage, -offset, 0, scanW, scanH);
         scanCtx.drawImage(originalImage, offset, 0, scanW, scanH);
         scanCtx.drawImage(originalImage, 0, -offset, scanW, scanH);
         scanCtx.drawImage(originalImage, 0, offset, scanW, scanH);
-        
-        // 원상복구
         scanCtx.globalCompositeOperation = 'source-over';
 
         const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
@@ -697,7 +686,7 @@ generateBtn.addEventListener('click', async () => {
         const colorDist = (c1, c2) => Math.abs(c1[0]-c2[0]) + Math.abs(c1[1]-c2[1]) + Math.abs(c1[2]-c2[2]);
         const BG_DISTANCE_THRESHOLD = 40; // 배경으로 간주할 최대 거리
 
-        // --- 3. 지분율 10% 필터링 (Threshold Mode Downsampling) ---
+        // --- 3. 최빈값 우선 추출 (Pure Mode Downsampling) ---
         const cellScaleX = scanW / cols;
         const cellScaleY = scanH / rows;
         let gridColors = [];
@@ -716,7 +705,7 @@ generateBtn.addEventListener('click', async () => {
                 for (let py = y0; py < y1; py++) {
                     for (let px = x0; px < x1; px++) {
                         const si = (py * scanW + px) * 4;
-                        if (scanData[si + 3] < 128) continue;
+                        if (scanData[si + 3] < 128) continue; // 투명 픽셀 무시
 
                         validPixels++;
                         const r = scanData[si], g = scanData[si+1], b = scanData[si+2];
@@ -729,24 +718,20 @@ generateBtn.addEventListener('click', async () => {
                     }
                 }
 
-                // 2. 전체 픽셀의 10% 미만을 차지하는 색상(번짐 찌꺼기)은 철저히 무시
-                const THRESHOLD_COUNT = validPixels * 0.1;
-                let maxDist = -1;
-                let candidateColor = bgColor;
+                // 2. 가장 많이 등장한 대표 색상(최빈값) 1개만 무조건 추출
+                let maxCount = 0;
+                let modeColor = bgColor;
 
                 for (let val of counts.values()) {
-                    if (val.count >= THRESHOLD_COUNT) {
-                        const dist = colorDist(val.c, bgColor);
-                        if (dist > maxDist) {
-                            maxDist = dist;
-                            candidateColor = val.c;
-                        }
+                    if (val.count > maxCount) {
+                        maxCount = val.count;
+                        modeColor = val.c;
                     }
                 }
 
-                // 3. 만약 10%를 넘으면서 배경보다 확연히 다른 색상이 선택되었다면 적용, 아니면 배경 처리
-                if (validPixels > 0 && maxDist > BG_DISTANCE_THRESHOLD) {
-                    gridColors.push(candidateColor);
+                // 3. 최빈값 적용 (색상 튀어나감 완전 차단)
+                if (validPixels > 0 && colorDist(modeColor, bgColor) > BG_DISTANCE_THRESHOLD) {
+                    gridColors.push(modeColor);
                 } else if (validPixels > 0) {
                     gridColors.push([Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])]);
                 } else {
