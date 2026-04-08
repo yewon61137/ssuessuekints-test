@@ -2,9 +2,9 @@
 
 import { 
     getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage,
-    collection, serverTimestamp, ref, uploadBytes, getDownloadURL
+    serverTimestamp, ref, uploadBytes, getDownloadURL
 } from './auth.js';
-import { addDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 // --- 상태 관리 ---
 let grid = []; // 2D array (0: 빈칸, 1: 채움칸, -1: 비활성칸)
