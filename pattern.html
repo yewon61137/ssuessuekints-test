@@ -238,7 +238,24 @@
             <input type="checkbox" id="applySmoothing">
             <label for="applySmoothing" data-i18n="label_smoothing">도안 노이즈 스무딩 (부드럽게)</label>
           </div>
+
+          <div class="control-group">
+            <label for="contrastBoost">
+              <span data-i18n="label_contrast">윤곽선/대비 강조</span>
+            </label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="range" id="contrastBoost" min="100" max="250" value="120" style="flex:1;">
+              <span id="contrastValue">120%</span>
+            </div>
+            <p class="field-hint" data-i18n="contrast_hint">흐릿한 사진의 윤곽선을 더 뚜렷하게 잡고 싶을 때 수치를 올려주세요.</p>
+          </div>
         </div>
+
+        <script>
+          document.getElementById('contrastBoost').addEventListener('input', function(e) {
+            document.getElementById('contrastValue').textContent = e.target.value + '%';
+          });
+        </script>
 
         <div class="action-buttons">
           <div class="generator-hint" data-i18n="regen_hint">

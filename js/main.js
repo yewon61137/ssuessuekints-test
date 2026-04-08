@@ -74,6 +74,8 @@ const translations = {
         unit_colors: "색",
         label_grid: "10단위 그리드 및 좌표 표시",
         label_smoothing: "도안 노이즈 스무딩 (부드럽게)",
+        label_contrast: "윤곽선/대비 강조",
+        contrast_hint: "흐릿한 사진의 윤곽선을 더 뚜렷하게 잡고 싶을 때 수치를 올려주세요.",
         regen_hint: "💡 버튼을 다시 누를 때마다 조금씩 다른 도안이 생성됩니다.",
         btn_generate: "도안 생성하기",
         btn_download: "PDF 다운로드",
@@ -144,6 +146,8 @@ const translations = {
         unit_colors: "colors",
         label_grid: "Show 10-unit Grid & Coordinates",
         label_smoothing: "Pattern Noise Smoothing (Softer)",
+        label_contrast: "Outline & Contrast Boost",
+        contrast_hint: "Increase this to make the outlines sharper and more distinct for blurry photos.",
         regen_hint: "💡 Re-generate to get slightly different color combinations.",
         btn_generate: "Generate Pattern",
         btn_download: "Download PDF",
@@ -214,6 +218,8 @@ const translations = {
         unit_colors: "色",
         label_grid: "10単位グリッドと座標を表示",
         label_smoothing: "図案ノイズスムージング（滑らかに）",
+        label_contrast: "輪郭・コントラスト強調",
+        contrast_hint: "ぼやけた写真の輪郭をはっきりさせたい場合に数値を上げてください。",
         regen_hint: "💡 ボタンをもう一度押すと、少しずつ異なる配色が生成されます。",
         btn_generate: "編み図を生成",
         btn_download: "PDFをダウンロード",
@@ -620,50 +626,105 @@ generateBtn.addEventListener('click', async () => {
     if (targetStitches > 1500 || targetRows > 1500) {
         showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
         generateBtn.disabled = false;
-        return;
-    }
-
-    await new Promise(res => setTimeout(res, 50));
-
-    try {
         const cols  = targetStitches;
         const rows  = targetRows;
 
-        // 1. 작은 캔버스에 직접 축소 (Nearest Neighbor 적용으로 픽셀화 명확히 유지)
-        const smallCanvas = document.createElement('canvas');
-        smallCanvas.width  = cols;
-        smallCanvas.height = rows;
-        const smallCtx = smallCanvas.getContext('2d', { willReadFrequently: true });
+        // --- 1. 대비 및 윤곽선 강조 값 ---
+        const contrastSlider = document.getElementById('contrastBoost');
+        const contrastVal = contrastSlider ? parseFloat(contrastSlider.value) : 120;
         
-        // 안티앨리어싱(흐림) 강제 끄기! (가장 핵심적인 수정)
-        smallCtx.imageSmoothingEnabled = false;
-        smallCtx.drawImage(originalImage, 0, 0, cols, rows);
-        const smallData = smallCtx.getImageData(0, 0, cols, rows).data;
+        // 스캔용 고해상도 캔버스 준비
+        const SCAN_MAX = 2000;
+        const origW = originalImage.width;
+        const origH = originalImage.height;
+        const scanScale = Math.min(1, SCAN_MAX / Math.max(origW, origH));
+        const scanW = Math.round(origW * scanScale);
+        const scanH = Math.round(origH * scanScale);
 
-        // 2. 픽셀 데이터를 색상 배열로 직결 (scanCanvas 및 임계값 삭제)
+        const scanCanvas = document.createElement('canvas');
+        scanCanvas.width  = scanW;
+        scanCanvas.height = scanH;
+        const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+        
+        // 캔버스 필터 적용 (대비 및 채도 증폭으로 피사체/배경 분리도 극대화)
+        scanCtx.filter = `contrast(${contrastVal}%) saturate(${Math.max(100, contrastVal * 0.9)}%)`;
+        scanCtx.imageSmoothingEnabled = true;
+        scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
+        const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
+
+        // --- 2. 배경색 모서리 감지 알고리즘 ---
+        const getPixelColor = (x, y) => {
+            const i = (y * scanW + x) * 4;
+            return [scanData[i], scanData[i+1], scanData[i+2]];
+        };
+        const corners = [
+            getPixelColor(0, 0),
+            getPixelColor(scanW-1, 0),
+            getPixelColor(0, scanH-1),
+            getPixelColor(scanW-1, scanH-1)
+        ];
+        let bgR = 0, bgG = 0, bgB = 0;
+        corners.forEach(c => { bgR+=c[0]; bgG+=c[1]; bgB+=c[2]; });
+        const bgColor = [bgR/4, bgG/4, bgB/4];
+
+        const colorDist = (c1, c2) => Math.abs(c1[0]-c2[0]) + Math.abs(c1[1]-c2[1]) + Math.abs(c1[2]-c2[2]);
+        const BG_DISTANCE_THRESHOLD = 40; // 배경으로 간주할 최대 거리
+
+        // --- 3. 어댑티브 샘플링 (피사체 우선 추출) ---
+        const cellScaleX = scanW / cols;
+        const cellScaleY = scanH / rows;
         let gridColors = [];
-        for (let i = 0; i < smallData.length; i += 4) {
-            const a = smallData[i + 3];
-            if (a < 128) {
-                gridColors.push([255, 255, 255]); // 투명 픽셀은 흰색으로
-            } else {
-                gridColors.push([smallData[i], smallData[i + 1], smallData[i + 2]]);
+
+        for (let gy = 0; gy < rows; gy++) {
+            for (let gx = 0; gx < cols; gx++) {
+                const x0 = Math.floor(gx * cellScaleX);
+                const x1 = Math.min(Math.ceil((gx + 1) * cellScaleX), scanW);
+                const y0 = Math.floor(gy * cellScaleY);
+                const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
+
+                let fgR = 0, fgG = 0, fgB = 0, fgNum = 0;
+                let oR = 0, oG = 0, oB = 0, oNum = 0;
+
+                for (let py = y0; py < y1; py++) {
+                    for (let px = x0; px < x1; px++) {
+                        const si = (py * scanW + px) * 4;
+                        if (scanData[si + 3] < 128) {
+                            oR+=255; oG+=255; oB+=255; oNum++; 
+                            continue;
+                        }
+                        const c = [scanData[si], scanData[si+1], scanData[si+2]];
+                        const dist = colorDist(c, bgColor);
+
+                        if (dist > BG_DISTANCE_THRESHOLD) {
+                            // 피사체 (배경과 확연히 다른 색)
+                            fgR+=c[0]; fgG+=c[1]; fgB+=c[2]; fgNum++;
+                        } else {
+                            // 배경색과 비슷함
+                            oR+=c[0]; oG+=c[1]; oB+=c[2]; oNum++;
+                        }
+                    }
+                }
+
+                // 칸 안에 피사체가 하나라도 존재한다면 그 칸은 무조건 피사체 색상을 우선 채택 (얇은 선 보존)
+                if (fgNum > 0) {
+                    gridColors.push([Math.round(fgR/fgNum), Math.round(fgG/fgNum), Math.round(fgB/fgNum)]);
+                } else if (oNum > 0) {
+                    gridColors.push([Math.round(oR/oNum), Math.round(oG/oNum), Math.round(oB/oNum)]);
+                } else {
+                    gridColors.push([255, 255, 255]);
+                }
             }
         }
 
-        // 3. 노이즈 스무딩 처리 (UI 체크박스 옵션 선택 기반)
+        // --- 4. 노이즈 스무딩 처리 (UI 체크박스) ---
         const smoothingCheckbox = document.getElementById('applySmoothing');
         const applyPatternSmoothing = smoothingCheckbox ? smoothingCheckbox.checked : false;
         
         if (applyPatternSmoothing) {
-            // 이웃 픽셀들의 평균으로 노이즈 점을 가라앉히는 단순한 필터
             const smoothedColors = [];
             for (let gy = 0; gy < rows; gy++) {
                 for (let gx = 0; gx < cols; gx++) {
-                    const idx = gy * cols + gx;
-                    let sumR = 0, sumG = 0, sumB = 0;
-                    let totalNeighbors = 0;
-                    
+                    let sumR = 0, sumG = 0, sumB = 0, totalNeighbors = 0;
                     for (let dy = -1; dy <= 1; dy++) {
                         for (let dx = -1; dx <= 1; dx++) {
                             const ny = gy + dy, nx = gx + dx;
@@ -684,7 +745,7 @@ generateBtn.addEventListener('click', async () => {
             gridColors = smoothedColors;
         }
 
-        // 4. K-Means 색상 양자화
+        // --- 5. K-Means 색상 양자화 ---
         const allPixels = [];
         for (let gy = 0; gy < rows; gy++) {
             for (let gx = 0; gx < cols; gx++) {
@@ -704,7 +765,7 @@ generateBtn.addEventListener('click', async () => {
         }
         if (palette.length === 0) palette.push([200, 200, 200]);
 
-        // 5. 최종 팔레트 매칭
+        // --- 6. 최종 팔레트 매칭 ---
         const legendPalette = palette;
         
         const finalAssignments = gridColors.map(c => {
@@ -717,7 +778,6 @@ generateBtn.addEventListener('click', async () => {
             }
             return minI;
         });
-
         // ── 7. 도안 캔버스 그리기 ─────────────────────────────────────────
         let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / cols)));
         if (cols * pixelSize > MAX_CANVAS_DIMENSION || rows * pixelSize > MAX_CANVAS_DIMENSION) {
