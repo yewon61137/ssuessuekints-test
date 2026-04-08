@@ -968,11 +968,13 @@ downloadPdfBtn.addEventListener('click', () => {
             tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
             const m = tCtx.measureText(text);
             tCanvas.width = Math.ceil(m.width) + (20 * scale);
-            tCanvas.height = size * 8 * scale;
+            // 너무 큰 캔버스 높이를 사이즈에 맞게 조절 (기존 8배 -> 1.5배)
+            tCanvas.height = Math.ceil(size * 1.5 * scale);
             tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
             tCtx.fillStyle = '#000'; tCtx.textBaseline = 'middle';
-            tCtx.fillText(text, 10 * scale, tCanvas.height / 2);
-            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / (scale * 2.5), h: tCanvas.height / (scale * 2.5) };
+            // 상하 중앙, 좌우 마진 10 * scale 정렬
+            tCtx.fillText(text, 10 * scale, tCanvas.height / 2 + (size * scale * 0.05));
+            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / (scale * 3), h: tCanvas.height / (scale * 3) };
         };
 
         const imgData = canvas.toDataURL('image/png'); // PNG로 선명도 유지
@@ -980,15 +982,23 @@ downloadPdfBtn.addEventListener('click', () => {
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
         const maxW = pdfWidth - (margin * 2);
-        const maxH = pdfHeight - (margin * 2) - 40;
+        // 타이틀 영역 높이 확보를 위해 maxH 조정
+        const maxH = pdfHeight - (margin * 2) - 30;
         let finalW = maxW;
         let finalH = (canvas.height / canvas.width) * finalW;
         if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         
         const lang = currentLang;
-        const titleText = (lang === 'ko' ? '픽셀 뜨개 도안' : (lang === 'ja' ? 'ピクセル編み図' : 'Knitting Pattern'));
+        let titleText = (lang === 'ko' ? '픽셀 뜨개 도안' : (lang === 'ja' ? 'ピクセル編み図' : 'Knitting Pattern'));
+        // 저장버튼 누를 때 지정한 제목이 있다면 반영
+        const nameInput = document.getElementById('patternTitleInput');
+        if (nameInput && nameInput.value.trim()) {
+             titleText = nameInput.value.trim();
+        }
+
         const titleImg = textToImg(titleText, 18, true);
-        pdf.addImage(titleImg.src, 'PNG', margin, margin - 5, titleImg.w, titleImg.h);
+        const infoY = margin + titleImg.h + 2;
+        pdf.addImage(titleImg.src, 'PNG', margin, margin, titleImg.w, titleImg.h);
 
         const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
         let infoStr = "";
@@ -998,9 +1008,10 @@ downloadPdfBtn.addEventListener('click', () => {
             infoStr = patternInfo.textContent;
         }
         const infoImg = textToImg(infoStr, 10);
-        pdf.addImage(infoImg.src, 'PNG', margin, margin + 8, infoImg.w, infoImg.h);
+        const imgY = infoY + infoImg.h + 5;
+        pdf.addImage(infoImg.src, 'PNG', margin, infoY, infoImg.w, infoImg.h);
         
-        pdf.addImage(imgData, 'PNG', margin, margin + 22, finalW, finalH);
+        pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
         let currentY = margin + 15;
