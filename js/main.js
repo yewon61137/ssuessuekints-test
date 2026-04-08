@@ -960,21 +960,32 @@ downloadPdfBtn.addEventListener('click', () => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
         
-        // 고해상도 텍스트 렌더링 함수 (High-DPI)
+        // 고해상도 텍스트 렌더링 함수 (High-DPI) - 자름 방지 및 레이아웃 최적화
         const textToImg = (text, size, isBold = false) => {
             const scale = 4;
             const tCanvas = document.createElement('canvas');
             const tCtx = tCanvas.getContext('2d');
-            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
+            const fontSize = size * scale;
+            tCtx.font = `${isBold ? 'bold ' : ''}${fontSize}px sans-serif`;
             const m = tCtx.measureText(text);
-            tCanvas.width = Math.ceil(m.width) + (20 * scale);
-            // 너무 큰 캔버스 높이를 사이즈에 맞게 조절 (기존 8배 -> 1.5배)
-            tCanvas.height = Math.ceil(size * 1.5 * scale);
-            tCtx.font = `${isBold ? 'bold ' : ''}${size * scale}px sans-serif`;
-            tCtx.fillStyle = '#000'; tCtx.textBaseline = 'middle';
-            // 상하 중앙, 좌우 마진 10 * scale 정렬
-            tCtx.fillText(text, 10 * scale, tCanvas.height / 2 + (size * scale * 0.05));
-            return { src: tCanvas.toDataURL('image/png'), w: tCanvas.width / (scale * 3), h: tCanvas.height / (scale * 3) };
+            
+            // 캔버스 높이를 충분히 확보하여 글자 잘림 방지 (기존 1.5배 -> 2.5배)
+            tCanvas.width = Math.ceil(m.width) + (40 * scale); 
+            tCanvas.height = Math.ceil(size * 2.5 * scale);
+            
+            // 캔버스 초기화 후 폰트 재설정 (필수)
+            tCtx.font = `${isBold ? 'bold ' : ''}${fontSize}px sans-serif`;
+            tCtx.fillStyle = '#000';
+            tCtx.textBaseline = 'top'; // 예측 가능한 배치를 위해 top 기준 사용
+            
+            // 중앙 근처에 안전하게 배치
+            tCtx.fillText(text, 20 * scale, size * 0.5 * scale);
+            
+            return { 
+                src: tCanvas.toDataURL('image/png'), 
+                w: tCanvas.width / (scale * 3.78), // 96DPI (3.78px/mm) 기준 정밀 변환
+                h: tCanvas.height / (scale * 3.78) 
+            };
         };
 
         const imgData = canvas.toDataURL('image/png'); // PNG로 선명도 유지
@@ -997,20 +1008,25 @@ downloadPdfBtn.addEventListener('click', () => {
         }
 
         const titleImg = textToImg(titleText, 18, true);
-        const infoY = margin + titleImg.h + 2;
         pdf.addImage(titleImg.src, 'PNG', margin, margin, titleImg.w, titleImg.h);
 
-        const numbers = patternInfo.textContent.match(/\d+(\.\d+)?/g);
+        // 정보란 텍스트 정제
+        const infoRaw = patternInfo.textContent || "";
+        const numbers = infoRaw.match(/\d+(\.\d+)?/g);
         let infoStr = "";
         if (numbers && numbers.length >= 4) {
-            infoStr = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
+            infoStr = `${numbers[0]} Stiches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
         } else {
-            infoStr = patternInfo.textContent;
+            infoStr = infoRaw;
         }
-        const infoImg = textToImg(infoStr, 10);
-        const imgY = infoY + infoImg.h + 5;
+
+        const infoImg = textToImg(infoStr, 11);
+        // 타이틀 바로 아래에 배치 (간격 2mm)
+        const infoY = margin + titleImg.h + 2;
         pdf.addImage(infoImg.src, 'PNG', margin, infoY, infoImg.w, infoImg.h);
         
+        // 도안 이미지는 정보란 아래에 배치 (간격 5mm)
+        const imgY = infoY + infoImg.h + 5;
         pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
         pdf.addPage();
         pdf.text("Color Legend", margin, margin + 5);
