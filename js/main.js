@@ -656,26 +656,6 @@ generateBtn.addEventListener('click', async () => {
         scanCtx.imageSmoothingEnabled = true;
         scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
 
-        // --- 1.5 캔버스 필터 적용 후, 배경 밝기에 따른 지능적 형태학적 팽창 (Closing Gaps & Preventing Spills) ---
-        // 가장자리 픽셀들의 평균 밝기를 대강 측정
-        const tl = scanCtx.getImageData(0, 0, 1, 1).data;
-        const br = scanCtx.getImageData(scanW-1, scanH-1, 1, 1).data;
-        const bgBrightness = (tl[0]+tl[1]+tl[2] + br[0]+br[1]+br[2]) / 2;
-
-        // 배경이 밝으면(일반 도안) 어두운 선을 팽창(darken), 배경이 어두우면(칠판 등) 밝은 선을 팽창(lighten)
-        scanCtx.globalCompositeOperation = bgBrightness > 380 ? 'darken' : 'lighten';
-        
-        // 셀(격자) 하나 크기의 약 45%만큼 상하좌우로 겹쳐서 선을 물리적으로 두껍게 만듭니다.
-        // 이로 인해 윤곽선이 꽉 닫히게 되며, 내부 색상이 격자 바깥으로 튀어나갈 공간 자체를 물리적으로 차단합니다.
-        const offset = Math.max(1, Math.floor((scanW / cols) * 0.45)); 
-        scanCtx.drawImage(originalImage, -offset, 0, scanW, scanH);
-        scanCtx.drawImage(originalImage, offset, 0, scanW, scanH);
-        scanCtx.drawImage(originalImage, 0, -offset, scanW, scanH);
-        scanCtx.drawImage(originalImage, 0, offset, scanW, scanH);
-        
-        // 원상복구
-        scanCtx.globalCompositeOperation = 'source-over';
-
         const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
 
         // --- 2. 배경색 모서리 감지 알고리즘 ---
