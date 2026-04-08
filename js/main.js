@@ -656,6 +656,27 @@ generateBtn.addEventListener('click', async () => {
         scanCtx.filter = `contrast(${contrastVal}%) saturate(${Math.max(100, contrastVal * 0.9)}%)`;
         scanCtx.imageSmoothingEnabled = true;
         scanCtx.drawImage(originalImage, 0, 0, scanW, scanH);
+
+        // --- 1.5 캔버스 필터 적용 후, 배경 밝기에 따른 지능적 형태학적 팽창 (Closing Gaps & Preventing Spills) ---
+        // 가장자리 픽셀들의 평균 밝기를 대강 측정
+        const tl = scanCtx.getImageData(0, 0, 1, 1).data;
+        const br = scanCtx.getImageData(scanW-1, scanH-1, 1, 1).data;
+        const bgBrightness = (tl[0]+tl[1]+tl[2] + br[0]+br[1]+br[2]) / 2;
+
+        // 배경이 밝으면(일반 도안) 어두운 선을 팽창(darken), 배경이 어두우면(칠판 등) 밝은 선을 팽창(lighten)
+        scanCtx.globalCompositeOperation = bgBrightness > 380 ? 'darken' : 'lighten';
+        
+        // 셀(격자) 하나 크기의 약 45%만큼 상하좌우로 겹쳐서 선을 물리적으로 두껍게 만듭니다.
+        // 이로 인해 윤곽선이 꽉 닫히게 되며, 내부 색상이 격자 바깥으로 튀어나갈 공간 자체를 물리적으로 차단합니다.
+        const offset = Math.max(1, Math.floor((scanW / cols) * 0.45)); 
+        scanCtx.drawImage(originalImage, -offset, 0, scanW, scanH);
+        scanCtx.drawImage(originalImage, offset, 0, scanW, scanH);
+        scanCtx.drawImage(originalImage, 0, -offset, scanW, scanH);
+        scanCtx.drawImage(originalImage, 0, offset, scanW, scanH);
+        
+        // 원상복구
+        scanCtx.globalCompositeOperation = 'source-over';
+
         const scanData = scanCtx.getImageData(0, 0, scanW, scanH).data;
 
         // --- 2. 배경색 모서리 감지 알고리즘 ---
@@ -716,6 +737,61 @@ generateBtn.addEventListener('click', async () => {
                     gridColors.push([Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])]);
                 } else {
                     gridColors.push([255, 255, 255]); // 완전 투명 폴백
+                }
+            }
+        }
+
+        // --- 3.5 플러드 필 (Flood-Fill) 클린업 ---
+        // 윤곽선 외부로 새어나간 에지(Color Spill)를 완벽히 제거하기 위해
+        // 테두리 픽셀에서 출발하는 BFS 물채우기(배경색으로 덮어쓰기)를 실행합니다.
+        // 먼저, 도안 내에서 배경과 가장 대비가 큰 색상(주요 윤곽선)의 거리를 찾습니다.
+        let maxGridDist = 0;
+        for (let i = 0; i < gridColors.length; i++) {
+            const d = colorDist(gridColors[i], bgColor);
+            if (d > maxGridDist) maxGridDist = d;
+        }
+        
+        // 최대 거리의 60% 이상 차이나는 색을 '단단한 벽(윤곽선)'으로 간주합니다.
+        // 윤곽선이 없는 그림의 경우 피사체 자체가 벽이 됩니다.
+        const WALL_THRESHOLD = Math.max(BG_DISTANCE_THRESHOLD, maxGridDist * 0.6);
+        const isWall = (c) => colorDist(c, bgColor) > WALL_THRESHOLD;
+
+        const flooded = new Uint8Array(cols * rows);
+        const queue = [];
+
+        // BFS 시작점: 상하좌우 테두리 중 벽이 아닌 곳
+        for (let x = 0; x < cols; x++) {
+            if (!isWall(gridColors[x])) { queue.push({x, y: 0}); flooded[x] = 1; }
+            const bottomIdx = (rows-1)*cols + x;
+            if (!isWall(gridColors[bottomIdx])) { queue.push({x, y: rows-1}); flooded[bottomIdx] = 1; }
+        }
+        for (let y = 0; y < rows; y++) {
+            const leftIdx = y*cols;
+            if (!isWall(gridColors[leftIdx])) { queue.push({x: 0, y}); flooded[leftIdx] = 1; }
+            const rightIdx = y*cols + cols - 1;
+            if (!isWall(gridColors[rightIdx])) { queue.push({x: cols-1, y}); flooded[rightIdx] = 1; }
+        }
+
+        let head = 0;
+        const dirs = [[0,1], [1,0], [0,-1], [-1,0]];
+        while(head < queue.length) {
+            const {x, y} = queue[head++];
+            const idx = y * cols + x;
+            
+            // 외부 공간은 무조건 배경색(bgColor)으로 물청소(색상 번짐 완벽 차단)
+            gridColors[idx] = [Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])];
+
+            for (let d of dirs) {
+                const nx = x + d[0], ny = y + d[1];
+                if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+                    const nidx = ny * cols + nx;
+                    if (!flooded[nidx]) {
+                        // 단단한 벽(닫힌 윤곽선)을 만나지 않았다면 물채우기 계속 진행
+                        if (!isWall(gridColors[nidx])) {
+                            flooded[nidx] = 1;
+                            queue.push({x: nx, y: ny});
+                        }
+                    }
                 }
             }
         }
