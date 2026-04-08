@@ -954,42 +954,46 @@ downloadPdfBtn.addEventListener('click', () => {
         const pdfWidth  = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
-        let textY = margin + 6;
+        const maxW = pdfWidth - margin * 2;
 
-        // 도안 이름
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(finalName, margin, textY);
-        textY += 8;
+        // 3. 제목: 고정 크기 캔버스 렌더링 (한국어 포함 모든 문자 지원)
+        const scale = 4;
+        const titleCanvas = document.createElement('canvas');
+        titleCanvas.width  = 1200 * scale;
+        titleCanvas.height = 60 * scale;
+        const tCtx = titleCanvas.getContext('2d');
+        tCtx.font = `600 ${32 * scale}px sans-serif`;
+        tCtx.fillStyle = '#000000';
+        tCtx.fillText(finalName, 20 * scale, 45 * scale);
+        const titleH = maxW * 60 / 1200;
+        pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG', margin, margin, maxW, titleH);
 
-        // 코수 / 단수
-        if (numbers && numbers.length >= 2) {
-            pdf.setFontSize(11);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`Stitches: ${numbers[0]}  /  Rows: ${numbers[1]}`, margin, textY);
-            textY += 6;
+        // 4. 도안 정보 (코수/단수/크기/실 굵기) — ASCII 전용이므로 pdf.text() 사용
+        const isMmModeNow = document.querySelector('input[name="yarnUnit"]:checked')?.value === 'mm';
+        let yarnSuffix = '';
+        if (isMmModeNow && yarnMmInput.value) {
+            yarnSuffix = ` · ${yarnMmInput.value}mm`;
+        } else if (!isMmModeNow && yarnWeightSelect.value) {
+            yarnSuffix = ` · ${yarnWeightSelect.value}`;
         }
-
-        // 완성 크기
         if (numbers && numbers.length >= 4) {
-            pdf.text(`Size: approx. ${numbers[2]}cm x ${numbers[3]}cm`, margin, textY);
-            textY += 6;
+            const infoLine = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)${yarnSuffix}`;
+            pdf.setFontSize(10);
+            pdf.text(infoLine, margin, margin + titleH + 5);
         }
 
-        // 도안 이미지
+        // 5. 도안 이미지
         const imgData = canvas.toDataURL('image/png');
-        const imgY  = textY + 4;
-        const maxW  = pdfWidth  - margin * 2;
-        const maxH  = pdfHeight - imgY   - margin;
+        const imgY  = margin + titleH + 14;
+        const maxH  = pdfHeight - imgY - margin;
         let finalW  = maxW;
         let finalH  = (canvas.height / canvas.width) * finalW;
         if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
 
-        // 2페이지: 색상표
+        // 6. 2페이지: 색상표
         pdf.addPage();
         pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
         pdf.text('Color Legend', margin, margin + 5);
         let currentY = margin + 15;
         let currentX = margin;
@@ -1001,7 +1005,6 @@ downloadPdfBtn.addEventListener('click', () => {
                 pdf.setDrawColor(0);
                 pdf.rect(currentX, currentY, 8, 8, 'S');
                 pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'normal');
                 pdf.text(item.querySelector('span').textContent, currentX + 12, currentY + 6);
                 currentY += 12;
                 if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 65; }
