@@ -626,6 +626,12 @@ generateBtn.addEventListener('click', async () => {
     if (targetStitches > 1500 || targetRows > 1500) {
         showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
         generateBtn.disabled = false;
+        return;
+    }
+
+    await new Promise(res => setTimeout(res, 50));
+
+    try {
         const cols  = targetStitches;
         const rows  = targetRows;
 
@@ -682,36 +688,34 @@ generateBtn.addEventListener('click', async () => {
                 const y0 = Math.floor(gy * cellScaleY);
                 const y1 = Math.min(Math.ceil((gy + 1) * cellScaleY), scanH);
 
-                let fgR = 0, fgG = 0, fgB = 0, fgNum = 0;
-                let oR = 0, oG = 0, oB = 0, oNum = 0;
+                let maxDist = -1;
+                let bestColor = bgColor;
+                let validPixels = 0;
 
                 for (let py = y0; py < y1; py++) {
                     for (let px = x0; px < x1; px++) {
                         const si = (py * scanW + px) * 4;
-                        if (scanData[si + 3] < 128) {
-                            oR+=255; oG+=255; oB+=255; oNum++; 
-                            continue;
-                        }
+                        if (scanData[si + 3] < 128) continue; // 투명은 무시
+
+                        validPixels++;
                         const c = [scanData[si], scanData[si+1], scanData[si+2]];
                         const dist = colorDist(c, bgColor);
 
-                        if (dist > BG_DISTANCE_THRESHOLD) {
-                            // 피사체 (배경과 확연히 다른 색)
-                            fgR+=c[0]; fgG+=c[1]; fgB+=c[2]; fgNum++;
-                        } else {
-                            // 배경색과 비슷함
-                            oR+=c[0]; oG+=c[1]; oB+=c[2]; oNum++;
+                        if (dist > maxDist) {
+                            maxDist = dist;
+                            bestColor = c;
                         }
                     }
                 }
 
-                // 칸 안에 피사체가 하나라도 존재한다면 그 칸은 무조건 피사체 색상을 우선 채택 (얇은 선 보존)
-                if (fgNum > 0) {
-                    gridColors.push([Math.round(fgR/fgNum), Math.round(fgG/fgNum), Math.round(fgB/fgNum)]);
-                } else if (oNum > 0) {
-                    gridColors.push([Math.round(oR/oNum), Math.round(oG/oNum), Math.round(oB/oNum)]);
+                if (validPixels > 0 && maxDist > BG_DISTANCE_THRESHOLD) {
+                    // 배경과 충분히 다른 픽셀이 있다면, 그 중 가장 확연히 튀는 픽셀(윤곽선/주 피사체)을 1순위로 채택
+                    gridColors.push(bestColor);
+                } else if (validPixels > 0) {
+                    // 전부 배경과 비슷하다면 안전하게 배경색 사용
+                    gridColors.push([Math.round(bgColor[0]), Math.round(bgColor[1]), Math.round(bgColor[2])]);
                 } else {
-                    gridColors.push([255, 255, 255]);
+                    gridColors.push([255, 255, 255]); // 완전 투명 폴백
                 }
             }
         }
