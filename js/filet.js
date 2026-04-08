@@ -1,10 +1,10 @@
 // filet.js - 방안뜨기 도안 생성기 (전체 재작성)
 
 import { 
-    getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage,
-    serverTimestamp, ref, uploadBytes, getDownloadURL
+    getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage
 } from './auth.js';
-import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { addDoc, collection, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // --- 상태 관리 ---
 let grid = []; // 2D array (0: 빈칸, 1: 채움칸, -1: 비활성칸)
