@@ -959,99 +959,75 @@ downloadPdfBtn.addEventListener('click', () => {
         }
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        
-        // 고해상도 텍스트 렌더링 함수 (High-DPI) - 자름 방지 및 레이아웃 최적화
-        const textToImg = (text, size, isBold = false) => {
-            const scale = 4;
-            const tCanvas = document.createElement('canvas');
-            const tCtx = tCanvas.getContext('2d');
-            const fontSize = size * scale;
-            tCtx.font = `${isBold ? 'bold ' : ''}${fontSize}px sans-serif`;
-            const m = tCtx.measureText(text);
-            
-            // 캔버스 높이를 충분히 확보하여 글자 잘림 방지 (기존 1.5배 -> 2.5배)
-            tCanvas.width = Math.ceil(m.width) + (40 * scale); 
-            tCanvas.height = Math.ceil(size * 2.5 * scale);
-            
-            // 캔버스 초기화 후 폰트 재설정 (필수)
-            tCtx.font = `${isBold ? 'bold ' : ''}${fontSize}px sans-serif`;
-            tCtx.fillStyle = '#000';
-            tCtx.textBaseline = 'top'; // 예측 가능한 배치를 위해 top 기준 사용
-            
-            // 중앙 근처에 안전하게 배치
-            tCtx.fillText(text, 20 * scale, size * 0.5 * scale);
-            
-            return { 
-                src: tCanvas.toDataURL('image/png'), 
-                w: tCanvas.width / (scale * 3.78), // 96DPI (3.78px/mm) 기준 정밀 변환
-                h: tCanvas.height / (scale * 3.78) 
-            };
-        };
 
-        const imgData = canvas.toDataURL('image/png'); // PNG로 선명도 유지
-        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth  = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 15;
-        const maxW = pdfWidth - (margin * 2);
-        // 타이틀 영역 높이 확보를 위해 maxH 조정
-        const maxH = pdfHeight - (margin * 2) - 30;
-        let finalW = maxW;
-        let finalH = (canvas.height / canvas.width) * finalW;
-        if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
-        
-        const lang = currentLang;
-        let titleText = (lang === 'ko' ? '픽셀 뜨개 도안' : (lang === 'ja' ? 'ピクセル編み図' : 'Knitting Pattern'));
-        // 저장버튼 누를 때 지정한 제목이 있다면 반영
-        const nameInput = document.getElementById('patternTitleInput');
-        if (nameInput && nameInput.value.trim()) {
-             titleText = nameInput.value.trim();
-        }
 
-        const titleImg = textToImg(titleText, 18, true);
-        pdf.addImage(titleImg.src, 'PNG', margin, margin, titleImg.w, titleImg.h);
-
-        // 정보란 텍스트 정제
-        const infoRaw = patternInfo.textContent || "";
+        // 도안 정보 추출
+        const infoRaw = patternInfo.textContent || '';
         const numbers = infoRaw.match(/\d+(\.\d+)?/g);
-        let infoStr = "";
+        let stitchesRows = '';
+        let sizeInfo = '';
         if (numbers && numbers.length >= 4) {
-            infoStr = `${numbers[0]} Stiches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)`;
-        } else {
-            infoStr = infoRaw;
+            stitchesRows = `${numbers[0]} Stitches x ${numbers[1]} Rows`;
+            sizeInfo     = `Finished size: approx. ${numbers[2]}cm x ${numbers[3]}cm`;
         }
 
-        const infoImg = textToImg(infoStr, 11);
-        // 타이틀 바로 아래에 배치 (간격 2mm)
-        const infoY = margin + titleImg.h + 2;
-        pdf.addImage(infoImg.src, 'PNG', margin, infoY, infoImg.w, infoImg.h);
-        
-        // 도안 이미지는 정보란 아래에 배치 (간격 5mm)
-        const imgY = infoY + infoImg.h + 5;
+        // 텍스트 직접 렌더링 (잘림 없음)
+        let textY = margin + 7;
+        if (stitchesRows) {
+            pdf.setFontSize(13);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(stitchesRows, margin, textY);
+            textY += 7;
+        }
+        if (sizeInfo) {
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(sizeInfo, margin, textY);
+            textY += 6;
+        }
+
+        // 도안 이미지 (텍스트 아래 5mm 여백)
+        const imgY  = textY + 5;
+        const maxW  = pdfWidth  - margin * 2;
+        const maxH  = pdfHeight - imgY   - margin;
+        let finalW  = maxW;
+        let finalH  = (canvas.height / canvas.width) * finalW;
+        if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
+
+        // 2페이지: 색상표
         pdf.addPage();
-        pdf.text("Color Legend", margin, margin + 5);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Color Legend', margin, margin + 5);
         let currentY = margin + 15;
         let currentX = margin;
         document.querySelectorAll('.color-item').forEach((item) => {
             const rgbMatch = item.querySelector('.color-box').style.backgroundColor.match(/\d+/g);
-            if(rgbMatch) {
-                 pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
-                 pdf.rect(currentX, currentY, 10, 10, 'F');
-                 pdf.setDrawColor(0);
-                 pdf.rect(currentX, currentY, 10, 10, 'S');
-                 pdf.setFontSize(10);
-                 pdf.text(item.querySelector('span').textContent, currentX + 15, currentY + 7);
-                 currentY += 15;
-                 if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 60; }
+            if (rgbMatch) {
+                pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                pdf.rect(currentX, currentY, 8, 8, 'F');
+                pdf.setDrawColor(0);
+                pdf.rect(currentX, currentY, 8, 8, 'S');
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(item.querySelector('span').textContent, currentX + 12, currentY + 6);
+                currentY += 12;
+                if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 65; }
             }
         });
+
         const defaultName = (() => {
             const nums = patternInfo.textContent.match(/\d+(\.\d+)?/g);
             if (nums && nums.length >= 4) return `knitting_pattern_${nums[2]}cm`;
             return 'knitting_pattern';
         })();
         const filename = window.prompt('저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
-        if (filename === null) return; // 취소
+        if (filename === null) return;
         pdf.save(`${filename.trim() || defaultName}.pdf`);
     } catch (e) {
         showStatus('status_error', true);
