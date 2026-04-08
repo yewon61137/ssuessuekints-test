@@ -636,8 +636,7 @@ generateBtn.addEventListener('click', async () => {
         const rows  = targetRows;
 
         // --- 1. 대비 및 윤곽선 강조 값 ---
-        const contrastSlider = document.getElementById('contrastBoost');
-        const contrastVal = contrastSlider ? parseFloat(contrastSlider.value) : 120;
+        const contrastVal = 120; // 사용자 설정 제거 및 120% 기본값 유지
         
         // 스캔용 고해상도 캔버스 준비
         const SCAN_MAX = 2000;
