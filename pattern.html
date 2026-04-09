@@ -267,6 +267,27 @@
           <div class="history-thumbnails" id="historyThumbnails"></div>
         </div>
 
+        <div id="editToolbar" class="edit-toolbar" style="display: none; margin-bottom: 1rem; border: 2px solid #000; padding: 0.75rem; background: #fff; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+          <div class="tool-group" style="display: flex; gap: 0.5rem;">
+            <button id="viewToolBtn" class="tool-btn active" title="View" style="padding: 0.5rem; width: auto; max-width: none; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; border: 2px solid #000;">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button id="pencilToolBtn" class="tool-btn" title="Pencil" style="padding: 0.5rem; width: auto; max-width: none; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; border: 2px solid #000;">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+          </div>
+          <div style="width: 2px; height: 30px; background: #eee;"></div>
+          <div class="checkbox-group" style="margin: 0; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="toggleSymbols" style="width: 18px; height: 18px;">
+            <label for="toggleSymbols" style="margin: 0; font-size: 0.8rem; cursor: pointer;" data-i18n="label_show_symbols">기호 표시</label>
+          </div>
+          <div style="width: 2px; height: 30px; background: #eee;"></div>
+          <div id="activeColorDisplay" style="display: flex; align-items: center; gap: 0.6rem; opacity: 0.4; transition: opacity 0.2s;">
+            <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;" data-i18n="label_active_color">편집 색상:</span>
+            <div id="activeColorBox" style="width: 24px; height: 24px; border: 2px solid #000; background: #fff;"></div>
+          </div>
+        </div>
+
         <div class="canvas-wrapper pattern-wrapper">
           <div id="resultPlaceholder" class="placeholder-msg" data-i18n="result_placeholder">도안을 생성하면 여기에 표시됩니다.</div>
           <canvas id="patternCanvas" style="display: none;"></canvas>

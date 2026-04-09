@@ -9,6 +9,10 @@ let originalImage = null;
 let patternHistory = []; // { dataURL, palette, infoText, id }
 let isPreviewMode = false;
 let seedColors = [];
+let isEditMode = false;
+let activeColorIndex = 0;
+let showSymbols = false;
+let currentPatternData = null; // { cols, rows, assignments, palette, gauge }
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -46,6 +50,13 @@ const historyThumbnails = document.getElementById('historyThumbnails');
 const langBtns = document.querySelectorAll('.lang-btn');
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('.tab-panel');
+
+const editToolbar = document.getElementById('editToolbar');
+const viewToolBtn = document.getElementById('viewToolBtn');
+const pencilToolBtn = document.getElementById('pencilToolBtn');
+const toggleSymbols = document.getElementById('toggleSymbols');
+const activeColorDisplay = document.getElementById('activeColorDisplay');
+const activeColorBox = document.getElementById('activeColorBox');
 
 // --- 번역 데이터 (i18n) ---
 const translations = {
@@ -120,6 +131,8 @@ const translations = {
         preset_summer: "여름용 면사 (코바늘 0-2호)",
         preset_winter: "일반 털실 (코바늘 3-5호)",
         recommended: "추천",
+        label_show_symbols: "기호 표시",
+        label_active_color: "편집 색상",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -192,6 +205,8 @@ const translations = {
         preset_summer: "Summer Cotton (0-2 Hook)",
         preset_winter: "Standard Wool (3-5 Hook)",
         recommended: "Recommended",
+        label_show_symbols: "Show Symbols",
+        label_active_color: "Active Color",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -264,6 +279,8 @@ const translations = {
         preset_summer: "夏用コットン (かぎ針 0-2号)",
         preset_winter: "一般毛糸 (かぎ針 3-5号)",
         recommended: "おすすめ",
+        label_show_symbols: "記号を表示",
+        label_active_color: "編集色",
     }
 };
 
@@ -796,38 +813,22 @@ generateBtn.addEventListener('click', async () => {
             }
             return minI;
         });
-        // ── 7. 도안 캔버스 그리기 ─────────────────────────────────────────
+        // ── 7. 데이터 저장 및 도안 그리기 ──────────────────
         let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / cols)));
         if (cols * pixelSize > MAX_CANVAS_DIMENSION || rows * pixelSize > MAX_CANVAS_DIMENSION) {
             pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(cols, rows));
         }
 
-        const renderWidth   = cols * pixelSize;
-        const renderHeight  = rows * pixelSize;
-        const paddingTop    = showGrid ? 40 : 10;
-        const paddingRight  = showGrid ? 60 : 10;
-        const paddingBottom = showGrid ? 60 : 10;
-        const paddingLeft   = showGrid ? 40 : 10;
+        currentPatternData = {
+            cols, rows, pixelSize, 
+            palette: legendPalette, 
+            assignments: finalAssignments,
+            showGrid,
+            gauge
+        };
 
-        canvas.width  = renderWidth  + paddingLeft + paddingRight;
-        canvas.height = renderHeight + paddingTop  + paddingBottom;
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.save();
-        ctx.translate(paddingLeft, paddingTop);
-
-        for (let gy = 0; gy < rows; gy++) {
-            for (let gx = 0; gx < cols; gx++) {
-                const palIdx = finalAssignments[gy * cols + gx];
-                const color  = legendPalette[palIdx] || legendPalette[0];
-                ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
-            }
-        }
-
-        if (showGrid) drawGridWithLabels(cols, rows, pixelSize);
-        ctx.restore();
+        editToolbar.style.display = 'flex';
+        renderPattern();
 
         resultPanel.style.display    = 'block';
         resultPlaceholder.style.display = 'none';
@@ -843,6 +844,7 @@ generateBtn.addEventListener('click', async () => {
         saveToCloudBtn.disabled = false;
         saveToCloudBtn.textContent =
             translations[currentLang]?.btn_save_cloud || '\ub0b4 \ub3c4\uc548\uc5d0 \uc800\uc7a5';
+        
         saveToHistory(canvas.toDataURL('image/png'), legendPalette, patternInfo.textContent);
         resultPanel.scrollIntoView({ behavior: 'smooth' });
 
@@ -853,6 +855,51 @@ generateBtn.addEventListener('click', async () => {
         generateBtn.disabled = false;
     }
 });
+
+function getSymbolForIndex(index) {
+    const symbols = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ?!@#";
+    return symbols[index % symbols.length] || "?";
+}
+
+function renderPattern() {
+    if (!currentPatternData) return;
+    const { cols, rows, pixelSize, palette, assignments, showGrid } = currentPatternData;
+
+    const paddingTop    = showGrid ? 40 : 10;
+    const paddingRight  = showGrid ? 60 : 10;
+    const paddingBottom = showGrid ? 60 : 10;
+    const paddingLeft   = showGrid ? 40 : 10;
+
+    canvas.width  = cols * pixelSize + paddingLeft + paddingRight;
+    canvas.height = rows * pixelSize + paddingTop + paddingBottom;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(paddingLeft, paddingTop);
+
+    for (let gy = 0; gy < rows; gy++) {
+        for (let gx = 0; gx < cols; gx++) {
+            const palIdx = assignments[gy * cols + gx];
+            const color  = palette[palIdx] || palette[0];
+            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
+
+            if (showSymbols) {
+                const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+                ctx.fillStyle = brightness > 128 ? '#000000' : '#ffffff';
+                ctx.font = `bold ${Math.floor(pixelSize * 0.6)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const symbol = getSymbolForIndex(palIdx);
+                ctx.fillText(symbol, gx * pixelSize + pixelSize / 2, gy * pixelSize + pixelSize / 2 + 1);
+            }
+        }
+    }
+
+    if (showGrid) drawGridWithLabels(cols, rows, pixelSize);
+    ctx.restore();
+}
 
 
 function drawGridWithLabels(cols, rows, cellSize) {
@@ -882,17 +929,108 @@ function updateLegend(palette) {
     palette.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
-        li.className = 'color-item';
+        li.className = 'color-item' + (activeColorIndex === index ? ' active' : '');
+        li.style.cursor = 'pointer';
+        
         const box = document.createElement('div');
         box.className = 'color-box';
         box.style.backgroundColor = hex;
+        
+        // 기호 표시
+        const sym = document.createElement('span');
+        sym.className = 'color-box-symbol';
+        sym.textContent = getSymbolForIndex(index);
+        sym.style.position = 'absolute';
+        sym.style.top = '50%';
+        sym.style.left = '50%';
+        sym.style.transform = 'translate(-50%, -50%)';
+        sym.style.fontSize = '10px';
+        sym.style.fontWeight = '900';
+        const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+        sym.style.color = brightness > 128 ? '#000' : '#fff';
+        box.appendChild(sym);
+
         const text = document.createElement('span');
         text.textContent = `No.${index + 1} (${hex})`;
+        
         li.appendChild(box);
         li.appendChild(text);
+
+        li.addEventListener('click', () => {
+            activeColorIndex = index;
+            document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
+            li.classList.add('active');
+            updateActiveColorUI();
+        });
+
         colorLegend.appendChild(li);
     });
+    updateActiveColorUI();
 }
+
+function updateActiveColorUI() {
+    if (!currentPatternData) return;
+    const color = currentPatternData.palette[activeColorIndex];
+    if (color) {
+        activeColorBox.style.backgroundColor = rgbToHex(color);
+        activeColorDisplay.style.opacity = isEditMode ? '1' : '0.4';
+    }
+}
+
+// ── 툴바 및 인터랙션 로직 ──────────────────────────────────────
+viewToolBtn.addEventListener('click', () => {
+    isEditMode = false;
+    viewToolBtn.style.background = '#000'; viewToolBtn.style.color = '#fff';
+    pencilToolBtn.style.background = '#fff'; pencilToolBtn.style.color = '#000';
+    activeColorDisplay.style.opacity = '0.4';
+    canvas.style.cursor = 'crosshair';
+});
+
+pencilToolBtn.addEventListener('click', () => {
+    isEditMode = true;
+    pencilToolBtn.style.background = '#000'; pencilToolBtn.style.color = '#fff';
+    viewToolBtn.style.background = '#fff'; viewToolBtn.style.color = '#000';
+    activeColorDisplay.style.opacity = '1';
+    canvas.style.cursor = 'cell';
+});
+
+toggleSymbols.addEventListener('change', (e) => {
+    showSymbols = e.target.checked;
+    renderPattern();
+});
+
+function handleCanvasEdit(e) {
+    if (!isEditMode || !currentPatternData) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const { cols, rows, pixelSize, showGrid } = currentPatternData;
+    const paddingTop    = showGrid ? 40 : 10;
+    const paddingLeft   = showGrid ? 40 : 10;
+    
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width) - paddingLeft;
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height) - paddingTop;
+
+    const gx = Math.floor(x / pixelSize);
+    const gy = Math.floor(y / pixelSize);
+
+    if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
+        const idx = gy * cols + gx;
+        if (currentPatternData.assignments[idx] !== activeColorIndex) {
+            currentPatternData.assignments[idx] = activeColorIndex;
+            renderPattern();
+        }
+    }
+}
+
+canvas.addEventListener('mousedown', (e) => {
+    if (!isEditMode) return;
+    handleCanvasEdit(e);
+    const moveHandler = (me) => handleCanvasEdit(me);
+    window.addEventListener('mousemove', moveHandler);
+    window.addEventListener('mouseup', () => {
+        window.removeEventListener('mousemove', moveHandler);
+    }, { once: true });
+});
 
 function saveToHistory(dataURL, palette, infoText) {
     const id = Date.now();
@@ -1000,13 +1138,23 @@ downloadPdfBtn.addEventListener('click', async () => {
         pdf.text('Color Legend', margin, margin + 5);
         let currentY = margin + 15;
         let currentX = margin;
-        document.querySelectorAll('.color-item').forEach((item) => {
+        document.querySelectorAll('.color-item').forEach((item, index) => {
             const rgbMatch = item.querySelector('.color-box').style.backgroundColor.match(/\d+/g);
             if (rgbMatch) {
-                pdf.setFillColor(parseInt(rgbMatch[0]), parseInt(rgbMatch[1]), parseInt(rgbMatch[2]));
+                const r = parseInt(rgbMatch[0]), g = parseInt(rgbMatch[1]), b = parseInt(rgbMatch[2]);
+                pdf.setFillColor(r, g, b);
                 pdf.rect(currentX, currentY, 8, 8, 'F');
                 pdf.setDrawColor(0);
                 pdf.rect(currentX, currentY, 8, 8, 'S');
+
+                // PDF 내 기호 표시
+                const sym = getSymbolForIndex(index);
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                pdf.setTextColor(brightness > 128 ? 0 : 255);
+                pdf.setFontSize(6);
+                pdf.text(sym, currentX + 4, currentY + 5.5, { align: 'center' });
+                pdf.setTextColor(0); // 원상 복구
+
                 pdf.setFontSize(10);
                 pdf.text(item.querySelector('span').textContent, currentX + 12, currentY + 6);
                 currentY += 12;
