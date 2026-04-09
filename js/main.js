@@ -58,8 +58,8 @@ const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
 
-// 초기 상태에서는 편집 툴바 숨김 (JS 사이드에서도 보강)
-if (editToolbar) editToolbar.style.setProperty('display', 'none', 'important');
+// 초기 상태에서는 편집 툴바 숨김 (CSS display: none 초기값 활용)
+if (editToolbar) editToolbar.style.display = 'none';
 
 // --- 번역 데이터 (i18n) ---
 const translations = {
@@ -830,7 +830,7 @@ generateBtn.addEventListener('click', async () => {
             gauge
         };
 
-        if (editToolbar) editToolbar.style.setProperty('display', 'flex', 'important');
+        if (editToolbar) editToolbar.style.display = 'flex';
         renderPattern();
 
         resultPanel.style.display    = 'block';
@@ -983,16 +983,16 @@ function updateActiveColorUI() {
 // ── 툴바 및 인터랙션 로직 ──────────────────────────────────────
 viewToolBtn.addEventListener('click', () => {
     isEditMode = false;
-    viewToolBtn.style.background = '#000'; viewToolBtn.style.color = '#fff';
-    pencilToolBtn.style.background = '#fff'; pencilToolBtn.style.color = '#000';
+    viewToolBtn.classList.add('active');
+    pencilToolBtn.classList.remove('active');
     activeColorDisplay.style.opacity = '0.4';
     canvas.style.cursor = 'crosshair';
 });
 
 pencilToolBtn.addEventListener('click', () => {
     isEditMode = true;
-    pencilToolBtn.style.background = '#000'; pencilToolBtn.style.color = '#fff';
-    viewToolBtn.style.background = '#fff'; viewToolBtn.style.color = '#000';
+    pencilToolBtn.classList.add('active');
+    viewToolBtn.classList.remove('active');
     activeColorDisplay.style.opacity = '1';
     canvas.style.cursor = 'cell';
 });
