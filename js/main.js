@@ -926,7 +926,7 @@ function renderHistory() {
     });
 }
 
-downloadPdfBtn.addEventListener('click', () => {
+downloadPdfBtn.addEventListener('click', async () => {
     if (!getCurrentUser()) {
         setOnAuthComplete(() => downloadPdfBtn.click());
         openAuthModal();
@@ -957,12 +957,15 @@ downloadPdfBtn.addEventListener('click', () => {
         const maxW = pdfWidth - margin * 2;
 
         // 3. 제목: 고정 크기 캔버스 렌더링 (한국어 포함 모든 문자 지원)
+        await document.fonts.ready; // 한글 웹폰트 로드 완료 대기
         const scale = 4;
         const titleCanvas = document.createElement('canvas');
         titleCanvas.width  = 1200 * scale;
         titleCanvas.height = 60 * scale;
         const tCtx = titleCanvas.getContext('2d');
-        tCtx.font = `600 ${32 * scale}px sans-serif`;
+        tCtx.fillStyle = '#ffffff'; // 흰 배경 먼저 채우기 (투명 배경 깨짐 방지)
+        tCtx.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
+        tCtx.font = `bold ${32 * scale}px sans-serif`;
         tCtx.fillStyle = '#000000';
         tCtx.fillText(finalName, 20 * scale, 45 * scale);
         const titleH = maxW * 60 / 1200;
