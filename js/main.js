@@ -58,6 +58,9 @@ const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
 
+// 초기 상태에서는 편집 툴바 숨김 (JS 사이드에서도 보강)
+if (editToolbar) editToolbar.style.setProperty('display', 'none', 'important');
+
 // --- 번역 데이터 (i18n) ---
 const translations = {
     ko: {
@@ -827,7 +830,7 @@ generateBtn.addEventListener('click', async () => {
             gauge
         };
 
-        editToolbar.style.display = 'flex';
+        if (editToolbar) editToolbar.style.setProperty('display', 'flex', 'important');
         renderPattern();
 
         resultPanel.style.display    = 'block';

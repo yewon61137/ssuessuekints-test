@@ -34,13 +34,14 @@ export { auth, db };
 // Storage is imported dynamically in functions that need it
 
 export async function applyAuthPersistence() {
+    if (!auth) return;
     const rm = document.getElementById('rememberMeCheck');
     const type = (rm && rm.checked) ? browserLocalPersistence : browserSessionPersistence;
     await setPersistence(auth, type);
 }
 
 export function getCurrentUser() {
-    return auth.currentUser;
+    return auth ? auth.currentUser : null;
 }
 
 /**
@@ -431,6 +432,10 @@ function initProfileSetupPanel() {
 
 // onAuthStateChanged 리스너를 헤더 UI 업데이트에 연결
 export function initAuth() {
+    if (!auth) {
+        console.warn("Auth system inactive (Firebase config missing).");
+        return;
+    }
     const signInBtn = document.getElementById('authSignInBtn');
     const userArea = document.getElementById('authUserArea');
     const userEmail = document.getElementById('authUserEmail');
