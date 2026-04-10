@@ -380,7 +380,7 @@ export const t = {
         label_filet_rows: '縦の段数',
         filet_result_size: '仕上がり予想サイズ',
         btn_convert_filet: '画像を格子に変換',
-        btn_clear_grid: '格子を初期화',
+        btn_clear_grid: '格子をリセット',
         legend_filet: '凡例: ■ 埋める, □ 空ける',
         // Follow
         follow: 'フォロー', following: 'フォロー中',
