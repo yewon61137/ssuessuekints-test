@@ -44,11 +44,22 @@
   setTimeout(updateBannerHeight, 100);
   window.addEventListener('resize', updateBannerHeight);
 
+  function handleLangChange(e) {
+    const newLang = e.detail?.lang || 'ko';
+    const newTx = t[newLang] || t.ko;
+    banner.querySelector('.cookie-msg').textContent = newTx.msg;
+    banner.querySelector('.cookie-more').textContent = newTx.more;
+    banner.querySelector('.cookie-accept').textContent = newTx.accept;
+    setTimeout(updateBannerHeight, 50);
+  }
+  window.addEventListener('langChange', handleLangChange);
+
   banner.querySelector('.cookie-accept').addEventListener('click', () => {
     localStorage.setItem('cookieConsent', '1');
     banner.style.transform = 'translateY(100%)';
     document.documentElement.style.setProperty('--cookie-banner-height', '0px');
     window.removeEventListener('resize', updateBannerHeight);
+    window.removeEventListener('langChange', handleLangChange);
     setTimeout(() => banner.remove(), 300);
   });
 })();

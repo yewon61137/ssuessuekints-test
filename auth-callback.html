@@ -29,6 +29,20 @@
 
     <!-- 글로벌 에러 핸들러: 비동기 모듈 로딩 전 발생 에러(구문 에러 등) 포착 시도 -->
     <script>
+        // 언어 감지 및 다국어 메시지 초기화
+        (function() {
+            const _lang = (function() { try { return localStorage.getItem('ssuessue_lang') || 'ko'; } catch(e) { return 'ko'; } })();
+            const _allMsgs = {
+                ko: { connecting: '인증 센터 연결 중...', verifying: '인증 코드 확인 중...', requesting: '서버에 인증 요청 중...', done: '완료', timeout: '요청 시간 초과', err_prefix: '오류: ', err_occurred: '오류 발생: ', err_interrupted: '인증 중단됨: ' },
+                en: { connecting: 'Connecting to auth server...', verifying: 'Verifying authentication code...', requesting: 'Sending authentication request...', done: 'Complete', timeout: 'Request timed out', err_prefix: 'Error: ', err_occurred: 'Error occurred: ', err_interrupted: 'Authentication interrupted: ' },
+                ja: { connecting: '認証サーバーに接続中...', verifying: '認証コードを確認中...', requesting: '認証リクエストを送信中...', done: '完了', timeout: 'リクエストがタイムアウトしました', err_prefix: 'エラー: ', err_occurred: 'エラーが発生しました: ', err_interrupted: '認証が中断されました: ' },
+            };
+            window._msgs = _allMsgs[_lang] || _allMsgs.ko;
+            window._authComplete = false;
+            const _statusEl = document.getElementById('statusMessage');
+            if (_statusEl) _statusEl.textContent = window._msgs.connecting;
+        })();
+
         window._sendFailure = function(msg) {
             console.error('Final failure:', msg);
             try {
@@ -41,18 +55,18 @@
         };
 
         window.onerror = function(msg, url, line) {
-            document.getElementById('statusMessage').textContent = '오류 발생: ' + msg;
+            document.getElementById('statusMessage').textContent = window._msgs.err_occurred + msg;
             window._sendFailure('전기적 오류 (' + line + '): ' + msg);
         };
         window.onunhandledrejection = function(e) {
-            document.getElementById('statusMessage').textContent = '인증 중단됨: ' + e.reason;
+            document.getElementById('statusMessage').textContent = window._msgs.err_interrupted + e.reason;
             window._sendFailure('비동기 오류: ' + e.reason);
         };
 
         // 30초 타임아웃
         setTimeout(() => {
-            if (document.getElementById('statusMessage').textContent !== '완료') {
-                document.getElementById('statusMessage').textContent = '요청 시간 초과';
+            if (!window._authComplete) {
+                document.getElementById('statusMessage').textContent = window._msgs.timeout;
                 window._sendFailure('인증 요청 시간이 초과되었습니다. 다시 시도해주세요.');
             }
         }, 30000);
@@ -93,7 +107,7 @@
 
         async function handleCallback() {
             try {
-                updateStatus('인증 코드 확인 중...');
+                updateStatus(window._msgs.verifying);
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
@@ -121,7 +135,7 @@
                     return;
                 }
 
-                updateStatus('서버에 인증 요청 중...');
+                updateStatus(window._msgs.requesting);
                 const response = await fetch(`/api/naver?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
                 if (!response.ok) {
                     let errorMessage = `서버 응답 오류 (${response.status})`;
@@ -135,7 +149,8 @@
                 const data = await response.json();
                 if (!data.firebaseToken) throw new Error('인증 토큰이 유효하지 않습니다.');
 
-                updateStatus('완료');
+                window._authComplete = true;
+                updateStatus(window._msgs.done);
                 // 토큰과 사용자 정보를 부모 창으로 전달 — Firebase 로그인은 메인 창에서 처리
                 sendResult({
                     type: 'naver_auth_complete',
@@ -147,7 +162,7 @@
 
             } catch (e) {
                 console.error('Auth traceback:', e);
-                updateStatus('오류: ' + e.message);
+                updateStatus(window._msgs.err_prefix + e.message);
                 sendResult({ type: 'naver_auth_complete', success: false, error: '로그인 오류: ' + e.message });
             }
         }
