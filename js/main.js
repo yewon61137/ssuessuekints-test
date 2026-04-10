@@ -320,6 +320,12 @@ function changeLanguage(lang) {
             el.innerHTML = merged[key];
         }
     });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (merged[key]) {
+            el.setAttribute('title', merged[key]);
+        }
+    });
     document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;
@@ -883,16 +889,24 @@ function getSymbolForIndex(index) {
 }
 
 function renderPattern() {
-    if (!currentPatternData) return;
+    if (!currentPatternData || !canvas || !ctx) return;
     const { cols, rows, pixelSize, palette, assignments, showGrid } = currentPatternData;
+
+    // Ensure canvas is visible before drawing
+    canvas.style.display = 'block';
 
     const paddingTop    = showGrid ? 40 : 10;
     const paddingRight  = showGrid ? 60 : 10;
     const paddingBottom = showGrid ? 60 : 10;
     const paddingLeft   = showGrid ? 40 : 10;
 
-    canvas.width  = cols * pixelSize + paddingLeft + paddingRight;
-    canvas.height = rows * pixelSize + paddingTop + paddingBottom;
+    const targetW = cols * pixelSize + paddingLeft + paddingRight;
+    const targetH = rows * pixelSize + paddingTop + paddingBottom;
+
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width  = targetW;
+        canvas.height = targetH;
+    }
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1060,13 +1074,15 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-toggleSymbols.addEventListener('change', (e) => {
-    showSymbols = e.target.checked;
-    renderPattern();
-});
+if (toggleSymbols) {
+    toggleSymbols.addEventListener('change', (e) => {
+        showSymbols = e.target.checked;
+        renderPattern();
+    });
+}
 
 function handleCanvasEdit(e) {
-    if (activeTool === 'view' || !currentPatternData) return;
+    if (activeTool === 'view' || !currentPatternData || !canvas) return;
 
     const rect = canvas.getBoundingClientRect();
     const { cols, rows, pixelSize, showGrid } = currentPatternData;
@@ -1099,18 +1115,20 @@ function handleCanvasEdit(e) {
     }
 }
 
-canvas.addEventListener('mousedown', (e) => {
-    if (activeTool === 'view') return;
-    if (activeTool === 'pencil' || activeTool === 'eraser') {
-        saveEditState();
-    }
-    handleCanvasEdit(e);
-    const moveHandler = (me) => handleCanvasEdit(me);
-    window.addEventListener('mousemove', moveHandler);
-    window.addEventListener('mouseup', () => {
-        window.removeEventListener('mousemove', moveHandler);
-    }, { once: true });
-});
+if (canvas) {
+    canvas.addEventListener('mousedown', (e) => {
+        if (activeTool === 'view') return;
+        if (activeTool === 'pencil' || activeTool === 'eraser') {
+            saveEditState();
+        }
+        handleCanvasEdit(e);
+        const moveHandler = (me) => handleCanvasEdit(me);
+        window.addEventListener('mousemove', moveHandler);
+        window.addEventListener('mouseup', () => {
+            window.removeEventListener('mousemove', moveHandler);
+        }, { once: true });
+    });
+}
 
 function saveToHistory(dataURL, palette, infoText) {
     const id = Date.now();
@@ -1264,13 +1282,21 @@ saveToCloudBtn.addEventListener('click', () => {
     document.getElementById('patternSaveModalSubmit').textContent = '저장';
 });
 
-document.getElementById('patternSaveModalClose').addEventListener('click', () => {
-    document.getElementById('patternSaveModal').style.display = 'none';
-});
+const saveModalClose = document.getElementById('patternSaveModalClose');
+if (saveModalClose) {
+    saveModalClose.addEventListener('click', () => {
+        const modal = document.getElementById('patternSaveModal');
+        if (modal) modal.style.display = 'none';
+    });
+}
 
-document.getElementById('patternSaveModalCancel').addEventListener('click', () => {
-    document.getElementById('patternSaveModal').style.display = 'none';
-});
+const saveModalCancel = document.getElementById('patternSaveModalCancel');
+if (saveModalCancel) {
+    saveModalCancel.addEventListener('click', () => {
+        const modal = document.getElementById('patternSaveModal');
+        if (modal) modal.style.display = 'none';
+    });
+}
 
 document.getElementById('patternSaveForm').addEventListener('submit', async (e) => {
     e.preventDefault();
