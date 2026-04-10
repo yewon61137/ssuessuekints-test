@@ -13,6 +13,9 @@ let isEditMode = false;
 let activeColorIndex = 0;
 let showSymbols = false;
 let currentPatternData = null; // { cols, rows, assignments, palette, gauge }
+let activeTool = 'view'; // 'view', 'pencil', 'eraser', 'picker'
+let editHistory = []; // Stack of assignments clones
+const MAX_EDIT_HISTORY = 30;
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -54,6 +57,9 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 const editToolbar = document.getElementById('editToolbar');
 const viewToolBtn = document.getElementById('viewToolBtn');
 const pencilToolBtn = document.getElementById('pencilToolBtn');
+const eraserToolBtn = document.getElementById('eraserToolBtn');
+const pickerToolBtn = document.getElementById('pickerToolBtn');
+const undoBtn = document.getElementById('undoBtn');
 const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
@@ -136,6 +142,10 @@ const translations = {
         recommended: "추천",
         label_show_symbols: "기호 표시",
         label_active_color: "편집 색상",
+        tooltip_pencil: "연필 (그리기)",
+        tooltip_eraser: "지우개 (바탕색으로 칠하기)",
+        tooltip_picker: "색상 추출 (도안에서 선택)",
+        tooltip_undo: "되돌리기 (Ctrl+Z)",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -210,6 +220,10 @@ const translations = {
         recommended: "Recommended",
         label_show_symbols: "Show Symbols",
         label_active_color: "Active Color",
+        tooltip_pencil: "Pencil (Draw)",
+        tooltip_eraser: "Eraser (Remove)",
+        tooltip_picker: "Color Picker (Eyedropper)",
+        tooltip_undo: "Undo (Ctrl+Z)",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -270,7 +284,7 @@ const translations = {
         label_threshold: "画像変換しきい値",
         label_filet_gauge: "ゲージ (10x10cm基準)",
         label_filet_sts: "目数",
-        label_filet_rows: "段수",
+        label_filet_rows: "段数",
         filet_result_size: "完成予想サイズ",
         btn_convert_filet: "画像をグリッドに変換",
         btn_clear_grid: "グリッドを初期化",
@@ -284,6 +298,10 @@ const translations = {
         recommended: "おすすめ",
         label_show_symbols: "記号を表示",
         label_active_color: "編集色",
+        tooltip_pencil: "鉛筆 (描く)",
+        tooltip_eraser: "消しゴム (背景色で塗る)",
+        tooltip_picker: "色抽出 (スポイト)",
+        tooltip_undo: "元に戻す (Ctrl+Z)",
     }
 };
 
@@ -953,6 +971,21 @@ function updateLegend(palette) {
         sym.style.color = brightness > 128 ? '#000' : '#fff';
         box.appendChild(sym);
 
+        // 팔레트 색상 수정 기능 추가
+        box.addEventListener('click', (e) => {
+            e.stopPropagation(); // li 클릭 이벤트(색상 선택) 방지
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.value = hex;
+            colorPicker.onchange = () => {
+                const newColor = hexToRgb(colorPicker.value);
+                currentPatternData.palette[index] = [newColor.r, newColor.g, newColor.b];
+                renderPattern();
+                updateLegend(currentPatternData.palette);
+            };
+            colorPicker.click();
+        });
+
         const text = document.createElement('span');
         text.textContent = `No.${index + 1} (${hex})`;
         
@@ -976,25 +1009,55 @@ function updateActiveColorUI() {
     const color = currentPatternData.palette[activeColorIndex];
     if (color) {
         activeColorBox.style.backgroundColor = rgbToHex(color);
-        activeColorDisplay.style.opacity = isEditMode ? '1' : '0.4';
+        activeColorDisplay.style.opacity = (activeTool === 'pencil' || activeTool === 'eraser') ? '1' : '0.4';
     }
 }
 
 // ── 툴바 및 인터랙션 로직 ──────────────────────────────────────
-viewToolBtn.addEventListener('click', () => {
-    isEditMode = false;
-    viewToolBtn.classList.add('active');
-    pencilToolBtn.classList.remove('active');
-    activeColorDisplay.style.opacity = '0.4';
-    canvas.style.cursor = 'crosshair';
-});
+function setTool(tool) {
+    activeTool = tool;
+    const btns = [viewToolBtn, pencilToolBtn, eraserToolBtn, pickerToolBtn];
+    btns.forEach(btn => {
+        if (btn) btn.classList.toggle('active', btn.id.startsWith(tool));
+    });
 
-pencilToolBtn.addEventListener('click', () => {
-    isEditMode = true;
-    pencilToolBtn.classList.add('active');
-    viewToolBtn.classList.remove('active');
-    activeColorDisplay.style.opacity = '1';
-    canvas.style.cursor = 'cell';
+    // 캔버스 커서 업데이트
+    if (canvas) {
+        canvas.classList.remove('cursor-pencil', 'cursor-eraser', 'cursor-picker');
+        if (tool !== 'view') canvas.classList.add(`cursor-${tool}`);
+    }
+
+    updateActiveColorUI();
+}
+
+if (viewToolBtn) viewToolBtn.addEventListener('click', () => setTool('view'));
+if (pencilToolBtn) pencilToolBtn.addEventListener('click', () => setTool('pencil'));
+if (eraserToolBtn) eraserToolBtn.addEventListener('click', () => setTool('eraser'));
+if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker'));
+
+// 되돌리기 로직
+function saveEditState() {
+    if (!currentPatternData) return;
+    editHistory.push([...currentPatternData.assignments]);
+    if (editHistory.length > MAX_EDIT_HISTORY) editHistory.shift();
+}
+
+function undoEdit() {
+    if (editHistory.length === 0) return;
+    currentPatternData.assignments = editHistory.pop();
+    renderPattern();
+}
+
+if (undoBtn) undoBtn.addEventListener('click', undoEdit);
+
+// 키보드 단축키 (Ctrl+Z)
+window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (activeTool !== 'view') {
+            e.preventDefault();
+            undoEdit();
+        }
+    }
 });
 
 toggleSymbols.addEventListener('change', (e) => {
@@ -1003,7 +1066,7 @@ toggleSymbols.addEventListener('change', (e) => {
 });
 
 function handleCanvasEdit(e) {
-    if (!isEditMode || !currentPatternData) return;
+    if (activeTool === 'view' || !currentPatternData) return;
 
     const rect = canvas.getBoundingClientRect();
     const { cols, rows, pixelSize, showGrid } = currentPatternData;
@@ -1018,15 +1081,29 @@ function handleCanvasEdit(e) {
 
     if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
         const idx = gy * cols + gx;
-        if (currentPatternData.assignments[idx] !== activeColorIndex) {
-            currentPatternData.assignments[idx] = activeColorIndex;
-            renderPattern();
+        if (activeTool === 'pencil' || activeTool === 'eraser') {
+            const targetColorIdx = activeTool === 'eraser' ? 0 : activeColorIndex;
+            if (currentPatternData.assignments[idx] !== targetColorIdx) {
+                currentPatternData.assignments[idx] = targetColorIdx;
+                renderPattern();
+            }
+        } else if (activeTool === 'picker') {
+            const pickedColorIdx = currentPatternData.assignments[idx];
+            activeColorIndex = pickedColorIdx;
+            // 범례 UI 업데이트
+            document.querySelectorAll('.color-item').forEach((el, i) => {
+                el.classList.toggle('active', i === pickedColorIdx);
+            });
+            updateActiveColorUI();
         }
     }
 }
 
 canvas.addEventListener('mousedown', (e) => {
-    if (!isEditMode) return;
+    if (activeTool === 'view') return;
+    if (activeTool === 'pencil' || activeTool === 'eraser') {
+        saveEditState();
+    }
     handleCanvasEdit(e);
     const moveHandler = (me) => handleCanvasEdit(me);
     window.addEventListener('mousemove', moveHandler);
