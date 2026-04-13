@@ -14,6 +14,7 @@ let activeColorIndex = 0;
 let showSymbols = false;
 let currentPatternData = null; // { cols, rows, assignments, palette, gauge }
 let activeTool = 'view'; // 'view', 'pencil', 'eraser', 'picker'
+let bgIndex = 0; // Likely background color index
 let editHistory = []; // Stack of assignments clones
 const MAX_EDIT_HISTORY = 30;
 
@@ -846,13 +847,23 @@ generateBtn.addEventListener('click', async () => {
             pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(cols, rows));
         }
 
-        currentPatternData = {
+            currentPatternData = {
             cols, rows, pixelSize, 
             palette: legendPalette, 
             assignments: finalAssignments,
             showGrid,
             gauge
         };
+
+        // Determine background index: find the color closest to white [255, 255, 255]
+        let minWhiteDist = Infinity;
+        currentPatternData.palette.forEach((rgb, i) => {
+            const dist = Math.sqrt((rgb[0]-255)**2 + (rgb[1]-255)**2 + (rgb[2]-255)**2);
+            if (dist < minWhiteDist) {
+                minWhiteDist = dist;
+                bgIndex = i;
+            }
+        });
 
         if (editToolbar) editToolbar.style.display = 'flex';
         renderPattern();
@@ -1092,13 +1103,14 @@ function handleCanvasEdit(e) {
     const x = (e.clientX - rect.left) * (canvas.width / rect.width) - paddingLeft;
     const y = (e.clientY - rect.top) * (canvas.height / rect.height) - paddingTop;
 
-    const gx = Math.floor(x / pixelSize);
-    const gy = Math.floor(y / pixelSize);
+    // Use a small safety margin for floating point math
+    const gx = Math.floor(x / pixelSize + 0.001);
+    const gy = Math.floor(y / pixelSize + 0.001);
 
     if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
         const idx = gy * cols + gx;
         if (activeTool === 'pencil' || activeTool === 'eraser') {
-            const targetColorIdx = activeTool === 'eraser' ? 0 : activeColorIndex;
+            const targetColorIdx = activeTool === 'eraser' ? bgIndex : activeColorIndex;
             if (currentPatternData.assignments[idx] !== targetColorIdx) {
                 currentPatternData.assignments[idx] = targetColorIdx;
                 renderPattern();
@@ -1132,7 +1144,8 @@ if (canvas) {
 
 function saveToHistory(dataURL, palette, infoText) {
     const id = Date.now();
-    patternHistory.push({ id, dataURL, palette, infoText });
+    const assignments = currentPatternData ? [...currentPatternData.assignments] : [];
+    patternHistory.push({ id, dataURL, palette, infoText, assignments });
     if (patternHistory.length > 5) patternHistory.shift();
     renderHistory();
 }
@@ -1146,6 +1159,14 @@ function renderHistory() {
         img.src = item.dataURL;
         img.className = 'history-item' + (index === patternHistory.length - 1 ? ' active' : '');
         img.addEventListener('click', () => {
+            // Restore currentPatternData when switching history
+            currentPatternData = {
+                ...currentPatternData, // keep gauge/pixelSize if needed
+                palette: item.palette,
+                assignments: [...item.assignments || []], // We need to store assignments in history too!
+                infoText: item.infoText
+            };
+            
             const tempImg = new Image();
             tempImg.onload = () => {
                 canvas.width = tempImg.width;
