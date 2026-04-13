@@ -1315,35 +1315,34 @@ downloadPdfBtn.addEventListener('click', async () => {
         if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
         pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
 
-        // 6. 2페이지: 색상표
+        // 6. 2페이지: 색상표 (currentPatternData.palette에서 직접 읽어 DOM 의존성 제거)
         pdf.addPage();
         pdf.setFontSize(12);
         pdf.text('Color Legend', margin, margin + 5);
         let currentY = margin + 15;
         let currentX = margin;
-        document.querySelectorAll('.color-item').forEach((item, index) => {
-            const rgbMatch = item.querySelector('.color-box').style.backgroundColor.match(/\d+/g);
-            if (rgbMatch) {
-                const r = parseInt(rgbMatch[0]), g = parseInt(rgbMatch[1]), b = parseInt(rgbMatch[2]);
+        if (currentPatternData) {
+            currentPatternData.palette.forEach((color, index) => {
+                const [r, g, b] = color;
+                const hex = rgbToHex(color);
                 pdf.setFillColor(r, g, b);
                 pdf.rect(currentX, currentY, 8, 8, 'F');
                 pdf.setDrawColor(0);
                 pdf.rect(currentX, currentY, 8, 8, 'S');
 
-                // PDF 내 기호 표시
                 const sym = getSymbolForIndex(index);
                 const brightness = (r * 299 + g * 587 + b * 114) / 1000;
                 pdf.setTextColor(brightness > 128 ? 0 : 255);
                 pdf.setFontSize(6);
                 pdf.text(sym, currentX + 4, currentY + 5.5, { align: 'center' });
-                pdf.setTextColor(0); // 원상 복구
+                pdf.setTextColor(0);
 
                 pdf.setFontSize(10);
-                pdf.text(item.querySelector('span').textContent, currentX + 12, currentY + 6);
+                pdf.text(`No.${index + 1} (${hex})`, currentX + 12, currentY + 6);
                 currentY += 12;
                 if (currentY > pdfHeight - margin) { currentY = margin + 15; currentX += 65; }
-            }
-        });
+            });
+        }
 
         pdf.save(`${finalName}.pdf`);
     } catch (e) {
