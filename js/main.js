@@ -953,11 +953,12 @@ function renderPatternForPdf() {
 
     const PDF_MIN_PIXEL = 28; // 기호가 선명하게 보이는 최소 셀 크기
     const pdfPixelSize = Math.max(PDF_MIN_PIXEL, currentPatternData.pixelSize);
+    const PDF_LABEL_FONT = 20; // 그리드 좌표 폰트 크기 (px)
 
-    const paddingTop    = showGrid ? 40 : 10;
-    const paddingRight  = showGrid ? 60 : 10;
-    const paddingBottom = showGrid ? 60 : 10;
-    const paddingLeft   = showGrid ? 40 : 10;
+    const paddingTop    = showGrid ? 60 : 10;
+    const paddingRight  = showGrid ? 80 : 10;
+    const paddingBottom = showGrid ? 80 : 10;
+    const paddingLeft   = showGrid ? 60 : 10;
 
     const offCanvas = document.createElement('canvas');
     offCanvas.width  = cols * pdfPixelSize + paddingLeft + paddingRight;
@@ -1004,11 +1005,11 @@ function renderPatternForPdf() {
         for (let y = rows; y >= 0; y -= 10) { offCtx.beginPath(); offCtx.moveTo(0,y*pdfPixelSize); offCtx.lineTo(cols*pdfPixelSize,y*pdfPixelSize); offCtx.stroke(); }
         offCtx.strokeRect(0, 0, cols*pdfPixelSize, rows*pdfPixelSize);
         offCtx.fillStyle = '#334155';
-        offCtx.font = 'bold 12px sans-serif';
+        offCtx.font = `bold ${PDF_LABEL_FONT}px sans-serif`;
         offCtx.textAlign = 'left'; offCtx.textBaseline = 'middle';
-        for (let y = rows; y >= 0; y -= 10) { offCtx.fillText(rows-y, cols*pdfPixelSize+8, y*pdfPixelSize); }
+        for (let y = rows; y >= 0; y -= 10) { offCtx.fillText(rows-y, cols*pdfPixelSize+10, y*pdfPixelSize); }
         offCtx.textAlign = 'center'; offCtx.textBaseline = 'top';
-        for (let x = cols; x >= 0; x -= 10) { offCtx.fillText(cols-x, x*pdfPixelSize, rows*pdfPixelSize+8); }
+        for (let x = cols; x >= 0; x -= 10) { offCtx.fillText(cols-x, x*pdfPixelSize, rows*pdfPixelSize+10); }
     }
 
     offCtx.restore();
@@ -1377,14 +1378,14 @@ downloadPdfBtn.addEventListener('click', async () => {
         }
         if (numbers && numbers.length >= 4) {
             const infoLine = `${numbers[0]} Stitches x ${numbers[1]} Rows (${numbers[2]}cm x ${numbers[3]}cm)${yarnSuffix}`;
-            pdf.setFontSize(10);
-            pdf.text(infoLine, margin, margin + titleH + 5);
+            pdf.setFontSize(14);
+            pdf.text(infoLine, margin, margin + titleH + 8);
         }
 
         // 5. 도안 이미지 (기호 표시 시 고해상도 오프스크린 캔버스 사용)
         const pdfPatternCanvas = renderPatternForPdf();
         const imgData = pdfPatternCanvas.toDataURL('image/png');
-        const imgY  = margin + titleH + 14;
+        const imgY  = margin + titleH + 18;
         const maxH  = pdfHeight - imgY - margin;
         let finalW  = maxW;
         let finalH  = (pdfPatternCanvas.height / pdfPatternCanvas.width) * finalW;
@@ -1435,7 +1436,7 @@ saveToCloudBtn.addEventListener('click', () => {
         return;
     }
     document.getElementById('patternSaveModal').style.display = 'flex';
-    document.getElementById('patternTitleInput').value = '';
+    document.getElementById('patternTitleInput').value = lastSavedTitle || '';
 
     document.getElementById('patternSaveError').style.display = 'none';
     document.getElementById('patternSaveModalSubmit').disabled = false;
