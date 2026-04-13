@@ -98,22 +98,13 @@
 
 .palette-container {
   flex: 1;
-  overflow-x: auto;
-  scrollbar-width: thin;
   padding: 0.5rem 0;
-}
-
-.palette-container::-webkit-scrollbar {
-  height: 2px;
-}
-
-.palette-container::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
+  min-width: 0;
 }
 
 .toolbar-palette-list {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(10, 28px);
   gap: 8px;
   list-style: none;
   padding: 0;

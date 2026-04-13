@@ -17,6 +17,8 @@ let activeTool = 'view'; // 'view', 'pencil', 'eraser', 'picker'
 let bgIndex = 0; // Likely background color index
 let editHistory = []; // Stack of assignments clones
 const MAX_EDIT_HISTORY = 30;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_CANVAS_DIMENSION = 4000;
 
 // --- DOM 요소 ---
 const imageUpload = document.getElementById('imageUpload');
@@ -842,7 +844,21 @@ generateBtn.addEventListener('click', async () => {
             }
             return minI;
         });
-        // Determine background index for Eraser
+        // --- 7. 데이터 저장 및 도안 그리기 ──────────────────
+        let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / cols)));
+        if (cols * pixelSize > MAX_CANVAS_DIMENSION || rows * pixelSize > MAX_CANVAS_DIMENSION) {
+            pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(cols, rows));
+        }
+
+        currentPatternData = {
+            cols, rows, pixelSize, 
+            palette: legendPalette, 
+            assignments: finalAssignments,
+            showGrid,
+            gauge
+        };
+
+        // Determine initial background index for reference (though eraser uses white now)
         bgIndex = detectBgIndex(legendPalette);
 
         if (editToolbar) editToolbar.style.display = 'flex';
@@ -874,10 +890,7 @@ generateBtn.addEventListener('click', async () => {
     }
 });
 
-function getSymbolForIndex(index) {
-    const symbols = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ?!@#";
-    return symbols[index % symbols.length] || "?";
-}
+
 
 function renderPattern() {
     if (!currentPatternData || !canvas || !ctx) return;
@@ -907,11 +920,17 @@ function renderPattern() {
     for (let gy = 0; gy < rows; gy++) {
         for (let gx = 0; gx < cols; gx++) {
             const palIdx = assignments[gy * cols + gx];
-            const color  = palette[palIdx] || palette[0];
-            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            
+            if (palIdx === -1) {
+                // 지우개로 지운 자리 (순백색)
+                ctx.fillStyle = '#ffffff';
+            } else {
+                const color = palette[palIdx] || palette[0];
+                ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            }
             ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
 
-            if (showSymbols) {
+            if (showSymbols && palIdx !== -1) {
                 const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
                 ctx.fillStyle = brightness > 128 ? '#000000' : '#ffffff';
                 ctx.font = `bold ${Math.floor(pixelSize * 0.6)}px sans-serif`;
@@ -1099,10 +1118,11 @@ function setTool(tool) {
     if (tool === 'eraser') {
         document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
     } else if (tool === 'pencil') {
-        // 연필 선택 시 현재 activeColorIndex에 해당하는 팔레트 아이템 강조
-        document.querySelectorAll('.color-item').forEach((el, i) => {
-            el.classList.toggle('active', i === activeColorIndex);
-        });
+        const legendItems = document.querySelectorAll('#colorLegend .color-item');
+        const toolbarItems = document.querySelectorAll('#toolbarPalette .color-item');
+        
+        legendItems.forEach((el, i) => el.classList.toggle('active', i === activeColorIndex));
+        toolbarItems.forEach((el, i) => el.classList.toggle('active', i === activeColorIndex));
     }
 
     updateActiveColorUI();
@@ -1163,7 +1183,7 @@ function handleCanvasEdit(e) {
     if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
         const idx = gy * cols + gx;
         if (activeTool === 'pencil' || activeTool === 'eraser') {
-            const targetColorIdx = activeTool === 'eraser' ? bgIndex : activeColorIndex;
+            const targetColorIdx = activeTool === 'eraser' ? -1 : activeColorIndex;
             if (currentPatternData.assignments[idx] !== targetColorIdx) {
                 currentPatternData.assignments[idx] = targetColorIdx;
                 renderPattern();
