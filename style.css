@@ -106,6 +106,7 @@
   min-height: 300px;
   overflow: auto !important;
   box-sizing: border-box;
+  touch-action: none; /* Prevent scroll on touch devices during drawing */
 }
 
 #patternCanvas {
@@ -113,6 +114,7 @@
   height: auto !important;
   display: block;
   margin: 0 auto;
+  touch-action: none; /* Prevent gestures */
 }
 
 /* --- Responsive Layout Polish & Consolidation --- */
@@ -142,4 +144,25 @@
   .tool-btn.active { background: #fff !important; color: #000 !important; }
   #activeColorBox { border-color: #fff !important; }
   .canvas-wrapper { background-color: #1a1a1a; border-color: #444; }
+}
+
+.color-item.active {
+  border-color: var(--primary-color) !important;
+  border-width: 4px;
+  background: var(--accent-color);
+  transform: scale(1.02);
+}
+
+/* Eraser Indicator */
+.active-color-eraser {
+  background: 
+    linear-gradient(45deg, transparent 48%, #ff4444 48%, #ff4444 52%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, #ff4444 48%, #ff4444 52%, transparent 52%) !important;
+  background-color: #fff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .active-color-eraser {
+    background-color: #1e1e1e !important;
+  }
 }

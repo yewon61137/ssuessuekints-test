@@ -841,7 +841,20 @@ generateBtn.addEventListener('click', async () => {
             }
             return minI;
         });
-        // ── 7. 데이터 저장 및 도안 그리기 ──────────────────
+function detectBgIndex(palette) {
+    let minWhiteDist = Infinity;
+    let index = 0;
+    palette.forEach((rgb, i) => {
+        const dist = Math.sqrt((rgb[0]-255)**2 + (rgb[1]-255)**2 + (rgb[2]-255)**2);
+        if (dist < minWhiteDist) {
+            minWhiteDist = dist;
+            index = i;
+        }
+    });
+    return index;
+}
+
+// ── 7. 데이터 저장 및 도안 그리기 ──────────────────
         let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / cols)));
         if (cols * pixelSize > MAX_CANVAS_DIMENSION || rows * pixelSize > MAX_CANVAS_DIMENSION) {
             pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(cols, rows));
@@ -855,15 +868,8 @@ generateBtn.addEventListener('click', async () => {
             gauge
         };
 
-        // Determine background index: find the color closest to white [255, 255, 255]
-        let minWhiteDist = Infinity;
-        currentPatternData.palette.forEach((rgb, i) => {
-            const dist = Math.sqrt((rgb[0]-255)**2 + (rgb[1]-255)**2 + (rgb[2]-255)**2);
-            if (dist < minWhiteDist) {
-                minWhiteDist = dist;
-                bgIndex = i;
-            }
-        });
+        // Determine background index for Eraser
+        bgIndex = detectBgIndex(currentPatternData.palette);
 
         if (editToolbar) editToolbar.style.display = 'flex';
         renderPattern();
@@ -1021,7 +1027,9 @@ function updateLegend(palette) {
             activeColorIndex = index;
             document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
             li.classList.add('active');
-            updateActiveColorUI();
+            
+            // 색상을 선택하면 자동으로 연필 도구로 전환
+            setTool('pencil');
         });
 
         colorLegend.appendChild(li);
@@ -1031,10 +1039,18 @@ function updateLegend(palette) {
 
 function updateActiveColorUI() {
     if (!currentPatternData) return;
-    const color = currentPatternData.palette[activeColorIndex];
-    if (color) {
-        activeColorBox.style.backgroundColor = rgbToHex(color);
-        activeColorDisplay.style.opacity = (activeTool === 'pencil' || activeTool === 'eraser') ? '1' : '0.4';
+    
+    if (activeTool === 'eraser') {
+        activeColorBox.style.backgroundColor = 'transparent';
+        activeColorBox.classList.add('active-color-eraser');
+        activeColorDisplay.style.opacity = '1';
+    } else {
+        const color = currentPatternData.palette[activeColorIndex];
+        activeColorBox.classList.remove('active-color-eraser');
+        if (color) {
+            activeColorBox.style.backgroundColor = rgbToHex(color);
+            activeColorDisplay.style.opacity = (activeTool === 'pencil') ? '1' : '0.4';
+        }
     }
 }
 
@@ -1050,6 +1066,16 @@ function setTool(tool) {
     if (canvas) {
         canvas.classList.remove('cursor-pencil', 'cursor-eraser', 'cursor-picker');
         if (tool !== 'view') canvas.classList.add(`cursor-${tool}`);
+    }
+
+    // 지우개 선택 시 팔레트 선택 해제 (시각적 피드백)
+    if (tool === 'eraser') {
+        document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
+    } else if (tool === 'pencil') {
+        // 연필 선택 시 현재 activeColorIndex에 해당하는 팔레트 아이템 강조
+        document.querySelectorAll('.color-item').forEach((el, i) => {
+            el.classList.toggle('active', i === activeColorIndex);
+        });
     }
 
     updateActiveColorUI();
@@ -1128,17 +1154,39 @@ function handleCanvasEdit(e) {
 }
 
 if (canvas) {
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('pointerdown', (e) => {
         if (activeTool === 'view') return;
+        
+        // Ensure touch gestures don't scroll the page
+        if (e.pointerType === 'touch') {
+            canvas.releasePointerCapture(e.pointerId); // Let pointer events flow
+        }
+        
+        // Capture the pointer to keep receiving events even if moved outside
+        canvas.setPointerCapture(e.pointerId);
+
         if (activeTool === 'pencil' || activeTool === 'eraser') {
             saveEditState();
         }
+        
         handleCanvasEdit(e);
-        const moveHandler = (me) => handleCanvasEdit(me);
-        window.addEventListener('mousemove', moveHandler);
-        window.addEventListener('mouseup', () => {
-            window.removeEventListener('mousemove', moveHandler);
-        }, { once: true });
+
+        const moveHandler = (me) => {
+            // Prevent default touch actions like scrolling
+            if (me.pointerType === 'touch') me.preventDefault();
+            handleCanvasEdit(me);
+        };
+
+        const upHandler = (ue) => {
+            canvas.releasePointerCapture(ue.pointerId);
+            window.removeEventListener('pointermove', moveHandler);
+            window.removeEventListener('pointerup', upHandler);
+            window.removeEventListener('pointercancel', upHandler);
+        };
+
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('pointerup', upHandler);
+        window.addEventListener('pointercancel', upHandler);
     });
 }
 
@@ -1175,6 +1223,9 @@ function renderHistory() {
             };
             tempImg.src = item.dataURL;
             updateLegend(item.palette);
+            // 배경색 인덱스 재설정
+            bgIndex = detectBgIndex(item.palette);
+            
             patternInfo.textContent = item.infoText;
             document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
             img.classList.add('active');
