@@ -16,6 +16,8 @@ let currentPatternData = null; // { cols, rows, assignments, palette, gauge }
 let activeTool = 'view'; // 'view', 'pencil', 'eraser', 'picker'
 let bgIndex = 0; // Likely background color index
 let editHistory = []; // Stack of assignments clones
+let lastSavedTitle = null;
+let lastSavedDocId = null;
 const MAX_EDIT_HISTORY = 30;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_CANVAS_DIMENSION = 4000;
@@ -944,6 +946,74 @@ function renderPattern() {
     ctx.restore();
 }
 
+// PDF 전용 고해상도 렌더링 (기호가 충분히 크게 출력되도록 pixelSize를 강제 확대)
+function renderPatternForPdf() {
+    if (!currentPatternData) return canvas;
+    const { cols, rows, palette, assignments, showGrid } = currentPatternData;
+
+    const PDF_MIN_PIXEL = 28; // 기호가 선명하게 보이는 최소 셀 크기
+    const pdfPixelSize = Math.max(PDF_MIN_PIXEL, currentPatternData.pixelSize);
+
+    const paddingTop    = showGrid ? 40 : 10;
+    const paddingRight  = showGrid ? 60 : 10;
+    const paddingBottom = showGrid ? 60 : 10;
+    const paddingLeft   = showGrid ? 40 : 10;
+
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width  = cols * pdfPixelSize + paddingLeft + paddingRight;
+    offCanvas.height = rows * pdfPixelSize + paddingTop  + paddingBottom;
+    const offCtx = offCanvas.getContext('2d');
+
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+    offCtx.save();
+    offCtx.translate(paddingLeft, paddingTop);
+
+    for (let gy = 0; gy < rows; gy++) {
+        for (let gx = 0; gx < cols; gx++) {
+            const palIdx = assignments[gy * cols + gx];
+            const color = palIdx !== -1 ? (palette[palIdx] || palette[0]) : null;
+
+            offCtx.fillStyle = palIdx === -1 ? '#ffffff' : `rgb(${color[0]},${color[1]},${color[2]})`;
+            offCtx.fillRect(gx * pdfPixelSize, gy * pdfPixelSize, pdfPixelSize, pdfPixelSize);
+
+            if (showSymbols && palIdx !== -1 && color) {
+                const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+                offCtx.fillStyle = brightness > 128 ? '#000000' : '#ffffff';
+                offCtx.font = `bold ${Math.floor(pdfPixelSize * 0.65)}px sans-serif`;
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.fillText(
+                    getSymbolForIndex(palIdx),
+                    gx * pdfPixelSize + pdfPixelSize / 2,
+                    gy * pdfPixelSize + pdfPixelSize / 2 + 1
+                );
+            }
+        }
+    }
+
+    // 그리드 선 (간소화 버전)
+    if (showGrid) {
+        offCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+        offCtx.lineWidth = 1;
+        for (let x = 0; x <= cols; x++) { offCtx.beginPath(); offCtx.moveTo(x*pdfPixelSize,0); offCtx.lineTo(x*pdfPixelSize,rows*pdfPixelSize); offCtx.stroke(); }
+        for (let y = 0; y <= rows; y++) { offCtx.beginPath(); offCtx.moveTo(0,y*pdfPixelSize); offCtx.lineTo(cols*pdfPixelSize,y*pdfPixelSize); offCtx.stroke(); }
+        offCtx.strokeStyle = 'rgba(0,0,0,0.7)';
+        offCtx.lineWidth = 2;
+        for (let x = cols; x >= 0; x -= 10) { offCtx.beginPath(); offCtx.moveTo(x*pdfPixelSize,0); offCtx.lineTo(x*pdfPixelSize,rows*pdfPixelSize); offCtx.stroke(); }
+        for (let y = rows; y >= 0; y -= 10) { offCtx.beginPath(); offCtx.moveTo(0,y*pdfPixelSize); offCtx.lineTo(cols*pdfPixelSize,y*pdfPixelSize); offCtx.stroke(); }
+        offCtx.strokeRect(0, 0, cols*pdfPixelSize, rows*pdfPixelSize);
+        offCtx.fillStyle = '#334155';
+        offCtx.font = 'bold 12px sans-serif';
+        offCtx.textAlign = 'left'; offCtx.textBaseline = 'middle';
+        for (let y = rows; y >= 0; y -= 10) { offCtx.fillText(rows-y, cols*pdfPixelSize+8, y*pdfPixelSize); }
+        offCtx.textAlign = 'center'; offCtx.textBaseline = 'top';
+        for (let x = cols; x >= 0; x -= 10) { offCtx.fillText(cols-x, x*pdfPixelSize, rows*pdfPixelSize+8); }
+    }
+
+    offCtx.restore();
+    return offCanvas;
+}
 
 function drawGridWithLabels(cols, rows, cellSize) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'; 
@@ -1160,6 +1230,11 @@ function handleCanvasEdit(e) {
             if (currentPatternData.assignments[idx] !== targetColorIdx) {
                 currentPatternData.assignments[idx] = targetColorIdx;
                 renderPattern();
+                // 편집 후 재저장 활성화
+                if (saveToCloudBtn && saveToCloudBtn.disabled) {
+                    saveToCloudBtn.disabled = false;
+                    saveToCloudBtn.textContent = translations[currentLang]?.btn_save_cloud || '내 도안에 저장';
+                }
             }
         } else if (activeTool === 'picker') {
             const pickedColorIdx = currentPatternData.assignments[idx];
@@ -1306,13 +1381,14 @@ downloadPdfBtn.addEventListener('click', async () => {
             pdf.text(infoLine, margin, margin + titleH + 5);
         }
 
-        // 5. 도안 이미지
-        const imgData = canvas.toDataURL('image/png');
+        // 5. 도안 이미지 (기호 표시 시 고해상도 오프스크린 캔버스 사용)
+        const pdfPatternCanvas = renderPatternForPdf();
+        const imgData = pdfPatternCanvas.toDataURL('image/png');
         const imgY  = margin + titleH + 14;
         const maxH  = pdfHeight - imgY - margin;
         let finalW  = maxW;
-        let finalH  = (canvas.height / canvas.width) * finalW;
-        if (finalH > maxH) { finalH = maxH; finalW = (canvas.width / canvas.height) * finalH; }
+        let finalH  = (pdfPatternCanvas.height / pdfPatternCanvas.width) * finalW;
+        if (finalH > maxH) { finalH = maxH; finalW = (pdfPatternCanvas.width / pdfPatternCanvas.height) * finalH; }
         pdf.addImage(imgData, 'PNG', margin, imgY, finalW, finalH);
 
         // 6. 2페이지: 색상표 (currentPatternData.palette에서 직접 읽어 DOM 의존성 제거)
@@ -1391,6 +1467,14 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
     if (!title) return;
     const submitBtn = document.getElementById('patternSaveModalSubmit');
     const errorEl = document.getElementById('patternSaveError');
+
+    // 같은 제목으로 저장 시 덮어쓰기 확인
+    const overwriteDocId = (title === lastSavedTitle && lastSavedDocId) ? lastSavedDocId : null;
+    if (title === lastSavedTitle && lastSavedDocId) {
+        const confirmed = window.confirm(`"${title}" 도안이 이미 저장되어 있습니다. 덮어쓰기 하시겠습니까?`);
+        if (!confirmed) return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = translations[currentLang].btn_save_cloud_saving;
     errorEl.style.display = 'none';
@@ -1408,7 +1492,9 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
     };
 
     try {
-        await savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML, patternInfo.textContent, settings);
+        const docId = await savePatternToCloud(canvas, previewCanvas, colorLegend.innerHTML, patternInfo.textContent, settings, overwriteDocId);
+        lastSavedTitle = title;
+        lastSavedDocId = docId;
         document.getElementById('patternSaveModal').style.display = 'none';
         saveToCloudBtn.textContent = translations[currentLang].btn_save_cloud_done;
         saveToCloudBtn.disabled = true;

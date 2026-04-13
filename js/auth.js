@@ -835,7 +835,7 @@ function canvasToBlob(canvas, type, quality) {
 }
 
 // 도안을 Firebase Storage + Firestore에 저장
-export async function savePatternToCloud(patternCanvas, originalCanvas, legendHTML, infoText, settings) {
+export async function savePatternToCloud(patternCanvas, originalCanvas, legendHTML, infoText, settings, overwriteDocId = null) {
     const user = auth.currentUser;
     if (!user) throw new Error('Not authenticated');
     const providerId = user.providerData[0]?.providerId;
@@ -884,14 +884,14 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
     // 5. Firestore에 메타데이터 저장
     const defaultTitle = `도안 ${new Date().toLocaleDateString('ko-KR')}`;
     const patternsRef = collection(db, `users/${user.uid}/patterns`);
-    await addDoc(patternsRef, {
+    const docData = {
         title: settings.title || defaultTitle,
         name: settings.title || defaultTitle, // 하위 호환
         tags: settings.tags || [],
         patternImageURL,
         originalImageURL,
         patternStoragePath: `${basePath}/pattern.png`,
-        patternBase64,  // PDF 생성용 (CORS 없이 직접 사용)
+        patternBase64,
         legendHTML,
         stitches,
         rows,
@@ -903,7 +903,17 @@ export async function savePatternToCloud(patternCanvas, originalCanvas, legendHT
         showGrid: settings.showGrid || false,
         techniqueRatio: settings.techniqueRatio || 1,
         createdAt: serverTimestamp()
-    });
+    };
+
+    let savedDocId;
+    if (overwriteDocId) {
+        await setDoc(doc(patternsRef, overwriteDocId), docData);
+        savedDocId = overwriteDocId;
+    } else {
+        const docRef = await addDoc(patternsRef, docData);
+        savedDocId = docRef.id;
+    }
+    return savedDocId;
 }
 
 // ==========================================
