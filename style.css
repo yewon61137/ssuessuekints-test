@@ -104,9 +104,9 @@
 .toolbar-palette-list {
   display: grid;
   grid-template-columns: repeat(10, 28px);
-  gap: 8px;
+  gap: 6px;
   list-style: none;
-  padding: 0;
+  padding: 4px;
   margin: 0;
 }
 
@@ -117,20 +117,19 @@
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: transform 0.15s;
+  box-sizing: border-box;
 }
 
 .toolbar-palette-list .color-item:hover {
-  transform: scale(1.15);
-  box-shadow: 2px 2px 0 var(--border-color);
-  z-index: 2;
+  border-color: #555;
+  border-width: 2.5px;
 }
 
 .toolbar-palette-list .color-item.active {
-  border-width: 3.5px;
-  box-shadow: 3px 3px 0 var(--primary-color);
-  transform: scale(1.1);
-  z-index: 3;
+  border: 3px solid #000;
+  outline: 2px solid #fff;
+  outline-offset: -5px;
+  z-index: 1;
 }
 
 .color-box-symbol {

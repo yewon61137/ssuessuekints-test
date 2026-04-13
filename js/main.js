@@ -1017,30 +1017,23 @@ function updateLegend(palette) {
                 activeColorIndex = index;
                 document.querySelectorAll('#toolbarPalette .color-item').forEach(el => el.classList.remove('active'));
                 li.classList.add('active');
-                
-                // 동기화: 하단 범례의 active 상태도 업데이트
-                document.querySelectorAll('#colorLegend .color-item').forEach((el, i) => {
-                    el.classList.toggle('active', i === index);
-                });
-
                 setTool('pencil');
             });
             toolbarPalette.appendChild(li);
         });
     }
 
-    // 하단 상세 범례 업데이트
+    // 하단 상세 범례 업데이트 (정보 표시 전용 — 클릭 불필요)
     palette.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
-        li.className = 'color-item' + (activeColorIndex === index ? ' active' : '');
-        li.style.cursor = 'pointer';
+        li.className = 'color-item';
 
         const box = document.createElement('div');
         box.className = 'color-box';
         box.style.backgroundColor = hex;
-        box.style.position = 'relative'; // 기호 위치 기준
-        
+        box.style.position = 'relative';
+
         const sym = document.createElement('span');
         sym.textContent = getSymbolForIndex(index);
         sym.className = 'color-box-symbol';
@@ -1056,25 +1049,9 @@ function updateLegend(palette) {
 
         const text = document.createElement('span');
         text.textContent = `No.${index + 1} (${hex})`;
-        
+
         li.appendChild(box);
         li.appendChild(text);
-
-        li.addEventListener('click', () => {
-            activeColorIndex = index;
-            document.querySelectorAll('#colorLegend .color-item').forEach(el => el.classList.remove('active'));
-            li.classList.add('active');
-            
-            // 동기화: 상단 툴바 팔레트의 active 상태 업데이트
-            if (toolbarPalette) {
-                document.querySelectorAll('#toolbarPalette .color-item').forEach((el, i) => {
-                    el.classList.toggle('active', i === index);
-                });
-            }
-
-            setTool('pencil');
-        });
-
         colorLegend.appendChild(li);
     });
     updateActiveColorUI();
@@ -1114,13 +1091,11 @@ function setTool(tool) {
 
     // 지우개 선택 시 팔레트 선택 해제 (시각적 피드백)
     if (tool === 'eraser') {
-        document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#toolbarPalette .color-item').forEach(el => el.classList.remove('active'));
     } else if (tool === 'pencil') {
-        const legendItems = document.querySelectorAll('#colorLegend .color-item');
-        const toolbarItems = document.querySelectorAll('#toolbarPalette .color-item');
-        
-        legendItems.forEach((el, i) => el.classList.toggle('active', i === activeColorIndex));
-        toolbarItems.forEach((el, i) => el.classList.toggle('active', i === activeColorIndex));
+        document.querySelectorAll('#toolbarPalette .color-item').forEach((el, i) => {
+            el.classList.toggle('active', i === activeColorIndex);
+        });
     }
 
     updateActiveColorUI();
@@ -1190,10 +1165,6 @@ function handleCanvasEdit(e) {
             const pickedColorIdx = currentPatternData.assignments[idx];
             if (pickedColorIdx !== -1) {
                 activeColorIndex = pickedColorIdx;
-                // 범례 UI 업데이트
-                document.querySelectorAll('.color-item').forEach((el, i) => {
-                    el.classList.toggle('active', i === pickedColorIdx);
-                });
                 setTool('pencil');
             }
         }
@@ -1282,11 +1253,6 @@ function renderHistory() {
 }
 
 downloadPdfBtn.addEventListener('click', async () => {
-    if (!getCurrentUser()) {
-        setOnAuthComplete(() => downloadPdfBtn.click());
-        openAuthModal();
-        return;
-    }
     try {
         if (typeof window.jspdf === 'undefined') {
             showStatus('status_pdf_err', true);
