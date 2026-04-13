@@ -7,7 +7,7 @@ import {
     collection, collectionGroup, query, orderBy, limit, getDocs,
     doc, getDoc, deleteDoc, updateDoc, where, onSnapshot, addDoc, serverTimestamp
 } from './firebase-db.js';
-import { ref, deleteObject, uploadBytes, getDownloadURL } from './firebase-storage.js';
+import { storage, ref, deleteObject, uploadBytes, getDownloadURL } from './firebase-storage.js';
 // getBlob is not used in the truncated part, checking if it is used later.
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
