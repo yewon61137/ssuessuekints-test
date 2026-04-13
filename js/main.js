@@ -310,8 +310,6 @@ const translations = {
 };
 
 let currentLang = 'ko';
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_CANVAS_DIMENSION = 4000; // Safari/Mobile memory safety limit 
 
 function changeLanguage(lang) {
     currentLang = lang;
@@ -920,17 +918,17 @@ function renderPattern() {
     for (let gy = 0; gy < rows; gy++) {
         for (let gx = 0; gx < cols; gx++) {
             const palIdx = assignments[gy * cols + gx];
-            
+            const color = palIdx !== -1 ? (palette[palIdx] || palette[0]) : null;
+
             if (palIdx === -1) {
                 // 지우개로 지운 자리 (순백색)
                 ctx.fillStyle = '#ffffff';
             } else {
-                const color = palette[palIdx] || palette[0];
                 ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
             }
             ctx.fillRect(gx * pixelSize, gy * pixelSize, pixelSize, pixelSize);
 
-            if (showSymbols && palIdx !== -1) {
+            if (showSymbols && palIdx !== -1 && color) {
                 const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
                 ctx.fillStyle = brightness > 128 ? '#000000' : '#ffffff';
                 ctx.font = `bold ${Math.floor(pixelSize * 0.6)}px sans-serif`;
@@ -1190,12 +1188,14 @@ function handleCanvasEdit(e) {
             }
         } else if (activeTool === 'picker') {
             const pickedColorIdx = currentPatternData.assignments[idx];
-            activeColorIndex = pickedColorIdx;
-            // 범례 UI 업데이트
-            document.querySelectorAll('.color-item').forEach((el, i) => {
-                el.classList.toggle('active', i === pickedColorIdx);
-            });
-            updateActiveColorUI();
+            if (pickedColorIdx !== -1) {
+                activeColorIndex = pickedColorIdx;
+                // 범례 UI 업데이트
+                document.querySelectorAll('.color-item').forEach((el, i) => {
+                    el.classList.toggle('active', i === pickedColorIdx);
+                });
+                setTool('pencil');
+            }
         }
     }
 }

@@ -80,11 +80,10 @@
 /* Toolbar Palette Layout */
 .toolbar-palette-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 }
 
 #activeColorBox {
