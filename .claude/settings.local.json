@@ -62,7 +62,9 @@
       "Read(//tmp/**)",
       "Bash(py _replace_handler.py)",
       "Bash(py -c ':*)",
-      "Bash(py _replace2.py)"
+      "Bash(py _replace2.py)",
+      "Bash(python:*)",
+      "Bash(py:*)"
     ]
   }
 }

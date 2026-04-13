@@ -64,6 +64,7 @@ const undoBtn = document.getElementById('undoBtn');
 const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
+const toolbarPalette = document.getElementById('toolbarPalette');
 
 // 초기 상태에서는 편집 툴바 숨김 (CSS display: none 초기값 활용)
 if (editToolbar) editToolbar.style.display = 'none';
@@ -841,35 +842,8 @@ generateBtn.addEventListener('click', async () => {
             }
             return minI;
         });
-function detectBgIndex(palette) {
-    let minWhiteDist = Infinity;
-    let index = 0;
-    palette.forEach((rgb, i) => {
-        const dist = Math.sqrt((rgb[0]-255)**2 + (rgb[1]-255)**2 + (rgb[2]-255)**2);
-        if (dist < minWhiteDist) {
-            minWhiteDist = dist;
-            index = i;
-        }
-    });
-    return index;
-}
-
-// ── 7. 데이터 저장 및 도안 그리기 ──────────────────
-        let pixelSize = Math.max(8, Math.min(20, Math.floor(800 / cols)));
-        if (cols * pixelSize > MAX_CANVAS_DIMENSION || rows * pixelSize > MAX_CANVAS_DIMENSION) {
-            pixelSize = Math.floor(MAX_CANVAS_DIMENSION / Math.max(cols, rows));
-        }
-
-            currentPatternData = {
-            cols, rows, pixelSize, 
-            palette: legendPalette, 
-            assignments: finalAssignments,
-            showGrid,
-            gauge
-        };
-
         // Determine background index for Eraser
-        bgIndex = detectBgIndex(currentPatternData.palette);
+        bgIndex = detectBgIndex(legendPalette);
 
         if (editToolbar) editToolbar.style.display = 'flex';
         renderPattern();
@@ -976,46 +950,92 @@ function drawGridWithLabels(cols, rows, cellSize) {
     for (let x = cols; x >= 0; x -= 10) { ctx.fillText(cols - x, x * cellSize, rows * cellSize + 8); }
 }
 
+// 기호 라이브러리 (도안에서 구분하기 쉬운 문단 기호 위주)
+const SYMBOLS = [' ', 'X', 'O', '/', '\\', 'V', 'T', '+', '-', '*', '#', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'P', 'Q', 'U', 'W', 'M', 'N'];
+
+function getSymbolForIndex(index) {
+    return SYMBOLS[index % SYMBOLS.length];
+}
+
+function detectBgIndex(palette) {
+    if (!palette || palette.length === 0) return 0;
+    // 가장 밝은 색상(L 수치가 큰 것)을 배경색으로 간주
+    let maxBrightness = -1;
+    let bestIdx = 0;
+    palette.forEach((color, i) => {
+        const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+        if (brightness > maxBrightness) {
+            maxBrightness = brightness;
+            bestIdx = i;
+        }
+    });
+    return bestIdx;
+}
+
 function updateLegend(palette) {
+    if (!colorLegend) return;
     colorLegend.innerHTML = '';
+    
+    // 상단 툴바 팔레트 업데이트
+    if (toolbarPalette) {
+        toolbarPalette.innerHTML = '';
+        palette.forEach((color, index) => {
+            const hex = rgbToHex(color);
+            const li = document.createElement('li');
+            li.className = 'color-item' + (index === activeColorIndex ? ' active' : '');
+            li.style.backgroundColor = hex;
+            li.title = `No.${index + 1} (${hex})`;
+
+            // 기호 표시 (밝기에 따라 텍스트 색상 결정)
+            const sym = document.createElement('span');
+            sym.className = 'color-box-symbol';
+            sym.textContent = getSymbolForIndex(index);
+            sym.style.fontSize = '12px';
+            sym.style.fontWeight = '900';
+            const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+            sym.style.color = brightness > 128 ? '#000' : '#fff';
+            li.appendChild(sym);
+
+            li.addEventListener('click', () => {
+                activeColorIndex = index;
+                document.querySelectorAll('#toolbarPalette .color-item').forEach(el => el.classList.remove('active'));
+                li.classList.add('active');
+                
+                // 동기화: 하단 범례의 active 상태도 업데이트
+                document.querySelectorAll('#colorLegend .color-item').forEach((el, i) => {
+                    el.classList.toggle('active', i === index);
+                });
+
+                setTool('pencil');
+            });
+            toolbarPalette.appendChild(li);
+        });
+    }
+
+    // 하단 상세 범례 업데이트
     palette.forEach((color, index) => {
         const hex = rgbToHex(color);
         const li = document.createElement('li');
         li.className = 'color-item' + (activeColorIndex === index ? ' active' : '');
         li.style.cursor = 'pointer';
-        
+
         const box = document.createElement('div');
         box.className = 'color-box';
         box.style.backgroundColor = hex;
+        box.style.position = 'relative'; // 기호 위치 기준
         
-        // 기호 표시
         const sym = document.createElement('span');
-        sym.className = 'color-box-symbol';
         sym.textContent = getSymbolForIndex(index);
+        sym.className = 'color-box-symbol';
         sym.style.position = 'absolute';
         sym.style.top = '50%';
         sym.style.left = '50%';
         sym.style.transform = 'translate(-50%, -50%)';
-        sym.style.fontSize = '10px';
+        sym.style.fontSize = '12px';
         sym.style.fontWeight = '900';
         const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
         sym.style.color = brightness > 128 ? '#000' : '#fff';
         box.appendChild(sym);
-
-        // 팔레트 색상 수정 기능 추가
-        box.addEventListener('click', (e) => {
-            e.stopPropagation(); // li 클릭 이벤트(색상 선택) 방지
-            const colorPicker = document.createElement('input');
-            colorPicker.type = 'color';
-            colorPicker.value = hex;
-            colorPicker.onchange = () => {
-                const newColor = hexToRgb(colorPicker.value);
-                currentPatternData.palette[index] = [newColor.r, newColor.g, newColor.b];
-                renderPattern();
-                updateLegend(currentPatternData.palette);
-            };
-            colorPicker.click();
-        });
 
         const text = document.createElement('span');
         text.textContent = `No.${index + 1} (${hex})`;
@@ -1025,10 +1045,16 @@ function updateLegend(palette) {
 
         li.addEventListener('click', () => {
             activeColorIndex = index;
-            document.querySelectorAll('.color-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#colorLegend .color-item').forEach(el => el.classList.remove('active'));
             li.classList.add('active');
             
-            // 색상을 선택하면 자동으로 연필 도구로 전환
+            // 동기화: 상단 툴바 팔레트의 active 상태 업데이트
+            if (toolbarPalette) {
+                document.querySelectorAll('#toolbarPalette .color-item').forEach((el, i) => {
+                    el.classList.toggle('active', i === index);
+                });
+            }
+
             setTool('pencil');
         });
 
@@ -1038,18 +1064,19 @@ function updateLegend(palette) {
 }
 
 function updateActiveColorUI() {
-    if (!currentPatternData) return;
+    if (!currentPatternData || !activeColorBox) return;
     
     if (activeTool === 'eraser') {
+        // 지우개 도구 활성 시 시각적 표시 (빨간 슬래시 패턴)
         activeColorBox.style.backgroundColor = 'transparent';
         activeColorBox.classList.add('active-color-eraser');
-        activeColorDisplay.style.opacity = '1';
+        if (activeColorDisplay) activeColorDisplay.style.opacity = '1';
     } else {
         const color = currentPatternData.palette[activeColorIndex];
         activeColorBox.classList.remove('active-color-eraser');
         if (color) {
             activeColorBox.style.backgroundColor = rgbToHex(color);
-            activeColorDisplay.style.opacity = (activeTool === 'pencil') ? '1' : '0.4';
+            if (activeColorDisplay) activeColorDisplay.style.opacity = (activeTool === 'pencil') ? '1' : '0.4';
         }
     }
 }
