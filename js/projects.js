@@ -1,7 +1,7 @@
 // projects.js — 프로젝트 기반 단수 카운터 관리
 // localStorage 사용 금지: 모든 데이터는 Firestore에만 저장
 
-import { auth, db, initAuth, openAuthModal } from './auth.js';
+import { auth, db, initAuth, openAuthModal, showLoginRequiredToast } from './auth.js';
 import { t, initLang, applyLang, formatDate } from './i18n.js';
 import {
     collection, doc, addDoc, updateDoc, deleteDoc,
@@ -1117,7 +1117,10 @@ export function init() {
 
     const guestLoginBtn = $('guest-login-btn');
     if (guestLoginBtn) {
-        guestLoginBtn.addEventListener('click', () => openAuthModal());
+        guestLoginBtn.addEventListener('click', () => {
+            showLoginRequiredToast();
+            setTimeout(() => openAuthModal(), 300);
+        });
     }
 
     attachEvents();

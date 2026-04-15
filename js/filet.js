@@ -1,7 +1,7 @@
 // filet.js - 방안뜨기 도안 생성기 (전체 재작성)
 
 import { 
-    getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage
+    getCurrentUser, openAuthModal, setOnAuthComplete, auth, db, storage, showLoginRequiredToast
 } from './auth.js';
 import { addDoc, collection, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
@@ -316,8 +316,8 @@ downloadBtn.addEventListener('click', () => {
 async function saveFiletToCloud() {
     const user = auth.currentUser;
     if (!user) {
-        alert('로그인이 필요합니다.');
-        openAuthModal();
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
         return;
     }
 

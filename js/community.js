@@ -1,6 +1,6 @@
 // community.js — 커뮤니티 피드
 
-import { auth, db, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { auth, db, initAuth, openAuthModal, getUserProfile, showLoginRequiredToast } from './auth.js';
 import { initLang, formatDate } from './i18n.js';
 import { onAuthStateChanged } from './firebase-auth.js';
 import {
@@ -203,7 +203,8 @@ const followingBtn = document.getElementById('followingFilterBtn');
 if (followingBtn) {
     followingBtn.addEventListener('click', async () => {
         if (!currentUser) {
-            openAuthModal();
+            showLoginRequiredToast();
+            setTimeout(() => openAuthModal(), 300);
             return;
         }
         isFollowingFilter = !isFollowingFilter;
@@ -238,7 +239,11 @@ const writeModalClose = document.getElementById('writeModalClose');
 const imageFiles = [null, null, null, null];
 
 writeBtn.addEventListener('click', () => {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) {
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return;
+    }
     const canWrite = currentUser.emailVerified ||
         currentUser.providerData.some(p => p.providerId !== 'password') ||
         currentUser.providerData.length === 0;

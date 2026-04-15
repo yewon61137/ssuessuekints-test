@@ -1593,8 +1593,8 @@ onAuthStateChanged(auth, async user => {
         resetPageState();
         document.getElementById('notLoggedIn').style.display = '';
         document.getElementById('loggedIn').style.display    = 'none';
-        // 비로그인이지만 타인 프로필이 없으면 로그인 유도
-        if (!urlUid) openAuthModal();
+        // 본인 마이페이지는 로그인 전용 — 홈으로 이동
+        if (!urlUid) window.location.replace('/');
     }
 });
 

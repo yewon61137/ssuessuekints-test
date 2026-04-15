@@ -1,6 +1,6 @@
 // post.js — 게시글 상세 페이지
 
-import { auth, db, initAuth, openAuthModal, getUserProfile } from './auth.js';
+import { auth, db, initAuth, openAuthModal, getUserProfile, showLoginRequiredToast } from './auth.js';
 import { initLang, formatDate } from './i18n.js';
 import { onAuthStateChanged } from './firebase-auth.js';
 import {
@@ -285,7 +285,11 @@ function buildCommentEl(pid, commentId, data) {
 
     // 답글 버튼 토글
     replyBtn.addEventListener('click', () => {
-        if (!currentUser) { openAuthModal(); return; }
+        if (!currentUser) {
+            showLoginRequiredToast();
+            setTimeout(() => openAuthModal(), 300);
+            return;
+        }
         const isOpen = replyFormEl.style.display !== 'none';
         replyFormEl.style.display = isOpen ? 'none' : 'block';
         if (!isOpen) replyFormEl.querySelector('.reply-input').focus();
@@ -384,7 +388,11 @@ function buildReplyEl(pid, commentId, replyId, data) {
 
 // --- 댓글 작성 ---
 async function submitComment(pid, content) {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) {
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return;
+    }
     const profile = await getUserProfile(currentUser.uid);
     const newDoc = await addDoc(collection(db, `posts/${pid}/comments`), {
         uid: currentUser.uid,
@@ -500,13 +508,21 @@ document.getElementById('editPostForm').addEventListener('submit', async e => {
 
 // --- 이벤트 바인딩 ---
 document.getElementById('likeBtn').addEventListener('click', async () => {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) { 
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return; 
+    }
     try { await toggleLike(postId, currentUser.uid); }
     catch (e) { console.error('Like error:', e); }
 });
 
 document.getElementById('scrapBtn').addEventListener('click', async () => {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) { 
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return; 
+    }
     try { await toggleScrap(postId, currentUser.uid); }
     catch (e) { console.error('Scrap error:', e); }
 });
@@ -565,7 +581,7 @@ document.getElementById('commentForm').addEventListener('submit', async e => {
     }
 });
 
-document.getElementById('commentLoginBtn')?.addEventListener('click', openAuthModal);
+// commentLoginBtn 제거됨 — 비로그인 댓글 시도 시 submitComment()에서 토스트+모달 처리
 
 document.getElementById('postEditBtn').addEventListener('click', () => {
     if (postData) openEditModal(postData);
@@ -584,17 +600,6 @@ initAuth();
 
 onAuthStateChanged(auth, async user => {
     currentUser = user || null;
-
-    // 댓글 입력 폼 표시 토글
-    const commentForm = document.getElementById('commentForm');
-    const commentLoginMsg = document.getElementById('commentLoginMsg');
-    if (currentUser) {
-        commentForm.style.display = 'flex';
-        commentLoginMsg.style.display = 'none';
-    } else {
-        commentForm.style.display = 'none';
-        commentLoginMsg.style.display = 'block';
-    }
 
     // 본인 글인 경우 수정/삭제 버튼 표시
     if (postData && currentUser && currentUser.uid === postData.uid) {

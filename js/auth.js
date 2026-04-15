@@ -984,6 +984,36 @@ export function openAuthModal() {
     }
 }
 
+/**
+ * 로그인 필요 토스트 메시지 (전 페이지 공용)
+ * 3개 국어 자동 감지, 3초 후 자동 사라짐, 중복 방지
+ */
+export function showLoginRequiredToast() {
+    const lang = localStorage.getItem('ssuessue_lang') || 'ko';
+    const msg = {
+        ko: '로그인 후 이용할 수 있는 기능입니다.',
+        en: 'Please log in to use this feature.',
+        ja: 'この機能はログイン後にご利用いただけます。'
+    }[lang] || '로그인 후 이용할 수 있는 기능입니다.';
+
+    let toast = document.getElementById('authLoginToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'authLoginToast';
+        toast.className = 'auth-toast';
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = msg;
+    // 혹시 이미 표시 중이면 타이머 리셋
+    clearTimeout(toast._hideTimer);
+    // 즉시 표시 (requestAnimationFrame으로 transition 트리거)
+    toast.classList.add('show');
+    toast._hideTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
 // 캔버스를 Blob으로 변환 (Promise)
 function canvasToBlob(canvas, type, quality) {
     return new Promise((resolve) => canvas.toBlob(resolve, type, quality));

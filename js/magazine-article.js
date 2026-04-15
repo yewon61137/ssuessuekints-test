@@ -1,4 +1,4 @@
-import { auth, db, openAuthModal, getUserProfile } from '/js/auth.js';
+import { auth, db, openAuthModal, getUserProfile, showLoginRequiredToast } from '/js/auth.js';
 import {
   doc, getDoc, setDoc, deleteDoc, serverTimestamp,
   collection, query, orderBy, getDocs, addDoc,
@@ -234,7 +234,11 @@ async function loadArticleCounts(articleId) {
 }
 
 async function toggleLike(articleId) {
-  if (!currentUser) { openAuthModal(); return; }
+  if (!currentUser) { 
+    showLoginRequiredToast();
+    setTimeout(() => openAuthModal(), 300);
+    return; 
+  }
   const likeRef = doc(db, `users/${currentUser.uid}/magazineLikes/${articleId}`);
   const articleRef = doc(db, 'magazine', articleId);
   const likeBtn = document.getElementById('likeBtn');
@@ -255,7 +259,11 @@ async function toggleLike(articleId) {
 }
 
 async function toggleScrap(articleId) {
-  if (!currentUser) { openAuthModal(); return; }
+  if (!currentUser) { 
+    showLoginRequiredToast();
+    setTimeout(() => openAuthModal(), 300);
+    return; 
+  }
   const scrapRef = doc(db, `users/${currentUser.uid}/magazineScraps/${articleId}`);
   const articleRef = doc(db, 'magazine', articleId);
   const scrapBtn = document.getElementById('scrapBtn');
@@ -400,7 +408,11 @@ function toggleReplyForm(articleId, commentId, repliesEl) {
   repliesEl.appendChild(form);
   form.querySelector('.reply-cancel-btn').addEventListener('click', () => form.remove());
   form.querySelector('.reply-submit-btn').addEventListener('click', async () => {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) { 
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return; 
+    }
     const text = form.querySelector('.reply-input').value.trim();
     if (!text) return;
     const profile = await getUserProfile(currentUser.uid);
@@ -424,7 +436,11 @@ function setupCommentForm(articleId) {
   const submitBtn = document.getElementById('commentSubmitBtn');
   if (!input || !submitBtn) return;
   submitBtn.addEventListener('click', async () => {
-    if (!currentUser) { openAuthModal(); return; }
+    if (!currentUser) { 
+        showLoginRequiredToast();
+        setTimeout(() => openAuthModal(), 300);
+        return; 
+    }
     const text = input.value.trim();
     if (!text) return;
     submitBtn.disabled = true;
