@@ -8,6 +8,8 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signInWithCustomToken,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -32,6 +34,12 @@ import {
 
 export { auth, db };
 // Storage is imported dynamically in functions that need it
+
+// 모바일/태블릿 감지 헬퍼 (네이버 로그인과 동일 기준)
+function isMobileDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
+        || window.innerWidth <= 768;
+}
 
 export async function applyAuthPersistence() {
     if (!auth) return;
@@ -431,7 +439,7 @@ function initProfileSetupPanel() {
 }
 
 // onAuthStateChanged 리스너를 헤더 UI 업데이트에 연결
-export function initAuth() {
+export async function initAuth() {
     if (!auth) {
         console.warn("Auth system inactive (Firebase config missing).");
         return;
@@ -443,6 +451,26 @@ export function initAuth() {
     const modal = document.getElementById('authModal');
 
     if (!signInBtn) return; // auth-area가 없는 페이지에서는 중단
+
+    // ── Google 리다이렉트 로그인 복귀 처리 (모바일에서 리다이렉트 후 돌아온 경우) ──
+    try {
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult && redirectResult.user) {
+            const user = redirectResult.user;
+            const complete = await isProfileComplete(user.uid);
+            if (!complete) {
+                showProfileSetup(user);
+            } else {
+                if (modal) modal.style.display = 'none';
+                callOnAuthComplete();
+            }
+        }
+    } catch (e) {
+        // auth/no-current-user 는 정상 케이스 (리다이렉트 결과 없음)
+        if (e.code && e.code !== 'auth/no-current-user') {
+            console.error('getRedirectResult error:', e);
+        }
+    }
 
     // 로그인 상태 변경 감지
     onAuthStateChanged(auth, async (user) => {
@@ -509,15 +537,32 @@ export function initAuth() {
         onAuthCompleteCallback = null;
     });
 
-    // Google 로그인
+    // Google 로그인 (모바일: 리다이렉트 / PC: 팝업 + 팝업 차단 시 리다이렉트 폴백)
     document.getElementById('googleSignInBtn').addEventListener('click', async () => {
         clearModalError();
+        const provider = new GoogleAuthProvider();
+
+        const doRedirect = async () => {
+            try {
+                await applyAuthPersistence();
+                localStorage.setItem('google_return_path', window.location.pathname + window.location.search);
+                await signInWithRedirect(auth, provider);
+            } catch (e2) {
+                showModalError(e2.message);
+            }
+        };
+
+        if (isMobileDevice()) {
+            // 모바일/태블릿: 팝업 대신 현재 탭에서 리다이렉트
+            await doRedirect();
+            return;
+        }
+
+        // PC: 팝업 우선 시도
         try {
             await applyAuthPersistence();
-            const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
-            // 프로필 완성 여부 확인
             const complete = await isProfileComplete(user.uid);
             if (!complete) {
                 showProfileSetup(user);
@@ -526,7 +571,12 @@ export function initAuth() {
                 callOnAuthComplete();
             }
         } catch (e) {
-            showModalError(e.message);
+            if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+                // 팝업 차단 또는 사용자 닫기 → 리다이렉트로 폴백
+                await doRedirect();
+            } else {
+                showModalError(e.message);
+            }
         }
     });
 
