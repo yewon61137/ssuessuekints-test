@@ -438,25 +438,13 @@ function initProfileSetupPanel() {
     });
 }
 
-// onAuthStateChanged 리스너를 헤더 UI 업데이트에 연결
-export async function initAuth() {
-    if (!auth) {
-        console.warn("Auth system inactive (Firebase config missing).");
-        return;
-    }
-    const signInBtn = document.getElementById('authSignInBtn');
-    const userArea = document.getElementById('authUserArea');
-    const userEmail = document.getElementById('authUserEmail');
-    const signOutBtn = document.getElementById('authSignOutBtn');
-    const modal = document.getElementById('authModal');
-
-    if (!signInBtn) return; // auth-area가 없는 페이지에서는 중단
-
-    // ── Google 리다이렉트 로그인 복귀 처리 (모바일에서 리다이렉트 후 돌아온 경우) ──
+// Google 리다이렉트 로그인 복귀 처리 — 이벤트 리스너 등록과 병렬 실행
+async function handleGoogleRedirectResult() {
     try {
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult && redirectResult.user) {
             const user = redirectResult.user;
+            const modal = document.getElementById('authModal');
             const complete = await isProfileComplete(user.uid);
             if (!complete) {
                 showProfileSetup(user);
@@ -471,6 +459,24 @@ export async function initAuth() {
             console.error('getRedirectResult error:', e);
         }
     }
+}
+
+// onAuthStateChanged 리스너를 헤더 UI 업데이트에 연결
+export function initAuth() {
+    if (!auth) {
+        console.warn("Auth system inactive (Firebase config missing).");
+        return;
+    }
+    const signInBtn = document.getElementById('authSignInBtn');
+    const userArea = document.getElementById('authUserArea');
+    const userEmail = document.getElementById('authUserEmail');
+    const signOutBtn = document.getElementById('authSignOutBtn');
+    const modal = document.getElementById('authModal');
+
+    if (!signInBtn) return; // auth-area가 없는 페이지에서는 중단
+
+    // ── Google 리다이렉트 복귀 결과를 비동기로 병렬 처리 (이벤트 리스너 등록을 막지 않음) ──
+    handleGoogleRedirectResult();
 
     // 로그인 상태 변경 감지
     onAuthStateChanged(auth, async (user) => {
