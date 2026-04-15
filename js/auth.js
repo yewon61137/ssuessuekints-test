@@ -614,11 +614,12 @@ export function initAuth() {
     });
 
     // 로그아웃 버튼 → 로그아웃 후 홈으로 이동
+    // signOut 완료를 기다리지 않고 즉시 이동 (mypage 등의 onAuthStateChanged가 먼저 발동해
+    // openAuthModal()을 열어버리는 경쟁 조건 방지)
     signOutBtn.addEventListener('click', () => {
-        signOut(auth).then(() => {
-            window.location.href = '/';
-        });
         stopVerificationCheck();
+        signOut(auth).catch(e => console.error('signOut error:', e));
+        window.location.replace('/');
     });
 
     // 모달 외부 클릭 → 닫지 않음 (X 버튼으로만 닫기)
