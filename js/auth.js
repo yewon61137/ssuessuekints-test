@@ -618,6 +618,7 @@ export function initAuth() {
     // openAuthModal()을 열어버리는 경쟁 조건 방지)
     signOutBtn.addEventListener('click', () => {
         stopVerificationCheck();
+        window.__signOutInProgress = true;
         signOut(auth).catch(e => console.error('signOut error:', e));
         window.location.replace('/');
     });
@@ -975,6 +976,7 @@ export async function deleteUserAccount(user) {
 }
 
 export function openAuthModal() {
+    if (window.__signOutInProgress) return;
     const modal = document.getElementById('authModal');
     if (modal) {
         modal.style.display = 'flex';
