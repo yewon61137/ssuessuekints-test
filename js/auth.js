@@ -613,9 +613,11 @@ export function initAuth() {
         clearModalError();
     });
 
-    // 로그아웃 버튼
+    // 로그아웃 버튼 → 로그아웃 후 홈으로 이동
     signOutBtn.addEventListener('click', () => {
-        signOut(auth);
+        signOut(auth).then(() => {
+            window.location.href = '/';
+        });
         stopVerificationCheck();
     });
 
