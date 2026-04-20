@@ -52,6 +52,8 @@ const canvas = document.getElementById('patternCanvas');
 const ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
 const magnifierCanvas = document.getElementById('magnifierCanvas');
 const magnifierCtx = magnifierCanvas ? magnifierCanvas.getContext('2d') : null;
+const compareCanvas = document.getElementById('compareCanvas');
+const compareCtx = compareCanvas ? compareCanvas.getContext('2d') : null;
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
@@ -61,6 +63,7 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 
 const editToolbar = document.getElementById('editToolbar');
 const viewToolBtn = document.getElementById('viewToolBtn');
+const compareToolBtn = document.getElementById('compareToolBtn');
 const pencilToolBtn = document.getElementById('pencilToolBtn');
 const eraserToolBtn = document.getElementById('eraserToolBtn');
 const pickerToolBtn = document.getElementById('pickerToolBtn');
@@ -913,6 +916,25 @@ generateBtn.addEventListener('click', async () => {
             translations[currentLang]?.btn_save_cloud || '\ub0b4 \ub3c4\uc548\uc5d0 \uc800\uc7a5';
         
         saveToHistory(canvas.toDataURL('image/png'), legendPalette, patternInfo.textContent);
+        
+        // 원본 비교용 캔버스 업데이트
+        if (compareCanvas && compareCtx && originalImage) {
+            compareCanvas.width = canvas.width;
+            compareCanvas.height = canvas.height;
+            compareCtx.clearRect(0, 0, compareCanvas.width, compareCanvas.height);
+            
+            // patternCanvas와 동일한 오프셋 및 크기로 원본 이미지 렌더링
+            const { cols, rows, pixelSize, showGrid } = currentPatternData;
+            const paddingTop = showGrid ? 40 : 10;
+            const paddingLeft = showGrid ? 40 : 10;
+            
+            compareCtx.save();
+            compareCtx.translate(paddingLeft, paddingTop);
+            compareCtx.imageSmoothingEnabled = true;
+            compareCtx.drawImage(originalImage, 0, 0, cols * pixelSize, rows * pixelSize);
+            compareCtx.restore();
+        }
+
         resultPanel.scrollIntoView({ behavior: 'smooth' });
 
     } catch (error) {
@@ -1209,6 +1231,33 @@ if (viewToolBtn) viewToolBtn.addEventListener('click', () => setTool('view'));
 if (pencilToolBtn) pencilToolBtn.addEventListener('click', () => setTool('pencil'));
 if (eraserToolBtn) eraserToolBtn.addEventListener('click', () => setTool('eraser'));
 if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker'));
+
+// 원본 비교 기능 (Hold to Compare)
+if (compareToolBtn && compareCanvas) {
+    const showCompare = (e) => {
+        if (e) e.preventDefault();
+        compareCanvas.style.display = 'block';
+        setTimeout(() => { compareCanvas.style.opacity = '1'; }, 10);
+        compareToolBtn.classList.add('active');
+    };
+    const hideCompare = (e) => {
+        if (e) e.preventDefault();
+        compareCanvas.style.opacity = '0';
+        setTimeout(() => { 
+            if (compareCanvas.style.opacity === '0') compareCanvas.style.display = 'none'; 
+        }, 150);
+        compareToolBtn.classList.remove('active');
+    };
+
+    compareToolBtn.addEventListener('pointerdown', showCompare);
+    compareToolBtn.addEventListener('pointerup', hideCompare);
+    compareToolBtn.addEventListener('pointerleave', hideCompare);
+    compareToolBtn.addEventListener('contextmenu', e => e.preventDefault());
+    
+    // 모바일 터치 대응 (일부 브라우저 pointerdown 이슈 대비)
+    compareToolBtn.addEventListener('touchstart', showCompare, { passive: false });
+    compareToolBtn.addEventListener('touchend', hideCompare, { passive: false });
+}
 
 // 되돌리기 로직
 function saveEditState() {

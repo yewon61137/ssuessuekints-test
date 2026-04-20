@@ -128,6 +128,13 @@ export const t = {
         btn_convert_filet: '이미지를 격자로 변환',
         btn_clear_grid: '격자 초기화',
         legend_filet: '범례: ■ 채움(한길긴뜨기 묶음), □ 비움(방안)',
+        // 도안 편집기 도구
+        tooltip_pencil: '연필 (그리기)',
+        tooltip_eraser: '지우개 (지우기)',
+        tooltip_picker: '색상 스포이트',
+        tooltip_undo: '실행 취소 (Ctrl+Z)',
+        tooltip_redo: '다시 실행 (Ctrl+Shift+Z)',
+        tooltip_compare: '원본과 비교 (누르고 있으면 표시)',
         // Follow
         follow: '팔로우', following: '팔로잉',
         my_following: '팔로우 목록', stat_following: '팔로잉', stat_followers: '팔로워',
@@ -255,6 +262,13 @@ export const t = {
         btn_convert_filet: 'Convert to Grid',
         btn_clear_grid: 'Clear Grid',
         legend_filet: 'Legend: ■ Filled, □ Empty',
+        // Editor Tools
+        tooltip_pencil: 'Pencil (Draw)',
+        tooltip_eraser: 'Eraser (Clear)',
+        tooltip_picker: 'Color Picker',
+        tooltip_undo: 'Undo (Ctrl+Z)',
+        tooltip_redo: 'Redo (Ctrl+Shift+Z)',
+        tooltip_compare: 'Compare with Original (Hold to view)',
         // Follow
         follow: 'Follow', following: 'Following',
         my_following: 'Following', stat_following: 'Following', stat_followers: 'Followers',
@@ -382,6 +396,13 @@ export const t = {
         btn_convert_filet: '画像を格子に変換',
         btn_clear_grid: '格子をリセット',
         legend_filet: '凡例: ■ 埋める, □ 空ける',
+        // 編集ツール
+        tooltip_pencil: '鉛筆 (描く)',
+        tooltip_eraser: '消しゴム (消す)',
+        tooltip_picker: 'カラーピッカー',
+        tooltip_undo: '元に戻す (Ctrl+Z)',
+        tooltip_redo: 'やり直し (Ctrl+Shift+Z)',
+        tooltip_compare: 'オリジナルと比較 (長押し)',
         // Follow
         follow: 'フォロー', following: 'フォロー中',
         my_following: 'フォロー・フォロワー', stat_following: 'フォロー', stat_followers: 'フォロワー',
@@ -423,6 +444,12 @@ export function applyLang(lang, opts = {}) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (merged[key] !== undefined) el.textContent = merged[key];
+    });
+
+    // tooltips 지원을 위한 data-i18n-title 추가
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (merged[key] !== undefined) el.title = merged[key];
     });
 
     // data-lang-section 블록 전환
