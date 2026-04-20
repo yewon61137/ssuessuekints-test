@@ -5,9 +5,11 @@
   'use strict';
 
   const TOUR_KEY = 'tour_pattern_v1';
-  const lang = (function () {
+
+  // 언어를 매 호출마다 동적으로 읽어서 언어 전환 후 재실행 시 정확히 반영
+  const getLang = () => {
     try { return localStorage.getItem('ssuessue_lang') || 'ko'; } catch (e) { return 'ko'; }
-  })();
+  };
 
   const STEPS = {
     ko: [
@@ -42,10 +44,10 @@
     ja: { prev: '前へ', next: '次へ', done: '完了', skip: 'スキップ', help: 'ガイド' },
   };
 
-  const steps = STEPS[lang] || STEPS.ko;
-  const ui = UI[lang] || UI.ko;
+  // 언어는 투어를 시작할 때마다 동적으로 결정
   let current = 0;
   let overlayEl, highlightEl, tooltipEl;
+  let activeSteps, activeUi;
 
   // ── CSS 주입 ────────────────────────────────────────────────────────────────
   function injectStyles() {
@@ -150,7 +152,7 @@
   // ── 스텝 렌더 ─────────────────────────────────────────────────────────────
   function showStep(idx) {
     current = idx;
-    const step = steps[idx];
+    const step = activeSteps[idx];
     const el   = document.querySelector(step.target);
     const vis  = isVisible(el);
 
@@ -167,13 +169,13 @@
 
     // 콘텐츠 렌더
     tooltipEl.innerHTML = `
-      <div class="t-count">${idx + 1} / ${steps.length}</div>
+      <div class="t-count">${idx + 1} / ${activeSteps.length}</div>
       <p class="t-title">${step.title}</p>
       <p class="t-body">${step.body}</p>
       <div class="t-nav">
-        <button class="t-skip">${ui.skip}</button>
-        ${idx > 0 ? `<button class="t-btn t-btn-ghost" id="tourPrev">${ui.prev}</button>` : ''}
-        <button class="t-btn t-btn-primary" id="tourNext">${idx < steps.length - 1 ? ui.next : ui.done}</button>
+        <button class="t-skip">${activeUi.skip}</button>
+        ${idx > 0 ? `<button class="t-btn t-btn-ghost" id="tourPrev">${activeUi.prev}</button>` : ''}
+        <button class="t-btn t-btn-primary" id="tourNext">${idx < activeSteps.length - 1 ? activeUi.next : activeUi.done}</button>
       </div>
     `;
 
@@ -186,7 +188,7 @@
     tooltipEl.querySelector('.t-skip').addEventListener('click', closeTour);
     tooltipEl.querySelector('#tourPrev')?.addEventListener('click', () => showStep(idx - 1));
     tooltipEl.querySelector('#tourNext')?.addEventListener('click', () => {
-      if (idx < steps.length - 1) showStep(idx + 1);
+      if (idx < activeSteps.length - 1) showStep(idx + 1);
       else closeTour();
     });
   }
@@ -194,6 +196,11 @@
   // ── 투어 시작 ─────────────────────────────────────────────────────────────
   function startTour() {
     if (document.getElementById('tourHighlight')) return;
+
+    // 투어 시작 시점의 현재 언어를 읽어서 사용
+    const lang = getLang();
+    activeSteps = STEPS[lang] || STEPS.ko;
+    activeUi    = UI[lang]    || UI.ko;
 
     overlayEl = document.createElement('div');
     overlayEl.id = 'tourOverlay';
@@ -224,7 +231,7 @@
 
   function onKey(e) {
     if (e.key === 'Escape') { closeTour(); }
-    else if (e.key === 'ArrowRight' && current < steps.length - 1) { showStep(current + 1); }
+    else if (e.key === 'ArrowRight' && current < activeSteps.length - 1) { showStep(current + 1); }
     else if (e.key === 'ArrowLeft'  && current > 0) { showStep(current - 1); }
   }
 
@@ -233,8 +240,9 @@
     if (document.getElementById('tourHelpBtn')) return;
     const btn = document.createElement('button');
     btn.id = 'tourHelpBtn';
-    btn.setAttribute('aria-label', ui.help);
-    btn.title = ui.help;
+    const helpLabel = (UI[getLang()] || UI.ko).help;
+    btn.setAttribute('aria-label', helpLabel);
+    btn.title = helpLabel;
     btn.textContent = '?';
     btn.addEventListener('click', startTour);
     document.body.appendChild(btn);

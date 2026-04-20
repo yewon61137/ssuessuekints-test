@@ -152,6 +152,14 @@ const translations = {
         tooltip_eraser: "지우개 (바탕색으로 칠하기)",
         tooltip_picker: "색상 추출 (도안에서 선택)",
         tooltip_undo: "되돌리기 (Ctrl+Z)",
+        status_too_large: "코/단 수가 너무 많습니다. 더 작은 크기나 굵은 실을 선택해주세요.",
+        btn_modal_save: "저장",
+        prompt_pdf_filename: "저장할 파일 이름을 입력하세요 (.pdf 자동 추가)",
+        save_error: "저장 중 오류가 발생했습니다.",
+        placeholder_pattern_title: "도안 이름 (필수, 최대 50자)",
+        btn_cancel: "취소",
+        modal_save_pattern_title: "도안 저장",
+        rec_click_hint: "클릭하여 적용",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -230,6 +238,14 @@ const translations = {
         tooltip_eraser: "Eraser (Remove)",
         tooltip_picker: "Color Picker (Eyedropper)",
         tooltip_undo: "Undo (Ctrl+Z)",
+        status_too_large: "Too many stitches/rows. Try a smaller size or thicker yarn.",
+        btn_modal_save: "Save",
+        prompt_pdf_filename: "Enter file name (.pdf will be added automatically)",
+        save_error: "An error occurred while saving.",
+        placeholder_pattern_title: "Pattern name (required, max 50 chars)",
+        btn_cancel: "Cancel",
+        modal_save_pattern_title: "Save Pattern",
+        rec_click_hint: "Click to apply",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -308,6 +324,14 @@ const translations = {
         tooltip_eraser: "消しゴム (背景色で塗る)",
         tooltip_picker: "色抽出 (スポイト)",
         tooltip_undo: "元に戻す (Ctrl+Z)",
+        status_too_large: "コ/段の数が多すぎます。小さいサイズか太い糸を選んでください。",
+        btn_modal_save: "保存",
+        prompt_pdf_filename: "ファイル名を入力してください（.pdfは自動で追加されます）",
+        save_error: "保存中にエラーが発生しました。",
+        placeholder_pattern_title: "編み図名（必須、最大50文字）",
+        btn_cancel: "キャンセル",
+        modal_save_pattern_title: "編み図を保存",
+        rec_click_hint: "クリックして適用",
     }
 };
 
@@ -330,13 +354,17 @@ function changeLanguage(lang) {
             el.setAttribute('title', merged[key]);
         }
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (merged[key]) el.setAttribute('placeholder', merged[key]);
+    });
     document.querySelectorAll('.i18n').forEach(el => {
         const val = el.getAttribute('data-' + lang);
         if (val) el.textContent = val;
     });
     // Handle special case for file name display which isn't data-i18n but updated dynamically
     const fileNameDisplay = document.getElementById('fileNameDisplay');
-    if (fileNameDisplay && (!imageUpload.files || imageUpload.files.length === 0)) {
+    if (fileNameDisplay && (!imageUpload || !imageUpload.files || imageUpload.files.length === 0)) {
         fileNameDisplay.textContent = translations[lang].no_file_selected;
     }
 
@@ -405,7 +433,7 @@ imageUpload.addEventListener('change', (e) => {
         return;
     }
 
-    if (!file.type.startsWith('image/')) {
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
         showStatus('status_format_err', true);
         return;
     }
@@ -449,7 +477,12 @@ imageUpload.addEventListener('change', (e) => {
                 const pixels = getPixelArray(imageData, drawWidth, drawHeight);
                 const recommended = detectOptimalColorCount(pixels, 20);
                 const recText = translations[currentLang].recommended || "Recommended";
-                recBadge.innerHTML = `<span class="recommendation-badge" title="Click to apply">${recText}: ${recommended}</span>`;
+                recBadge.textContent = '';
+                const recSpan = document.createElement('span');
+                recSpan.className = 'recommendation-badge';
+                recSpan.title = translations[currentLang]?.rec_click_hint || 'Click to apply';
+                recSpan.textContent = `${recText}: ${recommended}`;
+                recBadge.appendChild(recSpan);
                 recBadge.style.cursor = 'pointer';
                 recBadge.onclick = () => {
                     colorCountInput.value = recommended;
@@ -672,7 +705,7 @@ generateBtn.addEventListener('click', async () => {
     const targetRows   = Math.round(targetStitches * imgRatio * techniqueRatio);
 
     if (targetStitches > 1500 || targetRows > 1500) {
-        showStatus("Too many stitches/rows. Try a smaller size or thicker yarn.", true);
+        showStatus('status_too_large', true);
         generateBtn.disabled = false;
         return;
     }
@@ -1286,8 +1319,10 @@ if (canvas) {
 
 function saveToHistory(dataURL, palette, infoText) {
     const id = Date.now();
-    const assignments = currentPatternData ? [...currentPatternData.assignments] : [];
-    patternHistory.push({ id, dataURL, palette, infoText, assignments });
+    if (!currentPatternData) { renderHistory(); return; }
+    const { cols, rows, pixelSize, showGrid, gauge } = currentPatternData;
+    const assignments = [...currentPatternData.assignments];
+    patternHistory.push({ id, dataURL, palette, infoText, assignments, cols, rows, pixelSize, showGrid, gauge });
     if (patternHistory.length > 5) patternHistory.shift();
     renderHistory();
 }
@@ -1303,10 +1338,14 @@ function renderHistory() {
         img.addEventListener('click', () => {
             // Restore currentPatternData when switching history
             currentPatternData = {
-                ...currentPatternData, // keep gauge/pixelSize if needed
+                ...currentPatternData,
                 palette: item.palette,
-                assignments: [...item.assignments || []], // We need to store assignments in history too!
-                infoText: item.infoText
+                assignments: [...(item.assignments || [])],
+                cols: item.cols ?? currentPatternData?.cols,
+                rows: item.rows ?? currentPatternData?.rows,
+                pixelSize: item.pixelSize ?? currentPatternData?.pixelSize,
+                showGrid: item.showGrid ?? currentPatternData?.showGrid,
+                gauge: item.gauge ?? currentPatternData?.gauge,
             };
             
             const tempImg = new Image();
@@ -1341,7 +1380,7 @@ downloadPdfBtn.addEventListener('click', async () => {
         const defaultName = (numbers && numbers.length >= 4)
             ? `knitting_pattern_${numbers[2]}cm`
             : 'knitting_pattern';
-        const filename = window.prompt('저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
+        const filename = window.prompt(translations[currentLang]?.prompt_pdf_filename || '저장할 파일 이름을 입력하세요 (.pdf 자동 추가)', defaultName);
         if (filename === null) return;
         const finalName = filename.trim() || defaultName;
 
@@ -1441,7 +1480,7 @@ saveToCloudBtn.addEventListener('click', () => {
 
     document.getElementById('patternSaveError').style.display = 'none';
     document.getElementById('patternSaveModalSubmit').disabled = false;
-    document.getElementById('patternSaveModalSubmit').textContent = '저장';
+    document.getElementById('patternSaveModalSubmit').textContent = translations[currentLang]?.btn_modal_save || '저장';
 });
 
 const saveModalClose = document.getElementById('patternSaveModalClose');
@@ -1504,8 +1543,8 @@ document.getElementById('patternSaveForm').addEventListener('submit', async (e) 
     } catch (err) {
         console.error('Cloud save failed:', err);
         submitBtn.disabled = false;
-        submitBtn.textContent = '저장';
-        errorEl.textContent = '저장 중 오류가 발생했습니다.';
+        submitBtn.textContent = translations[currentLang]?.btn_modal_save || '저장';
+        errorEl.textContent = translations[currentLang]?.save_error || '저장 중 오류가 발생했습니다.';
         errorEl.style.display = 'block';
     }
 });
