@@ -11,6 +11,14 @@ let currentLang = 'ko';
 
 // 매거진 기사 순서 정의 (최신순)
 const MAGAZINE_ARTICLES = [
+  'knitting-tools-accessories',
+  'winter-yarn-guide',
+  'colorwork-basics',
+  'knitting-abbreviations',
+  'blocking-guide',
+  'reading-patterns',
+  'yarn-fiber-guide',
+  'needle-types-guide',
   'knitting-history-spy',
   'science-of-knitting-physics',
   'knitting-mental-health',
