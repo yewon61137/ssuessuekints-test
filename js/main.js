@@ -1235,28 +1235,50 @@ if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker
 // 원본 비교 기능 (Hold to Compare)
 if (compareToolBtn && compareCanvas) {
     const showCompare = (e) => {
-        if (e) e.preventDefault();
+        if (!originalImage) return;
+        if (e) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        console.log('Comparing started...');
         compareCanvas.style.display = 'block';
-        setTimeout(() => { compareCanvas.style.opacity = '1'; }, 10);
+        // force reflow
+        void compareCanvas.offsetWidth;
+        compareCanvas.style.opacity = '1';
         compareToolBtn.classList.add('active');
     };
+    
     const hideCompare = (e) => {
-        if (e) e.preventDefault();
+        if (e) {
+            // Note: pointerleave or touchend shouldn't always preventDefault
+            e.stopPropagation();
+        }
+        
+        console.log('Comparing ended...');
         compareCanvas.style.opacity = '0';
         setTimeout(() => { 
-            if (compareCanvas.style.opacity === '0') compareCanvas.style.display = 'none'; 
-        }, 150);
+            if (compareCanvas.style.opacity === '0') {
+                compareCanvas.style.display = 'none'; 
+            }
+        }, 160);
         compareToolBtn.classList.remove('active');
     };
 
+    // Use pointer events for modern support, but keep touch events as fallback/specific override
     compareToolBtn.addEventListener('pointerdown', showCompare);
     compareToolBtn.addEventListener('pointerup', hideCompare);
     compareToolBtn.addEventListener('pointerleave', hideCompare);
     compareToolBtn.addEventListener('contextmenu', e => e.preventDefault());
     
-    // 모바일 터치 대응 (일부 브라우저 pointerdown 이슈 대비)
-    compareToolBtn.addEventListener('touchstart', showCompare, { passive: false });
-    compareToolBtn.addEventListener('touchend', hideCompare, { passive: false });
+    // Ensure mobile browsers don't trigger context menu or scrolling during hold
+    compareToolBtn.addEventListener('touchstart', (e) => {
+        if (e.cancelable) e.preventDefault();
+        showCompare(e);
+    }, { passive: false });
+    compareToolBtn.addEventListener('touchend', (e) => {
+        hideCompare(e);
+    }, { passive: false });
 }
 
 // 되돌리기 로직
