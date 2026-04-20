@@ -135,6 +135,7 @@ export const t = {
         tooltip_undo: '실행 취소 (Ctrl+Z)',
         tooltip_redo: '다시 실행 (Ctrl+Shift+Z)',
         tooltip_compare: '원본과 비교 (누르고 있으면 표시)',
+        status_no_original: '직접 생성한 도안에서만 원본 비교가 가능합니다.',
         // Follow
         follow: '팔로우', following: '팔로잉',
         my_following: '팔로우 목록', stat_following: '팔로잉', stat_followers: '팔로워',
@@ -269,6 +270,7 @@ export const t = {
         tooltip_undo: 'Undo (Ctrl+Z)',
         tooltip_redo: 'Redo (Ctrl+Shift+Z)',
         tooltip_compare: 'Compare with Original (Hold to view)',
+        status_no_original: 'Comparison is only available for patterns created in this session.',
         // Follow
         follow: 'Follow', following: 'Following',
         my_following: 'Following', stat_following: 'Following', stat_followers: 'Followers',
@@ -403,6 +405,7 @@ export const t = {
         tooltip_undo: '元に戻す (Ctrl+Z)',
         tooltip_redo: 'やり直し (Ctrl+Shift+Z)',
         tooltip_compare: 'オリジナルと比較 (長押し)',
+        status_no_original: 'このセッションで作成された編み図のみ比較可能です。',
         // Follow
         follow: 'フォロー', following: 'フォロー中',
         my_following: 'フォロー・フォロワー', stat_following: 'フォロー', stat_followers: 'フォロワー',

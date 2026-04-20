@@ -152,6 +152,7 @@
   overflow: auto !important;
   box-sizing: border-box;
   touch-action: none; /* Prevent scroll on touch devices during drawing */
+  position: relative; /* Anchor for absolute compareCanvas */
 }
 
 #patternCanvas {
@@ -164,20 +165,19 @@
 
 #compareCanvas {
   position: absolute;
-  top: 50%;
+  top: 1rem; /* .canvas-wrapper padding matching */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   width: auto;
   height: auto;
-  max-width: 95% !important; /* Ensure it stays within parent like patternCanvas */
-  max-height: 80vh !important;
+  max-width: 95% !important;
   pointer-events: none;
   z-index: 10;
   display: none;
   image-rendering: auto;
   object-fit: contain;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease-in-out;
 }
 
 /* --- Responsive Layout Polish & Consolidation --- */

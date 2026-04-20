@@ -1235,7 +1235,13 @@ if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker
 // 원본 비교 기능 (Hold to Compare)
 if (compareToolBtn && compareCanvas) {
     const showCompare = (e) => {
-        if (!originalImage) return;
+        if (!originalImage) {
+            if (typeof showStatus === 'function') {
+                // 원본 이미지가 없는 경우 (클라우드 로드 등) 안내
+                showStatus('status_no_original', true);
+            }
+            return;
+        }
         if (e) {
             if (e.cancelable) e.preventDefault();
             e.stopPropagation();
@@ -1393,7 +1399,15 @@ function saveToHistory(dataURL, palette, infoText) {
     if (!currentPatternData) { renderHistory(); return; }
     const { cols, rows, pixelSize, showGrid, gauge } = currentPatternData;
     const assignments = [...currentPatternData.assignments];
-    patternHistory.push({ id, dataURL, palette, infoText, assignments, cols, rows, pixelSize, showGrid, gauge });
+    
+    // 원본 이미지를 데이터 URL로 저장하여 히스토리 전환 시에도 비교 기능 유지
+    const originalDataURL = (originalImage && originalImage.src) ? originalImage.src : null;
+    
+    patternHistory.push({ 
+        id, dataURL, palette, infoText, assignments, 
+        cols, rows, pixelSize, showGrid, gauge,
+        originalDataURL 
+    });
     if (patternHistory.length > 5) patternHistory.shift();
     renderHistory();
 }
@@ -1433,6 +1447,28 @@ function renderHistory() {
             patternInfo.textContent = item.infoText;
             document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
             img.classList.add('active');
+
+            // 히스토리 항목의 원본 이미지 복구 (비교 기능용)
+            if (item.originalDataURL) {
+                const tempOrigImg = new Image();
+                tempOrigImg.onload = () => {
+                    originalImage = tempOrigImg;
+                    // compareCanvas 업데이트
+                    if (compareCanvas && compareCtx) {
+                        compareCanvas.width = canvas.width;
+                        compareCanvas.height = canvas.height;
+                        compareCtx.clearRect(0, 0, compareCanvas.width, compareCanvas.height);
+                        const paddingTop = item.showGrid ? 40 : 10;
+                        const paddingLeft = item.showGrid ? 40 : 10;
+                        compareCtx.save();
+                        compareCtx.translate(paddingLeft, paddingTop);
+                        compareCtx.imageSmoothingEnabled = true;
+                        compareCtx.drawImage(originalImage, 0, 0, item.cols * item.pixelSize, item.rows * item.pixelSize);
+                        compareCtx.restore();
+                    }
+                };
+                tempOrigImg.src = item.originalDataURL;
+            }
         });
         historyThumbnails.appendChild(img);
     });
