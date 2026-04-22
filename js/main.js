@@ -1311,16 +1311,20 @@ function redoEdit() {
 if (undoBtn) undoBtn.addEventListener('click', undoEdit);
 if (redoBtn) redoBtn.addEventListener('click', redoEdit);
 
-// 키보드 단축키 (Ctrl+Z / Ctrl+Shift+Z)
+// 키보드 단축키 (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y)
 window.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        if (e.shiftKey) {
+    const key = e.key.toLowerCase();
+    if (e.ctrlKey || e.metaKey) {
+        if (key === 'z' && e.shiftKey) {
             e.preventDefault();
             redoEdit();
-        } else {
+        } else if (key === 'z' && !e.shiftKey) {
             e.preventDefault();
             undoEdit();
+        } else if (key === 'y') {
+            e.preventDefault();
+            redoEdit();
         }
     }
 });

@@ -112,13 +112,16 @@
 }
 
 .toolbar-palette-list .color-item {
+  display: block;
   width: 28px;
   height: 28px;
+  padding: 0;
   flex-shrink: 0;
   border: 2px solid var(--border-color);
   cursor: pointer;
   position: relative;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .toolbar-palette-list .color-item:hover {
