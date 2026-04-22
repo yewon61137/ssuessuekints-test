@@ -16,6 +16,7 @@ let currentPatternData = null; // { cols, rows, assignments, palette, gauge }
 let activeTool = 'view'; // 'view', 'pencil', 'eraser', 'picker'
 let bgIndex = 0; // Likely background color index
 let editHistory = []; // Stack of assignments clones
+let redoHistory = [];
 let lastSavedTitle = null;
 let lastSavedDocId = null;
 let isOverlayVisible = false;
@@ -69,6 +70,7 @@ const pencilToolBtn = document.getElementById('pencilToolBtn');
 const eraserToolBtn = document.getElementById('eraserToolBtn');
 const pickerToolBtn = document.getElementById('pickerToolBtn');
 const undoBtn = document.getElementById('undoBtn');
+const redoBtn = document.getElementById('redoBtn');
 const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
@@ -157,6 +159,7 @@ const translations = {
         tooltip_eraser: "지우개 (바탕색으로 칠하기)",
         tooltip_picker: "색상 추출 (도안에서 선택)",
         tooltip_undo: "되돌리기 (Ctrl+Z)",
+        tooltip_redo: "다시 실행 (Ctrl+Shift+Z)",
         status_too_large: "코/단 수가 너무 많습니다. 더 작은 크기나 굵은 실을 선택해주세요.",
         btn_modal_save: "저장",
         prompt_pdf_filename: "저장할 파일 이름을 입력하세요 (.pdf 자동 추가)",
@@ -244,6 +247,7 @@ const translations = {
         tooltip_eraser: "Eraser (Remove)",
         tooltip_picker: "Color Picker (Eyedropper)",
         tooltip_undo: "Undo (Ctrl+Z)",
+        tooltip_redo: "Redo (Ctrl+Shift+Z)",
         status_too_large: "Too many stitches/rows. Try a smaller size or thicker yarn.",
         btn_modal_save: "Save",
         prompt_pdf_filename: "Enter file name (.pdf will be added automatically)",
@@ -331,6 +335,7 @@ const translations = {
         tooltip_eraser: "消しゴム (背景色で塗る)",
         tooltip_picker: "色抽出 (スポイト)",
         tooltip_undo: "元に戻す (Ctrl+Z)",
+        tooltip_redo: "やり直し (Ctrl+Shift+Z)",
         status_too_large: "コ/段の数が多すぎます。小さいサイズか太い糸を選んでください。",
         btn_modal_save: "保存",
         prompt_pdf_filename: "ファイル名を入力してください（.pdfは自動で追加されます）",
@@ -1286,20 +1291,34 @@ function saveEditState() {
     if (!currentPatternData) return;
     editHistory.push([...currentPatternData.assignments]);
     if (editHistory.length > MAX_EDIT_HISTORY) editHistory.shift();
+    redoHistory = [];
 }
 
 function undoEdit() {
     if (editHistory.length === 0) return;
+    redoHistory.push([...currentPatternData.assignments]);
     currentPatternData.assignments = editHistory.pop();
     renderPattern();
 }
 
-if (undoBtn) undoBtn.addEventListener('click', undoEdit);
+function redoEdit() {
+    if (redoHistory.length === 0) return;
+    editHistory.push([...currentPatternData.assignments]);
+    currentPatternData.assignments = redoHistory.pop();
+    renderPattern();
+}
 
-// 키보드 단축키 (Ctrl+Z)
+if (undoBtn) undoBtn.addEventListener('click', undoEdit);
+if (redoBtn) redoBtn.addEventListener('click', redoEdit);
+
+// 키보드 단축키 (Ctrl+Z / Ctrl+Shift+Z)
 window.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        if (activeTool !== 'view') {
+        if (e.shiftKey) {
+            e.preventDefault();
+            redoEdit();
+        } else {
             e.preventDefault();
             undoEdit();
         }

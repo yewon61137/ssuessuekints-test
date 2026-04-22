@@ -102,8 +102,8 @@
 }
 
 .toolbar-palette-list {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   list-style: none;
   padding: 4px;
@@ -112,25 +112,23 @@
 }
 
 .toolbar-palette-list .color-item {
-  aspect-ratio: 1;
-  width: 100%;
-  max-width: 32px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   border: 2px solid var(--border-color);
   cursor: pointer;
-  flex-shrink: 0;
   position: relative;
   box-sizing: border-box;
 }
 
 .toolbar-palette-list .color-item:hover {
   border-color: #555;
-  border-width: 2.5px;
 }
 
 .toolbar-palette-list .color-item.active {
-  border: 3px solid #000;
+  border: 2px solid #000;
   outline: 2px solid #fff;
-  outline-offset: -5px;
+  outline-offset: -4px;
   z-index: 1;
 }
 
