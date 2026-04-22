@@ -165,9 +165,8 @@
 
 #compareCanvas {
   position: absolute;
-  top: 1rem; /* .canvas-wrapper padding matching */
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
   width: auto;
   height: auto;
   max-width: 95% !important;

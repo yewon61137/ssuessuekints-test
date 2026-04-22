@@ -1247,7 +1247,15 @@ if (compareToolBtn && compareCanvas) {
             e.stopPropagation();
         }
         
-        console.log('Comparing started...');
+        // patternCanvas의 실제 렌더링 위치에 compareCanvas를 정렬
+        if (canvas) {
+            compareCanvas.style.top = canvas.offsetTop + 'px';
+            compareCanvas.style.left = canvas.offsetLeft + 'px';
+            compareCanvas.style.width = canvas.offsetWidth + 'px';
+            compareCanvas.style.height = canvas.offsetHeight + 'px';
+            compareCanvas.style.transform = 'none';
+        }
+
         compareCanvas.style.display = 'block';
         // force reflow
         void compareCanvas.offsetWidth;
