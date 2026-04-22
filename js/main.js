@@ -1322,9 +1322,6 @@ window.addEventListener('keydown', (e) => {
         } else if (key === 'z' && !e.shiftKey) {
             e.preventDefault();
             undoEdit();
-        } else if (key === 'y' && !e.shiftKey) {
-            e.preventDefault();
-            redoEdit();
         }
     } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (key === 'i') {
