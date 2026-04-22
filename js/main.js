@@ -154,10 +154,10 @@ const translations = {
         recommended: "추천",
         label_show_symbols: "기호 표시",
         label_active_color: "편집 색상",
-        tooltip_compare: "원본 사진 오버레이 켜기/끄기",
+        tooltip_compare: "원본 사진 오버레이 켜기/끄기 (O)",
         tooltip_pencil: "연필 (그리기)",
         tooltip_eraser: "지우개 (바탕색으로 칠하기)",
-        tooltip_picker: "색상 추출 (도안에서 선택)",
+        tooltip_picker: "색상 추출 (도안에서 선택) (I)",
         tooltip_undo: "되돌리기 (Ctrl+Z)",
         tooltip_redo: "다시 실행 (Ctrl+Shift+Z)",
         status_too_large: "코/단 수가 너무 많습니다. 더 작은 크기나 굵은 실을 선택해주세요.",
@@ -242,10 +242,10 @@ const translations = {
         recommended: "Recommended",
         label_show_symbols: "Show Symbols",
         label_active_color: "Active Color",
-        tooltip_compare: "Toggle Original Photo Overlay",
+        tooltip_compare: "Toggle Original Photo Overlay (O)",
         tooltip_pencil: "Pencil (Draw)",
         tooltip_eraser: "Eraser (Remove)",
-        tooltip_picker: "Color Picker (Eyedropper)",
+        tooltip_picker: "Color Picker (Eyedropper) (I)",
         tooltip_undo: "Undo (Ctrl+Z)",
         tooltip_redo: "Redo (Ctrl+Shift+Z)",
         status_too_large: "Too many stitches/rows. Try a smaller size or thicker yarn.",
@@ -330,10 +330,10 @@ const translations = {
         recommended: "おすすめ",
         label_show_symbols: "記号を表示",
         label_active_color: "編集色",
-        tooltip_compare: "元の写真オーバーレイ表示切替",
+        tooltip_compare: "元の写真オーバーレイ表示切替 (O)",
         tooltip_pencil: "鉛筆 (描く)",
         tooltip_eraser: "消しゴム (背景色で塗る)",
-        tooltip_picker: "色抽出 (スポイト)",
+        tooltip_picker: "色抽出 (スポイト) (I)",
         tooltip_undo: "元に戻す (Ctrl+Z)",
         tooltip_redo: "やり直し (Ctrl+Shift+Z)",
         status_too_large: "コ/段の数が多すぎます。小さいサイズか太い糸を選んでください。",
@@ -1311,7 +1311,7 @@ function redoEdit() {
 if (undoBtn) undoBtn.addEventListener('click', undoEdit);
 if (redoBtn) redoBtn.addEventListener('click', redoEdit);
 
-// 키보드 단축키 (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y)
+// 키보드 단축키
 window.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     const key = e.key.toLowerCase();
@@ -1322,9 +1322,18 @@ window.addEventListener('keydown', (e) => {
         } else if (key === 'z' && !e.shiftKey) {
             e.preventDefault();
             undoEdit();
-        } else if (key === 'y') {
+        } else if (key === 'y' && !e.shiftKey) {
             e.preventDefault();
             redoEdit();
+        }
+    } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (key === 'i') {
+            if (currentPatternData) setTool('picker');
+        } else if (key === 'o') {
+            if (originalImage && compareToolBtn && compareCanvas) {
+                if (isOverlayVisible) hideOverlay();
+                else showOverlay();
+            }
         }
     }
 });
