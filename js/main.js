@@ -155,7 +155,7 @@ const translations = {
         label_show_symbols: "기호 표시",
         label_active_color: "편집 색상",
         tooltip_compare: "원본 사진 오버레이 켜기/끄기 (O)",
-        tooltip_pencil: "연필 (그리기) (B)",
+        tooltip_pencil: "연필 (그리기) (P)",
         tooltip_eraser: "지우개 (바탕색으로 칠하기) (E)",
         tooltip_picker: "색상 추출 (도안에서 선택) (I)",
         tooltip_undo: "되돌리기 (Ctrl+Z)",
@@ -243,7 +243,7 @@ const translations = {
         label_show_symbols: "Show Symbols",
         label_active_color: "Active Color",
         tooltip_compare: "Toggle Original Photo Overlay (O)",
-        tooltip_pencil: "Pencil (Draw) (B)",
+        tooltip_pencil: "Pencil (Draw) (P)",
         tooltip_eraser: "Eraser (Remove) (E)",
         tooltip_picker: "Color Picker (Eyedropper) (I)",
         tooltip_undo: "Undo (Ctrl+Z)",
@@ -331,7 +331,7 @@ const translations = {
         label_show_symbols: "記号を表示",
         label_active_color: "編集色",
         tooltip_compare: "元の写真オーバーレイ表示切替 (O)",
-        tooltip_pencil: "鉛筆 (描く) (B)",
+        tooltip_pencil: "鉛筆 (描く) (P)",
         tooltip_eraser: "消しゴム (背景色で塗る) (E)",
         tooltip_picker: "色抽出 (スポイト) (I)",
         tooltip_undo: "元に戻す (Ctrl+Z)",
@@ -1323,7 +1323,7 @@ window.addEventListener('keydown', (e) => {
             undoEdit();
         }
     } else if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
-        if (e.code === 'KeyB') {
+        if (e.code === 'KeyP') {
             if (currentPatternData) setTool('pencil');
         } else if (e.code === 'KeyE') {
             if (currentPatternData) setTool('eraser');
