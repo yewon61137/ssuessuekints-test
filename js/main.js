@@ -1311,22 +1311,21 @@ function redoEdit() {
 if (undoBtn) undoBtn.addEventListener('click', undoEdit);
 if (redoBtn) redoBtn.addEventListener('click', redoEdit);
 
-// 키보드 단축키
+// 키보드 단축키 (e.code 사용 — IME/한글 입력 모드 무관)
 window.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-    const key = e.key.toLowerCase();
     if (e.ctrlKey || e.metaKey) {
-        if (key === 'z' && e.shiftKey) {
+        if (e.code === 'KeyZ' && e.shiftKey) {
             e.preventDefault();
             redoEdit();
-        } else if (key === 'z' && !e.shiftKey) {
+        } else if (e.code === 'KeyZ' && !e.shiftKey) {
             e.preventDefault();
             undoEdit();
         }
-    } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (key === 'i') {
+    } else if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        if (e.code === 'KeyI') {
             if (currentPatternData) setTool('picker');
-        } else if (key === 'o') {
+        } else if (e.code === 'KeyO') {
             if (originalImage && compareToolBtn && compareCanvas) {
                 if (isOverlayVisible) hideOverlay();
                 else showOverlay();
