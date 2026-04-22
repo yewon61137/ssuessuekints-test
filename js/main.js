@@ -18,6 +18,7 @@ let bgIndex = 0; // Likely background color index
 let editHistory = []; // Stack of assignments clones
 let lastSavedTitle = null;
 let lastSavedDocId = null;
+let isOverlayVisible = false;
 const MAX_EDIT_HISTORY = 30;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_CANVAS_DIMENSION = 4000;
@@ -931,8 +932,11 @@ generateBtn.addEventListener('click', async () => {
             compareCtx.save();
             compareCtx.translate(paddingLeft, paddingTop);
             compareCtx.imageSmoothingEnabled = true;
+            compareCtx.globalAlpha = 0.5;
             compareCtx.drawImage(originalImage, 0, 0, cols * pixelSize, rows * pixelSize);
             compareCtx.restore();
+
+            if (isOverlayVisible) showOverlay();
         }
 
         resultPanel.scrollIntoView({ behavior: 'smooth' });
@@ -1232,67 +1236,46 @@ if (pencilToolBtn) pencilToolBtn.addEventListener('click', () => setTool('pencil
 if (eraserToolBtn) eraserToolBtn.addEventListener('click', () => setTool('eraser'));
 if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker'));
 
-// 원본 비교 기능 (Hold to Compare)
+// 원본 오버레이 토글 기능
+function syncOverlayPosition() {
+    if (!canvas || !compareCanvas) return;
+    compareCanvas.style.top = canvas.offsetTop + 'px';
+    compareCanvas.style.left = canvas.offsetLeft + 'px';
+    compareCanvas.style.width = canvas.offsetWidth + 'px';
+    compareCanvas.style.height = canvas.offsetHeight + 'px';
+    compareCanvas.style.transform = 'none';
+}
+
+function showOverlay() {
+    syncOverlayPosition();
+    compareCanvas.style.display = 'block';
+    void compareCanvas.offsetWidth;
+    compareCanvas.style.opacity = '1';
+    compareToolBtn.classList.add('active');
+    isOverlayVisible = true;
+}
+
+function hideOverlay() {
+    compareCanvas.style.opacity = '0';
+    setTimeout(() => {
+        if (compareCanvas.style.opacity === '0') compareCanvas.style.display = 'none';
+    }, 160);
+    compareToolBtn.classList.remove('active');
+    isOverlayVisible = false;
+}
+
 if (compareToolBtn && compareCanvas) {
-    const showCompare = (e) => {
+    compareToolBtn.addEventListener('click', () => {
         if (!originalImage) {
-            if (typeof showStatus === 'function') {
-                // 원본 이미지가 없는 경우 (클라우드 로드 등) 안내
-                showStatus('status_no_original', true);
-            }
+            showStatus('status_no_original', true);
             return;
         }
-        if (e) {
-            if (e.cancelable) e.preventDefault();
-            e.stopPropagation();
+        if (isOverlayVisible) {
+            hideOverlay();
+        } else {
+            showOverlay();
         }
-        
-        // patternCanvas의 실제 렌더링 위치에 compareCanvas를 정렬
-        if (canvas) {
-            compareCanvas.style.top = canvas.offsetTop + 'px';
-            compareCanvas.style.left = canvas.offsetLeft + 'px';
-            compareCanvas.style.width = canvas.offsetWidth + 'px';
-            compareCanvas.style.height = canvas.offsetHeight + 'px';
-            compareCanvas.style.transform = 'none';
-        }
-
-        compareCanvas.style.display = 'block';
-        // force reflow
-        void compareCanvas.offsetWidth;
-        compareCanvas.style.opacity = '1';
-        compareToolBtn.classList.add('active');
-    };
-    
-    const hideCompare = (e) => {
-        if (e) {
-            // Note: pointerleave or touchend shouldn't always preventDefault
-            e.stopPropagation();
-        }
-        
-        console.log('Comparing ended...');
-        compareCanvas.style.opacity = '0';
-        setTimeout(() => { 
-            if (compareCanvas.style.opacity === '0') {
-                compareCanvas.style.display = 'none'; 
-            }
-        }, 160);
-        compareToolBtn.classList.remove('active');
-    };
-
-    // Use pointer events for modern support, but keep touch events as fallback/specific override
-    compareToolBtn.addEventListener('pointerdown', showCompare);
-    compareToolBtn.addEventListener('pointerup', hideCompare);
-    compareToolBtn.addEventListener('pointerleave', hideCompare);
-    compareToolBtn.addEventListener('contextmenu', e => e.preventDefault());
-    
-    // Ensure mobile browsers don't trigger context menu or scrolling during hold
-    compareToolBtn.addEventListener('touchstart', (e) => {
-        if (e.cancelable) e.preventDefault();
-        showCompare(e);
-    }, { passive: false });
-    compareToolBtn.addEventListener('touchend', (e) => {
-        hideCompare(e);
-    }, { passive: false });
+    });
 }
 
 // 되돌리기 로직
@@ -1471,6 +1454,7 @@ function renderHistory() {
                         compareCtx.save();
                         compareCtx.translate(paddingLeft, paddingTop);
                         compareCtx.imageSmoothingEnabled = true;
+                        compareCtx.globalAlpha = 0.5;
                         compareCtx.drawImage(originalImage, 0, 0, item.cols * item.pixelSize, item.rows * item.pixelSize);
                         compareCtx.restore();
                     }
