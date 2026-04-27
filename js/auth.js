@@ -35,10 +35,16 @@ import {
 export { auth, db };
 // Storage is imported dynamically in functions that need it
 
-// 모바일/태블릿 감지 헬퍼 (네이버 로그인과 동일 기준)
+// 모바일/태블릿/Safari 감지 헬퍼
+// Safari는 signInWithPopup 전 async 작업(setPersistence) 이후 팝업을
+// user gesture 없음으로 판단해 차단하므로 리다이렉트 방식 사용
 function isMobileDevice() {
-    return /Mobi|Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
+    const ua = navigator.userAgent;
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini/i.test(ua)
         || window.innerWidth <= 768;
+    // Safari 감지: Chrome/Edge/Android의 'chrome' 키워드가 없고 'safari'가 있는 경우
+    const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+    return isMobile || isSafari;
 }
 
 export async function applyAuthPersistence() {
