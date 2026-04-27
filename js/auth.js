@@ -160,7 +160,9 @@ export async function checkNicknameAvailable(nickname) {
 // 사용자 프로필 완성 여부 확인
 async function isProfileComplete(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
-    return snap.exists() && snap.data().profileCompleted === true;
+    if (!snap.exists()) return false;
+    const data = snap.data();
+    return data.profileCompleted === true || !!data.nickname;
 }
 
 // 사용자 프로필 저장 (Firestore + Storage)
@@ -227,17 +229,19 @@ function showProfileSetup(user) {
     stopVerificationCheck();
 
     const modal = document.getElementById('authModal');
-    // 탭·소셜 버튼·구분선 숨기기
-    modal.querySelector('.modal-tabs').style.display = 'none';
-    modal.querySelector('.google-btn').style.display = 'none';
-    modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = 'none');
-    modal.querySelector('.modal-divider').style.display = 'none';
-    document.getElementById('signinPanel').style.display = 'none';
-    document.getElementById('signupPanel').style.display = 'none';
-    document.getElementById('verificationSentPanel').style.display = 'none';
+    // 탭·소셜 버튼·구분선 숨기기 (하드코딩된 구버전 모달에서도 에러 나지 않도록 방어 코드 적용)
+    if (modal) {
+        modal.querySelector('.modal-tabs')?.style && (modal.querySelector('.modal-tabs').style.display = 'none');
+        modal.querySelector('.google-btn')?.style && (modal.querySelector('.google-btn').style.display = 'none');
+        modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = 'none');
+        modal.querySelector('.modal-divider')?.style && (modal.querySelector('.modal-divider').style.display = 'none');
+    }
+    document.getElementById('signinPanel')?.style && (document.getElementById('signinPanel').style.display = 'none');
+    document.getElementById('signupPanel')?.style && (document.getElementById('signupPanel').style.display = 'none');
+    document.getElementById('verificationSentPanel')?.style && (document.getElementById('verificationSentPanel').style.display = 'none');
 
     const panel = document.getElementById('profileSetupPanel');
-    panel.style.display = 'block';
+    if (panel) panel.style.display = 'block';
     clearModalError();
 
     const saveBtn = document.getElementById('profileSaveBtn');
@@ -276,12 +280,15 @@ function showProfileSetup(user) {
 
 function showVerificationSentUI(email) {
     const modal = document.getElementById('authModal');
-    modal.querySelector('.modal-tabs').style.display = 'none';
-    modal.querySelector('.google-btn').style.display = 'none';
-    modal.querySelector('.modal-divider').style.display = 'none';
-    document.getElementById('signinPanel').style.display = 'none';
-    document.getElementById('signupPanel').style.display = 'none';
-    document.getElementById('profileSetupPanel').style.display = 'none';
+    if (modal) {
+        modal.querySelector('.modal-tabs')?.style && (modal.querySelector('.modal-tabs').style.display = 'none');
+        modal.querySelector('.google-btn')?.style && (modal.querySelector('.google-btn').style.display = 'none');
+        modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = 'none');
+        modal.querySelector('.modal-divider')?.style && (modal.querySelector('.modal-divider').style.display = 'none');
+    }
+    document.getElementById('signinPanel')?.style && (document.getElementById('signinPanel').style.display = 'none');
+    document.getElementById('signupPanel')?.style && (document.getElementById('signupPanel').style.display = 'none');
+    document.getElementById('profileSetupPanel')?.style && (document.getElementById('profileSetupPanel').style.display = 'none');
 
     const panel = document.getElementById('verificationSentPanel');
     panel.style.display = 'block';
@@ -329,10 +336,12 @@ function hideProfileSetupUI() {
     pendingProfileUser = null;
     stopVerificationCheck();
     const modal = document.getElementById('authModal');
-    modal.querySelector('.modal-tabs').style.display = '';
-    modal.querySelector('.google-btn').style.display = '';
-    modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = '');
-    modal.querySelector('.modal-divider').style.display = '';
+    if (modal) {
+        modal.querySelector('.modal-tabs')?.style && (modal.querySelector('.modal-tabs').style.display = '');
+        modal.querySelector('.google-btn')?.style && (modal.querySelector('.google-btn').style.display = '');
+        modal.querySelector('.naver-btn')?.style && (modal.querySelector('.naver-btn').style.display = '');
+        modal.querySelector('.modal-divider')?.style && (modal.querySelector('.modal-divider').style.display = '');
+    }
     const setupPanel = document.getElementById('profileSetupPanel');
     if (setupPanel) setupPanel.style.display = 'none';
     const sentPanel = document.getElementById('verificationSentPanel');
@@ -444,9 +453,17 @@ function initProfileSetupPanel() {
     });
 }
 
-// authModal이 없는 페이지(magazine, toolkit 등)에서도 로그인 모달을 동작시키기 위해 동적 주입
+// authModal이 없는 페이지(magazine, toolkit 등) 또는 구버전 모달이 있는 페이지(community 등)에 최신 모달 동적 주입/교체
 function ensureAuthModal() {
-    if (document.getElementById('authModal')) return;
+    const existing = document.getElementById('authModal');
+    if (existing) {
+        // profileSetupPanel이나 verificationSentPanel이 없으면 구버전 모달로 간주하고 교체
+        if (!existing.querySelector('#profileSetupPanel') || !existing.querySelector('#verificationSentPanel')) {
+            existing.remove();
+        } else {
+            return;
+        }
+    }
     const html = `<div id="authModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
       <button class="modal-close" id="modalCloseBtn" aria-label="닫기">&#x2715;</button>
@@ -985,6 +1002,7 @@ export async function deleteUserAccount(user) {
 
 export function openAuthModal() {
     if (window.__signOutInProgress) return;
+    ensureAuthModal(); // 모달이 없거나 구버전이면 최신으로 주입/교체
     const modal = document.getElementById('authModal');
     if (modal) {
         modal.style.display = 'flex';
