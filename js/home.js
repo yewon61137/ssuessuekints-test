@@ -263,7 +263,7 @@ function syncLangSelect(lang) {
 let _currentNickname = '';
 let _currentUser = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function _homeInit() {
     initAuth();
     initLang({ pageTitles: PAGE_TITLES });
 
@@ -309,4 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGreeting(_currentNickname);
         syncLangSelect(lang);
     });
-});
+}
+
+// 모듈의 top-level await으로 인해 DOMContentLoaded가 먼저 발화했을 경우를 대비
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _homeInit);
+} else {
+    _homeInit();
+}

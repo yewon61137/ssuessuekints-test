@@ -1,4 +1,80 @@
 (function () {
+
+  /* ── 인앱 브라우저 감지 & 안내 배너 ── */
+  (function () {
+    var ua = navigator.userAgent || '';
+    var isInApp = /Instagram|FBAN|FBAV|KAKAOTALK|Line\/|Twitter\/|NAVER/i.test(ua);
+    if (!isInApp) return;
+
+    var lang = (function () { try { return localStorage.getItem('ssuessue_lang') || 'ko'; } catch (e) { return 'ko'; } })();
+    var dismissed = (function () { try { return sessionStorage.getItem('inapp_banner_dismissed') === '1'; } catch (e) { return false; } })();
+    if (dismissed) return;
+
+    var appName = /Instagram/i.test(ua) ? '인스타그램' : /FBAN|FBAV/i.test(ua) ? '페이스북' : /KAKAOTALK/i.test(ua) ? '카카오톡' : /Line\//i.test(ua) ? '라인' : /NAVER/i.test(ua) ? '네이버 앱' : '앱';
+    var appNameEn = /Instagram/i.test(ua) ? 'Instagram' : /FBAN|FBAV/i.test(ua) ? 'Facebook' : /KAKAOTALK/i.test(ua) ? 'KakaoTalk' : /Line\//i.test(ua) ? 'Line' : /NAVER/i.test(ua) ? 'Naver App' : 'this app';
+
+    var msgs = {
+      ko: {
+        title: appName + ' 내부 브라우저에서는 로그인이 작동하지 않아요.',
+        guide: '우하단 <b>···</b> 버튼 → <b>Safari로 열기</b> 를 눌러주세요.',
+        copy: '링크 복사',
+        copied: '복사됨!',
+        dismiss: '그냥 볼게요'
+      },
+      en: {
+        title: 'Login doesn\'t work in the ' + appNameEn + ' browser.',
+        guide: 'Tap <b>···</b> at the bottom right → <b>Open in Safari / Chrome</b>.',
+        copy: 'Copy link',
+        copied: 'Copied!',
+        dismiss: 'Continue anyway'
+      },
+      ja: {
+        title: appNameEn + ' のブラウザではログインできません。',
+        guide: '右下の <b>···</b> → <b>Safariで開く</b> をタップしてください。',
+        copy: 'リンクをコピー',
+        copied: 'コピー済み!',
+        dismiss: 'このまま続ける'
+      }
+    };
+    var m = msgs[lang] || msgs.ko;
+
+    var banner = document.createElement('div');
+    banner.id = 'inapp-banner';
+    banner.style.cssText = 'background:#1a1a1a;color:#fff;padding:14px 16px 12px;text-align:center;font-family:sans-serif;font-size:13px;line-height:1.6;position:relative;z-index:2000;';
+    banner.innerHTML =
+      '<div style="max-width:520px;margin:0 auto;">' +
+        '<div style="font-weight:700;margin-bottom:4px;font-size:14px;">⚠ ' + m.title + '</div>' +
+        '<div style="opacity:.85;margin-bottom:10px;">' + m.guide + '</div>' +
+        '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">' +
+          '<button id="inapp-copy-btn" style="background:#fff;color:#000;border:none;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;border-radius:2px;font-family:inherit;">' + m.copy + '</button>' +
+          '<button id="inapp-dismiss-btn" style="background:transparent;color:#aaa;border:1px solid #555;padding:7px 14px;font-size:12px;cursor:pointer;border-radius:2px;font-family:inherit;">' + m.dismiss + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentElement('afterbegin', banner);
+
+    document.getElementById('inapp-copy-btn').addEventListener('click', function () {
+      try {
+        navigator.clipboard.writeText(window.location.href).then(function () {
+          document.getElementById('inapp-copy-btn').textContent = m.copied;
+        });
+      } catch (e) {
+        var ta = document.createElement('textarea');
+        ta.value = window.location.href;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        document.getElementById('inapp-copy-btn').textContent = m.copied;
+      }
+    });
+
+    document.getElementById('inapp-dismiss-btn').addEventListener('click', function () {
+      try { sessionStorage.setItem('inapp_banner_dismissed', '1'); } catch (e) {}
+      banner.style.display = 'none';
+    });
+  })();
+
   const headerHtml = `
   <header>
     <div class="hdr-inner">

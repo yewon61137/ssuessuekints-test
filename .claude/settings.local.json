@@ -64,7 +64,8 @@
       "Bash(py -c ':*)",
       "Bash(py _replace2.py)",
       "Bash(python:*)",
-      "Bash(py:*)"
+      "Bash(py:*)",
+      "Bash(npm i *)"
     ]
   }
 }

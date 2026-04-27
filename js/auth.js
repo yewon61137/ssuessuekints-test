@@ -532,6 +532,8 @@ async function handleGoogleRedirectResult() {
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult && redirectResult.user) {
             const user = redirectResult.user;
+            // 모달이 아직 DOM에 없을 수 있으므로 먼저 주입 보장
+            ensureAuthModal();
             const modal = document.getElementById('authModal');
             const complete = await isProfileComplete(user.uid);
             if (!complete) {

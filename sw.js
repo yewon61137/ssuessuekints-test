@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ssuessue-pwa-v13';
+const CACHE_NAME = 'ssuessue-pwa-v14';
 
 // 앱 시작에 필수적인 자원 사전 캐싱
 const PRE_CACHE_ASSETS = [
