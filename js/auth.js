@@ -768,11 +768,8 @@ export function initAuth() {
             localStorage.setItem('naver_remember_me', (rm && rm.checked) ? '1' : '0');
             const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
-            // 모바일 감지: window.open() 팝업은 네이버가 인앱 브라우저로 감지해 차단(error 207)
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
-                          || window.innerWidth <= 768;
-
-            if (isMobile) {
+            // 모바일/Safari 감지: window.open() 팝업은 네이버가 인앱 브라우저로 감지해 차단(error 207)
+            if (isMobileDevice()) {
                 // 모바일: 현재 페이지 경로 저장 후 현재 탭에서 직접 이동
                 localStorage.setItem('naver_return_path', window.location.pathname + window.location.search);
                 localStorage.setItem('naver_redirect_fallback', '1');

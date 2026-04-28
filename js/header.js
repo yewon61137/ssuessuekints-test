@@ -157,16 +157,24 @@
     });
   }
 
-  /* ── GNB dropdown parent — 꺽쇠 클릭만 드롭다운 / 텍스트 클릭은 페이지 이동 ── */
+  /* ── GNB dropdown parent ── */
+  var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
   document.querySelectorAll('.gnb-has-sub > .gnb-link').forEach(function (el) {
     el.addEventListener('click', function (e) {
-      // 꺽쇠(chevron) SVG 또는 그 내부 클릭이면 드롭다운 토글
+      var sub = el.nextElementSibling;
       if (e.target.closest('.gnb-chevron')) {
+        // chevron 클릭: 항상 드롭다운 토글
         e.preventDefault();
-        var sub = el.nextElementSibling;
         if (sub) sub.classList.toggle('open');
+      } else if (isTouchDevice) {
+        // 터치 기기에서 링크 텍스트 tap: 서브메뉴가 닫혀 있으면 열고, 이미 열려 있으면 페이지 이동
+        if (sub && !sub.classList.contains('open')) {
+          e.preventDefault();
+          sub.classList.add('open');
+        }
+        // 이미 열려 있으면 기본 href 이동 허용
       }
-      // 텍스트 or 링크 자체 클릭이면 그대로 href 이동 (기본 동작 유지)
+      // 데스크탑: 텍스트 클릭 시 그대로 페이지 이동
     });
   });
   // 드롭다운 외부 클릭 시 닫기
