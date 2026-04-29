@@ -614,7 +614,10 @@ export function initAuth() {
                     const snap = await getDoc(doc(db, 'users', user.uid));
                     if (snap.exists()) {
                         const data = snap.data();
-                        if (!data.profileCompleted) showProfileSetup(user);
+                        // 기존 유저(nickname은 있으나 profileCompleted가 없는 경우) 호환성 유지
+                        if (!(data.profileCompleted === true || !!data.nickname)) {
+                            showProfileSetup(user);
+                        }
                         // Firestore 닉네임으로 업데이트
                         if (data.nickname) userEmail.textContent = data.nickname;
                     } else {
@@ -622,8 +625,7 @@ export function initAuth() {
                     }
                 } catch (e) {
                     console.error('Profile check failed:', e);
-                    // Firestore 오류 시에도 프로필 설정 모달 표시
-                    showProfileSetup(user);
+                    // Firestore 오류(네트워크 등) 시 무분별하게 모달을 띄우지 않음
                 }
             }
         } else {
