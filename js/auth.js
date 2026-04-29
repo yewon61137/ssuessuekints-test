@@ -457,8 +457,8 @@ function initProfileSetupPanel() {
 function ensureAuthModal() {
     const existing = document.getElementById('authModal');
     if (existing) {
-        // profileSetupPanel이나 verificationSentPanel이 없으면 구버전 모달로 간주하고 교체
-        if (!existing.querySelector('#profileSetupPanel') || !existing.querySelector('#verificationSentPanel')) {
+        // profileSetupPanel, verificationSentPanel, rememberMeCheck, social-login-group 중 하나라도 없으면 구버전
+        if (!existing.querySelector('#profileSetupPanel') || !existing.querySelector('#verificationSentPanel') || !existing.querySelector('#rememberMeCheck') || !existing.querySelector('.social-login-group')) {
             existing.remove();
         } else {
             return;

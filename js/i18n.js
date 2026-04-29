@@ -460,10 +460,16 @@ export function applyLang(lang, opts = {}) {
         el.style.display = el.getAttribute('data-lang-section') === lang ? 'block' : 'none';
     });
 
-    // .i18n-placeholder 패턴 추가
+    // .i18n-placeholder 패턴 (data-placeholder-ko/en/ja)
     document.querySelectorAll('.i18n-placeholder').forEach(el => {
         const val = el.getAttribute('data-placeholder-' + lang);
         if (val) el.placeholder = val;
+    });
+
+    // data-i18n-placeholder 패턴 (번역 키 기반)
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (merged[key] !== undefined) el.placeholder = merged[key];
     });
 
     // 네이버 로그인은 한국어 사용자에게만 표시

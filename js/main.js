@@ -2,7 +2,7 @@
 
 import { getPixelArray, kMeans, rgbToHex, hexToRgb, detectOptimalColorCount, mergeByDeltaE, applyMedianFilter } from './colorUtils.js';
 import { initAuth, getCurrentUser, savePatternToCloud, openAuthModal, setOnAuthComplete, showLoginRequiredToast } from './auth.js';
-import { t as sharedT } from './i18n.js';
+import { initLang, getLang, t as sharedT } from './i18n.js';
 
 // --- 상태 관리 ---
 let originalImage = null;
@@ -59,7 +59,6 @@ const compareCtx = compareCanvas ? compareCanvas.getContext('2d') : null;
 const colorLegend = document.getElementById('colorLegend');
 const historyPanel = document.getElementById('historyPanel');
 const historyThumbnails = document.getElementById('historyThumbnails');
-const langBtns = document.querySelectorAll('.lang-btn');
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -347,54 +346,24 @@ const translations = {
     }
 };
 
-let currentLang = 'ko';
+let currentLang = getLang();
 
-function changeLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('ssuessue_lang', lang);
-    document.documentElement.lang = lang;
-    const merged = { ...sharedT[lang], ...translations[lang] };
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (merged[key]) {
-            el.innerHTML = merged[key];
-        }
-    });
-    document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const key = el.getAttribute('data-i18n-title');
-        if (merged[key]) {
-            el.setAttribute('title', merged[key]);
-        }
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        if (merged[key]) el.setAttribute('placeholder', merged[key]);
-    });
-    document.querySelectorAll('.i18n').forEach(el => {
-        const val = el.getAttribute('data-' + lang);
-        if (val) el.textContent = val;
-    });
-    // Handle special case for file name display which isn't data-i18n but updated dynamically
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    if (fileNameDisplay && (!imageUpload || !imageUpload.files || imageUpload.files.length === 0)) {
-        fileNameDisplay.textContent = translations[lang].no_file_selected;
-    }
-
-    langBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-    });
-}
-
-langBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const lang = btn.getAttribute('data-lang');
-        if (lang) changeLanguage(lang);
-    });
+// i18n.js 통합: initLang()이 언어 전환 버튼 이벤트 등록 + 초기 적용을 담당
+// main.js 고유 번역 키를 extra로 전달하여 병합 적용
+initLang({
+    extra: translations,
+    pageTitles: { ko: '도안 생성기', en: 'Pattern Generator', ja: '編み図ジェネレーター' }
 });
 
-// 저장된 언어로 초기화 (기본값 한국어)
-const savedLang = localStorage.getItem('ssuessue_lang');
-changeLanguage(savedLang || 'ko');
+// 언어 변경 이벤트 수신으로 currentLang 동기화
+window.addEventListener('langChange', (e) => {
+    currentLang = e.detail.lang;
+    // Handle special case for file name display
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    if (fileNameDisplay && (!imageUpload || !imageUpload.files || imageUpload.files.length === 0)) {
+        fileNameDisplay.textContent = translations[currentLang]?.no_file_selected || '';
+    }
+});
 
 // --- 실 굵기 입력 방식 전환 ---
 yarnUnitRadios.forEach(radio => {
