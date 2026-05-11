@@ -50,7 +50,9 @@ function isMobileDevice() {
 export async function applyAuthPersistence() {
     if (!auth) return;
     const rm = document.getElementById('rememberMeCheck');
-    const type = (rm && rm.checked) ? browserLocalPersistence : browserSessionPersistence;
+    // rememberMeCheck가 DOM에 없는 경우(구버전 모달, 모달 미주입 상태) 기본값을
+    // browserLocalPersistence로 사용 — 모바일에서 페이지 이동 시 세션 소실 방지
+    const type = rm ? (rm.checked ? browserLocalPersistence : browserSessionPersistence) : browserLocalPersistence;
     await setPersistence(auth, type);
 }
 

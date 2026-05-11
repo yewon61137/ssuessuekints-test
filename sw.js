@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ssuessue-pwa-v14';
+const CACHE_NAME = 'ssuessue-pwa-v15';
 
 // 앱 시작에 필수적인 자원 사전 캐싱
 const PRE_CACHE_ASSETS = [
@@ -49,12 +49,17 @@ self.addEventListener('fetch', (e) => {
         url.includes('clarity.ms') ||
         url.includes('pagead') ||
         url.includes('/api/') ||
+        url.includes('/__/auth/') ||
+        url.includes('identitytoolkit') ||
+        url.includes('securetoken') ||
         e.request.method !== 'GET'
     ) {
         return;
     }
 
     // HTML 네비게이션 요청: Network-First (최신 콘텐츠 우선, 오프라인 시 캐시 폴백)
+    // 주의: 오프라인 폴백으로 /index.html을 반환하면 Firebase Auth 리다이렉트 세션이 깨질 수 있으므로
+    // 동일 경로 캐시만 반환하고, 없으면 네트워크 에러를 그대로 전파
     if (e.request.mode === 'navigate') {
         e.respondWith(
             fetch(e.request)
@@ -67,7 +72,6 @@ self.addEventListener('fetch', (e) => {
                 })
                 .catch(() =>
                     caches.match(e.request)
-                        .then(cached => cached || caches.match('/index.html'))
                 )
         );
         return;
