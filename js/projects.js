@@ -1132,6 +1132,9 @@ export function init() {
     });
 
     onAuthStateChanged(auth, user => {
+        // 로그아웃 리다이렉트 중이면 UI 업데이트 건너뛰기 (홈으로 이동 중)
+        if (window.__signOutInProgress) return;
+
         currentUser = user;
         const params = new URLSearchParams(location.search);
         const urlUid = params.get('uid');
