@@ -1,16 +1,16 @@
-const CACHE_NAME = 'ssuessue-pwa-v16';
+const CACHE_NAME = 'ssuessue-pwa-v17';
 
-// 앱 시작에 필수적인 자원 사전 캐싱
+// Pre-cache the core shell used by the offline fallback.
 const PRE_CACHE_ASSETS = [
     '/',
     '/index.html',
     '/toolkit.html',
     '/style.css?v=13',
     '/favicon.png',
-    '/js/header.js?v=10',
-    '/js/auth.js?v=10',
-    '/js/i18n.js?v=10',
-    '/js/home.js?v=10',
+    '/js/header.js?v=11',
+    '/js/auth.js',
+    '/js/i18n.js',
+    '/js/home.js?v=13',
     '/js/row-counter.js?v=10',
     '/js/toolkit.js',
     '/js/cookie-consent.js',

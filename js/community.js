@@ -15,8 +15,6 @@ const PAGE_SIZE = 12;
 let currentTagFilter = '';
 let isFollowingFilter = false;
 let followedUids = [];
-let localFollowFeed = [];
-let localFollowIndex = 0;
 let lastDoc = null;
 let isLoading = false;
 let currentUser = null;
@@ -40,6 +38,13 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
     }
 
     try {
+        if (!db) {
+            loadingEl.style.display = 'none';
+            emptyEl.style.display = 'block';
+            isLoading = false;
+            return;
+        }
+
         if (isFollowingFilter && followedUids.length === 0) {
             loadingEl.style.display = 'none';
             emptyEl.style.display = 'block';
@@ -49,51 +54,45 @@ async function loadFeed(tagFilter = '', cursorDoc = null) {
 
         const uids = isFollowingFilter ? followedUids.slice(0, 30) : null;
 
-        // 팔로우 필터가 적용 중이면 로컬에서 정렬 및 페이징 처리 (복합 인덱스 회피)
+        // 팔로우 필터는 Firestore 정렬 및 페이지네이션으로 처리
         if (isFollowingFilter) {
-            if (!cursorDoc) {
-                let q;
-                if (tagFilter) {
-                    q = query(collection(db, 'posts'), where('tags', 'array-contains', tagFilter), where('uid', 'in', uids));
-                } else {
-                    q = query(collection(db, 'posts'), where('uid', 'in', uids));
-                }
-                const snap = await getDocs(q);
-                
-                let tempResults = [];
-                snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    if (data.isPublic === false) return;
-                    tempResults.push({ id: docSnap.id, data });
-                });
-                
-                // 날짜순 내림차순 정렬 (JS 로컬)
-                tempResults.sort((a, b) => {
-                    const tA = a.data.createdAt?.toMillis ? a.data.createdAt.toMillis() : 0;
-                    const tB = b.data.createdAt?.toMillis ? b.data.createdAt.toMillis() : 0;
-                    return tB - tA;
-                });
-                
-                localFollowFeed = tempResults;
-                localFollowIndex = 0;
+            let q;
+            if (tagFilter) {
+                q = query(
+                    collection(db, 'posts'),
+                    where('tags', 'array-contains', tagFilter),
+                    where('uid', 'in', uids),
+                    orderBy('createdAt', 'desc'),
+                    limit(PAGE_SIZE)
+                );
+            } else {
+                q = query(
+                    collection(db, 'posts'),
+                    where('uid', 'in', uids),
+                    orderBy('createdAt', 'desc'),
+                    limit(PAGE_SIZE)
+                );
             }
-            
+
+            if (cursorDoc) q = query(q, startAfter(cursorDoc));
+
+            const snap = await getDocs(q);
             loadingEl.style.display = 'none';
-            if (localFollowFeed.length === 0) {
+
+            if (snap.empty && !cursorDoc) {
                 emptyEl.style.display = 'block';
                 isLoading = false;
                 return;
             }
 
-            const pageItems = localFollowFeed.slice(localFollowIndex, localFollowIndex + PAGE_SIZE);
-            pageItems.forEach(item => {
-                gridEl.appendChild(renderPostCard(item.id, item.data));
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.isPublic === false) return;
+                gridEl.appendChild(renderPostCard(docSnap.id, data));
             });
-            
-            localFollowIndex += PAGE_SIZE;
 
-            if (localFollowIndex < localFollowFeed.length) {
-                lastDoc = 'virtual'; 
+            if (snap.docs.length === PAGE_SIZE) {
+                lastDoc = snap.docs[snap.docs.length - 1];
                 loadMoreArea.style.display = 'block';
             } else {
                 lastDoc = null;
@@ -239,6 +238,10 @@ const writeModalClose = document.getElementById('writeModalClose');
 const imageFiles = [null, null, null, null];
 
 writeBtn.addEventListener('click', () => {
+    if (!db || !storage) {
+        alert('Cloud features are not configured.');
+        return;
+    }
     if (!currentUser) {
         showLoginRequiredToast();
         setTimeout(() => openAuthModal(), 300);
