@@ -277,3 +277,82 @@
 @media (max-width: 480px) {
   .auth-toast { font-size: 0.82rem; padding: 0.55rem 1rem; bottom: 70px; }
 }
+
+/* Educational guide blocks attached to tool pages */
+.tool-education {
+  margin: 3rem 0 0;
+  padding: 2.25rem 0 0;
+  border-top: 2px solid #111;
+}
+.tool-education-inner { display: grid; gap: 1.4rem; }
+.tool-education-kicker {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #777;
+}
+.tool-education h2 {
+  font-family: 'GmarketSans', sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  margin: 0 0 0.65rem;
+  color: #111;
+}
+.tool-education p {
+  margin: 0;
+  max-width: 760px;
+  color: #555;
+  font-size: 0.92rem;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+.tool-education-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: 1.5rem;
+}
+.tool-education-box {
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+}
+.tool-education-box h3 {
+  margin: 0 0 0.65rem;
+  color: #111;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+.tool-education-box ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #555;
+  font-size: 0.86rem;
+  line-height: 1.75;
+}
+.tool-education-box li { margin-bottom: 0.35rem; }
+.tool-education-links { display: grid; gap: 0.55rem; }
+.tool-education-links a {
+  display: block;
+  color: #111;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-decoration: none;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+.tool-education-links a:hover { text-decoration: underline; }
+@media (prefers-color-scheme: dark) {
+  .tool-education { border-top-color: #fff; }
+  .tool-education h2,
+  .tool-education-box h3,
+  .tool-education-links a { color: #eee; }
+  .tool-education p,
+  .tool-education-box ul { color: #bbb; }
+  .tool-education-box,
+  .tool-education-links a { border-color: #444; }
+}
+@media (max-width: 760px) {
+  .tool-education-grid { grid-template-columns: 1fr; }
+}
