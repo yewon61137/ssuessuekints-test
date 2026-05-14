@@ -19,6 +19,7 @@
       "SSUESSUE_KNITS_매거진_콘텐츠_전략_및_주제_추천.pdf",
       "docs/**",
       "functions/**",
+      "tools/**",
       "tmp/**",
       "js/firebase-config.example.js",
       "**/.*",
