@@ -1,7 +1,7 @@
 {
   "name": "SSUESSUE KNITS",
-  "short_name": "쓔쓔닛츠",
-  "description": "뜨개인을 위한 올인원 플랫폼",
+  "short_name": "SSUESSUE",
+  "description": "Knitting tools, guides, and pattern resources by SSUESSUE KNITS.",
   "start_url": "/?pwa=1",
   "display": "standalone",
   "background_color": "#f5f0e8",

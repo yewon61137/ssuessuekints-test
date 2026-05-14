@@ -172,6 +172,42 @@
       margin-top: auto;
     }
 
+    /* LEARNING GUIDES */
+    .home-learning-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2.75rem;
+    }
+    .home-learning-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e8e8e8;
+      color: inherit;
+      text-decoration: none;
+    }
+    .home-learning-card:hover .hl-title { text-decoration: underline; }
+    .hl-kicker {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .hl-title {
+      font-family: 'GmarketSans', sans-serif;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+    .hl-desc {
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: #666;
+    }
+
     /* BOTTOM GRID */
     .home-bottom-grid {
       display: grid;
@@ -277,7 +313,11 @@
     .home-empty svg { stroke: #ddd; }
 
     /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      .home-learning-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 700px) {
+      .home-learning-grid { grid-template-columns: 1fr; }
       .home-tools-grid { grid-template-columns: 1fr; }
       .home-bottom-grid { grid-template-columns: 1fr; }
     }
@@ -300,6 +340,36 @@
             <span class="i18n" data-ko="커뮤니티 보기" data-en="Community" data-ja="コミュニティ">커뮤니티 보기</span>
           </button>
         </div>
+      </div>
+
+      <!-- LEARNING GUIDES -->
+      <div class="home-sec-hdr">
+        <div class="home-sec-ttl i18n" data-ko="처음 시작하는 뜨개 가이드" data-en="Beginner Knitting Guides" data-ja="はじめての編み物ガイド">처음 시작하는 뜨개 가이드</div>
+        <a class="home-sec-all" href="/magazine.html">
+          <span class="i18n" data-ko="매거진 보기 →" data-en="Read Magazine →" data-ja="マガジンを見る →">매거진 보기 →</span>
+        </a>
+      </div>
+      <div class="home-learning-grid">
+        <a class="home-learning-card" href="/magazine/beginners-guide.html">
+          <div class="hl-kicker i18n" data-ko="입문" data-en="Start" data-ja="入門">입문</div>
+          <div class="hl-title i18n" data-ko="뜨개 초보가 처음 알아야 할 준비물과 순서" data-en="What beginners need before the first project" data-ja="初心者が最初に知っておきたい準備">뜨개 초보가 처음 알아야 할 준비물과 순서</div>
+          <div class="hl-desc i18n" data-ko="실, 바늘, 게이지, 기본 코 만들기까지 첫 작품 전에 확인할 내용을 정리했습니다." data-en="Yarn, needles, gauge, and the first setup steps before your first project." data-ja="糸、針、ゲージ、最初の作り目までを整理しました。">실, 바늘, 게이지, 기본 코 만들기까지 첫 작품 전에 확인할 내용을 정리했습니다.</div>
+        </a>
+        <a class="home-learning-card" href="/magazine/yarn-weight-guide.html">
+          <div class="hl-kicker i18n" data-ko="실 선택" data-en="Yarn" data-ja="糸選び">실 선택</div>
+          <div class="hl-title i18n" data-ko="실 굵기와 바늘 호수, 어떻게 맞춰야 할까?" data-en="How to match yarn weight and needle size" data-ja="糸の太さと針サイズの合わせ方">실 굵기와 바늘 호수, 어떻게 맞춰야 할까?</div>
+          <div class="hl-desc i18n" data-ko="도안의 권장 실을 대체할 때 확인해야 하는 굵기, 소재, 게이지 기준입니다." data-en="A practical checklist for substituting yarn by weight, fiber, and gauge." data-ja="代替糸を選ぶ時の太さ、素材、ゲージの基準です。">도안의 권장 실을 대체할 때 확인해야 하는 굵기, 소재, 게이지 기준입니다.</div>
+        </a>
+        <a class="home-learning-card" href="/magazine/reading-patterns.html">
+          <div class="hl-kicker i18n" data-ko="도안 읽기" data-en="Patterns" data-ja="編み図">도안 읽기</div>
+          <div class="hl-title i18n" data-ko="뜨개 도안 기호와 약어를 읽는 기본법" data-en="How to read knitting symbols and abbreviations" data-ja="編み図記号と略語の読み方">뜨개 도안 기호와 약어를 읽는 기본법</div>
+          <div class="hl-desc i18n" data-ko="반복 구간, 코 늘림과 줄임, 약어 표기를 실제 작업 순서에 맞춰 설명합니다." data-en="Repeats, increases, decreases, and abbreviations explained by workflow." data-ja="繰り返し、増減目、略語を作業順に説明します。">반복 구간, 코 늘림과 줄임, 약어 표기를 실제 작업 순서에 맞춰 설명합니다.</div>
+        </a>
+        <a class="home-learning-card" href="/magazine/gauge-swatch-guide.html">
+          <div class="hl-kicker i18n" data-ko="게이지" data-en="Gauge" data-ja="ゲージ">게이지</div>
+          <div class="hl-title i18n" data-ko="게이지 스와치를 꼭 떠야 하는 이유" data-en="Why a gauge swatch changes the final fit" data-ja="ゲージスワッチが仕上がりを変える理由">게이지 스와치를 꼭 떠야 하는 이유</div>
+          <div class="hl-desc i18n" data-ko="완성 치수가 달라지는 원리와 스와치 재는 법, 도안 보정 방법을 다룹니다." data-en="How finished size changes, how to measure, and how to adjust a pattern." data-ja="仕上がり寸法の変化、測り方、補正方法を扱います。">완성 치수가 달라지는 원리와 스와치 재는 법, 도안 보정 방법을 다룹니다.</div>
+        </a>
       </div>
 
       <!-- TOOLS -->
