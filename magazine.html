@@ -34,6 +34,15 @@
     .magazine-intro { padding: 3rem 0 2.5rem; text-align: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); }
     .magazine-intro h2 { font-size: 2rem; font-weight: 900; margin: 0 0 0.75rem; letter-spacing: -0.03em; }
     .magazine-intro p { margin: 0; font-size: 1rem; color: var(--secondary-color); line-height: 1.8; max-width: 700px; margin-inline: auto; word-break: keep-all; }
+    .reading-path { margin: -1rem 0 3rem; border-top: 2px solid #111; border-bottom: 1px solid var(--border-color); padding: 1.4rem 0 1.6rem; }
+    .reading-path h3 { font-size: 1rem; font-weight: 900; margin: 0 0 0.75rem; }
+    .reading-path p { margin: 0 0 1rem; color: #666; line-height: 1.75; font-size: 0.92rem; word-break: keep-all; }
+    .reading-path-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; counter-reset: path; }
+    .reading-path-list a { color: inherit; text-decoration: none; border-bottom: 1px solid #ddd; padding: 0.85rem 0; display: block; }
+    .reading-path-list a:hover strong { text-decoration: underline; }
+    .reading-path-list a::before { counter-increment: path; content: counter(path, decimal-leading-zero); display: block; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.08em; color: #777; margin-bottom: 0.35rem; }
+    .reading-path-list strong { display: block; font-size: 0.88rem; line-height: 1.45; color: #111; margin-bottom: 0.25rem; }
+    .reading-path-list span { display: block; font-size: 0.75rem; line-height: 1.6; color: #666; }
     
     .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; margin-bottom: 5rem; }
     .article-card { border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); background: #fff; }
@@ -59,6 +68,8 @@
 
     @media (max-width: 650px) {
       .magazine-intro { padding: 3rem 1.5rem 2rem; }
+      .reading-path { margin: -0.5rem 0 2.25rem; }
+      .reading-path-list { grid-template-columns: 1fr; }
       .article-grid { grid-template-columns: 1fr; gap: 2rem; }
       .article-card { border-radius: 20px; }
     }
@@ -86,6 +97,17 @@
         <h2 class="i18n" data-ko="매거진" data-en="Magazine" data-ja="マガジン">매거진</h2>
         <p class="i18n" data-ko="뜨개질 실 가이드, 기법 비교, 트렌드, 입문 팁까지 — 뜨개를 사랑하는 모든 분들을 위한 콘텐츠를 발행합니다." data-en="Yarn guides, technique comparisons, trends, and beginner tips — contents for everyone who loves knitting." data-ja="糸のガイド、技法比較、トレンド、入門チップまで — 編み物を愛するすべての人のためにコンテンツを配信します。">뜨개질 실 가이드, 기법 비교, 트렌드, 입문 팁까지 — 뜨개를 사랑하는 모든 분들을 위한 콘텐츠를 발행합니다.</p>
       </div>
+
+      <section class="reading-path" aria-labelledby="readingPathTitle">
+        <h3 id="readingPathTitle">처음 방문했다면 이 순서로 읽어보세요</h3>
+        <p>도구를 먼저 쓰기보다 기본 개념을 잡고 시작하면 실패 확률이 줄어듭니다. 아래 네 글은 실 선택, 게이지, 도안 읽기까지 뜨개 프로젝트의 기본 흐름을 따라 구성했습니다.</p>
+        <div class="reading-path-list">
+          <a href="/magazine/beginners-guide.html"><strong>뜨개질 입문 완전 가이드</strong><span>도구 선택과 첫 작품 준비</span></a>
+          <a href="/magazine/yarn-weight-guide.html"><strong>실 굵기 완벽 가이드</strong><span>도안에 맞는 실 고르기</span></a>
+          <a href="/magazine/gauge-swatch-guide.html"><strong>게이지 스와치 가이드</strong><span>완성 사이즈 맞추는 계산법</span></a>
+          <a href="/magazine/reading-patterns.html"><strong>뜨개 도안 읽는 법</strong><span>기호, 약어, 차트 해석</span></a>
+        </div>
+      </section>
 
       <div class="article-grid">
 

@@ -40,6 +40,11 @@
     .article-body li { margin-bottom: 0.38rem; }
     .info-box { border: 1.5px solid #111; padding: 1rem 1.15rem; margin: 1.5rem 0; background: #fafafa; }
     .info-box strong { display: block; margin-bottom: 0.45rem; color: #111; }
+    .article-table-wrap { overflow-x: auto; margin: 1.25rem 0 1.6rem; }
+    .article-table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: 0.92rem; }
+    .article-table th { background: #111; color: #fff; text-align: left; padding: 0.7rem 0.85rem; }
+    .article-table td { border-bottom: 1px solid #e5e5e5; padding: 0.72rem 0.85rem; vertical-align: top; }
+    .article-table tr:last-child td { border-bottom: 1px solid #111; }
     .faq-item { border-top: 1px solid #e5e5e5; padding: 1rem 0; }
     .faq-item:last-child { border-bottom: 1px solid #e5e5e5; }
     .faq-item h3 { font-size: 0.98rem; color: #111; margin: 0 0 0.35rem; }
@@ -88,6 +93,24 @@
 
         <h2>초보자가 자주 놓치는 부분</h2>
         <p>스와치를 너무 작게 뜨거나 세탁 전 수치만 기록하면 실제 완성품과 달라질 수 있습니다. 특히 울, 면, 알파카는 세탁과 건조 후 길이와 폭이 달라질 수 있으므로 최종 상태에서 측정해야 합니다.</p>
+
+        <h2>게이지 보정 공식</h2>
+        <p>가로 코 수를 보정할 때는 도안 코 수에 내 게이지를 곱하고 도안 게이지로 나눕니다. 단 수 보정도 같은 방식으로 계산할 수 있습니다.</p>
+        <p>공식: 보정 코 수 = 도안 코 수 x 내 10cm 코 수 / 도안 10cm 코 수. 예를 들어 도안 20코, 내 게이지 18코, 도안 시작 100코라면 90코가 됩니다.</p>
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead><tr><th>상황</th><th>의미</th><th>조정</th></tr></thead>
+            <tbody>
+              <tr><td>내 코 수가 더 많다</td><td>더 촘촘하게 뜨고 있음</td><td>바늘을 키우거나 코 수를 늘려 계산</td></tr>
+              <tr><td>내 코 수가 더 적다</td><td>더 느슨하게 뜨고 있음</td><td>바늘을 줄이거나 코 수를 줄여 계산</td></tr>
+              <tr><td>단 수만 다르다</td><td>세로 길이가 달라짐</td><td>암홀, 소매, 총장 구간에서 단 수 보정</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>측정할 때 흔한 실수</h2>
+        <p>스와치 가장자리까지 포함해 재면 실제보다 코 수가 적거나 많게 나올 수 있습니다. 반드시 중앙 10cm를 기준으로 재고, 0.5코처럼 애매한 숫자도 반올림하지 말고 그대로 기록하세요.</p>
+        <p>세탁 후 늘어나는 실이라면 세탁 전 수치가 아니라 건조 후 수치를 기준으로 계산해야 합니다. 완성품이 실제로 겪을 상태를 스와치에도 똑같이 적용하는 것이 핵심입니다.</p>
 
         <div class="info-box">
           <strong>작업 전 체크리스트</strong>
