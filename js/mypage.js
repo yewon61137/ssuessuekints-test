@@ -1553,6 +1553,7 @@ function resetPageState() {
 
 let _prevUid = null;
 
+if (auth) {
 onAuthStateChanged(auth, async user => {
     if (urlUid) {
         // 본인 uid로 접근 시 내 마이페이지로 리다이렉트
@@ -1597,6 +1598,12 @@ onAuthStateChanged(auth, async user => {
         if (!urlUid) window.location.replace('/');
     }
 });
+} else {
+    resetPageState();
+    document.getElementById('notLoggedIn').style.display = '';
+    document.getElementById('loggedIn').style.display = 'none';
+    if (!urlUid) window.location.replace('/');
+}
 
 async function setupOtherUserView() {
     // 도안/프로필/프로젝트/스크랩/내 팔레트/실 창고 탭 숨김
@@ -1769,5 +1776,4 @@ async function loadFollowing(uid) {
 document.getElementById('followingModalCloseBtn')?.addEventListener('click', () => {
     document.getElementById('followingModal').style.display = 'none';
 });
-
 

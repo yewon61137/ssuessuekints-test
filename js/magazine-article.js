@@ -57,13 +57,15 @@ const UI = {
 function t(key) { return UI[key]?.[currentLang] ?? UI[key]?.ko ?? key; }
 
 export function initMagazineArticle(articleId) {
-  onAuthStateChanged(auth, user => { currentUser = user; });
+  if (auth) onAuthStateChanged(auth, user => { currentUser = user; });
   initArticleLang();
-  initLikeScrap(articleId);
   initShare();
-  loadComments(articleId);
-  setupCommentForm(articleId);
   initNavigation(articleId);
+  if (db) {
+    initLikeScrap(articleId);
+    loadComments(articleId);
+    setupCommentForm(articleId);
+  }
 }
 
 // ─── Navigation ───────────────────────────────────────────
@@ -211,7 +213,9 @@ function showToast(msg) {
 // ─── Like / Scrap ─────────────────────────────────────────
 
 function initLikeScrap(articleId) {
+  if (!db) return;
   loadArticleCounts(articleId);
+  if (!auth) return;
   onAuthStateChanged(auth, async user => {
     if (!user) {
       document.getElementById('likeBtn')?.classList.remove('active');

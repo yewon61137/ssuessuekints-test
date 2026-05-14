@@ -382,9 +382,11 @@ function escHtml(str) {
 initLang();
 initAuth();
 
-onAuthStateChanged(auth, user => {
-    currentUser = user || null;
-});
+if (auth) {
+    onAuthStateChanged(auth, user => {
+        currentUser = user || null;
+    });
+}
 
 // 페이지 로드 시 피드
 loadFeed();

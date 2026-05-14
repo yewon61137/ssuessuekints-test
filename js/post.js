@@ -598,20 +598,22 @@ function escHtml(str) {
 // --- 인증 + 초기화 ---
 initAuth();
 
-onAuthStateChanged(auth, async user => {
-    currentUser = user || null;
+if (auth) {
+    onAuthStateChanged(auth, async user => {
+        currentUser = user || null;
 
-    // 본인 글인 경우 수정/삭제 버튼 표시
-    if (postData && currentUser && currentUser.uid === postData.uid) {
-        document.getElementById('postEditBtn').style.display = 'inline-block';
-        document.getElementById('postDeleteBtn').style.display = 'inline-block';
-    }
+        // 본인 글인 경우 수정/삭제 버튼 표시
+        if (postData && currentUser && currentUser.uid === postData.uid) {
+            document.getElementById('postEditBtn').style.display = 'inline-block';
+            document.getElementById('postDeleteBtn').style.display = 'inline-block';
+        }
 
-    // 좋아요/스크랩 상태 확인
-    if (currentUser && postId) {
-        await checkUserActions(currentUser.uid, postId);
-    }
-});
+        // 좋아요/스크랩 상태 확인
+        if (currentUser && postId) {
+            await checkUserActions(currentUser.uid, postId);
+        }
+    });
+}
 
 // 페이지 로드
 if (postId) {

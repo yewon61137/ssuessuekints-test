@@ -33,6 +33,21 @@ SSUESSUE KNITS는 전통적인 뜨개질 방식에 현대적인 기술을 결합
 
 ---
 
+## Local Firebase config
+
+Cloud features require `js/firebase-config.js`. This file is intentionally
+ignored by git because it is environment-specific.
+
+1. Copy `js/firebase-config.example.js` to `js/firebase-config.js`.
+2. Fill in the Firebase web app config from Firebase Console.
+3. Open the site through a local server or deploy it to the configured hosting
+   domain.
+
+Without this file, the site still loads static pages, but Auth, Firestore, and
+Storage-backed features are disabled.
+
+---
+
 ## 🌍 다국어 지원 (i18n)
 본 프로젝트는 **한국어(KO), 영어(EN), 일본어(JA)**를 완전히 지원하며, 브라우저 설정에 따라 유동적으로 언어가 전환됩니다.
 

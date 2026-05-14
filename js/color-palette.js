@@ -776,9 +776,11 @@ const extraByLang = ['ko', 'en', 'ja'].reduce((acc, lang) => {
 }, {});
 initLang({ extra: extraByLang });
 
-onAuthStateChanged(auth, user => {
-  // Header UI is handled by initAuth
-});
+if (auth) {
+  onAuthStateChanged(auth, user => {
+    // Header UI is handled by initAuth
+  });
+}
 
 // ?palette=["#hex",...] 파라미터로 시뮬레이터 초기화
 (function loadFromUrl() {
@@ -873,4 +875,3 @@ window.addEventListener('langChange', () => {
   updateTextureDesc();
   renderStripeSliders(); // 슬라이더 단위(단/rows/段) 갱신
 });
-

@@ -279,6 +279,13 @@ function _homeInit() {
     syncLangSelect(lang);
 
     // Auth state → 분기 렌더링
+    if (!auth) {
+        updateGreeting('');
+        loadCommunityPosts(null);
+        loadProjects(false);
+        return;
+    }
+
     onAuthStateChanged(auth, async user => {
         _currentUser = user || null;
         if (user) {
