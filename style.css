@@ -224,6 +224,107 @@
   .edit-toolbar .checkbox-group label { font-size: 0.75rem; }
 }
 
+/* Magazine/header stability fixes */
+header,
+header * {
+  box-sizing: border-box;
+}
+
+.hdr-logo {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.gnb,
+.hdr-right,
+.auth-user {
+  min-width: 0;
+}
+
+.hdr-right {
+  flex-wrap: nowrap;
+}
+
+.auth-user .lang-btn,
+#authSignInBtn,
+#authSignOutBtn {
+  white-space: nowrap;
+}
+
+.article-nav {
+  align-items: center;
+}
+
+.article-nav span {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.article-nav-center {
+  text-align: center;
+}
+
+.article-nav-next {
+  text-align: right;
+}
+
+.article-nav a {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .hdr-inner {
+    align-items: center;
+  }
+
+  .gnb {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  header {
+    padding: 0.65rem 1rem 0 !important;
+  }
+
+  .hdr-inner {
+    padding: 0 !important;
+  }
+
+  .hdr-logo {
+    flex: 1 1 auto;
+    margin-right: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hdr-right {
+    flex: 0 0 auto;
+    gap: 0.25rem !important;
+  }
+
+  .auth-user {
+    gap: 0.25rem;
+  }
+
+  .auth-user .lang-btn,
+  #authSignInBtn,
+  #authSignOutBtn {
+    padding: 0.28rem 0.42rem !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0;
+  }
+
+  .article-nav {
+    align-items: stretch;
+  }
+
+  .article-nav span {
+    flex: none;
+    text-align: left;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .edit-toolbar { background: #121212 !important; border-color: #fff !important; }
   .tool-btn { background: #1e1e1e !important; border-color: #fff !important; color: #fff !important; }
