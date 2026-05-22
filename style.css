@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
   font-family: 'GmarketSans';
   src: url('/fonts/GmarketSansTTFBold.woff2') format('woff2');
   font-weight: 700;
@@ -456,4 +456,35 @@ header * {
 }
 @media (max-width: 760px) {
   .tool-education-grid { grid-template-columns: 1fr; }
+}
+
+/* ── 줌/패닝 ── */
+.zoom-viewport {
+  overflow: hidden;
+  position: relative;
+}
+.zoom-viewport.zoomed {
+  cursor: grab;
+}
+.zoom-viewport.panning {
+  cursor: grabbing;
+}
+.zoom-viewport canvas {
+  transform-origin: 0 0;
+  transition: transform 0.12s ease-out;
+}
+.zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.zoom-level-display {
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 3.2em;
+  text-align: center;
+  color: var(--secondary-color);
+  user-select: none;
+  letter-spacing: 0;
+  text-transform: none;
 }

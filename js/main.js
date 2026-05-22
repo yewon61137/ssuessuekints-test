@@ -21,6 +21,14 @@ let lastSavedTitle = null;
 let lastSavedDocId = null;
 let isOverlayVisible = false;
 const MAX_EDIT_HISTORY = 30;
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+let isPanning = false;
+let panStartX = 0, panStartY = 0;
+let spaceHeld = false;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 8;
+const ZOOM_STEP = 0.25;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_CANVAS_DIMENSION = 4000;
 
@@ -74,6 +82,11 @@ const toggleSymbols = document.getElementById('toggleSymbols');
 const activeColorDisplay = document.getElementById('activeColorDisplay');
 const activeColorBox = document.getElementById('activeColorBox');
 const toolbarPalette = document.getElementById('toolbarPalette');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const zoomResetBtn = document.getElementById('zoomResetBtn');
+const zoomLevelDisplay = document.getElementById('zoomLevelDisplay');
+const zoomViewport = document.querySelector('.zoom-viewport');
 
 // 초기 상태에서는 편집 툴바 숨김 (CSS display: none 초기값 활용)
 if (editToolbar) editToolbar.style.display = 'none';
@@ -167,6 +180,9 @@ const translations = {
         btn_cancel: "취소",
         modal_save_pattern_title: "도안 저장",
         rec_click_hint: "클릭하여 적용",
+        tooltip_zoom_in: "확대 (+)",
+        tooltip_zoom_out: "축소 (-)",
+        tooltip_zoom_reset: "원래 크기 (0)",
     },
     en: {
         tagline: "Crafting your pixels into knit patterns.",
@@ -255,6 +271,9 @@ const translations = {
         btn_cancel: "Cancel",
         modal_save_pattern_title: "Save Pattern",
         rec_click_hint: "Click to apply",
+        tooltip_zoom_in: "Zoom In (+)",
+        tooltip_zoom_out: "Zoom Out (-)",
+        tooltip_zoom_reset: "Reset Zoom (0)",
     },
     ja: {
         tagline: "あなたのピクセルを編み図に変えます。",
@@ -343,6 +362,9 @@ const translations = {
         btn_cancel: "キャンセル",
         modal_save_pattern_title: "編み図を保存",
         rec_click_hint: "クリックして適用",
+        tooltip_zoom_in: "拡大 (+)",
+        tooltip_zoom_out: "縮小 (-)",
+        tooltip_zoom_reset: "元のサイズ (0)",
     }
 };
 
@@ -877,6 +899,7 @@ generateBtn.addEventListener('click', async () => {
 
         if (editToolbar) editToolbar.style.display = 'flex';
         renderPattern();
+        zoomReset();
 
         resultPanel.style.display    = 'block';
         resultPlaceholder.style.display = 'none';
@@ -1213,6 +1236,56 @@ if (pencilToolBtn) pencilToolBtn.addEventListener('click', () => setTool('pencil
 if (eraserToolBtn) eraserToolBtn.addEventListener('click', () => setTool('eraser'));
 if (pickerToolBtn) pickerToolBtn.addEventListener('click', () => setTool('picker'));
 
+// --- 줌/패닝 기능 ---
+function applyZoomTransform() {
+    if (!canvas) return;
+    if (zoomLevel === 1 && panX === 0 && panY === 0) {
+        canvas.style.transform = 'none';
+        if (compareCanvas) compareCanvas.style.transform = 'none';
+    } else {
+        canvas.style.transformOrigin = '0 0';
+        canvas.style.transform = `scale(${zoomLevel}) translate(${panX}px, ${panY}px)`;
+        if (compareCanvas) {
+            compareCanvas.style.transformOrigin = '0 0';
+            compareCanvas.style.transform = `scale(${zoomLevel}) translate(${panX}px, ${panY}px)`;
+        }
+    }
+    if (zoomLevelDisplay) zoomLevelDisplay.textContent = Math.round(zoomLevel * 100) + '%';
+    if (zoomViewport) zoomViewport.classList.toggle('zoomed', zoomLevel > 1);
+}
+
+function zoomIn() {
+    zoomLevel = Math.min(ZOOM_MAX, +(zoomLevel + ZOOM_STEP).toFixed(2));
+    applyZoomTransform();
+}
+
+function zoomOut() {
+    zoomLevel = Math.max(ZOOM_MIN, +(zoomLevel - ZOOM_STEP).toFixed(2));
+    applyZoomTransform();
+}
+
+function zoomReset() {
+    zoomLevel = 1;
+    panX = 0;
+    panY = 0;
+    applyZoomTransform();
+}
+
+if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+if (zoomResetBtn) zoomResetBtn.addEventListener('click', zoomReset);
+
+// 마우스 휠 줌 (Ctrl/Cmd + 휠)
+if (zoomViewport) {
+    zoomViewport.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn();
+            else zoomOut();
+        }
+    }, { passive: false });
+}
+
 // 원본 오버레이 토글 기능
 function syncOverlayPosition() {
     if (!canvas || !compareCanvas) return;
@@ -1220,7 +1293,8 @@ function syncOverlayPosition() {
     compareCanvas.style.left = canvas.offsetLeft + 'px';
     compareCanvas.style.width = canvas.offsetWidth + 'px';
     compareCanvas.style.height = canvas.offsetHeight + 'px';
-    compareCanvas.style.transform = 'none';
+    compareCanvas.style.transformOrigin = canvas.style.transformOrigin;
+    compareCanvas.style.transform = canvas.style.transform;
 }
 
 function showOverlay() {
@@ -1303,8 +1377,20 @@ window.addEventListener('keydown', (e) => {
                 if (isOverlayVisible) hideOverlay();
                 else showOverlay();
             }
+        } else if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+            e.preventDefault(); zoomIn();
+        } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+            e.preventDefault(); zoomOut();
+        } else if (e.code === 'Digit0' || e.code === 'Numpad0') {
+            e.preventDefault(); zoomReset();
+        } else if (e.code === 'Space') {
+            e.preventDefault(); spaceHeld = true;
         }
     }
+});
+
+window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') { spaceHeld = false; }
 });
 
 if (toggleSymbols) {
@@ -1354,8 +1440,34 @@ function handleCanvasEdit(e) {
 
 if (canvas) {
     canvas.addEventListener('pointerdown', (e) => {
-        if (activeTool === 'view') return;
-        
+        // 패닝 모드: View 도구이거나 Space 키를 누른 상태에서 드래그로 캔버스 이동
+        if (activeTool === 'view' || spaceHeld) {
+            if (zoomLevel > 1) {
+                e.preventDefault();
+                isPanning = true;
+                const startPanX = panX, startPanY = panY;
+                const startClientX = e.clientX, startClientY = e.clientY;
+                if (zoomViewport) zoomViewport.classList.add('panning');
+
+                const panMoveHandler = (me) => {
+                    panX = startPanX + (me.clientX - startClientX) / zoomLevel;
+                    panY = startPanY + (me.clientY - startClientY) / zoomLevel;
+                    applyZoomTransform();
+                };
+                const panUpHandler = () => {
+                    isPanning = false;
+                    if (zoomViewport) zoomViewport.classList.remove('panning');
+                    window.removeEventListener('pointermove', panMoveHandler);
+                    window.removeEventListener('pointerup', panUpHandler);
+                    window.removeEventListener('pointercancel', panUpHandler);
+                };
+                window.addEventListener('pointermove', panMoveHandler);
+                window.addEventListener('pointerup', panUpHandler);
+                window.addEventListener('pointercancel', panUpHandler);
+            }
+            return;
+        }
+
         // Ensure touch gestures don't scroll the page
         if (e.pointerType === 'touch') {
             canvas.releasePointerCapture(e.pointerId); // Let pointer events flow
